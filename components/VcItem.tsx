@@ -312,20 +312,24 @@ function getLocalizedField(rawField: string | LocalizedField) {
   }
   try {
     const locales: LocalizedField[] = JSON.parse(JSON.stringify(rawField));
-    const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
-    const currentLanguage = i18n.language;
-    if (locales.length > 1) {
-      for (const language in supportedLanguages) {
-        if (currentLanguage == language) {
-          const languageDetails = locales.filter(
-            (obj) => obj.language === language
-          );
-          return languageDetails[0].value;
-        }
-      }
-    }
-    return locales[0].value;
+    return getLanguageDetails(locales);
   } catch (e) {
     return '';
   }
+}
+
+export function getLanguageDetails(locales) {
+  const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
+  const currentLanguage = i18n.language;
+  if (locales.length > 1) {
+    for (const language in supportedLanguages) {
+      if (currentLanguage == language) {
+        const languageDetails = locales.filter(
+          (obj) => obj.language === language
+        );
+        return languageDetails[0].value;
+      }
+    }
+  }
+  return locales[0].value;
 }
