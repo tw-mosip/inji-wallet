@@ -10,7 +10,7 @@ import { Theme } from './ui/styleUtils';
 import { TextItem } from './ui/TextItem';
 import { VcItemTags } from './VcItemTags';
 import VerifiedIcon from './VerifiedIcon';
-import i18n from '../i18n';
+import i18n, { SUPPORTED_LANGUAGES } from '../i18n';
 
 export const VcDetails: React.FC<VcDetailsProps> = (props) => {
   const { t, i18n } = useTranslation('VcDetails');
@@ -353,11 +353,17 @@ function getLocalizedField(rawField: string | LocalizedField[]) {
   }
   try {
     const locales: LocalizedField[] = JSON.parse(JSON.stringify(rawField));
-    const language = i18n.language;
-    if (locales.length > 1 && language === 'ar') {
-      return locales[1].language === 'ara'
-        ? locales[1].value
-        : locales[0].value;
+    const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
+    const currentLanguage = i18n.language;
+    if (locales.length > 1) {
+      for (const language in supportedLanguages) {
+        if (currentLanguage == language) {
+          const languageDetails = locales.filter(
+            (obj) => obj.language === language
+          );
+          return languageDetails[0].value;
+        }
+      }
     }
     return locales[0].value;
   } catch (e) {
