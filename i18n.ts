@@ -43,3 +43,18 @@ function getLanguageCode(code: string) {
   const [language] = code.split('-');
   return language;
 }
+
+export function getLanguageDetails(locales, currentLanguage) {
+  const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
+  if (locales.length > 1) {
+    for (const language in supportedLanguages) {
+      if (currentLanguage == language) {
+        const languageDetails = locales.filter(
+          (obj) => obj.language === language
+        );
+        return languageDetails[0].value;
+      }
+    }
+  }
+  return locales[0].value;
+}
