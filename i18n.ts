@@ -11,6 +11,7 @@ import ta from './locales/tam.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const resources = { en, fil, ar, hi, kn, ta };
+import { iso6393To1 } from 'iso-639-3';
 
 export const SUPPORTED_LANGUAGES = {
   en: 'English',
@@ -45,16 +46,26 @@ function getLanguageCode(code: string) {
 }
 
 export function getLanguageDetails(locales, currentLanguage) {
+  getThreeLetterLanguageCode('en');
   const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
   if (locales.length > 1) {
     for (const language in supportedLanguages) {
-      if (currentLanguage == language) {
+      if (currentLanguage == supportedLanguages[language]) {
         const languageDetails = locales.filter(
-          (obj) => obj.language === language
+          (obj) => obj.language === getThreeLetterLanguageCode(currentLanguage)
         );
-        return languageDetails[0].value;
+        return languageDetails[0]?.value;
       }
     }
   }
-  return locales[0].value;
+  return locales[0]?.value;
+}
+
+function getThreeLetterLanguageCode(twoLetterLanguageCode) {
+  // @ts-ignore
+  let key = Object.keys(iso6393To1).find(
+    (key) => iso6393To1[key] === twoLetterLanguageCode
+  );
+  console.log('3letter key ->', key);
+  return key;
 }
