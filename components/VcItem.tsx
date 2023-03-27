@@ -314,12 +314,7 @@ function getLocalizedField(rawField: string | LocalizedField) {
     const locales: LocalizedField[] = JSON.parse(JSON.stringify(rawField));
     const currentLanguage = i18n.language;
     if (locales.length == 1) return locales[0]?.value;
-    const responseval = getVCDetailsForCurrentLanguage(
-      locales,
-      currentLanguage
-    );
-    console.log('Finalll valu>>>>>>>>>', responseval);
-    return responseval;
+    return getVCDetailsForCurrentLanguage(locales, currentLanguage);
   } catch (e) {
     return '';
   }

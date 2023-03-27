@@ -48,22 +48,17 @@ function getLanguageCode(code: string) {
   return language;
 }
 
-function getVCDetailsForCurrentLanguage(locales, currentLanguage) {
-  console.log('Map>>>>>>>>>', languageCodeMap);
+export function getVCDetailsForCurrentLanguage(locales, currentLanguage) {
   const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
-  supportedLanguages.forEach((supportedLanguage) => {
+  for (const index in supportedLanguages) {
+    const supportedLanguage = supportedLanguages[index];
     if (supportedLanguage == currentLanguage) {
-      console.log('inside if>>>>>>>>>>>>>>>>');
       const vcDetailsForCurrentLanguage = locales.filter(
         (obj) => obj.language === languageCodeMap[currentLanguage]
       );
-      console.log(
-        'VC response val>>>>>>>>',
-        vcDetailsForCurrentLanguage[0]?.value
-      );
       return vcDetailsForCurrentLanguage[0]?.value;
     }
-  });
+  }
 }
 
 // This method gets the value from iso-639-3 package, which contains key value pairs of three letter language codes[key] and two letter langugae code[value]. These values are according to iso standards.
@@ -72,7 +67,6 @@ function getThreeLetterLanguageCode(twoLetterLanguageCode) {
   let threeLetterLanguageCode = Object.keys(iso6393To1).find(
     (key) => iso6393To1[key] === twoLetterLanguageCode
   );
-  console.log('Pooja threeLetterLanguageCode ', threeLetterLanguageCode);
   if (!threeLetterLanguageCode) {
     threeLetterLanguageCode = Object.keys(iso6393To2T).find(
       (key) => iso6393To2T[key] === twoLetterLanguageCode
