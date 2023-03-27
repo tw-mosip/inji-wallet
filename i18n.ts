@@ -11,7 +11,9 @@ import ta from './locales/tam.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const resources = { en, fil, ar, hi, kn, ta };
-import { iso6393To1 } from 'iso-639-3';
+import { iso6393To1, iso6393To2T } from 'iso-639-3';
+
+const languageCodeMap = {};
 
 export const SUPPORTED_LANGUAGES = {
   en: 'English',
@@ -35,6 +37,7 @@ i18next
     const language = await AsyncStorage.getItem('language');
     if (language !== i18next.language) {
       i18next.changeLanguage(language);
+      populateThreeLetterLanguageCodeMap();
     }
   });
 
@@ -45,27 +48,44 @@ function getLanguageCode(code: string) {
   return language;
 }
 
-export function getLanguageDetails(locales, currentLanguage) {
-  getThreeLetterLanguageCode('en');
+function getVCDetailsForCurrentLanguage(locales, currentLanguage) {
+  console.log('Map>>>>>>>>>', languageCodeMap);
   const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
-  if (locales.length > 1) {
-    for (const language in supportedLanguages) {
-      if (currentLanguage == supportedLanguages[language]) {
-        const languageDetails = locales.filter(
-          (obj) => obj.language === getThreeLetterLanguageCode(currentLanguage)
-        );
-        return languageDetails[0]?.value;
-      }
+  supportedLanguages.forEach((supportedLanguage) => {
+    if (supportedLanguage == currentLanguage) {
+      console.log('inside if>>>>>>>>>>>>>>>>');
+      const vcDetailsForCurrentLanguage = locales.filter(
+        (obj) => obj.language === languageCodeMap[currentLanguage]
+      );
+      console.log(
+        'VC response val>>>>>>>>',
+        vcDetailsForCurrentLanguage[0]?.value
+      );
+      return vcDetailsForCurrentLanguage[0]?.value;
     }
-  }
-  return locales[0]?.value;
+  });
 }
 
+// This method gets the value from iso-639-3 package, which contains key value pairs of three letter language codes[key] and two letter langugae code[value]. These values are according to iso standards.
+// The response recieved from the server is three letter language code and the value in the inji code base is two letter language code. Hence the conversion is done.
 function getThreeLetterLanguageCode(twoLetterLanguageCode) {
-  // @ts-ignore
-  let key = Object.keys(iso6393To1).find(
+  let threeLetterLanguageCode = Object.keys(iso6393To1).find(
     (key) => iso6393To1[key] === twoLetterLanguageCode
   );
-  console.log('3letter key ->', key);
-  return key;
+  console.log('Pooja threeLetterLanguageCode ', threeLetterLanguageCode);
+  if (!threeLetterLanguageCode) {
+    threeLetterLanguageCode = Object.keys(iso6393To2T).find(
+      (key) => iso6393To2T[key] === twoLetterLanguageCode
+    );
+  }
+  return threeLetterLanguageCode;
+}
+
+function populateThreeLetterLanguageCodeMap() {
+  const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
+  supportedLanguages.forEach((twoLetterLanguageCode) => {
+    return (languageCodeMap[twoLetterLanguageCode] = getThreeLetterLanguageCode(
+      twoLetterLanguageCode
+    ));
+  });
 }

@@ -26,7 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { LocalizedField } from '../types/vc';
 import { VcItemTags } from './VcItemTags';
 import VerifiedIcon from './VerifiedIcon';
-import i18n, { getLanguageDetails } from '../i18n';
+import i18n, { getVCDetailsForCurrentLanguage } from '../i18n';
 
 const getDetails = (arg1, arg2, verifiableCredential) => {
   if (arg1 === 'Status') {
@@ -313,7 +313,13 @@ function getLocalizedField(rawField: string | LocalizedField) {
   try {
     const locales: LocalizedField[] = JSON.parse(JSON.stringify(rawField));
     const currentLanguage = i18n.language;
-    return getLanguageDetails(locales, currentLanguage);
+    if (locales.length == 1) return locales[0]?.value;
+    const responseval = getVCDetailsForCurrentLanguage(
+      locales,
+      currentLanguage
+    );
+    console.log('Finalll valu>>>>>>>>>', responseval);
+    return responseval;
   } catch (e) {
     return '';
   }
