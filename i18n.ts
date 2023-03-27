@@ -37,7 +37,7 @@ i18next
     const language = await AsyncStorage.getItem('language');
     if (language !== i18next.language) {
       i18next.changeLanguage(language);
-      populateThreeLetterLanguageCodeMap();
+      populateLanguageCodeMap();
     }
   });
 
@@ -56,7 +56,9 @@ export function getVCDetailsForCurrentLanguage(locales, currentLanguage) {
       const vcDetailsForCurrentLanguage = locales.filter(
         (obj) => obj.language === languageCodeMap[currentLanguage]
       );
-      return vcDetailsForCurrentLanguage[0]?.value;
+      return vcDetailsForCurrentLanguage[0]?.value
+        ? vcDetailsForCurrentLanguage[0].value
+        : locales[0]?.value;
     }
   }
 }
@@ -75,7 +77,7 @@ function getThreeLetterLanguageCode(twoLetterLanguageCode) {
   return threeLetterLanguageCode;
 }
 
-function populateThreeLetterLanguageCodeMap() {
+function populateLanguageCodeMap() {
   const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
   supportedLanguages.forEach((twoLetterLanguageCode) => {
     return (languageCodeMap[twoLetterLanguageCode] = getThreeLetterLanguageCode(
