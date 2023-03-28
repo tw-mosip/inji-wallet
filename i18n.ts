@@ -50,41 +50,31 @@ function getLanguageCode(code: string) {
 }
 
 export function getVCDetailsForCurrentLanguage(locales) {
-  const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
   const currentLanguage = i18next.language;
-  for (const index in supportedLanguages) {
-    const supportedLanguage = supportedLanguages[index];
-    if (supportedLanguage == currentLanguage) {
-      const vcDetailsForCurrentLanguage = locales.filter(
-        (obj) => obj.language === languageCodeMap[currentLanguage]
-      );
-      return vcDetailsForCurrentLanguage[0]?.value
-        ? vcDetailsForCurrentLanguage[0].value
-        : locales[0]?.value;
-    }
-  }
+  const vcDetailsForCurrentLanguage = locales.filter(
+    (obj) => obj.language === languageCodeMap[currentLanguage]
+  );
+  return vcDetailsForCurrentLanguage[0]?.value
+    ? vcDetailsForCurrentLanguage[0].value
+    : locales[0]?.value;
 }
 
 // This method gets the value from iso-639-3 package, which contains key value pairs of three letter language codes[key] and two letter langugae code[value]. These values are according to iso standards.
-// The response recieved from the server is three letter language code and the value in the inji code base is two letter language code. Hence the conversion is done.
+// The response received from the server is three letter language code and the value in the inji code base is two letter language code. Hence the conversion is done.
 function getThreeLetterLanguageCode(twoLetterLanguageCode) {
-  let threeLetterLanguageCode = Object.keys(iso6393To1).find(
+  return Object.keys(iso6393To1).find(
     (key) => iso6393To1[key] === twoLetterLanguageCode
   );
-  if (!threeLetterLanguageCode) {
-    threeLetterLanguageCode = Object.keys(iso6393To2T).find(
-      (key) => iso6393To2T[key] === twoLetterLanguageCode
-    );
-  }
-  return threeLetterLanguageCode;
 }
 
 function populateLanguageCodeMap() {
   const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
   supportedLanguages.forEach((twoLetterLanguageCode) => {
-    return (languageCodeMap[twoLetterLanguageCode] = getThreeLetterLanguageCode(
-      twoLetterLanguageCode
-    ));
+    if (isTwoLetterLanguageCode) {
+      return (languageCodeMap[twoLetterLanguageCode] =
+        getThreeLetterLanguageCode(twoLetterLanguageCode));
+    }
+    return (languageCodeMap[twoLetterLanguageCode] = twoLetterLanguageCode);
   });
 }
 
@@ -99,4 +89,8 @@ export function getLocalizedField(rawField: string | LocalizedField[]) {
   } catch (e) {
     return '';
   }
+}
+
+function isTwoLetterLanguageCode(languageCode) {
+  return languageCode.length == 2;
 }
