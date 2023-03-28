@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const resources = { en, fil, ar, hi, kn, ta };
 import { iso6393To1, iso6393To2T } from 'iso-639-3';
+import { LocalizedField } from './types/vc';
 
 const languageCodeMap = {};
 
@@ -48,8 +49,9 @@ function getLanguageCode(code: string) {
   return language;
 }
 
-export function getVCDetailsForCurrentLanguage(locales, currentLanguage) {
+export function getVCDetailsForCurrentLanguage(locales) {
   const supportedLanguages = Object.keys(SUPPORTED_LANGUAGES);
+  const currentLanguage = i18next.language;
   for (const index in supportedLanguages) {
     const supportedLanguage = supportedLanguages[index];
     if (supportedLanguage == currentLanguage) {
@@ -84,4 +86,17 @@ function populateLanguageCodeMap() {
       twoLetterLanguageCode
     ));
   });
+}
+
+export function getLocalizedField(rawField: string | LocalizedField[]) {
+  if (typeof rawField === 'string') {
+    return rawField;
+  }
+  try {
+    const locales: LocalizedField[] = JSON.parse(JSON.stringify(rawField));
+    if (locales.length == 1) return locales[0]?.value;
+    return getVCDetailsForCurrentLanguage(locales);
+  } catch (e) {
+    return '';
+  }
 }
