@@ -18,10 +18,10 @@ do
 done
 
 if [[ "$ELIGIBLE" -eq 1 ]]; then
-    ISSUETYPE_TICKET=$( echo $MESSAGE | cut -d ':' -f1 ) # `feat(#1234)`
-    ISSUENUMBER=$( echo $ISSUETYPE_TICKET | grep -Eo '[0-9]+') # `1234`
-    # TODO: Check if the ISSUENUMBER is a numeric entity as GitHub issues are numeric
-    if [[ -n "$ISSUENUMBER" ]]; then
+    ISSUETYPE_TICKET=$( echo $MESSAGE | cut -d ':' -f1 )
+    if [[ $ISSUETYPE_TICKET =~ [0-9] ]];then
+        ISSUENUMBER=$( echo $ISSUETYPE_TICKET | grep -Eo '[0-9]+')
+         # TODO: Check if the ISSUENUMBER is a numeric entity as GitHub issues are numeric
         git interpret-trailers --in-place --trailer "$ISSUELINK$ISSUENUMBER" "$COMMIT_MSG_FILE"
     else
         echo "missing ticket number for issue type"
