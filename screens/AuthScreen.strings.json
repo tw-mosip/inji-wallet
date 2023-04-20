@@ -6,6 +6,6 @@
     "unavailable": "Device does not support Biometrics",
     "unenrolled": "To use Biometrics, please enroll your biometrics in your device settings",
     "failed": "Failed to authenticate with Biometrics",
-    "generic": "There seems to be an error in Biometrics authentication"
+    "generic": "There  to be an error in Biometrics authentication"
   }
 }
