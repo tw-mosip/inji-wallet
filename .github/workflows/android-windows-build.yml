@@ -22,12 +22,18 @@ jobs:
 
         with:
           path: inji
-    
+
+      - name: Install Chocolatey
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+          iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
       - name: Install Dependencies
         run: |
-          choco install -y openjdk8
-          choco install -y nodejs-lts yarn
-          yarn install
+          choco install openjdk --version=11.0
+          choco install nodejs --version=16.17.0
+          npm install -g npm@8.19.3
        
         working-directory: inji
 
