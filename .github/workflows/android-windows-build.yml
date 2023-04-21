@@ -19,26 +19,17 @@ jobs:
      
       - name: Checkout Repository
         uses: actions/checkout@v3.1.0
-
+      - uses: actions/setup-node@v3
         with:
-          path: inji
+          node-version: '16.x'
 
-      - name: Install Chocolatey
-        shell: pwsh
-        run: |
-          Set-ExecutionPolicy AllSigned -Scope Process -Force
-          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-          iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-             
 
-      - name: Install Dependencies
-        shell: pwsh
+      - name: Install npm dependencies
+        # shell: pwsh
         run: |
-          choco install openjdk --version=11.0
-          choco install nodejs --version=16.17.0
-          npm install -g npm@8.19.3
-       
+          npm install
         working-directory: inji
+        
 
       - name: Create .env.local file
         run: |
