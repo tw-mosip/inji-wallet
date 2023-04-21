@@ -1,4 +1,4 @@
-name: Testing my workflow file 0.2
+name: Testing my workflow file 0.4
 
 on:
   push:
