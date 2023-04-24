@@ -15,16 +15,15 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '16.x'
-      
-      - name: Setup Java
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-          distribution: 'ubuntu'
-          distribution-version: '20.04'
-        
-      - name: Setup Java1  
-        run: echo "JAVA_11=$JAVA_HOME" >> $GITHUB_ENV
+
+      - name: Install OpenJDK 11
+        run: sudo apt-get update && sudo apt-get install -y openjdk-11-jdk
+
+      - name: Set JAVA_HOME
+        run: echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" | sudo tee -a /etc/environment
+
+      - name: Print JAVA_HOME path
+        run: echo $JAVA_HOME
 
       - name: Install npm dependencies
         run: |
