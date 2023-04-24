@@ -24,14 +24,13 @@ jobs:
 
 
       - name: Install npm dependencies
-        # shell: pwsh
         run: |
           npm install
 
       - name: Install Fastlane
         uses: actions/setup-ruby@v1
         with:
-          ruby-version: 2.6
+          ruby-version: '3.0' 
 
       - name: Create .env.local file
         run: |
