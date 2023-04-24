@@ -20,13 +20,14 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '11'
+        
+      - name: Setup Java1  
         run: echo "JAVA_11=$JAVA_HOME" >> $GITHUB_ENV
 
       - name: Setup Android SDK
         uses: android-actions/setup-android-sdk@v2
         with:
           sdk-version: 'latest'
-        run: echo "sdk-version"=$ANDROID_HOME" >> $GITHUB_ENV
         
       - name: Accept Android licenses
         run: $ANDROID_HOME/tools/bin/sdkmanager --licenses
