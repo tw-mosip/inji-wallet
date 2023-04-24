@@ -46,7 +46,8 @@ jobs:
       #     args: -h
 
        - name: Install Chocolatey pkg
-         uses: Tyler887/chocolatey-install@1.0
+         run: |
+            choco install ruby --version=2.6.5.1
 
 
       #  - name: Set up Ruby
