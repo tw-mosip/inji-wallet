@@ -45,10 +45,9 @@ jobs:
       #    with:
       #     args: -h
 
-       - name: Chocolatey Action
-         uses: crazy-max/ghaction-chocolatey@v2.1.0
-         with:
-          args: -h
+       - name: Install Chocolatey pkg
+         uses: Tyler887/chocolatey-install@1.0
+
 
       #  - name: Set up Ruby
       #    uses: ruby/setup-ruby-pkgs@v1
