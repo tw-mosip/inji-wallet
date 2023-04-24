@@ -25,6 +25,24 @@ jobs:
       - name: Print JAVA_HOME path
         run: echo $JAVA_HOME
 
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y wget unzip
+
+      - name: Download and extract Android SDK
+        run: |
+          wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O sdk.zip
+          mkdir -p $HOME/Android/Sdk/cmdline-tools
+          unzip -q sdk.zip -d $HOME/Android/Sdk/cmdline-tools
+
+      - name: Set PATH and sdkmanager path
+        run: |
+          echo "export ANDROID_HOME=$HOME/Android/Sdk" >> ~/.bashrc
+          echo "export PATH=$PATH:$HOME/Android/Sdk/cmdline-tools/tools/bin" >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: Print sdkmanager path
+        run: which sdkmanager
+
       - name: Install npm dependencies
         run: |
           npm ci
