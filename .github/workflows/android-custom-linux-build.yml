@@ -32,7 +32,8 @@ jobs:
         run: |
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O sdk.zip
           mkdir -p $HOME/Android/Sdk/cmdline-tools
-          unzip -q sdk.zip -d $HOME/Android/Sdk/cmdline-tools
+          unzip -q -o sdk.zip -d $HOME/Android/Sdk/cmdline-tools
+
 
       - name: Set PATH and sdkmanager path
         run: |
