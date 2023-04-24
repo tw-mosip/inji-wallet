@@ -40,15 +40,20 @@ jobs:
        - name: Checkout code
          uses: actions/checkout@v2
 
-      #  - name: Choco help
-      #    uses: crazy-max/ghaction-chocolatey@v2
-      #    with:
-      #     args: -h
-
-       - name: Set up Ruby
-         uses: ruby/setup-ruby-pkgs@v1
+       - name: Choco help
+         uses: ./
          with:
-          ruby-version: '2.6.6'
+          args: -h
+
+       - name: Choco install InnoSetup
+         uses: ./
+         with:
+          args: install innosetup --no-progress
+
+      #  - name: Set up Ruby
+      #    uses: ruby/setup-ruby-pkgs@v1
+      #    with:
+      #     ruby-version: '2.6.6'
 
  # - name: Install npm dependencies
       #   run: |
