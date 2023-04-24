@@ -47,6 +47,8 @@ jobs:
 
        - name: Chocolatey Action
          uses: crazy-max/ghaction-chocolatey@v2.1.0
+         with:
+          args: -h
 
       #  - name: Set up Ruby
       #    uses: ruby/setup-ruby-pkgs@v1
