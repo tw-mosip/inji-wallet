@@ -41,7 +41,7 @@ jobs:
           source ~/.bashrc
 
       - name: Print sdkmanager path
-        run: which sdkmanager
+        run: echo $ANDROID_HOME
 
       - name: Install npm dependencies
         run: |
