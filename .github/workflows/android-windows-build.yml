@@ -40,13 +40,13 @@ jobs:
        - name: Checkout code
          uses: actions/checkout@v2
 
-       - name: Choco help
-         uses: crazy-max/ghaction-chocolatey@v2
-         with:
-          args: -h
+      #  - name: Choco help
+      #    uses: crazy-max/ghaction-chocolatey@v2
+      #    with:
+      #     args: -h
 
        - name: Set up Ruby
-         uses: ruby/setup-ruby@v1
+         uses: ruby/setup-ruby-pkgs@v1
          with:
           ruby-version: '2.6.6'
 
