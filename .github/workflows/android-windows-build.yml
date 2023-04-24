@@ -40,10 +40,10 @@ jobs:
        - name: Checkout code
          uses: actions/checkout@v2
 
-       - name: Choco help
-         uses: ./
-         with:
-          args: -h
+      #  - name: Choco help
+      #    uses: ./
+      #    with:
+      #     args: -h
 
        - name: Choco install InnoSetup
          uses: ./
