@@ -22,15 +22,20 @@ jobs:
         with:
           node-version: '16.x'
 
+      - name: Set up Ruby
+        uses: ruby/setup-ruby
+        with:
+          ruby-version: '2.6.x' 
+
 
       - name: Install npm dependencies
         run: |
           npm install
 
       - name: Install Fastlane
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: '3.0' 
+        run: |
+           gem install bundler
+           bundle install     
 
       - name: Create .env.local file
         run: |
