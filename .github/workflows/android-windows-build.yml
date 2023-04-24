@@ -32,14 +32,13 @@ jobs:
 
       - name: Create .env.local file
         run: |
-          echo "" > .env.local > android/local.properties
+          echo "${{ secrets.ENV_FILE }}" > .env.local > android/local.properties
 
       - name: Run Fastlane
         run: |
           fastlane android_build
       
-
-      - name: Upload Artifact file
-        run: |
-          mkdir apk
-          cp inji/android/app/build/outputs/apk/release/app-release.apk apk/
+      # - name: Upload Artifact file
+      #   run: |
+      #     mkdir apk
+      #     cp inji/android/app/build/outputs/apk/release/app-release.apk apk/
