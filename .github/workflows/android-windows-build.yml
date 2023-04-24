@@ -27,7 +27,7 @@ jobs:
           npm install
 
       - name: Set up Ruby
-      - uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0.2'
 
