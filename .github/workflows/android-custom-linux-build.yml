@@ -16,44 +16,8 @@ jobs:
         with:
           node-version: '16.x'
 
-      - name: Install OpenJDK 11
-        run: sudo apt-get update && sudo apt-get install -y openjdk-11-jdk
-
       - name: Set JAVA_HOME
-        run: echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" | sudo tee -a /etc/environment
+        run: echo "export ADITYAN_HOME=/usr/bin/" | sudo tee -a /etc/environment
 
-      - name: Print JAVA_HOME path
-        run: echo $JAVA_HOME
-
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y wget unzip
-
-      - name: Download and extract Android SDK
-        run: |
-          wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O sdk.zip
-          mkdir -p $HOME/Android/Sdk/cmdline-tools
-          unzip -q -o sdk.zip -d $HOME/Android/Sdk/cmdline-tools
-
-
-      - name: Set PATH and sdkmanager path
-        run: |
-          echo "export ANDROID_HOME=$HOME/Android/Sdk" >> ~/.bashrc
-          echo "export PATH=$PATH:$HOME/Android/Sdk/cmdline-tools/tools/bin" >> ~/.bashrc
-          source ~/.bashrc
-
-      - name: Print sdkmanager path
-        run: echo $ANDROID_HOME
-
-      - name: Install npm dependencies
-        run: |
-          npm ci
-
-      - name: Create .env.local file
-        run: |
-          echo "${{ secrets.ENV_FILE }}" > .env.local > android/local.properties
-
-      - name: Setup branch and env 
-        run: |
-          # Strip git ref prefix from version
-          echo "BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_ENV
-          echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
+      - name: Print Adityan home path
+        run: echo $ADITYAN_HOME
