@@ -17,7 +17,7 @@ jobs:
           node-version: '16.x'
 
       - name: Set JAVA_HOME
-        run: echo "export ADITYAN_HOME=/usr/bin/" | sudo tee -a /etc/environment
+        run: echo "export ADITYAN_HOME=/usr/bin/" | sudo tee -a /etc/bash.bashrc
 
       - name: Print Adityan home path
         run: echo $ADITYAN_HOME
