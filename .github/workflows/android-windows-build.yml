@@ -48,8 +48,7 @@ jobs:
 
       - name: Build APK
         run: |
-          cd android
-          gradlew.bat assembleNewlogicRelease
+          npm run build:android:mosip
 
       
       - name: Upload Artifact file
