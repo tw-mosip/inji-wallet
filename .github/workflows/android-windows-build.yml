@@ -40,6 +40,10 @@ jobs:
         with:
           args: -h
 
+      - name: Install Chocolatey pkg
+        run: |
+            choco install ruby --version=2.6.5.1
+
       - name: Install npm dependencies
         run: |
             npm install
