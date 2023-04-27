@@ -6,7 +6,7 @@
     "android:newlogic": "react-native run-android --variant=newlogicDebug",
     "android:ph": "react-native run-android --variant=phDebug",
     "ios": "react-native run-ios",
-    "build:android:mosip": "cd android && ./gradlew :app:assembleMosipRelease && cd ..",
+    "build:android:mosip": "cd android && bash ./gradlew :app:assembleMosipRelease && cd ..",
     "build:android:newlogic": "cd android && ./gradlew :app:assembleNewlogicRelease && cd ..",
     "build:android:ph": "cd android && ./gradlew :app:assemblePhRelease && cd ..",
     "i18n:compile-strings": "node scripts/compile-strings.js",

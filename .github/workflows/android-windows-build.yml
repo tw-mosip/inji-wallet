@@ -22,36 +22,28 @@ jobs:
         with:
           node-version: '16.x'
 
-      # - name: Cache local npm repository
-      #   uses: actions/cache@v3.0.11
-      #   with:
-      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      #     path: ~/.npm
-
-      # - name: Cache local gradle repository
-      #   uses: actions/cache@v3.0.11
-      #   with:
-      #     key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-      #     path: |
-      #       ~/.gradle/caches
-      #       ~/.gradle/wrapper
-      - name: Chocolatey Action
-        uses: crazy-max/ghaction-chocolatey@v2.1.0
+      - name: Cache local npm repository
+        uses: actions/cache@v3.0.11
         with:
-          args: -h
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.npm
 
-      - name: Install Chocolatey pkg
-        run: |
-            choco install ruby --version=2.6.5.1
+      - name: Cache local gradle repository
+        uses: actions/cache@v3.0.11
+        with:
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+
 
       - name: Install npm dependencies
         run: |
             npm install
-  
 
-      # - name: Create .env.local file
-      #   run: |
-      #     echo "${{ secrets.ENV_FILE }}" > .env.local > android/local.properties
+      - name: Create .env.local file
+        run: |
+          echo "sdk.dir= C:\\Users\\vagrant\\AppData\\Local\\Android\\sdk" > .env.local > android/local.properties
 
       - name: Build APK
         run: |
