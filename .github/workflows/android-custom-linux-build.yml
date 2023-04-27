@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-android:
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.1.0
       - uses: actions/setup-node@v3
@@ -21,3 +21,6 @@ jobs:
 
       - name: Print Adityan home path
         run: echo $ADITYAN_HOME
+
+      - name: Print the details
+        run: lscpu
