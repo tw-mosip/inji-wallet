@@ -39,7 +39,8 @@ jobs:
       - name: Build APK
         run: |
            pwd
-           cd android && ./gradlew :app:assembleMosipRelease
+           cd android
+           ./gradlew :app:assembleMosipRelease
       
       
       - name: Upload Artifact file
