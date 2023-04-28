@@ -27,8 +27,8 @@ jobs:
         run: |
          echo $ANDROID_HOME
 
-      # - name: Set ANDROID_HOME
-      #   run:  echo "${{ secrets.ANDROID_HOME }}" > .env.local > android/local.properties
+      - name: Set ANDROID_HOME
+        run:  echo "${{ secrets.ANDROID_HOME }}" > android/local.properties
 
       - name: Cache local npm repository
         uses: actions/cache@v3.0.11
