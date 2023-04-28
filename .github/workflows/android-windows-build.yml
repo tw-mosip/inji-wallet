@@ -28,7 +28,7 @@ jobs:
          echo $ANDROID_HOME
 
       - name: Set ANDROID_HOME
-        run:  echo "${{ secrets.ANDROID_HOME }}" > android/local.properties
+        run:  echo "sdk.dir=C:\\Users\\vagrant\\AppData\\Local\\Android\\sdk"> android/local.properties
 
       - name: Cache local npm repository
         uses: actions/cache@v3.0.11
@@ -49,15 +49,12 @@ jobs:
         run: |
             npm install
       
-      # - name: Create .env.local file
-      #   run: |
-      #     echo $ANDROID_HOME > .env.local > android/local.properties
 
       - name: Build APK
         run: |
           cd android
           ./gradlew :app:assembleMosipRelease
-
+          cd ..
 
       
       - name: Upload Artifact file
