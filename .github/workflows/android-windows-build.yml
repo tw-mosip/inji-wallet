@@ -28,7 +28,7 @@ jobs:
          echo $ANDROID_HOME
 
       - name: Set ANDROID_HOME
-        run:  echo "sdk.dir=C:\\Users\\vagrant\\AppData\\Local\\Android\\sdk"> android/local.properties
+        run:  echo "sdk.dir=C:\\Android"> android/local.properties
 
 
       - name: Install npm dependencies
@@ -38,8 +38,8 @@ jobs:
 
       - name: Build APK
         run: |
-           cd android
-           ./gradlew :app:assembleMosipRelease
+           pwd
+           cd android && ./gradlew :app:assembleMosipRelease
       
       
       - name: Upload Artifact file
