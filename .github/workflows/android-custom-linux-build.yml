@@ -44,7 +44,6 @@ jobs:
       - name: Run Fastlane
         run: |
           cd android
-          if [ ! -z "$FIREBASE_SECRET" ] && [ -f app/google-services.json.gpg ];then rm -f app/google-services.json;gpg2 --quiet --batch --passphrase=$FIREBASE_SECRET --pinentry-mode loopback --decrypt --output app/google-services.json app/mosip-google-services.json.gpg;fi
           fastlane build_android
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
