@@ -55,7 +55,9 @@ jobs:
 
       - name: Build APK
         run: |
-          npm run build:android:mosip
+          cd android
+          ./gradlew :app:assembleMosipRelease
+
 
       
       - name: Upload Artifact file
