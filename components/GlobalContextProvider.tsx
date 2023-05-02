@@ -5,7 +5,7 @@ import { appMachine, logState } from '../machines/app';
 import { GlobalContext } from '../shared/GlobalContext';
 
 export const GlobalContextProvider: React.FC = (props) => {
-  const appService = useInterpret(appMachine);
+  const appService = useInterpret(appMachine, { devTools: __DEV__ });
 
   if (__DEV__) {
     appService.subscribe(logState);
