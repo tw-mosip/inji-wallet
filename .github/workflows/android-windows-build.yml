@@ -14,9 +14,9 @@ jobs:
     env:
       KEYSTORE_PASSWORD: 'android'
       KEY_PASSWORD: 'android'
-      ANDROID_HOME: C:\Android
-      GRADLE_HOME: C:\ProgramData\chocolatey\lib\gradle\tools\gradle-8.1
-      JAVA_HOME: C:\Program Files\Microsoft\jdk-11.0.18.10-hotspot\
+      # ANDROID_HOME: C:\Android
+      # GRADLE_HOME: C:\ProgramData\chocolatey\lib\gradle\tools\gradle-8.1
+      # JAVA_HOME: C:\Program Files\Microsoft\jdk-11.0.18.10-hotspot\
 
     steps:
       - name: Checkout Repository
@@ -24,13 +24,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
             node-version: '16.x'
-
-      # - name: Set environment variable
-      #   uses: actions/set-env@v2
-      #   with:
-      #     ANDROID_HOME: C:\Android
-      #     GRADLE_HOME: C:\ProgramData\chocolatey\lib\gradle\tools\gradle-8.1
-      #     JAVA_HOME: C:\Program Files\Microsoft\jdk-11.0.18.10-hotspot\
 
       - name: ANDROID_HOME
         run: |
@@ -50,12 +43,12 @@ jobs:
       
       - name: Build APK
         run: |
-           pwd
            cd android
            ./gradlew :app:assembleMosipRelease
       
-      
+    
       - name: Upload Artifact file
-        run: |
-          mkdir apk
-          cp inji/android/app/build/outputs/apk/release/app-release.apk apk/
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          path: android/app/build/outputs/apk/mosip/release/
+          retention-days: 1
