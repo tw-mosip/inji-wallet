@@ -14,7 +14,9 @@ jobs:
     env:
       KEYSTORE_PASSWORD: 'android'
       KEY_PASSWORD: 'android'
-     
+      ANDROID_HOME: C:\Android
+      GRADLE_HOME: C:\ProgramData\chocolatey\lib\gradle\tools\gradle-8.1
+      JAVA_HOME: C:\Program Files\Microsoft\jdk-11.0.18.10-hotspot\
 
     steps:
       - name: Checkout Repository
@@ -23,12 +25,12 @@ jobs:
         with:
             node-version: '16.x'
 
-      - name: Set environment variable
-        uses: actions/set-env@v2
-        with:
-          ANDROID_HOME: C:\Android
-          GRADLE_HOME: C:\ProgramData\chocolatey\lib\gradle\tools\gradle-8.1
-          JAVA_HOME: C:\Program Files\Microsoft\jdk-11.0.18.10-hotspot\
+      # - name: Set environment variable
+      #   uses: actions/set-env@v2
+      #   with:
+      #     ANDROID_HOME: C:\Android
+      #     GRADLE_HOME: C:\ProgramData\chocolatey\lib\gradle\tools\gradle-8.1
+      #     JAVA_HOME: C:\Program Files\Microsoft\jdk-11.0.18.10-hotspot\
 
       - name: ANDROID_HOME
         run: |
@@ -38,13 +40,14 @@ jobs:
 
       - name: Set PATH
         run: echo "sdk.dir=C:\\Android"> android/local.properties
-
+            $env:ANDROID_HOME = C:\Android
+            $env:GRADLE_HOME = C:\ProgramData\chocolatey\lib\gradle\tools\gradle-8.1
+            $env:JAVA_HOME = C:\Program Files\Microsoft\jdk-11.0.18.10-hotspot\
 
       - name: Install npm dependencies
         run: |
             npm install
       
-
       - name: Build APK
         run: |
            pwd
