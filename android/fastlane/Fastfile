@@ -34,7 +34,7 @@ platform :android do
   lane :build_android do
   gradle(
      task: "assemble",
-     flavor: "Mosip",
+     flavor: "newlogic",
      build_type: "Release"
    )
   end

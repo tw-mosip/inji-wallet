@@ -62,6 +62,7 @@ buck-out/
 \.buckd/
 *.keystore
 !debug.keystore
+!release.keystore
 
 # Bundle artifacts
 *.jsbundle
