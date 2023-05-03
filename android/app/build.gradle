@@ -175,9 +175,9 @@ android {
     }
     signingConfigs {
         release {
-            def keystore = System.getenv("RELEASE_KEYSTORE") ?: "debug.keystore"
-            def keystoreAlias = System.getenv("RELEASE_KEYSTORE_ALIAS") ?: "androiddebugkey"
-            def keystorePass = System.getenv("RELEASE_KEYSTORE_PASSWORD") ?: "android"
+            def keystore = System.getenv("RELEASE_KEYSTORE")
+            def keystoreAlias = System.getenv("RELEASE_KEYSTORE_ALIAS")
+            def keystorePass = System.getenv("RELEASE_KEYSTORE_PASSWORD")
             storeFile file("$keystore")
             storePassword "$keystorePass"
             keyAlias "$keystoreAlias"

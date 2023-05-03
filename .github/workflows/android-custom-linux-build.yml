@@ -55,10 +55,15 @@ jobs:
           -keystore android/app/release.keystore \
           -dname "CN=io.mosip.residentapp,OU=,O=,L=,S=,C=US"
 
+      - name: Export variables
+        run: |
+          export RELEASE_KEYSTORE=release.keystore
+          export RELEASE_KEYSTORE_ALIAS=androidreleasekey
+          export RELEASE_KEYSTORE_PASSWORD=android  
+
       - name: Run Fastlane
         run: |
           cd android
-          y | sudo fastlane increment_vc
           fastlane build_android
       
         env:
