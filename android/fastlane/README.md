@@ -14,21 +14,19 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## Android
 
-### android test
+### android generate_keystore
 
 ```sh
-[bundle exec] fastlane android test
+[bundle exec] fastlane android generate_keystore
 ```
 
-Runs all the tests
-
-### android build_android
+### android increment_vc
 
 ```sh
-[bundle exec] fastlane android build_android
+[bundle exec] fastlane android increment_vc
 ```
 
-Build Android
+Increment version code
 
 ---
 

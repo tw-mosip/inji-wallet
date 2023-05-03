@@ -154,11 +154,8 @@ android {
         applicationId 'io.mosip.residentapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // Update versionName and/or versionCode via git tag <XX.xx.xx>
-        // More info here:
-        // https://github.com/gladed/gradle-android-git-version#3-use-a-git-tag-to-specify-your-version-number-see-semantic-versioning
-        versionName androidGitVersion.name()
-        versionCode androidGitVersion.code()
+        versionName '1.0'
+        versionCode 3 
 
         Properties properties = new Properties()
         properties.load(project.rootProject.file('local.properties').newDataInputStream())
