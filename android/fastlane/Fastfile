@@ -13,6 +13,11 @@
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
 
+# Fastfile
+
+plugin "increment_version_code"
+
+
 default_platform(:android)
 
 platform :android do
@@ -21,20 +26,20 @@ platform :android do
   #   gradle(task: "test")
   # end
 
-  # desc "Build Android"
-  # lane :build_android do
-  # gradle(
-  #    task: "assemble",
-  #    flavor: "Mosip",
-  #    build_type: "Release"
-  #  )
-  # end
-
   desc "Increment version code"
   lane :increment_vc do
   increment_version_code(
        gradle_file_path: "./app/build.gradle",
  )
+  end
+
+  desc "Build Android"
+  lane :build_android do
+  gradle(
+     task: "assemble",
+     flavor: "Mosip",
+     build_type: "Release"
+   )
   end
 #   # Initialize the title, description, screenshots
 #     desc "Description of your app"

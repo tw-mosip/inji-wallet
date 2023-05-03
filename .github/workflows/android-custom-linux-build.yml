@@ -58,6 +58,7 @@ jobs:
       - name: Run Fastlane
         run: |
           cd android
+          fastlane increment_vc
           fastlane build_android
       
         env:
