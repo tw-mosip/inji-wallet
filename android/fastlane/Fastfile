@@ -22,13 +22,13 @@ plugins = [
   "fastlane-plugin-sentry"
 ]
 
-# Install the plugins
-plugins.each do |plugin_name|
-  unless plugin_installed?(plugin_name)
-    UI.message("Installing plugin: #{plugin_name}")
-    sh("fastlane add_plugin #{plugin_name}")
-  end
-end
+# # Install the plugins
+# plugins.each do |plugin_name|
+#   unless plugin_installed?(plugin_name)
+#     UI.message("Installing plugin: #{plugin_name}")
+#     sh("fastlane add_plugin #{plugin_name}")
+#   end
+# end
 
 
 
