@@ -58,7 +58,7 @@ platform :android do
   lane :build_android do
   gradle(
      task: "assemble",
-     flavor: "newlogic",
+     flavor: "Newlogic",
      build_type: "Release"
    )
   end
