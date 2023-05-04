@@ -41,21 +41,28 @@ jobs:
           gpg2 --import ./.github/keys/mosipgpgkey_pub.gpg 
           gpg2 --quiet --batch --passphrase=${{secrets.gpg_secret}}  --allow-secret-key-import --import ./.github/keys/mosipgpgkey_sec.gpg
 
+      - name: Setup keystore
+        run: |
+        sudo apt-get --yes install gnupg
+        gpg --import ./.github/keys/secret-key.gpg
+        cd android
+        gpg --batch --passphrase=adityan.kannan410 --decrypt --output app/release.keystore app/release.keystore.gpg
+
 #1 - generate at runtime.
 #2 - Encrypt in workflow and decrypt and use it.
-      - name: Generate keystore
-        run: |
-          keytool \
-          -genkey -v \
-          -storetype PKCS12 \
-          -keyalg RSA \
-          -keysize 2048 \
-          -validity 10000 \
-          -storepass 'android' \
-          -keypass 'android' \
-          -alias androidreleasekey \
-          -keystore android/app/release.keystore \
-          -dname "CN=io.mosip.residentapp,OU=,O=,L=,S=,C=US"
+      # - name: Generate keystore
+      #   run: |
+      #     keytool \
+      #     -genkey -v \
+      #     -storetype PKCS12 \
+      #     -keyalg RSA \
+      #     -keysize 2048 \
+      #     -validity 10000 \
+      #     -storepass 'android' \
+      #     -keypass 'android' \
+      #     -alias androidreleasekey \
+      #     -keystore android/app/release.keystore \
+      #     -dname "CN=io.mosip.residentapp,OU=,O=,L=,S=,C=US"
 
       - name: Export variables
         run: |
