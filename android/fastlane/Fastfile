@@ -62,6 +62,22 @@ platform :android do
      build_type: "Release"
    )
   end
+
+  desc "Build App Bundle"
+  lane :build_aab do
+    gradle(
+      task: 'bundle',
+      build_type: 'release',
+      print_command: true
+    )
+    # Move the generated AAB file to the output directory
+    aab_path = Dir["app/build/outputs/bundle/release/*.aab"].first
+    FileUtils.cp(aab_path, "output/app-release.aab")
+  
+    # Print success message
+    UI.success("Built AAB successfully")
+  end
+  
 #   # Initialize the title, description, screenshots
 #     desc "Description of your app"
 #     lanuage "en-US"

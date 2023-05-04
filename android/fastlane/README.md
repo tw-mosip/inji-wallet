@@ -38,6 +38,14 @@ Increment version name
 
 Build Android
 
+### android build_aab
+
+```sh
+[bundle exec] fastlane android build_aab
+```
+
+Build App Bundle
+
 ---
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

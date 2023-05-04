@@ -154,7 +154,7 @@ android {
         applicationId 'io.mosip.residentapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionName 1.0.0
+        versionName "1.0.2"
         versionCode 8
 
         Properties properties = new Properties()
@@ -175,9 +175,9 @@ android {
     }
     signingConfigs {
         release {
-            def keystore = System.getenv("RELEASE_KEYSTORE").toString()
-            def keystoreAlias = System.getenv("RELEASE_KEYSTORE_ALIAS").toString()
-            def keystorePass = System.getenv("RELEASE_KEYSTORE_PASSWORD").toString()
+            def keystore = "release.keystore"
+            def keystoreAlias = System.getenv("RELEASE_KEYSTORE_ALIAS")
+            def keystorePass = System.getenv("RELEASE_KEYSTORE_PASSWORD")
             storeFile file("$keystore")
             storePassword "$keystorePass"
             keyAlias "$keystoreAlias"
