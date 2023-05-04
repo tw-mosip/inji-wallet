@@ -45,6 +45,7 @@ jobs:
         run: |
           sudo apt-get --yes install gnupg
           gpg --import ./.github/keys/secret-key.gpg
+          gpg --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret-key.gpg
           
       - name: Decrypt the keystore file
         run: |    
