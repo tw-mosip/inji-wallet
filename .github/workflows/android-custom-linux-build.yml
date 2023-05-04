@@ -45,8 +45,10 @@ jobs:
         run: |
           sudo apt-get --yes install gnupg
           gpg --import ./.github/keys/secret-key.gpg
-          cd android
-          gpg --batch --passphrase=adityan.kannan410 --decrypt --output app/release.keystore app/release.keystore.gpg
+          
+      - name: Decrypt the keystore file
+        run: |    
+          gpg --batch --passphrase=adityan.kannan410 --decrypt --output ./app/release.keystore ./app/release.keystore.gpg
 
 #1 - generate at runtime.
 #2 - Encrypt in workflow and decrypt and use it.
