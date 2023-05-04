@@ -15,6 +15,23 @@
 
 # Fastfile
 
+# plugins ["increment_version_code",
+# "increment_version_name"]
+plugins = [
+  "fastlane-plugin-increment_version_code",
+  "fastlane-plugin-sentry"
+]
+
+# Install the plugins
+plugins.each do |plugin_name|
+  unless plugin_installed?(plugin_name)
+    UI.message("Installing plugin: #{plugin_name}")
+    sh("fastlane add_plugin #{plugin_name}")
+  end
+end
+
+
+
 default_platform(:android)
 
 platform :android do
@@ -23,12 +40,19 @@ platform :android do
   #   gradle(task: "test")
   # end
 
-#   desc "Increment version code"
-#   lane :increment_vc do
-#   increment_version_code(
-#        gradle_file_path: "./app/build.gradle",
-#  )
-#   end
+  desc "Increment version code"
+  lane :increment_vc do
+  increment_version_code(
+       gradle_file_path: "./app/build.gradle",
+ )
+  end
+
+  desc "Increment version name"
+  lane :increment_vname do
+  increment_version_name(
+       gradle_file_path: "./app/build.gradle",
+ )
+  end
 
   desc "Build Android"
   lane :build_android do
