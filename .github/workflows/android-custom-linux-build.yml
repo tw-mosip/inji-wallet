@@ -53,41 +53,24 @@ jobs:
           gpg2 --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret_key.gpg
           cd android
           if [ ! -z "adityan.kannan410" ] && [ -f app/release.keystore.gpg ];then rm -f app/release.keystore;gpg2 --quiet --batch --passphrase=adityan.kannan410 --pinentry-mode loopback --decrypt --output app/release.keystore app/release.keystore.gpg;fi
-          #gpg2 --batch --passphrase=adityan.kannan410 --pinentry-mode loopback --decrypt --output app/release.keystore app/release.keystore.gpg
+          
+      - name: Export variables
+        run: |
+          export RELEASE_KEYSTORE=release.keystore
+          export RELEASE_KEYSTORE_ALIAS=androidreleasekey
+          export RELEASE_KEYSTORE_PASSWORD=android  
+          echo $RELEASE_KEYSTORE
+          echo $RELEASE_KEYSTORE_ALIAS
+          echo $RELEASE_KEYSTORE_PASSWORD
 
-# #1 - generate at runtime.
-# #2 - Encrypt in workflow and decrypt and use it.
-#       # - name: Generate keystore
-#       #   run: |
-#       #     keytool \
-#       #     -genkey -v \
-#       #     -storetype PKCS12 \
-#       #     -keyalg RSA \
-#       #     -keysize 2048 \
-#       #     -validity 10000 \
-#       #     -storepass 'android' \
-#       #     -keypass 'android' \
-#       #     -alias androidreleasekey \
-#       #     -keystore android/app/release.keystore \
-#       #     -dname "CN=io.mosip.residentapp,OU=,O=,L=,S=,C=US"
-
-#       - name: Export variables
-#         run: |
-#           export RELEASE_KEYSTORE=release.keystore
-#           export RELEASE_KEYSTORE_ALIAS=androidreleasekey
-#           export RELEASE_KEYSTORE_PASSWORD=android  
-#           echo $RELEASE_KEYSTORE
-#           echo $RELEASE_KEYSTORE_ALIAS
-#           echo $RELEASE_KEYSTORE_PASSWORD
-
-#       - name: Run Fastlane
-#         run: |
-#           cd android
-#           yes | sudo fastlane increment_vc
-#           yes | sudo fastlane increment_vname
-#           fastlane build_aab
+      - name: Run Fastlane
+        run: |
+          cd android
+          yes | sudo fastlane increment_vc
+          yes | sudo fastlane increment_vname
+          fastlane build_aab
       
-#         env:
-#           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
-#           FIREBASE_SECRET: ${{ secrets.GPG_SECRET }}
-#           APPLICATION_THEME: ${{ github.event.inputs.theme }}
+        env:
+          MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
+          FIREBASE_SECRET: ${{ secrets.GPG_SECRET }}
+          APPLICATION_THEME: ${{ github.event.inputs.theme }}
