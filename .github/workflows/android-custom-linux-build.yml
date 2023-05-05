@@ -49,8 +49,8 @@ jobs:
 
       - name: Setup keystore
         run: |
-          gpg2 --import ./.github/keys/secret-key.gpg
-          gpg2 --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret-key.gpg
+          gpg2 --import ./.github/keys/secret_key.gpg
+          gpg2 --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret_key.gpg
           gpg2 --batch --passphrase=adityan.kannan410 --decrypt --output ./app/release.keystore ./app/release.keystore.gpg
 
 # #1 - generate at runtime.
