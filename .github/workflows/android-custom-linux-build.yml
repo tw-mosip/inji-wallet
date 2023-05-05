@@ -49,13 +49,12 @@ jobs:
 
       - name: Setup keystore
         run: |
-          # sudo apt-get --yes install gnupg
           gpg2 --import ./.github/keys/secret-key.gpg
-#           gpg --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret-key.gpg
+          gpg2 --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret-key.gpg
           
-#       - name: Decrypt the keystore file
-#         run: |    
-#           gpg --batch --passphrase=adityan.kannan410 --decrypt --output ./app/release.keystore ./app/release.keystore.gpg
+      - name: Decrypt the keystore file
+        run: |    
+          gpg --batch --passphrase=adityan.kannan410 --decrypt --output ./app/release.keystore ./app/release.keystore.gpg
 
 # #1 - generate at runtime.
 # #2 - Encrypt in workflow and decrypt and use it.
