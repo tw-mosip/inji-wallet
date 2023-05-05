@@ -46,11 +46,11 @@ jobs:
           cd .github/keys
           ls
           pwd
-          
-#       - name: Setup keystore
-#         run: |
-#           sudo apt-get --yes install gnupg
-#           gpg --import ./.github/keys/secret-key.gpg
+
+      - name: Setup keystore
+        run: |
+          # sudo apt-get --yes install gnupg
+          gpg2 --import ./.github/keys/secret-key.gpg
 #           gpg --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret-key.gpg
           
 #       - name: Decrypt the keystore file
