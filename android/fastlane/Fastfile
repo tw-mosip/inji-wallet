@@ -23,6 +23,13 @@ plugins = [
 default_platform(:android)
 
 platform :android do
+  desc "Execute Android"
+  lane :execute_android do
+  increment_vc
+  increment_vname
+  build_android
+  end
+
   desc "Increment version code"
   lane :increment_vc do
   increment_version_code(
@@ -41,7 +48,7 @@ platform :android do
   lane :build_android do
   gradle(
      task: "assemble",
-     flavor: "Newlogic",
+     flavor: "mosip",
      build_type: "Release"
    )
   end

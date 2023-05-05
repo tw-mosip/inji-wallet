@@ -68,7 +68,7 @@ jobs:
           cd android
           yes | sudo fastlane increment_vc
           yes | sudo fastlane increment_vname
-          fastlane build_android
+          fastlane execute_android
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
