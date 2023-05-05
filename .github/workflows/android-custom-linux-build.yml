@@ -41,49 +41,55 @@ jobs:
           gpg2 --import ./.github/keys/mosipgpgkey_pub.gpg 
           gpg2 --quiet --batch --passphrase=${{secrets.gpg_secret}}  --allow-secret-key-import --import ./.github/keys/mosipgpgkey_sec.gpg
 
-      - name: Setup keystore
+      - name: See the path and list the files
         run: |
-          sudo apt-get --yes install gnupg
-          gpg --import ./.github/keys/secret-key.gpg
-          gpg --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret-key.gpg
+          cd .github/keys
+          ls
+          pwd
           
-      - name: Decrypt the keystore file
-        run: |    
-          gpg --batch --passphrase=adityan.kannan410 --decrypt --output ./app/release.keystore ./app/release.keystore.gpg
+#       - name: Setup keystore
+#         run: |
+#           sudo apt-get --yes install gnupg
+#           gpg --import ./.github/keys/secret-key.gpg
+#           gpg --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret-key.gpg
+          
+#       - name: Decrypt the keystore file
+#         run: |    
+#           gpg --batch --passphrase=adityan.kannan410 --decrypt --output ./app/release.keystore ./app/release.keystore.gpg
 
-#1 - generate at runtime.
-#2 - Encrypt in workflow and decrypt and use it.
-      # - name: Generate keystore
-      #   run: |
-      #     keytool \
-      #     -genkey -v \
-      #     -storetype PKCS12 \
-      #     -keyalg RSA \
-      #     -keysize 2048 \
-      #     -validity 10000 \
-      #     -storepass 'android' \
-      #     -keypass 'android' \
-      #     -alias androidreleasekey \
-      #     -keystore android/app/release.keystore \
-      #     -dname "CN=io.mosip.residentapp,OU=,O=,L=,S=,C=US"
+# #1 - generate at runtime.
+# #2 - Encrypt in workflow and decrypt and use it.
+#       # - name: Generate keystore
+#       #   run: |
+#       #     keytool \
+#       #     -genkey -v \
+#       #     -storetype PKCS12 \
+#       #     -keyalg RSA \
+#       #     -keysize 2048 \
+#       #     -validity 10000 \
+#       #     -storepass 'android' \
+#       #     -keypass 'android' \
+#       #     -alias androidreleasekey \
+#       #     -keystore android/app/release.keystore \
+#       #     -dname "CN=io.mosip.residentapp,OU=,O=,L=,S=,C=US"
 
-      - name: Export variables
-        run: |
-          export RELEASE_KEYSTORE=release.keystore
-          export RELEASE_KEYSTORE_ALIAS=androidreleasekey
-          export RELEASE_KEYSTORE_PASSWORD=android  
-          echo $RELEASE_KEYSTORE
-          echo $RELEASE_KEYSTORE_ALIAS
-          echo $RELEASE_KEYSTORE_PASSWORD
+#       - name: Export variables
+#         run: |
+#           export RELEASE_KEYSTORE=release.keystore
+#           export RELEASE_KEYSTORE_ALIAS=androidreleasekey
+#           export RELEASE_KEYSTORE_PASSWORD=android  
+#           echo $RELEASE_KEYSTORE
+#           echo $RELEASE_KEYSTORE_ALIAS
+#           echo $RELEASE_KEYSTORE_PASSWORD
 
-      - name: Run Fastlane
-        run: |
-          cd android
-          yes | sudo fastlane increment_vc
-          yes | sudo fastlane increment_vname
-          fastlane build_aab
+#       - name: Run Fastlane
+#         run: |
+#           cd android
+#           yes | sudo fastlane increment_vc
+#           yes | sudo fastlane increment_vname
+#           fastlane build_aab
       
-        env:
-          MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
-          FIREBASE_SECRET: ${{ secrets.GPG_SECRET }}
-          APPLICATION_THEME: ${{ github.event.inputs.theme }}
+#         env:
+#           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
+#           FIREBASE_SECRET: ${{ secrets.GPG_SECRET }}
+#           APPLICATION_THEME: ${{ github.event.inputs.theme }}
