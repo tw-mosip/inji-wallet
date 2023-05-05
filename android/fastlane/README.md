@@ -16,6 +16,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ### android increment_vc
 
+### android execute_android
+
+```sh
+[bundle exec] fastlane android execute_android
+```
+
+Execute Android
+
 ```sh
 [bundle exec] fastlane android increment_vc
 ```
