@@ -65,6 +65,7 @@ jobs:
 
       - name: Run Fastlane
         run: |
+          cd android
           fastlane execute_android
       
         env:
