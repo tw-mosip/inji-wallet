@@ -25,9 +25,9 @@ default_platform(:android)
 platform :android do
   desc "Execute Android"
   lane :execute_android do
-  increment_vc
-  increment_vname
-  build_android
+  yes | sudo increment_vc
+  yes | sudo increment_vname
+  yes | sudo build_android
   end
 
   desc "Increment version code"
