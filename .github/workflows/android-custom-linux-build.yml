@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: '16.x'
 
-      - name: Install npm dependencies
+      - name: Install npm 
         run: |
           npm install
       
