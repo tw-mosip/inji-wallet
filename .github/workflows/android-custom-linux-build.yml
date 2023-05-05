@@ -52,7 +52,8 @@ jobs:
           gpg2 --import ./.github/keys/public_key.gpg
           gpg2 --quiet --batch --passphrase=adityan.kannan410  --allow-secret-key-import --import ./.github/keys/secret_key.gpg
           cd android
-          gpg2 --batch --passphrase=adityan.kannan410 --pinentry-mode loopback --decrypt --output app/release.keystore app/release.keystore.gpg
+          if [ ! -z "adityan.kannan410" ] && [ -f app/release.keystore.gpg ];then rm -f app/release.keystore;gpg2 --quiet --batch --passphrase=adityan.kannan410 --pinentry-mode loopback --decrypt --output app/release.keystore app/release.keystore.gpg;fi
+          #gpg2 --batch --passphrase=adityan.kannan410 --pinentry-mode loopback --decrypt --output app/release.keystore app/release.keystore.gpg
 
 # #1 - generate at runtime.
 # #2 - Encrypt in workflow and decrypt and use it.
