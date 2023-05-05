@@ -66,6 +66,7 @@ jobs:
       - name: Run Fastlane
         run: |
           cd android
+          yes | ./gradlew clean
           yes | sudo fastlane execute_android
       
         env:
