@@ -15,8 +15,6 @@
 
 # Fastfile
 
-# plugins ["increment_version_code",
-# "increment_version_name"]
 plugins = [
   "fastlane-plugin-increment_version_code",
   "fastlane-plugin-sentry"
@@ -39,30 +37,15 @@ platform :android do
  )
   end
 
-  # desc "Build Android"
-  # lane :build_android do
-  # gradle(
-  #    task: "assemble",
-  #    flavor: "Newlogic",
-  #    build_type: "Release"
-  #  )
-  # end
-
-  desc "Build App Bundle"
-  lane :build_aab do
-    gradle(
-      task: 'bundle',
-      build_type: 'release',
-      print_command: true
-    )
-    # Move the generated AAB file to the output directory
-    aab_path = Dir["app/build/outputs/bundle/release/*.aab"].first
-    FileUtils.cp(aab_path, "output/app-release.aab")
-  
-    # Print success message
-    UI.success("Built AAB successfully")
+  desc "Build Android"
+  lane :build_android do
+  gradle(
+     task: "bundle",
+     flavor: "Newlogic",
+     build_type: "Release"
+   )
   end
-  
+
 #   # Initialize the title, description, screenshots
 #     desc "Description of your app"
 #     lanuage "en-US"
