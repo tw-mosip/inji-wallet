@@ -40,7 +40,7 @@ platform :android do
   desc "Build Android"
   lane :build_android do
   gradle(
-     task: "bundle",
+     task: "assemble",
      flavor: "Newlogic",
      build_type: "Release"
    )
