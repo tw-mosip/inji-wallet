@@ -19,6 +19,21 @@ jobs:
       - name: Install npm 
         run: |
           npm install
+
+      # Cache stuff for faster build
+      - name: Cache local npm repository
+        uses: actions/cache@v3.0.11
+        with:
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.npm
+
+      - name: Cache local gradle repository
+        uses: actions/cache@v3.0.11
+        with:
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
       
       - name: Create .env.local file
         run: |
@@ -63,15 +78,17 @@ jobs:
           echo $RELEASE_KEYSTORE_ALIAS
           echo $RELEASE_KEYSTORE_PASSWORD
 
+      - name: Grant Permission to Execute
+        run: chmod +x gradlew
+
       - name: Run Fastlane
         run: |
           cd android
-          ./gradlew clean
-          ./gradlew --stop
           # yes | sudo fastlane increment_vc
           # yes | sudo fastlane increment_vname
           # ./gradlew :app:assembleNewlogicRelease
           yes | sudo fastlane build_and_increment
+          bundle exec fastlane build_bundle
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}

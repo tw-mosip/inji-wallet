@@ -27,6 +27,7 @@ default_platform(:android)
     increment_vc
     increment_vname
     build_android
+    build_bundle
   end
 
 # platform :android do
@@ -60,10 +61,10 @@ default_platform(:android)
    )
   end
 
-  # desc "Build Android"
-  # lane :build_android do
-  #   sh ("./gradlew :app:assembleNewlogicRelease")
-  # end
+  desc "Build Bundle"
+  lane :build_bundle do
+    gradle(task: "clean bundleNewlogicRelease")
+  end
 
 
 
