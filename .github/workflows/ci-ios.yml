@@ -5,21 +5,24 @@ env:
 
   # Allows you to run this workflow manually from the Actions a tab
 on:
-  workflow_dispatch:
-    inputs:
-      backendServiceUrl:
-        description: 'Backend service URL'
-        required: true
-        default: 'https://api.qa-121.mosip.net'
-        type: string
-      theme:
-        description: 'Application Theme'
-        required: true
-        default: 'orange'
-        type: choice
-        options:
-          - orange
-          - purple
+  push:
+     branches: [ci-ios]
+          
+  # workflow_dispatch:
+  #   inputs:
+  #     backendServiceUrl:
+  #       description: 'Backend service URL'
+  #       required: true
+  #       default: 'https://api.qa-121.mosip.net'
+  #       type: string
+  #     theme:
+  #       description: 'Application Theme'
+  #       required: true
+  #       default: 'orange'
+  #       type: choice
+  #       options:
+  #         - orange
+  #         - purple
 jobs:
   deploy:
     name: Deploying to Testflight
