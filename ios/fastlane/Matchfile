@@ -2,8 +2,7 @@ git_url("https://github.com/dhivya0413/certificates")
 
 storage_mode("git")
 type("appstore") # The default type, can be: appstore, adhoc, enterprise or development
-#app_identifier(["io.mosip.inji.mobileid"])
-#username("monobikash@gmail.com") # Your Apple Developer Portal username
+
 
 # For all available options run `fastlane match --help`
 # Remove the # in the beginning of the line to enable the other options
