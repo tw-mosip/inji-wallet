@@ -22,19 +22,19 @@ plugins = [
 
 default_platform(:android)
 
-platform :android do
-  desc "Execute Android"
-  lane :execute_android do
-  yes | sudo increment_vc
-  yes | sudo increment_vname
-  yes | sudo build_android
-  end
+# platform :android do
+#   desc "Execute Android"
+#   lane :execute_android do
+#   yes | sudo increment_vc
+#   yes | sudo increment_vname
+#   yes | sudo build_android
+#   end
 
   desc "Increment version code"
   lane :increment_vc do
   increment_version_code(
        gradle_file_path: "./app/build.gradle",
- )
+  )
   end
 
   desc "Increment version name"
@@ -53,14 +53,4 @@ platform :android do
    )
   end
 
-#   # Initialize the title, description, screenshots
-#     desc "Description of your app"
-#     lanuage "en-US"
-#     title "Your app name"
-#     short_description "A short description of your app"
-#     full_description "The full description of your app"
-#     screenshots_from_file ["./path/to/screenshot1.png", "./path/to/screenshot2.png"]
-#     video_from_file "./path/to/video.mp4"
-# end
 
-end
