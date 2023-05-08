@@ -1,14 +1,12 @@
-name: CD
-on:
-  push:
-    branches:  ci-ios 
+name: Inji iOS build
 
-  env:
+env:
     backendServiceDefaultUrl: https://api.qa-121.mosip.net
 
   # Allows you to run this workflow manually from the Actions a tab
+on:
   workflow_dispatch:
-      inputs:
+    inputs:
       backendServiceUrl:
         description: 'Backend service URL'
         required: true
@@ -28,15 +26,18 @@ jobs:
     runs-on: self-hosted
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v3.1.0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
       
-     - name: Install npm dependencies
+      - name: Install npm dependencies
         run: |
           npm install
         
       - name: Install Pod
         run: |
+          cd ios
           pod install
         
       - name: Deploy iOS Beta to TestFlight via Fastlane
