@@ -24,7 +24,7 @@ on:
   #         - orange
   #         - purple
 jobs:
-  deploy:
+  build_ios:
     name: Deploying to Testflight
     runs-on: self-hosted
     
