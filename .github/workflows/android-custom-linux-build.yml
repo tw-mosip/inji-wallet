@@ -1,8 +1,5 @@
 name: Integrating fastlane with pipeline
 
-env:
-  backendServiceDefaultUrl: https://api.qa-121.mosip.net/residentmobileapp
-  
 on:
   push:
     branches:
@@ -71,7 +68,7 @@ jobs:
           cd android
           yes | sudo fastlane increment_vc
           yes | sudo fastlane increment_vname
-          yes | sudo fastlane build_android
+          fastlane build_android
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
