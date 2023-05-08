@@ -65,13 +65,11 @@ jobs:
 
       - name: Run Fastlane
         run: |
-          cd android/app
-          chmod +r build.gradle
-          cd ..
-          yes | sudo fastlane increment_vc
-          yes | sudo fastlane increment_vname
+          cd android
+          # yes | sudo fastlane increment_vc
+          # yes | sudo fastlane increment_vname
           ./gradlew :app:assembleNewlogicRelease
-          # fastlane build_android
+          fastlane build_android
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
