@@ -44,14 +44,20 @@ default_platform(:android)
  )
   end
 
+  # desc "Build Android"
+  # lane :build_android do
+  # gradle(
+  #    task: "assemble",
+  #    flavor: "Newlogic",
+  #    build_type: "Release"
+  #  )
+  # end
+
   desc "Build Android"
   lane :build_android do
-  gradle(
-     task: "assemble",
-     flavor: "newlogic",
-     build_type: "Release"
-   )
+    sh ("./gradlew :app:assembleNewlogicRelease")
   end
+
 
 
 
