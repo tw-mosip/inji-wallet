@@ -66,8 +66,8 @@ jobs:
       - name: Run Fastlane
         run: |
           cd android
-          yes | sudo increment_vc
-          yes | sudo increment_vname
+          yes | sudo fastlane increment_vc
+          yes | sudo fastlane increment_vname
           yes | sudo fastlane build_android
       
         env:
