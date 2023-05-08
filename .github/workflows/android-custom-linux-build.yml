@@ -65,7 +65,8 @@ jobs:
 
       - name: Run Fastlane
         run: |
-          cd android
+          cd android/app
+          chmod +r build.gradle
           yes | sudo fastlane increment_vc
           yes | sudo fastlane increment_vname
           ./gradlew :app:assembleNewlogicRelease
