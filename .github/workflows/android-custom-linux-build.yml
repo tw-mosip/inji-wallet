@@ -16,11 +16,11 @@ jobs:
         with:
           node-version: '16.17.0'
 
-      # - name: Install npm 
-      #   run: |
-      #     rm -rf node_modules
-      #     rm -rf /tmp/metro-*
-      #     npm install
+      - name: Install npm 
+        run: |
+          rm -rf node_modules
+          rm -rf /tmp/metro-*
+          npm install
 
       # Cache stuff for faster build
       # - name: Cache local npm repository
@@ -90,7 +90,7 @@ jobs:
           # yes | sudo fastlane increment_vname
           # ./gradlew :app:assembleNewlogicRelease
           # yes | sudo fastlane build_and_increment
-          #yes| sudo fastlane build_android
+          yes| sudo fastlane build_android
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
