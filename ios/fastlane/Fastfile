@@ -13,6 +13,7 @@
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
 
+xcode_select '/Applications/Xcode.app'
 
 default_platform(:ios)
 
@@ -42,8 +43,8 @@ def create_temp_keychain(name, password)
 end
 
 def ensure_temp_keychain(name, password)
-  #delete_temp_keychain(name)
-  #create_temp_keychain(name, password)
+  delete_temp_keychain(name)
+  create_temp_keychain(name, password)
 end
   
 before_all do |_lane, options|
@@ -57,7 +58,7 @@ platform :ios do
   lane :beta do
     keychain_name = TEMP_KEYCHAIN_USER
     keychain_password = TEMP_KEYCHAIN_PASSWORD
-    #ensure_temp_keychain(keychain_name, keychain_password)
+    ensure_temp_keychain(keychain_name, keychain_password)
    
     api_key = app_store_connect_api_key(
       key_id: "#{APPLE_KEY_ID}",
@@ -67,11 +68,11 @@ platform :ios do
       in_house: false
     )
   
-    increment_build_number(xcodeproj: "MOSIPResidentApp.xcworkspace")
+    increment_build_number(xcodeproj: "MOSIPResidentApp.xcodeproj")
     
-    cocoapods(
-      clean_install: true
-    )
+    # cocoapods(
+    #   clean_install: true
+    # )
 
     match(
       type: 'appstore',
@@ -82,12 +83,30 @@ platform :ios do
       keychain_password: keychain_password,
       api_key: api_key
     )
+
    
+
+    # update_code_signing_settings(
+    #     use_automatic_signing: true,
+    #     path: "MOSIPResidentApp.xcodeproj",
+    #    profile_name: "#{DEVELOPER_APP_ID}"
+    # )
+
+    # desc "Sync the certificates"
+    # lane :sync_signing do
+    #   unlock_keychain( password: "#{TEMP_KEYCHAIN_PASSWORD}"  )
+    #   sync_code_signing # match
+    #   profile_mapping = Actions.lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+    #   update_code_signing_settings(profile_name: profile_mapping[ENV['DEVELOPER_APP_ID']])    
+    # end
+    profile_mapping = Actions.lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
     gym(
-      configuration: "Release",
+      configuration: "Debug",
+      use_automatic_signing: false
       workspace: "MOSIPResidentApp.xcworkspace",
       scheme: "MOSIPResidentApp",
       export_method: "app-store",
+      
       export_options: {
         provisioningProfiles: { 
             "#{DEVELOPER_APP_ID}" => "#{PROVISIONING_PROFILE_SPECIFIER}"
