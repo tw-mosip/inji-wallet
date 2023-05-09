@@ -60,8 +60,6 @@ default_platform(:android)
   increment_version_name(
        gradle_file_path: "./app/build.gradle",
   )
-  sh("export NODE_OPTIONS=--openssl-legacy-provider")
-  sh("echo $NODE_OPTIONS")
   gradle(
      task: "clean bundleNewlogicRelease",
   )

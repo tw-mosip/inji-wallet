@@ -77,7 +77,6 @@ jobs:
           echo $RELEASE_KEYSTORE
           echo $RELEASE_KEYSTORE_ALIAS
           echo $RELEASE_KEYSTORE_PASSWORD
-          export NODE_OPTIONS=--openssl-legacy-provider
           echo $NODE_OPTIONS
 
       - name: Run Fastlane
