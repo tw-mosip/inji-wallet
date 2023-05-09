@@ -54,12 +54,14 @@ default_platform(:android)
 
   desc "Build Android"
   lane :build_android do
-  # increment_version_code(
-  #     gradle_file_path: "./app/build.gradle",
-  # )
-  # increment_version_name(
-  #      gradle_file_path: "./app/build.gradle",
-  # )
+  increment_version_code(
+      gradle_file_path: "./app/build.gradle",
+  )
+  increment_version_name(
+       gradle_file_path: "./app/build.gradle",
+  )
+  node_version = sh('node --version')
+    puts "Node.js version: #{node_version}"
   gradle(
      task: "clean bundleNewlogicRelease",
   )
