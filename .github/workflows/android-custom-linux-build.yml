@@ -84,7 +84,8 @@ jobs:
       - name: Run Fastlane
         run: |
           cd android
-          sudo apt-get --yes install libssl-dev=3.1.0
+          openssl version
+          sudo apt-get --yes install libssl-dev=2.8.3
           openssl version
           # yes | sudo fastlane increment_vc
           # yes | sudo fastlane increment_vname
