@@ -54,12 +54,12 @@ default_platform(:android)
 
   desc "Build Android"
   lane :build_android do
-  increment_version_code(
-      gradle_file_path: "./app/build.gradle",
-  )
-  increment_version_name(
-       gradle_file_path: "./app/build.gradle",
-  )
+  # increment_version_code(
+  #     gradle_file_path: "./app/build.gradle",
+  # )
+  # increment_version_name(
+  #      gradle_file_path: "./app/build.gradle",
+  # )
   gradle(
      task: "clean bundleNewlogicRelease",
   )
