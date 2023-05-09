@@ -2,7 +2,6 @@
   "scripts": {
     "prepare": "husky install",
     "start": "react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
     "android:mosip": "react-native run-android --variant=mosipDebug",
     "android:newlogic": "react-native run-android --variant=newlogicDebug",
     "android:ph": "react-native run-android --variant=phDebug",
