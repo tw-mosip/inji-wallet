@@ -78,9 +78,6 @@ jobs:
           echo $RELEASE_KEYSTORE_ALIAS
           echo $RELEASE_KEYSTORE_PASSWORD
 
-      - name: Grant Permission to Execute
-        run: chmod +x gradlew
-
       - name: Run Fastlane
         run: |
           cd android
@@ -88,7 +85,7 @@ jobs:
           # yes | sudo fastlane increment_vname
           # ./gradlew :app:assembleNewlogicRelease
           # yes | sudo fastlane build_and_increment
-          yes | sudo fastlane build_android
+          yes| sudo fastlane build_android
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
