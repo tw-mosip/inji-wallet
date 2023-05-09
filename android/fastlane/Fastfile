@@ -66,10 +66,15 @@ default_platform(:android)
   end
 
   desc "Build Bundle"
-  lane :build_bundle do
-    gradle(task: "clean bundleNewlogicRelease")
+  lane :echo_version do
+    sh(task:"echo node -v")
   end
 
+  lane :my_lane do
+    node_version = sh('node --version')
+    puts "Node.js version: #{node_version}"
+  end
+  
 
 
 
