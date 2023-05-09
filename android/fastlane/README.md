@@ -12,6 +12,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 # Available Actions
 
+### build_and_increment
+
+```sh
+[bundle exec] fastlane build_and_increment
+```
+
+Build, increment version code and name
+
 ### increment_vc
 
 ```sh
@@ -35,6 +43,20 @@ Increment version name
 ```
 
 Build Android
+
+### echo_version
+
+```sh
+[bundle exec] fastlane echo_version
+```
+
+Build Bundle
+
+### my_lane
+
+```sh
+[bundle exec] fastlane my_lane
+```
 
 ---
 
