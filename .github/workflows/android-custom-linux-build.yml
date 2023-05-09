@@ -82,17 +82,15 @@ jobs:
           echo $NODE_OPTIONS
 
       - name: Run Fastlane
-        run: |
+        run: | 
           cd android
-          openssl version
-          sudo apt-get --yes install libssl-dev
-          sudo apt-get --yes install openssl
-          openssl version
+          fastlane env 
+          node -v     
           # yes | sudo fastlane increment_vc
           # yes | sudo fastlane increment_vname
           # ./gradlew :app:assembleNewlogicRelease
           # yes | sudo fastlane build_and_increment
-          yes| sudo fastlane build_android
+          #yes| sudo fastlane build_android
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
