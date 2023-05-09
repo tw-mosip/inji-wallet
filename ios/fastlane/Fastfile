@@ -102,7 +102,7 @@ platform :ios do
     profile_mapping = Actions.lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
     gym(
       configuration: "Debug",
-      use_automatic_signing: false
+      use_automatic_signing: true,
       workspace: "MOSIPResidentApp.xcworkspace",
       scheme: "MOSIPResidentApp",
       export_method: "app-store",
