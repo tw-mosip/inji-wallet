@@ -61,9 +61,7 @@ default_platform(:android)
        gradle_file_path: "./app/build.gradle",
   )
   gradle(
-     task: "assemble",
-     flavor: "Newlogic",
-     build_type: "Release"
+     task: "clean bundleNewlogicRelease",
   )
   end
 
