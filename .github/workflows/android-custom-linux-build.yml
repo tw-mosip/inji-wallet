@@ -85,7 +85,8 @@ jobs:
         run: |
           cd android
           openssl version
-          sudo apt-get --yes install libssl-dev=2.8.3
+          sudo apt-get --yes install libssl-dev
+          sudo apt-get --yes install openssl
           openssl version
           # yes | sudo fastlane increment_vc
           # yes | sudo fastlane increment_vname
