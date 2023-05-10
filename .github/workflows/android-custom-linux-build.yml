@@ -85,9 +85,6 @@ jobs:
         run: | 
           cd android
           node -v  
-          nvm ls
-          nvm use 16.20.0
-          nvm ls
           yes | sudo fastlane build_android
           node -v
       
