@@ -87,7 +87,7 @@ jobs:
           node -v  
           which node
           echo $PATH
-          cat ~/.bashrc
+          yes | sudo gem install bundler
           yes | sudo fastlane install_plugins
           fastlane build_android
           node -v
