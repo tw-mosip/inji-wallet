@@ -15,7 +15,6 @@
 
 # Fastfile
 
-ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
 
 plugins = [
   "fastlane-plugin-increment_version_code",
