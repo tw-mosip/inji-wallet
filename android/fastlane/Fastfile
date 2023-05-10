@@ -24,12 +24,15 @@ plugins = [
 
 default_platform(:android)
 
-  before_all do
-    sh("nvm install 16.17.0")
-    sh("nvm use 16.17.0")
-    ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
-    puts "Set node version here"
-  end
+  # before_all do
+  #   sh("curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash")
+  #   sh('export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && export PATH="$NVM_DIR/versions/node/v16.17.0/bin:$PATH"')
+  #   sh('node -v')
+  #   sh("nvm install 16.17.0")
+  #   sh("nvm use 16.17.0")
+  #   ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
+  #   puts "Set node version here"
+  # end
   desc "Build, increment version code and name"
   lane :build_and_increment do
     increment_vc
@@ -37,6 +40,14 @@ default_platform(:android)
     build_android
     build_bundle
   end
+
+  lane :install_node do
+    sh('curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
+    sh('sudo apt-get install -y nodejs')
+    node_version = sh('node --version')
+    puts "Node.js version: #{node_version}"
+  end
+  
 
 # platform :android do
 #   desc "Execute Android"
