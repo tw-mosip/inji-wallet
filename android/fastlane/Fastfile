@@ -33,12 +33,12 @@ default_platform(:android)
   #   ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
   #   puts "Set node version here"
   # end
-  desc "Build, increment version code and name"
-  lane :build_and_increment do
-    increment_vc
-    increment_vname
-    build_android
-    build_bundle
+  desc "Install node and run the build"
+  lane :build_inji do
+  install_node
+  increment_vc
+  increment_vname
+  build_android
   end
 
   lane :install_node do
@@ -73,27 +73,11 @@ default_platform(:android)
 
   desc "Build Android"
   lane :build_android do
-  increment_version_code(
-      gradle_file_path: "./app/build.gradle",
-  )
-  increment_version_name(
-       gradle_file_path: "./app/build.gradle",
-  )
   node_version = sh('node --version')
     puts "Node.js version: #{node_version}"
-  # gradle(
-  #    task: "clean bundleNewlogicRelease",
-  # )
-  end
-
-  desc "Build Bundle"
-  lane :echo_version do
-    sh(task:"echo node -v")
-  end
-
-  lane :my_lane do
-    node_version = sh('node --version')
-    puts "Node.js version: #{node_version}"
+  gradle(
+     task: "clean bundleNewlogicRelease",
+  )
   end
   
 

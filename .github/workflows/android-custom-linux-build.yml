@@ -85,13 +85,7 @@ jobs:
         run: | 
           cd android
           node -v  
-          # fastlane env    
-          # yes | sudo fastlane increment_vc
-          # yes | sudo fastlane increment_vname
-          # ./gradlew :app:assembleNewlogicRelease
-          # yes | sudo fastlane build_and_increment
-          # yes| sudo fastlane build_android
-          fastlane install_node
+          yes| sudo fastlane build_inji
           node -v
       
         env:
