@@ -91,6 +91,7 @@ jobs:
           # ./gradlew :app:assembleNewlogicRelease
           # yes | sudo fastlane build_and_increment
           yes| sudo fastlane build_android
+          node -v
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}

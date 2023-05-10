@@ -65,9 +65,9 @@ default_platform(:android)
   )
   node_version = sh('node --version')
     puts "Node.js version: #{node_version}"
-  gradle(
-     task: "clean bundleNewlogicRelease",
-  )
+  # gradle(
+  #    task: "clean bundleNewlogicRelease",
+  # )
   end
 
   desc "Build Bundle"
