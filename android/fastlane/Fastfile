@@ -25,6 +25,8 @@ plugins = [
 default_platform(:android)
 
   before_all do
+    sh("nvm install 16.17.0")
+    sh("nvm use 16.17.0")
     ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
     puts "Set node version here"
   end
