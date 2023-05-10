@@ -16,10 +16,10 @@
 # Fastfile
 
 
-plugins = [
-  "fastlane-plugin-increment_version_code",
-  "fastlane-plugin-sentry"
-]
+# plugins = [
+#   "fastlane-plugin-increment_version_code",
+#   "fastlane-plugin-sentry"
+# ]
 
 default_platform(:android)
 
@@ -64,19 +64,19 @@ default_platform(:android)
   lane :build_android do 
   node_version = sh('node --version')
   puts "Node.js version: Before running the vcode and vname #{node_version}"
-  increment_version_code(
-       gradle_file_path: "./app/build.gradle",
-  )
-  increment_version_name(
-       gradle_file_path: "./app/build.gradle",
-  )
+  # increment_version_code(
+  #      gradle_file_path: "./app/build.gradle",
+  # )
+  # increment_version_name(
+  #      gradle_file_path: "./app/build.gradle",
+  # )
   sh('curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
   sh('sudo apt-get install -y nodejs')
   node_version = sh('node --version')
   puts "Node.js version: after installing 16 #{node_version}"
-  # gradle(
-  #    task: "assembleNewlogicRelease",
-  # )
+  gradle(
+     task: "assembleNewlogicRelease",
+  )
   end
   
 
