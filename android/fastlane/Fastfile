@@ -15,7 +15,7 @@
 
 # Fastfile
 
-ENV['FASTLANE_NODE_VERSION'] = '18.x'
+ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
 
 plugins = [
   "fastlane-plugin-increment_version_code",
@@ -24,6 +24,10 @@ plugins = [
 
 default_platform(:android)
 
+  before_all do
+    ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
+    puts "Set node version here"
+  end
   desc "Build, increment version code and name"
   lane :build_and_increment do
     increment_vc
@@ -56,7 +60,6 @@ default_platform(:android)
 
   desc "Build Android"
   lane :build_android do
-  ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
   increment_version_code(
       gradle_file_path: "./app/build.gradle",
   )
