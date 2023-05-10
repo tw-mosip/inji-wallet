@@ -56,7 +56,6 @@ default_platform(:android)
 
   desc "Build Android"
   lane :build_android do
-  sh("bundle install")
   ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
   increment_version_code(
       gradle_file_path: "./app/build.gradle",
