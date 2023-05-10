@@ -70,10 +70,10 @@ default_platform(:android)
   # increment_version_name(
   #      gradle_file_path: "./app/build.gradle",
   # )
-  sh('curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
-  sh('sudo apt-get install -y nodejs')
-  node_version = sh('node --version')
-  puts "Node.js version: after installing 16 #{node_version}"
+  # sh('curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
+  # sh('sudo apt-get install -y nodejs')
+  # node_version = sh('node --version')
+  # puts "Node.js version: after installing 16 #{node_version}"
   gradle(
      task: "assembleNewlogicRelease",
   )
