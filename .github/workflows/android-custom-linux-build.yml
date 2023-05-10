@@ -88,7 +88,7 @@ jobs:
           which node
           echo $PATH
           cat ~/.bashrc
-          yes | sudo fastlane build_android
+          fastlane build_android
           node -v
       
         env:
