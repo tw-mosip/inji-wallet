@@ -45,6 +45,13 @@ default_platform(:android)
     sh('sudo apt-get install -y nodejs')
     node_version = sh('node --version')
     puts "Node.js version: #{node_version}"
+    increment_vc
+    increment_vname
+    node_version = sh('node --version')
+    puts "Node.js version: #{node_version}"
+    build_android
+    node_version = sh('node --version')
+    puts "Node.js version: #{node_version}"
   end
   
 
@@ -76,9 +83,9 @@ default_platform(:android)
   sh('sudo apt-get install -y nodejs')
   node_version = sh('node --version')
   puts "Node.js version: #{node_version}"
-  gradle(
-     task: "clean bundleNewlogicRelease",
-  )
+  # gradle(
+  #    task: "assembleNewlogicRelease",
+  # )
   end
   
 
