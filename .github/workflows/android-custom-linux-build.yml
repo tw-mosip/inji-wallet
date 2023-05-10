@@ -85,6 +85,7 @@ jobs:
         run: | 
           cd android
           node -v  
+          sudo gem install --yes fastlane -NV
           yes| sudo fastlane build_inji
           node -v
       
