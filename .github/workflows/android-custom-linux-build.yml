@@ -87,6 +87,7 @@ jobs:
           node -v  
           which node
           echo $PATH
+          cat ~/.bashrc
           yes | sudo fastlane build_android
           node -v
       

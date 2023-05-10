@@ -65,7 +65,7 @@ default_platform(:android)
   sh("which node")
   sh("echo $PATH")
   node_version = sh('node --version')
-  puts "Node.js version: Before running the vcode and vname #{node_version}"
+  puts "Node.js version:  #{node_version}"
   # increment_version_code(
   #      gradle_file_path: "./app/build.gradle",
   # )
@@ -76,9 +76,9 @@ default_platform(:android)
   # sh('sudo apt-get install -y nodejs')
   # node_version = sh('node --version')
   # puts "Node.js version: after installing 16 #{node_version}"
-  gradle(
-     task: "assembleNewlogicRelease",
-  )
+  # gradle(
+  #    task: "assembleNewlogicRelease",
+  # )
   end
   
 
