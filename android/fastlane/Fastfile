@@ -33,54 +33,45 @@ default_platform(:android)
   #   ENV['FASTLANE_NODE_VERSION'] = '16.17.0'
   #   puts "Set node version here"
   # end
-  desc "Install node and run the build"
-  lane :build_inji do
-  increment_vc
-  increment_vname
-  build_android
-  end
-
-  lane :install_node do
-    sh('curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
-    sh('sudo apt-get install -y nodejs')
-    node_version = sh('node --version')
-    puts "Node.js version: #{node_version}"
-    # increment_vc
-    # increment_vname
-    # node_version = sh('node --version')
-    # puts "Node.js version: #{node_version}"
-    # build_android
-    # node_version = sh('node --version')
-    # puts "Node.js version: #{node_version}"
-  end
-  
-
-# platform :android do
-#   desc "Execute Android"
-#   lane :execute_android do
-#   yes | sudo increment_vc
-#   yes | sudo increment_vname
-#   yes | sudo build_android
+#   desc "Install node and run the build"
+#   lane :build_inji do
+#   increment_vc
+#   increment_vname
+#   build_android
 #   end
 
-  desc "Increment version code"
-  lane :increment_vc do
+#   lane :install_node do
+#     sh('curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
+#     sh('sudo apt-get install -y nodejs')
+#     node_version = sh('node --version')
+#     puts "Node.js version: #{node_version}"
+#   end
+
+#   desc "Increment version code"
+#   lane :increment_vc do
+#   increment_version_code(
+#        gradle_file_path: "./app/build.gradle",
+#   )
+#   end
+
+#   desc "Increment version name"
+#   lane :increment_vname do
+#   increment_version_name(
+#        gradle_file_path: "./app/build.gradle",
+#  )
+#   end
+
+  desc "Build Android"
+  lane :build_android do 
   increment_version_code(
        gradle_file_path: "./app/build.gradle",
   )
-  end
-
-  desc "Increment version name"
-  lane :increment_vname do
   increment_version_name(
        gradle_file_path: "./app/build.gradle",
- )
-  end
-
-  desc "Build Android"
-  lane :build_android do
-  # sh('curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
-  # sh('sudo apt-get install -y nodejs')
+  )
+  install_nodejs(
+    version: "16.17.0"
+  )
   node_version = sh('node --version')
   puts "Node.js version: #{node_version}"
   gradle(

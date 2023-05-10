@@ -85,7 +85,7 @@ jobs:
         run: | 
           cd android
           node -v  
-          fastlane build_android
+          yes | sudo fastlane build_android
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
