@@ -16,10 +16,10 @@
 # Fastfile
 
 
-# plugins = [
-#   "fastlane-plugin-increment_version_code",
-#   "fastlane-plugin-sentry"
-# ]
+plugins = [
+  "fastlane-plugin-increment_version_code",
+  "fastlane-plugin-sentry"
+]
 
 default_platform(:android)
 
