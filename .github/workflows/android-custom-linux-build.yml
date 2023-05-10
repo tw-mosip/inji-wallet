@@ -86,6 +86,7 @@ jobs:
           cd android
           node -v  
           which node
+          echo $PATH
           yes | sudo fastlane build_android
           node -v
       
