@@ -62,6 +62,7 @@ default_platform(:android)
 
   desc "Build Android"
   lane :build_android do 
+  sh("which node")
   node_version = sh('node --version')
   puts "Node.js version: Before running the vcode and vname #{node_version}"
   # increment_version_code(
