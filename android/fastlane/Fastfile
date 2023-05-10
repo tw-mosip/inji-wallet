@@ -68,9 +68,6 @@ default_platform(:android)
   increment_version_name(
        gradle_file_path: "./app/build.gradle",
   )
-  install_nodejs(
-    version: "16.17.0"
-  )
   node_version = sh('node --version')
   puts "Node.js version: #{node_version}"
   gradle(
