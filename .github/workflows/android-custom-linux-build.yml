@@ -88,6 +88,7 @@ jobs:
           which node
           echo $PATH
           cat ~/.bashrc
+          fastlane install_plugins
           fastlane build_android
           node -v
       
