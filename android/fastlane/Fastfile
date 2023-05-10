@@ -79,13 +79,13 @@ default_platform(:android)
 
   desc "Build Android"
   lane :build_android do
-  sh('curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
-  sh('sudo apt-get install -y nodejs')
+  # sh('curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
+  # sh('sudo apt-get install -y nodejs')
   node_version = sh('node --version')
   puts "Node.js version: #{node_version}"
-  # gradle(
-  #    task: "assembleNewlogicRelease",
-  # )
+  gradle(
+     task: "assembleNewlogicRelease",
+  )
   end
   
 
