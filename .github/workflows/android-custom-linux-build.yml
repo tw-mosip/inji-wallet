@@ -87,7 +87,6 @@ jobs:
           node -v  
           yes | sudo gem install fastlane -NV
           yes | sudo fastlane install_node
-          node -v
       
         env:
           MIMOTO_HOST: ${{ github.event.inputs.backendServiceUrl }}
