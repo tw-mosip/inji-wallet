@@ -1,4 +1,4 @@
-name: Integrating fastlane with pipeline
+name: Run manual build
 
 env:
   backendServiceDefaultUrl: https://api.qa-121.mosip.net/residentmobileapp
