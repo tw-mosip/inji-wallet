@@ -1,11 +1,7 @@
 name: Integrating fastlane with pipeline
 
 on:
-  push:
-    branches:
-      - ci-linux-android
-    tags:
-      - '*'
+  workflow_dispatch:
 
 jobs:
   build-android:
