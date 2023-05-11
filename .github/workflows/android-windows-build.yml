@@ -1,0 +1,54 @@
+# Android Build on Windows Runner via Fastlane
+
+name: Android Build Pipeline - Windows
+
+on:
+  push:
+    branches: [ci-windows-android] 
+
+
+jobs:
+  android_build_job:
+    runs-on: [self-hosted, Windows, X64]
+
+    env:
+      KEYSTORE_PASSWORD: 'android'
+      KEY_PASSWORD: 'android'
+      # ANDROID_HOME: C:\Android
+      # GRADLE_HOME: C:\ProgramData\chocolatey\lib\gradle\tools\gradle-8.1
+      # JAVA_HOME: C:\Program Files\Microsoft\jdk-11.0.18.10-hotspot\
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3.1.0
+      - uses: actions/setup-node@v3
+        with:
+            node-version: '16.x'
+
+      - name: ANDROID_HOME
+        run: |
+         echo $ANDROID_HOME
+         echo $GRADLE_HOME
+         echo $JAVA_HOME
+
+      - name: Set PATH
+        run: echo "sdk.dir=C:\\Android"> android/local.properties
+            $env:ANDROID_HOME = C:\Android
+            $env:GRADLE_HOME = C:\ProgramData\chocolatey\lib\gradle\tools\gradle-8.1
+            $env:JAVA_HOME = C:\Program Files\Microsoft\jdk-11.0.18.10-hotspot\
+
+      - name: Install npm dependencies
+        run: |
+            npm install
+      
+      - name: Build APK
+        run: |
+           cd android
+           ./gradlew :app:assembleMosipRelease
+      
+    
+      - name: Upload Artifact file
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          path: android/app/build/outputs/apk/mosip/release/
+          retention-days: 1
