@@ -1,0 +1,34 @@
+name: Run manual build
+
+env:
+  backendServiceDefaultUrl: https://api.qa-121.mosip.net/residentmobileapp
+  
+on:
+  workflow_dispatch:
+    inputs:
+      backendServiceUrl:
+        description: 'Backend service URL'
+        required: true
+        default: 'https://api.qa-121.mosip.net/residentmobileapp'
+        type: string
+      theme:
+        description: 'Application Theme'
+        required: true
+        default: 'orange'
+        type: choice
+        options:
+          - orange
+          - purple
+
+jobs:
+  build-android:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.20.0'
+
+      - name: Install npm 
+        run: |
+          npm install
