@@ -26,6 +26,9 @@ APPLE_ISSUER_ID = ENV["APPLE_ISSUER_ID"]
 APPLE_KEY_ID = ENV["APPLE_KEY_ID"]
 APPLE_KEY_CONTENT = ENV["APPLE_KEY_CONTENT"]
 GIT_AUTHORIZATION = ENV["GIT_AUTHORIZATION"]
+TEAM_ID = ENV["DEVELOPER_PORTAL_TEAM_ID"]
+APPLE_ID = ENV["FASTLANE_APPLE_ID"]
+APP_STORE_CONNECT_TEAM_ID = ENV["APP_STORE_CONNECT_TEAM_ID"]
 
 def delete_temp_keychain(name)
   delete_keychain(
@@ -47,13 +50,8 @@ def ensure_temp_keychain(name, password)
   create_temp_keychain(name, password)
 end
   
-before_all do |_lane, options|
-  ENV["FASTLANE_ITUNES_TRANSPORTER_USE_SHELL_SCRIPT"]="1"
-  ENV["FASTLANE_ITUNES_TRANSPORTER_PATH"]="/Applications/Transporter.app/Contents/itms"
-end
 
 platform :ios do
-
 
   lane :beta do
     keychain_name = TEMP_KEYCHAIN_USER
@@ -70,9 +68,6 @@ platform :ios do
   
     increment_build_number(xcodeproj: "MOSIPResidentApp.xcodeproj")
     
-    # cocoapods(
-    #   clean_install: true
-    # )
 
     match(
       type: 'appstore',
@@ -86,19 +81,6 @@ platform :ios do
 
    
 
-    # update_code_signing_settings(
-    #     use_automatic_signing: true,
-    #     path: "MOSIPResidentApp.xcodeproj",
-    #    profile_name: "#{DEVELOPER_APP_ID}"
-    # )
-
-    # desc "Sync the certificates"
-    # lane :sync_signing do
-    #   unlock_keychain( password: "#{TEMP_KEYCHAIN_PASSWORD}"  )
-    #   sync_code_signing # match
-    #   profile_mapping = Actions.lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
-    #   update_code_signing_settings(profile_name: profile_mapping[ENV['DEVELOPER_APP_ID']])    
-    # end
     profile_mapping = Actions.lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
     gym(
       configuration: "Debug",
@@ -113,14 +95,12 @@ platform :ios do
       }
     )
 
+
     pilot(
-      apple_id: "#{DEVELOPER_APP_ID}",
-      app_identifier: "#{DEVELOPER_APP_IDENTIFIER}",
-      skip_waiting_for_build_processing: true,
-      skip_submission: true,
-      distribute_external: false,
-      notify_external_testers: false,
-      ipa: "./inji.ipa"
+       app_identifier: "#{DEVELOPER_APP_IDENTIFIER}",
+       api_key: api_key,
+       ipa: "./MOSIPResidentApp.ipa",
+       skip_waiting_for_build_processing: true
     )
 
     delete_temp_keychain(keychain_name)
