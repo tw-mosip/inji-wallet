@@ -57,8 +57,9 @@ platform :ios do
   lane :beta do
     keychain_name = TEMP_KEYCHAIN_USER
     keychain_password = TEMP_KEYCHAIN_PASSWORD
-    UI.message(keychain_name)
-    UI.message(keychain_password)
+    puts(message: keychain_name)
+    puts(message: "----------Custom text")
+    puts(message: keychain_password)
     ensure_temp_keychain(keychain_name, keychain_password)
     #create_temp_keychain(keychain_name, keychain_password)
 
