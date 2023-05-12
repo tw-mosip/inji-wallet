@@ -41,7 +41,7 @@ def create_temp_keychain(name, password)
     name: name,
     password: password,
     unlock: false,
-    timeout: 0
+    timeout: 3600
   )
 end
 
@@ -56,8 +56,9 @@ platform :ios do
   lane :beta do
     keychain_name = TEMP_KEYCHAIN_USER
     keychain_password = TEMP_KEYCHAIN_PASSWORD
-    ensure_temp_keychain(keychain_name, keychain_password)
-   
+   # ensure_temp_keychain(keychain_name, keychain_password)
+   create_temp_keychain(name, password)
+
     api_key = app_store_connect_api_key(
       key_id: "#{APPLE_KEY_ID}",
       issuer_id: "#{APPLE_ISSUER_ID}",
