@@ -46,7 +46,8 @@ jobs:
       - name: Deploy iOS Beta to TestFlight via Fastlane
         run: |
           cd ios
-          sudo fastlane beta
+          fastlane beta
+          
         env:
           APP_STORE_CONNECT_TEAM_ID: '${{ secrets.APP_STORE_CONNECT_TEAM_ID }}'
           DEVELOPER_APP_ID: '${{ secrets.DEVELOPER_APP_ID }}'
