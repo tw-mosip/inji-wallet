@@ -206,6 +206,7 @@
     "name": "Name",
     "vcLabel": "VC Label",
     "language": "Language",
+    "credentialRegistry": "Credential Registry",
     "bioUnlock": "Unlock with biometrics",
     "authFactorUnlock": "Unlock auth factor",
     "AppMetaData": "About Inji",

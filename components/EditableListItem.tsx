@@ -26,8 +26,9 @@ export const EditableListItem: React.FC<EditableListItemProps> = (props) => {
         <ListItem.Title>
           <Text color={Theme.Colors.profileLabel}>{props.label}</Text>
         </ListItem.Title>
+        <Text color={Theme.Colors.profileValue}>{props.value}</Text>
       </ListItem.Content>
-      <Text color={Theme.Colors.profileValue}>{props.value}</Text>
+
       <Overlay
         overlayStyle={{ padding: 24, elevation: 6 }}
         isVisible={isEditing}

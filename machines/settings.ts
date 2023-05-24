@@ -1,7 +1,7 @@
 import { ContextFrom, EventFrom, send, StateFrom } from 'xstate';
 import { createModel } from 'xstate/lib/model';
 import { AppServices } from '../shared/GlobalContext';
-import { SETTINGS_STORE_KEY } from '../shared/constants';
+import { changeHOST, HOST, SETTINGS_STORE_KEY } from '../shared/constants';
 import { VCLabel } from '../types/vc';
 import { StoreEvents } from './store';
 
@@ -14,6 +14,7 @@ const model = createModel(
       plural: 'Cards',
     } as VCLabel,
     isBiometricUnlockEnabled: false,
+    credentialRegistry: HOST,
   },
   {
     events: {
@@ -22,6 +23,9 @@ const model = createModel(
       TOGGLE_BIOMETRIC_UNLOCK: (enable: boolean) => ({ enable }),
       STORE_RESPONSE: (response: unknown) => ({ response }),
       CHANGE_LANGUAGE: (language: string) => ({ language }),
+      UPDATE_CREDENTIAL_REGISTRY: (credentialRegistry: string) => ({
+        credentialRegistry,
+      }),
     },
   }
 );
@@ -66,6 +70,13 @@ export const settingsMachine = model.createMachine(
           UPDATE_VC_LABEL: {
             actions: ['updateVcLabel', 'storeContext'],
           },
+          UPDATE_CREDENTIAL_REGISTRY: {
+            actions: [
+              'updateCredentialRegistry',
+              'storeContext',
+              'updateCredentialRegistryInApp',
+            ],
+          },
         },
       },
     },
@@ -103,6 +114,17 @@ export const settingsMachine = model.createMachine(
         }),
       }),
 
+      updateCredentialRegistry: model.assign({
+        credentialRegistry: (_, event) => event.credentialRegistry,
+      }),
+
+      updateCredentialRegistryInApp: send(
+        (context) => {
+          return changeHOST(context.credentialRegistry);
+        },
+        { to: (context) => context.serviceRefs.store }
+      ),
+
       toggleBiometricUnlock: model.assign({
         isBiometricUnlockEnabled: (_, event) => event.enable,
       }),
@@ -127,6 +149,10 @@ type State = StateFrom<typeof settingsMachine>;
 
 export function selectName(state: State) {
   return state.context.name;
+}
+
+export function selectCredentialRegistry(state: State) {
+  return state.context.credentialRegistry;
 }
 
 export function selectVcLabel(state: State) {

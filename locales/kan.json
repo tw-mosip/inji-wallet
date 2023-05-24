@@ -206,6 +206,7 @@
     "name": "ಹೆಸರು",
     "vcLabel": "VC ಲೇಬಲ್",
     "language": "ಭಾಷೆ",
+    "credentialRegistry": "ರುಜುವಾತುಗಳ ನೋಂದಣಿ",
     "bioUnlock": "ಬಯೋಮೆಟ್ರಿಕ್‌ಗಳೊಂದಿಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಿ",
     "authFactorUnlock": "ಅನ್ಲಾಕ್ ದೃಢೀಕರಣ ಅಂಶ",
     "AppMetaData": "ಇಂಜಿ ಬಗ್ಗೆ",

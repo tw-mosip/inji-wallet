@@ -2,7 +2,7 @@ import { formatDistanceToNow } from 'date-fns';
 import React from 'react';
 import * as DateFnsLocale from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground, View } from 'react-native';
+import { Image, ImageBackground } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { VC, CredentialSubject } from '../types/vc';
 import { Button, Column, Row, Text } from './ui';
@@ -235,6 +235,21 @@ export const VcDetails: React.FC<VcDetailsProps> = (props) => {
                   )}
                 </Text>
               </Row>
+            </Column>
+
+            <Column fill style={Theme.Styles.labelPart}>
+              <Text
+                weight="bold"
+                size="smaller"
+                color={Theme.Colors.DetailsLabel}>
+                {'credentialRegistry'}
+              </Text>
+              <Text
+                weight="semibold"
+                size="smaller"
+                color={Theme.Colors.Details}>
+                {props.vc?.credentialRegistry}
+              </Text>
             </Column>
           </Column>
         </Row>

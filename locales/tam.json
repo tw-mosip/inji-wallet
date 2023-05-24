@@ -206,6 +206,7 @@
     "name": "பெயர்",
     "vcLabel": "VC லேபிள்",
     "language": "மொழி",
+    "credentialRegistry": "நற்சான்றிதழ்கள் பதிவு",
     "bioUnlock": "பயோமெட்ரிக்ஸ் மூலம் திறக்கவும்",
     "authFactorUnlock": "அங்கீகார காரணியைத் திற",
     "AppMetaData": "இன்ஜி பற்றி",

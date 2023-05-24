@@ -120,6 +120,12 @@ export const ProfileScreen: React.FC<MainRouteProps> = (props) => {
           label={t('AppMetaData')}
           color={Theme.Colors.profileLabel}
         />
+        <EditableListItem
+          label={t('credentialRegistry')}
+          value={controller.credentialRegistry}
+          onEdit={controller.UPDATE_CREDENTIAL_REGISTRY}
+          Icon="star"
+        />
         <ListItem bottomDivider onPress={controller.LOGOUT}>
           <Icon
             name="logout"
