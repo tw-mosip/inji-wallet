@@ -24,9 +24,7 @@ import { request } from '../shared/request';
 import { isBLEEnabled } from '../lib/smartshare';
 import {
   changeCrendetialRegistry,
-  HOST,
   SETTINGS_STORE_KEY,
-  COMMON_PROPS_KEY,
 } from '../shared/constants';
 import { MIMOTO_HOST } from 'react-native-dotenv';
 import { updateInjiProps } from '../shared/commonprops/commonProps';
