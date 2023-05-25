@@ -1,7 +1,11 @@
 import { ContextFrom, EventFrom, send, StateFrom } from 'xstate';
 import { createModel } from 'xstate/lib/model';
 import { AppServices } from '../shared/GlobalContext';
-import { changeHOST, HOST, SETTINGS_STORE_KEY } from '../shared/constants';
+import {
+  changeCrendetialRegistry,
+  HOST,
+  SETTINGS_STORE_KEY,
+} from '../shared/constants';
 import { VCLabel } from '../types/vc';
 import { StoreEvents } from './store';
 
@@ -74,7 +78,7 @@ export const settingsMachine = model.createMachine(
             actions: [
               'updateCredentialRegistry',
               'storeContext',
-              'updateCredentialRegistryInApp',
+              'updateCredentialRegistryInConstants',
             ],
           },
         },
@@ -118,9 +122,9 @@ export const settingsMachine = model.createMachine(
         credentialRegistry: (_, event) => event.credentialRegistry,
       }),
 
-      updateCredentialRegistryInApp: send(
+      updateCredentialRegistryInConstants: send(
         (context) => {
-          return changeHOST(context.credentialRegistry);
+          return changeCrendetialRegistry(context.credentialRegistry);
         },
         { to: (context) => context.serviceRefs.store }
       ),

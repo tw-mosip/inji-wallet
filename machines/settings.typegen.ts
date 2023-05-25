@@ -23,7 +23,7 @@ export interface Typegen0 {
       | 'UPDATE_VC_LABEL';
     toggleBiometricUnlock: 'TOGGLE_BIOMETRIC_UNLOCK';
     updateCredentialRegistry: 'UPDATE_CREDENTIAL_REGISTRY';
-    updateCredentialRegistryInApp: 'UPDATE_CREDENTIAL_REGISTRY';
+    updateCredentialRegistryInConstants: 'UPDATE_CREDENTIAL_REGISTRY';
     updateName: 'UPDATE_NAME';
     updateVcLabel: 'UPDATE_VC_LABEL';
   };

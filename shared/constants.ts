@@ -6,7 +6,7 @@ import {
 
 export let HOST = MIMOTO_HOST;
 
-export const changeHOST = (host) => (HOST = host);
+export const changeCrendetialRegistry = (host) => (HOST = host);
 
 export const MY_VCS_STORE_KEY = 'myVCs';
 

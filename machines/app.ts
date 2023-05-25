@@ -9,7 +9,7 @@ import { EventFrom, spawn, StateFrom, send, assign, AnyState } from 'xstate';
 import { createModel } from 'xstate/lib/model';
 import { authMachine, createAuthMachine } from './auth';
 import { createSettingsMachine, settingsMachine } from './settings';
-import { storeMachine } from './store';
+import { StoreEvents, storeMachine } from './store';
 import { createVcMachine, vcMachine } from './vc';
 import { createActivityLogMachine, activityLogMachine } from './activityLog';
 import { createRequestMachine, requestMachine } from './request';
@@ -22,6 +22,14 @@ import { pure, respond } from 'xstate/lib/actions';
 import { AppServices } from '../shared/GlobalContext';
 import { request } from '../shared/request';
 import { isBLEEnabled } from '../lib/smartshare';
+import {
+  changeCrendetialRegistry,
+  HOST,
+  SETTINGS_STORE_KEY,
+  COMMON_PROPS_KEY,
+} from '../shared/constants';
+import { MIMOTO_HOST } from 'react-native-dotenv';
+import { updateInjiProps } from '../shared/commonprops/commonProps';
 
 const model = createModel(
   {
@@ -61,7 +69,27 @@ export const appMachine = model.createMachine(
           store: {
             entry: ['spawnStoreActor', 'logStoreEvents'],
             on: {
-              READY: 'services',
+              READY: 'credentialRegistry',
+            },
+          },
+          credentialRegistry: {
+            entry: ['loadCredentialRegistryHostFromStorage'],
+            on: {
+              STORE_RESPONSE: {
+                actions: ['loadCredentialRegistryInConstants'],
+                target: 'injiProps',
+              },
+            },
+          },
+          injiProps: {
+            invoke: {
+              src: 'updateInjiProps',
+              onDone: {
+                target: 'services',
+              },
+              onError: {
+                target: 'services',
+              },
             },
           },
           services: {
@@ -239,6 +267,24 @@ export const appMachine = model.createMachine(
       setBackendInfo: model.assign({
         backendInfo: (_, event) => event.info,
       }),
+      loadCredentialRegistryHostFromStorage: send(
+        StoreEvents.GET(SETTINGS_STORE_KEY),
+        {
+          to: (context) => context.serviceRefs.store,
+        }
+      ),
+
+      loadCredentialRegistryInConstants: send(
+        (_context, event) => {
+          if (!event.response) {
+            return MIMOTO_HOST;
+          }
+          return changeCrendetialRegistry(event.response?.credentialRegistry);
+        },
+        {
+          to: (context) => context.serviceRefs.store,
+        }
+      ),
     },
 
     services: {
@@ -309,6 +355,15 @@ export const appMachine = model.createMachine(
             callback({ type: 'OFFLINE' });
           }
         });
+      },
+
+      updateInjiProps: () => async () => {
+        try {
+          await updateInjiProps();
+        } catch (error) {
+          console.log(error);
+          throw error;
+        }
       },
     },
   }
