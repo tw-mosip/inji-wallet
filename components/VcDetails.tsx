@@ -242,7 +242,7 @@ export const VcDetails: React.FC<VcDetailsProps> = (props) => {
                 weight="bold"
                 size="smaller"
                 color={Theme.Colors.DetailsLabel}>
-                {'credentialRegistry'}
+                {t('credentialRegistry')}
               </Text>
               <Text
                 weight="semibold"

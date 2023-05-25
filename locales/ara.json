@@ -61,7 +61,8 @@
     "yes_confirm": "نعم ، أنا أؤكد",
     "no": "رقم",
     "Alert": "انذار",
-    "ok": "تمام"
+    "ok": "تمام",
+    "credentialRegistry": "سجل الاعتماد"
   },
   "AuthScreen": {
     "header": "هل ترغب في استخدام المقاييس الحيوية لفتح التطبيق؟",
@@ -206,6 +207,7 @@
     "name": "اسم",
     "vcLabel": "تسمية VC",
     "language": "اللغة",
+    "credentialRegistry": "سجل الاعتماد",
     "bioUnlock": "افتح مع القياسات الحيوية",
     "authFactorUnlock": "إلغاء تأمين عامل المصادقة",
     "AppMetaData": "حول إنجي",

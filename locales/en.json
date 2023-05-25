@@ -61,7 +61,8 @@
     "yes_confirm": "Yes, I Confirm",
     "no": "No",
     "Alert": "Alert",
-    "ok": "Okay"
+    "ok": "Okay",
+    "credentialRegistry": "Credential Registry"
   },
   "AuthScreen": {
     "header": "Would you like to use biometrics to unlock the application?",

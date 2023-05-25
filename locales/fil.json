@@ -61,7 +61,8 @@
     "yes_confirm": "Oo, Kinukumpirma ko",
     "no": "Hindi",
     "Alert": "Alerto",
-    "ok": "Sige"
+    "ok": "Sige",
+    "credentialRegistry": "Registry ng Mga Kredensyal"
   },
   "AuthScreen": {
     "header": "Gusto mo bang gumamit ng biometrics upang i-unlock ang aplikasyon?",
