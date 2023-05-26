@@ -62,7 +62,17 @@
     "no": "இல்லை",
     "Alert": "எச்சரிக்கை",
     "ok": "சரி",
-    "credentialRegistry": "நற்சான்றிதழ்கள் பதிவு"
+    "credentialRegistry": "நற்சான்றிதழ்கள் பதிவு",
+    "errors": {
+      "savingFailed": {
+        "title": "{{vcLabelSingular}}ஐ சேமிப்பதில் தோல்வி",
+        "message": "கடையில் {{vcLabelSingular}}ஐ சேமிக்கும் போது ஏதோ தவறு ஏற்பட்டது."
+      },
+      "diskFullError": {
+        "title": "{{vcLabelSingular}}ஐ சேமிக்க முடியவில்லை",
+        "message": "ஆப்ஸ் டேட்டா நிரம்பியதால் {{vcLabelPlural}} பெறவோ சேமிக்கவோ முடியாது."
+      }
+    }
   },
   "AuthScreen": {
     "header": "பயன்பாட்டைத் திறக்க பயோமெட்ரிக்ஸைப் பயன்படுத்த விரும்புகிறீர்களா?",
@@ -153,7 +163,17 @@
   "MyVcsTab": {
     "addVcButton": "{{vcLabel}} சேர்",
     "generateVc": "உங்கள் {{vcLabel}}ஐ உருவாக்கவும்",
-    "generateVcDescription": "உங்கள் \"சேர் {{vcLabel}}\" என்பதைத் தட்டவும் {{vcLabel}}"
+    "generateVcDescription": "உங்கள் \"சேர் {{vcLabel}}\" என்பதைத் தட்டவும் {{vcLabel}}",
+    "errors": {
+      "savingFailed": {
+        "title": "{{vcLabelSingular}}ஐ சேமிப்பதில் தோல்வி",
+        "message": "கடையில் {{vcLabelSingular}}ஐ சேமிக்கும் போது ஏதோ தவறு ஏற்பட்டது."
+      },
+      "diskFullError": {
+        "title": "{{vcLabelSingular}}ஐ சேமிக்க முடியவில்லை",
+        "message": "ஆப்ஸ் டேட்டா நிரம்பியதால் {{vcLabelPlural}} பெறவோ சேமிக்கவோ முடியாது."
+      }
+    }
   },
   "OnboardingOverlay": {
     "stepOneTitle": "வரவேற்கிறேன்!",

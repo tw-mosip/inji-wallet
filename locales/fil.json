@@ -62,7 +62,17 @@
     "no": "Hindi",
     "Alert": "Alerto",
     "ok": "Sige",
-    "credentialRegistry": "Registry ng Mga Kredensyal"
+    "credentialRegistry": "Registry ng Mga Kredensyal",
+    "errors": {
+      "savingFailed": {
+        "title": "Nabigong i-save ang {{vcLabelSingular}}",
+        "message": "Nagkaproblema habang nagse-save ng {{vcLabelSingular}} sa tindahan."
+      },
+      "diskFullError": {
+        "title": "Nabigong i-save ang {{vcLabelSingular}}",
+        "message": "Wala nang mga {{vcLabelPlural}} na matatanggap o mai-save dahil puno na ang Data ng App."
+      }
+    }
   },
   "AuthScreen": {
     "header": "Gusto mo bang gumamit ng biometrics upang i-unlock ang aplikasyon?",
@@ -153,7 +163,17 @@
   "MyVcsTab": {
     "addVcButton": "Magdagdag ng {{vcLabel}}",
     "generateVc": "Gumawa ng iyong {{vcLabel}}",
-    "generateVcDescription": "Pindutin ang \"Magdagdag ng {{vcLabel}}\" sa ibaba upang makuha ang iyong {{vcLabel}}"
+    "generateVcDescription": "Pindutin ang \"Magdagdag ng {{vcLabel}}\" sa ibaba upang makuha ang iyong {{vcLabel}}",
+    "errors": {
+      "savingFailed": {
+        "title": "Nabigong i-save ang {{vcLabelSingular}}",
+        "message": "Nagkaproblema habang nagse-save ng {{vcLabelSingular}} sa tindahan."
+      },
+      "diskFullError": {
+        "title": "Nabigong i-save ang {{vcLabelSingular}}",
+        "message": "Wala nang mga {{vcLabelPlural}} na matatanggap o mai-save dahil puno na ang Data ng App."
+      }
+    }
   },
   "OnboardingOverlay": {
     "stepOneTitle": "Mabuhay!",
@@ -253,7 +273,7 @@
       },
       "diskFullError": {
         "title": "Nabigong i-save ang {{vcLabelSingular}}",
-        "message": "Wala nang mga {{vcLabelSingular}} na matatanggap o mai-save dahil puno na ang Data ng App."
+        "message": "Wala nang mga {{vcLabelPlural}} na matatanggap o mai-save dahil puno na ang Data ng App."
       }
     }
   },
