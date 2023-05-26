@@ -31,7 +31,9 @@ export async function downloadModel() {
     const resp: string = injiProp != null ? injiProp.faceSdkModelUrl : null;
     if (resp != null) {
       for (let counter = 0; counter < maxRetry; counter++) {
-        var result = await init(resp, false);
+        var result = await init(
+          'https://drive.google.com/u/0/uc?id=1Krd2U6DQsqhXpZn7QgDv-Hx4aAwP-QOa&export=download'
+        );
         console.log('model download result is = ' + result);
         if (result) {
           break;

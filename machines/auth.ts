@@ -1,4 +1,3 @@
-import { init } from 'mosip-inji-face-sdk';
 import { ContextFrom, EventFrom, send, StateFrom } from 'xstate';
 import { createModel } from 'xstate/lib/model';
 import { downloadModel } from '../shared/commonprops/commonProps';

@@ -45,7 +45,7 @@
     "expo-updates": "~0.11.6",
     "i18next": "^21.6.16",
     "iso-639-3": "^3.0.1",
-    "mosip-inji-face-sdk": "^0.1.12",
+    "mosip-inji-face-sdk": "git+https://github.com/vijay151096/mosip-mobileid-sdk.git#64a092ee2705f34a42808a39bb339095a7b4715e",
     "node-forge": "^1.3.1",
     "patch-package": "^6.5.1",
     "postinstall-postinstall": "^2.1.0",

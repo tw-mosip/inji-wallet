@@ -1,4 +1,6 @@
 PODS:
+  - BiometricSdk (0.3.5):
+    - TensorFlowLiteObjC (= 2.12.0)
   - boost-for-react-native (1.63.0)
   - CrcSwift (0.0.3)
   - DoubleConversion (1.1.6)
@@ -66,8 +68,9 @@ PODS:
   - GzipSwift (5.1.1)
   - MMKV (1.2.13):
     - MMKVCore (~> 1.2.13)
-  - MMKVCore (1.2.15)
-  - mosip-inji-face-sdk (0.1.7):
+  - MMKVCore (1.2.16)
+  - mosip-mobileid-sdk (0.1.0):
+    - BiometricSdk (= 0.3.5)
     - React-Core
   - NearbyMessages (1.1.1):
     - GoogleInterchangeUtilities (~> 1.2)
@@ -382,6 +385,13 @@ PODS:
   - smartshare-react-native (0.2.3-beta.2):
     - NearbyMessages
     - React-Core
+  - TensorFlowLiteC (2.12.0):
+    - TensorFlowLiteC/Core (= 2.12.0)
+  - TensorFlowLiteC/Core (2.12.0)
+  - TensorFlowLiteObjC (2.12.0):
+    - TensorFlowLiteObjC/Core (= 2.12.0)
+  - TensorFlowLiteObjC/Core (2.12.0):
+    - TensorFlowLiteC (= 2.12.0)
   - Yoga (1.14.0)
   - ZXingObjC/Core (3.6.5)
   - ZXingObjC/OneD (3.6.5):
@@ -413,7 +423,7 @@ DEPENDENCIES:
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
-  - mosip-inji-face-sdk (from `../node_modules/mosip-inji-face-sdk`)
+  - mosip-mobileid-sdk (from `../node_modules/mosip-inji-face-sdk`)
   - Permission-BluetoothPeripheral (from `../node_modules/react-native-permissions/ios/BluetoothPeripheral`)
   - Permission-Camera (from `../node_modules/react-native-permissions/ios/Camera`)
   - Permission-LocationAccuracy (from `../node_modules/react-native-permissions/ios/LocationAccuracy`)
@@ -466,6 +476,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - BiometricSdk
     - boost-for-react-native
     - CrcSwift
     - GoogleInterchangeUtilities
@@ -476,6 +487,8 @@ SPEC REPOS:
     - MMKV
     - MMKVCore
     - NearbyMessages
+    - TensorFlowLiteC
+    - TensorFlowLiteObjC
     - ZXingObjC
 
 EXTERNAL SOURCES:
@@ -525,7 +538,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/React/FBReactNativeSpec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
-  mosip-inji-face-sdk:
+  mosip-mobileid-sdk:
     :path: "../node_modules/mosip-inji-face-sdk"
   Permission-BluetoothPeripheral:
     :path: "../node_modules/react-native-permissions/ios/BluetoothPeripheral"
@@ -623,6 +636,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  BiometricSdk: 63d01d9438e33e907769695c227f400fdc24438f
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   CrcSwift: f85dea6b41dddb5f98bb3743fd777ce58b77bc2e
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
@@ -646,7 +660,7 @@ SPEC CHECKSUMS:
   EXUpdates: a83e036243b0f6ece53a8c1cb883b6751c88a5f8
   EXUpdatesInterface: a9814f422d3cd6e7cfd260d13c27786148ece20e
   FBLazyVector: fa8275d5086566e22a26ddc385ab5772e7f9b1bd
-  FBReactNativeSpec: 8c984a18702fcebb4b4dd88178aef9dbced89f4a
+  FBReactNativeSpec: 3dd3dbe40d762b657bf4b09f7730ea4f28c39873
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   GoogleInterchangeUtilities: d5bc4d88d5b661ab72f9d70c58d02ca8c27ad1f7
   GoogleNetworkingUtilities: 3edd3a8161347494f2da60ea0deddc8a472d94cb
@@ -654,8 +668,8 @@ SPEC CHECKSUMS:
   GoogleUtilitiesLegacy: 5501bedec1646bd284286eb5fc9453f7e23a12f4
   GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
   MMKV: aac95d817a100479445633f2b3ed8961b4ac5043
-  MMKVCore: ddf41b9d9262f058419f9ba7598719af56c02cd3
-  mosip-inji-face-sdk: a1355473a393f2cdd6d927c51af4363be6d97d9f
+  MMKVCore: 9cfef4c48c6c46f66226fc2e4634d78490206a48
+  mosip-mobileid-sdk: 3c359d5d9192ebd8bb8cc902e25076c947f91586
   NearbyMessages: bd9e88f2df7fbab78be58fed58580d5d5bd62cbf
   Permission-BluetoothPeripheral: 67708853584bb9208c76d36d0e0ea4eafb97ea5b
   Permission-Camera: bf6791b17c7f614b6826019fcfdcc286d3a107f6
@@ -703,9 +717,11 @@ SPEC CHECKSUMS:
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   RNVectorIcons: 31cebfcf94e8cf8686eb5303ae0357da64d7a5a4
   smartshare-react-native: 133dca4c48dea0908649c680701f0948317378c5
+  TensorFlowLiteC: 20785a69299185a379ba9852b6625f00afd7984a
+  TensorFlowLiteObjC: 9a46a29a76661c513172cfffd3bf712b11ef25c3
   Yoga: d1fc3575b8b68891ff5ef3c276daa855e841eb32
   ZXingObjC: fdbb269f25dd2032da343e06f10224d62f537bdb
 
 PODFILE CHECKSUM: 5b97bf5aba623284ca8545706889f881c9b64811
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.0
