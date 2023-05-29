@@ -27,7 +27,6 @@ import {
   SETTINGS_STORE_KEY,
 } from '../shared/constants';
 import { MIMOTO_HOST } from 'react-native-dotenv';
-import { updateInjiProps } from '../shared/commonprops/commonProps';
 
 const model = createModel(
   {
