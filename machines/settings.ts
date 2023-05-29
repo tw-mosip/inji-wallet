@@ -8,6 +8,10 @@ import {
 } from '../shared/constants';
 import { VCLabel } from '../types/vc';
 import { StoreEvents } from './store';
+import getAllConfigurations, {
+  COMMON_PROPS_KEY,
+} from '../shared/commonprops/commonProps';
+import Storage from '../shared/storage';
 
 const model = createModel(
   {
@@ -80,6 +84,15 @@ export const settingsMachine = model.createMachine(
               'storeContext',
               'updateCredentialRegistryInConstants',
             ],
+            target: 'resetInjiProps',
+          },
+        },
+      },
+      resetInjiProps: {
+        invoke: {
+          src: 'resetInjiProps',
+          onDone: {
+            target: 'idle',
           },
         },
       },
@@ -134,7 +147,17 @@ export const settingsMachine = model.createMachine(
       }),
     },
 
-    services: {},
+    services: {
+      resetInjiProps: () => async () => {
+        try {
+          await Storage.removeItem(COMMON_PROPS_KEY);
+          await getAllConfigurations();
+        } catch (error) {
+          console.log(error);
+          throw error;
+        }
+      },
+    },
 
     guards: {
       hasData: (_, event) => event.response != null,

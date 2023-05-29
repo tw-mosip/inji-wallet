@@ -3,7 +3,7 @@ import Storage from '../storage';
 import { init } from 'mosip-inji-face-sdk';
 import { HOST } from '../constants';
 
-const COMMON_PROPS_KEY: string =
+export const COMMON_PROPS_KEY: string =
   'CommonPropsKey-' + '6964d04a-9268-11ed-a1eb-0242ac120002';
 
 export default async function getAllConfigurations() {
@@ -41,23 +41,6 @@ export async function downloadModel() {
     }
   } catch (error) {
     console.log(error);
-  }
-}
-
-export async function updateInjiProps() {
-  try {
-    const response = await Storage.getItem(COMMON_PROPS_KEY);
-    if (response) {
-      const injiProps = JSON.parse(response);
-      injiProps.faceSdkModelUrl = HOST + '/inji';
-      injiProps.credentialRegistry = HOST;
-      injiProps.warningDomainName = HOST;
-      const injiPropsString = JSON.stringify(injiProps);
-      await Storage.setItem(COMMON_PROPS_KEY, injiPropsString);
-    }
-  } catch (error) {
-    console.log(error);
-    throw error;
   }
 }
 

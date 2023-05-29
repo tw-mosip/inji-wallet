@@ -75,17 +75,6 @@ export const appMachine = model.createMachine(
             on: {
               STORE_RESPONSE: {
                 actions: ['loadCredentialRegistryInConstants'],
-                target: 'injiProps',
-              },
-            },
-          },
-          injiProps: {
-            invoke: {
-              src: 'updateInjiProps',
-              onDone: {
-                target: 'services',
-              },
-              onError: {
                 target: 'services',
               },
             },
@@ -274,7 +263,7 @@ export const appMachine = model.createMachine(
 
       loadCredentialRegistryInConstants: send(
         (_context, event) => {
-          if (!event.response) {
+          if (!event || !event.response) {
             return MIMOTO_HOST;
           }
           return changeCrendetialRegistry(event.response?.credentialRegistry);
@@ -353,15 +342,6 @@ export const appMachine = model.createMachine(
             callback({ type: 'OFFLINE' });
           }
         });
-      },
-
-      updateInjiProps: () => async () => {
-        try {
-          await updateInjiProps();
-        } catch (error) {
-          console.log(error);
-          throw error;
-        }
       },
     },
   }
