@@ -47,7 +47,7 @@ export function useScanScreen() {
   );
   const isBluetoothDenied = useSelector(scanService, selectIsBluetoothDenied);
   const locationError = { message: '', button: '' };
-  const nearByPermissionError = { message: '', button: '' };
+  const nearByDevicesPermissionError = { message: '', button: '' };
 
   if (isLocationDisabled) {
     locationError.message = t('errors.locationDisabled.message');
@@ -57,13 +57,17 @@ export function useScanScreen() {
     locationError.button = t('errors.locationDenied.button');
   }
   if (isNearByDevicesPermissionDenied) {
-    nearByPermissionError.message = t('errors.nearbyPermissionDenied.message');
-    nearByPermissionError.button = t('errors.nearbyPermissionDenied.button');
+    nearByDevicesPermissionError.message = t(
+      'errors.nearbyDevicesPermissionDenied.message'
+    );
+    nearByDevicesPermissionError.button = t(
+      'errors.nearbyDevicesPermissionDenied.button'
+    );
   }
 
   return {
     locationError,
-    nearByPermissionError,
+    nearByDevicesPermissionError,
     vcLabel: useSelector(settingsService, selectVcLabel),
     isEmpty: !shareableVcs.length,
     isBluetoothPermissionDenied,
