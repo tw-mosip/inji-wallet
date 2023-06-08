@@ -2,17 +2,10 @@ import SmartshareReactNative from '@idpass/smartshare-react-native';
 import OpenIdBle from 'react-native-openid4vp-ble';
 import uuid from 'react-native-uuid';
 import BluetoothStateManager from 'react-native-bluetooth-state-manager';
+import { EmitterSubscription, Linking, Platform } from 'react-native';
 import {
-  EmitterSubscription,
-  Linking,
-  Platform,
-  PermissionsAndroid,
-} from 'react-native';
-import {
-  check,
   checkMultiple,
   PERMISSIONS,
-  request,
   requestMultiple,
   RESULTS,
 } from 'react-native-permissions';
@@ -60,6 +53,7 @@ const model = createModel(
       ? 'ONLINE'
       : 'OFFLINE') as SharingProtocol,
     receiveLogType: '' as ActivityLogType,
+    readyForBluetoothStateCheck: false,
   },
   {
     events: {
@@ -153,6 +147,7 @@ export const requestMachine =
               },
               on: {
                 NEARBY_ENABLED: {
+                  actions: 'setReadyForBluetoothStateCheck',
                   target: '#request.checkingBluetoothService',
                 },
                 NEARBY_DISABLED: {
@@ -560,6 +555,10 @@ export const requestMachine =
 
         setReceiverInfo: model.assign({
           receiverInfo: (_context, event) => event.info,
+        }),
+
+        setReadyForBluetoothStateCheck: model.assign({
+          readyForBluetoothStateCheck: () => true,
         }),
 
         generateConnectionParams: assign({
@@ -981,6 +980,10 @@ export function selectSenderInfo(state: State) {
 
 export function selectConnectionParams(state: State) {
   return state.context.connectionParams;
+}
+
+export function selectReadyForBluetoothStateCheck(state: State) {
+  return state.context.readyForBluetoothStateCheck;
 }
 
 export function selectIncomingVc(state: State) {

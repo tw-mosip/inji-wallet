@@ -74,7 +74,7 @@ const model = createModel(
     shareLogType: '' as ActivityLogType,
     QrLoginRef: {} as ActorRefFrom<typeof qrLoginMachine>,
     linkCode: '',
-    requestCount: 0,
+    readyForBluetoothStateCheck: false,
   },
   {
     events: {
@@ -210,6 +210,7 @@ export const scanMachine =
               },
               on: {
                 BLUETOOTH_ALLOWED: {
+                  actions: 'setReadyForBluetoothStateCheck',
                   target: 'enabled',
                 },
                 BLUETOOTH_DENIED: {
@@ -724,6 +725,10 @@ export const scanMachine =
           receiverInfo: (_context, event) => event.receiverInfo,
         }),
 
+        setReadyForBluetoothStateCheck: model.assign({
+          readyForBluetoothStateCheck: () => true,
+        }),
+
         setReason: model.assign({
           reason: (_context, event) => event.reason,
         }),
@@ -1214,6 +1219,9 @@ export function selectReceiverInfo(state: State) {
 
 export function selectReason(state: State) {
   return state.context.reason;
+}
+export function selectReadyForBluetoothStateCheck(state: State) {
+  return state.context.readyForBluetoothStateCheck;
 }
 
 export function selectVcName(state: State) {
