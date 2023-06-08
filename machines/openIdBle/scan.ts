@@ -95,10 +95,10 @@ const model = createModel(
       CONNECTION_DESTROYED: () => ({}),
       SCREEN_BLUR: () => ({}),
       SCREEN_FOCUS: () => ({}),
-      BLUETOOTH_ALLOWED: () => ({}),
-      BLUETOOTH_DENIED: () => ({}),
-      BLUETOOTH_ENABLED: () => ({}),
-      BLUETOOTH_DISABLED: () => ({}),
+      BLUETOOTH_PERMISSION_ENABLED: () => ({}),
+      BLUETOOTH_PERMISSION_DENIED: () => ({}),
+      BLUETOOTH_STATE_ENABLED: () => ({}),
+      BLUETOOTH_STATE_DISABLED: () => ({}),
       NEARBY_ENABLED: () => ({}),
       NEARBY_DISABLED: () => ({}),
       GOTO_SETTINGS: () => ({}),
@@ -160,7 +160,19 @@ export const scanMachine =
         },
         startPermissionCheck: {
           on: {
-            START_PERMISSION_CHECK: '#scan.checkNearbyDevicesPermission',
+            START_PERMISSION_CHECK: [
+              {
+                cond: 'uptoAndroid11',
+                target: '#scan.checkBluetoothPermission',
+              },
+              {
+                cond: 'isIOS',
+                target: '#scan.checkBluetoothPermission',
+              },
+              {
+                target: '#scan.checkNearbyDevicesPermission',
+              },
+            ],
           },
         },
 
@@ -209,11 +221,11 @@ export const scanMachine =
                 src: 'checkBluetoothPermission',
               },
               on: {
-                BLUETOOTH_ALLOWED: {
+                BLUETOOTH_PERMISSION_ENABLED: {
                   actions: 'setReadyForBluetoothStateCheck',
                   target: 'enabled',
                 },
-                BLUETOOTH_DENIED: {
+                BLUETOOTH_PERMISSION_DENIED: {
                   target: '#scan.bluetoothPermissionDenied',
                 },
               },
@@ -234,10 +246,10 @@ export const scanMachine =
                 src: 'checkBluetoothState',
               },
               on: {
-                BLUETOOTH_ENABLED: {
+                BLUETOOTH_STATE_ENABLED: {
                   target: 'enabled',
                 },
-                BLUETOOTH_DISABLED: {
+                BLUETOOTH_STATE_DISABLED: {
                   target: 'requesting',
                 },
               },
@@ -247,18 +259,24 @@ export const scanMachine =
                 src: 'requestBluetooth',
               },
               on: {
-                BLUETOOTH_ENABLED: {
+                BLUETOOTH_STATE_ENABLED: {
                   target: 'enabled',
                 },
-                BLUETOOTH_DISABLED: {
+                BLUETOOTH_STATE_DISABLED: {
                   target: '#scan.bluetoothDenied',
                 },
               },
             },
             enabled: {
-              always: {
-                target: '#scan.checkingLocationService',
-              },
+              always: [
+                {
+                  cond: 'uptoAndroid11',
+                  target: '#scan.checkingLocationService',
+                },
+                {
+                  target: '#scan.clearingConnection',
+                },
+              ],
             },
           },
         },
@@ -271,10 +289,10 @@ export const scanMachine =
                 src: 'checkBluetoothState',
               },
               on: {
-                BLUETOOTH_ENABLED: {
+                BLUETOOTH_STATE_ENABLED: {
                   target: 'enabled',
                 },
-                BLUETOOTH_DISABLED: {
+                BLUETOOTH_STATE_DISABLED: {
                   target: '#scan.bluetoothDenied',
                 },
               },
@@ -887,9 +905,9 @@ export const scanMachine =
             }
 
             if (response === RESULTS.GRANTED) {
-              callback(model.events.BLUETOOTH_ALLOWED());
+              callback(model.events.BLUETOOTH_PERMISSION_ENABLED());
             } else {
-              callback(model.events.BLUETOOTH_DENIED());
+              callback(model.events.BLUETOOTH_PERMISSION_DENIED());
             }
           } catch (e) {
             console.error(e);
@@ -898,9 +916,9 @@ export const scanMachine =
         checkBluetoothState: () => (callback) => {
           const subscription = BluetoothStateManager.onStateChange((state) => {
             if (state === 'PoweredOn') {
-              callback(model.events.BLUETOOTH_ENABLED());
+              callback(model.events.BLUETOOTH_STATE_ENABLED());
             } else {
-              callback(model.events.BLUETOOTH_DISABLED());
+              callback(model.events.BLUETOOTH_STATE_DISABLED());
             }
           }, true);
           return () => subscription.remove();
@@ -908,18 +926,12 @@ export const scanMachine =
 
         requestBluetooth: () => (callback) => {
           BluetoothStateManager.requestToEnable()
-            .then(() => callback(model.events.BLUETOOTH_ENABLED()))
-            .catch(() => callback(model.events.BLUETOOTH_DISABLED()));
+            .then(() => callback(model.events.BLUETOOTH_STATE_ENABLED()))
+            .catch(() => callback(model.events.BLUETOOTH_STATE_DISABLED()));
         },
 
         checkLocationPermission: () => async (callback) => {
           try {
-            if (
-              (Platform.OS === 'android' && Platform.Version >= 31) ||
-              Platform.OS === 'ios'
-            ) {
-              return callback(model.events.LOCATION_ENABLED());
-            }
             // wait a bit for animation to finish when app becomes active
             await new Promise((resolve) => setTimeout(resolve, 250));
 
@@ -938,29 +950,25 @@ export const scanMachine =
         },
 
         checkNearByDevicesPermission: () => (callback) => {
-          if (Platform.OS === 'android' && Platform.Version >= 31) {
-            const result = checkMultiple([
-              PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
-              PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
-            ])
-              .then((response) => {
-                if (
-                  response[PERMISSIONS.ANDROID.BLUETOOTH_ADVERTISE] ===
-                    RESULTS.GRANTED &&
-                  response[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] ===
-                    RESULTS.GRANTED
-                ) {
-                  callback(model.events.NEARBY_ENABLED());
-                } else {
-                  callback(model.events.NEARBY_DISABLED());
-                }
-              })
-              .catch((err) => {
+          checkMultiple([
+            PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
+            PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
+          ])
+            .then((response) => {
+              if (
+                response[PERMISSIONS.ANDROID.BLUETOOTH_ADVERTISE] ===
+                  RESULTS.GRANTED &&
+                response[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] ===
+                  RESULTS.GRANTED
+              ) {
+                callback(model.events.NEARBY_ENABLED());
+              } else {
                 callback(model.events.NEARBY_DISABLED());
-              });
-          } else {
-            callback(model.events.NEARBY_ENABLED());
-          }
+              }
+            })
+            .catch((err) => {
+              callback(model.events.NEARBY_DISABLED());
+            });
         },
 
         requestNearByDevicesPermission: () => (callback) => {
@@ -1190,6 +1198,9 @@ export const scanMachine =
             return false;
           }
         },
+        uptoAndroid11: () => Platform.OS === 'android' && Platform.Version < 31,
+
+        isIOS: () => Platform.OS === 'ios',
       },
 
       delays: {
