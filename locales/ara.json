@@ -258,9 +258,17 @@
   },
   "RequestScreen": {
     "bluetoothDenied": "الرجاء تمكين Bluetooth لتتمكن من طلب{{vcLabel}}",
+    "bluetoothStateAndroid": "يرجى تشغيل البلوتوث من الإعدادات السريعة لدعم المشاركة المحلية",
+    "bluetoothStateIos": "يرجى تشغيل البلوتوث من مركز التحكم لدعم المشاركة المحلية",
     "showQrCode": "اعرض  رمز الاستجابة السريعة هذا لطلب المقيم {{vcLabel}}",
     "incomingVc": "الوارد {{vcLabel}}",
     "request": "طلب",
+    "errors": {
+      "nearbyDevicesPermissionDenied": {
+        "message": "{{vcLabel}} مطلوب إذن الأجهزة المجاورة لتتمكن من طلب",
+        "button": "السماح إذن"
+      }
+    },
     "status": {
       "accepted": {
         "title": "نجاح!",
@@ -311,6 +319,10 @@
       "locationDenied": {
         "message": "إذن الموقع مطلوب لوظيفة المسح",
         "button": "الموقع"
+      },
+      "nearbyDevicesPermissionDenied": {
+        "message": "مطلوب إذن الأجهزة المجاورة لوظيفة المسح",
+        "button": "السماح إذن"
       }
     },
     "status": {
