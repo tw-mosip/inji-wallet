@@ -42,6 +42,11 @@ jobs:
         with:
           node-version: '16.x'
       
+      - name: Check for Git Tag
+        run: |
+          cd android/scripts
+          ./git-tag.sh
+          
       - name: Cache local npm repository
         uses: actions/cache@v3.0.11
         with:
