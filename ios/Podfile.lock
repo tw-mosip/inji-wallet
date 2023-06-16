@@ -1,5 +1,6 @@
 PODS:
   - boost-for-react-native (1.63.0)
+  - CocoaAsyncSocket (7.6.5)
   - CrcSwift (0.0.3)
   - DoubleConversion (1.1.6)
   - EXApplication (4.0.2):
@@ -55,6 +56,66 @@ PODS:
     - React-Core (= 0.64.4)
     - React-jsi (= 0.64.4)
     - ReactCommon/turbomodule/core (= 0.64.4)
+  - Flipper (0.165.0):
+    - Flipper-Folly (~> 2.6)
+  - Flipper-Boost-iOSX (1.76.0.1.11)
+  - Flipper-DoubleConversion (1.1.7)
+  - Flipper-Fmt (7.1.7)
+  - Flipper-Folly (2.6.10):
+    - Flipper-Boost-iOSX
+    - Flipper-DoubleConversion
+    - Flipper-Fmt (= 7.1.7)
+    - Flipper-Glog
+    - libevent (~> 2.1.12)
+    - OpenSSL-Universal (= 1.1.1100)
+  - Flipper-Glog (0.3.6)
+  - Flipper-PeerTalk (0.0.4)
+  - Flipper-RSocket (1.4.3):
+    - Flipper-Folly (~> 2.6)
+  - FlipperKit (0.165.0):
+    - FlipperKit/Core (= 0.165.0)
+  - FlipperKit/Core (0.165.0):
+    - Flipper (~> 0.165.0)
+    - FlipperKit/CppBridge
+    - FlipperKit/FBCxxFollyDynamicConvert
+    - FlipperKit/FBDefines
+    - FlipperKit/FKPortForwarding
+    - SocketRocket (~> 0.6.0)
+  - FlipperKit/CppBridge (0.165.0):
+    - Flipper (~> 0.165.0)
+  - FlipperKit/FBCxxFollyDynamicConvert (0.165.0):
+    - Flipper-Folly (~> 2.6)
+  - FlipperKit/FBDefines (0.165.0)
+  - FlipperKit/FKPortForwarding (0.165.0):
+    - CocoaAsyncSocket (~> 7.6)
+    - Flipper-PeerTalk (~> 0.0.4)
+  - FlipperKit/FlipperKitHighlightOverlay (0.165.0)
+  - FlipperKit/FlipperKitLayoutHelpers (0.165.0):
+    - FlipperKit/Core
+    - FlipperKit/FlipperKitHighlightOverlay
+    - FlipperKit/FlipperKitLayoutTextSearchable
+  - FlipperKit/FlipperKitLayoutIOSDescriptors (0.165.0):
+    - FlipperKit/Core
+    - FlipperKit/FlipperKitHighlightOverlay
+    - FlipperKit/FlipperKitLayoutHelpers
+    - YogaKit (~> 1.18)
+  - FlipperKit/FlipperKitLayoutPlugin (0.165.0):
+    - FlipperKit/Core
+    - FlipperKit/FlipperKitHighlightOverlay
+    - FlipperKit/FlipperKitLayoutHelpers
+    - FlipperKit/FlipperKitLayoutIOSDescriptors
+    - FlipperKit/FlipperKitLayoutTextSearchable
+    - YogaKit (~> 1.18)
+  - FlipperKit/FlipperKitLayoutTextSearchable (0.165.0)
+  - FlipperKit/FlipperKitNetworkPlugin (0.165.0):
+    - FlipperKit/Core
+  - FlipperKit/FlipperKitReactPlugin (0.165.0):
+    - FlipperKit/Core
+  - FlipperKit/FlipperKitUserDefaultsPlugin (0.165.0):
+    - FlipperKit/Core
+  - FlipperKit/SKIOSNetworkPlugin (0.165.0):
+    - FlipperKit/Core
+    - FlipperKit/FlipperKitNetworkPlugin
   - glog (0.3.5)
   - GoogleInterchangeUtilities (1.2.2):
     - GoogleSymbolUtilities (~> 1.1)
@@ -64,9 +125,10 @@ PODS:
   - GoogleUtilitiesLegacy (1.3.2):
     - GoogleSymbolUtilities (~> 1.1)
   - GzipSwift (5.1.1)
+  - libevent (2.1.12)
   - MMKV (1.2.13):
     - MMKVCore (~> 1.2.13)
-  - MMKVCore (1.2.15)
+  - MMKVCore (1.2.16)
   - mosip-inji-face-sdk (0.1.12):
     - React-Core
   - NearbyMessages (1.1.1):
@@ -74,6 +136,7 @@ PODS:
     - GoogleNetworkingUtilities (~> 1.2)
     - GoogleSymbolUtilities (~> 1.1)
     - GoogleUtilitiesLegacy (~> 1.3)
+  - OpenSSL-Universal (1.1.1100)
   - Permission-BluetoothPeripheral (3.6.1):
     - RNPermissions
   - Permission-Camera (3.6.1):
@@ -382,7 +445,10 @@ PODS:
   - smartshare-react-native (0.2.3-beta.2):
     - NearbyMessages
     - React-Core
+  - SocketRocket (0.6.0)
   - Yoga (1.14.0)
+  - YogaKit (1.18.1):
+    - Yoga (~> 1.14)
   - ZXingObjC/Core (3.6.5)
   - ZXingObjC/OneD (3.6.5):
     - ZXingObjC/Core
@@ -412,6 +478,25 @@ DEPENDENCIES:
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
+  - Flipper (= 0.165.0)
+  - Flipper-DoubleConversion (= 1.1.7)
+  - Flipper-Folly (~> 2.6)
+  - Flipper-Glog (= 0.3.6)
+  - Flipper-PeerTalk (~> 0.0.4)
+  - Flipper-RSocket (~> 1.3)
+  - FlipperKit (= 0.165.0)
+  - FlipperKit/Core (= 0.165.0)
+  - FlipperKit/CppBridge (= 0.165.0)
+  - FlipperKit/FBCxxFollyDynamicConvert (= 0.165.0)
+  - FlipperKit/FBDefines (= 0.165.0)
+  - FlipperKit/FKPortForwarding (= 0.165.0)
+  - FlipperKit/FlipperKitHighlightOverlay (= 0.165.0)
+  - FlipperKit/FlipperKitLayoutPlugin (= 0.165.0)
+  - FlipperKit/FlipperKitLayoutTextSearchable (= 0.165.0)
+  - FlipperKit/FlipperKitNetworkPlugin (= 0.165.0)
+  - FlipperKit/FlipperKitReactPlugin (= 0.165.0)
+  - FlipperKit/FlipperKitUserDefaultsPlugin (= 0.165.0)
+  - FlipperKit/SKIOSNetworkPlugin (= 0.165.0)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - mosip-inji-face-sdk (from `../node_modules/mosip-inji-face-sdk`)
   - Permission-BluetoothPeripheral (from `../node_modules/react-native-permissions/ios/BluetoothPeripheral`)
@@ -467,15 +552,29 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - boost-for-react-native
+    - CocoaAsyncSocket
     - CrcSwift
+    - Flipper
+    - Flipper-Boost-iOSX
+    - Flipper-DoubleConversion
+    - Flipper-Fmt
+    - Flipper-Folly
+    - Flipper-Glog
+    - Flipper-PeerTalk
+    - Flipper-RSocket
+    - FlipperKit
     - GoogleInterchangeUtilities
     - GoogleNetworkingUtilities
     - GoogleSymbolUtilities
     - GoogleUtilitiesLegacy
     - GzipSwift
+    - libevent
     - MMKV
     - MMKVCore
     - NearbyMessages
+    - OpenSSL-Universal
+    - SocketRocket
+    - YogaKit
     - ZXingObjC
 
 EXTERNAL SOURCES:
@@ -624,6 +723,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
+  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   CrcSwift: f85dea6b41dddb5f98bb3743fd777ce58b77bc2e
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
   EXApplication: 54fe5bd6268d697771645e8f1aef8b806a65247a
@@ -647,16 +747,27 @@ SPEC CHECKSUMS:
   EXUpdatesInterface: a9814f422d3cd6e7cfd260d13c27786148ece20e
   FBLazyVector: fa8275d5086566e22a26ddc385ab5772e7f9b1bd
   FBReactNativeSpec: 8c984a18702fcebb4b4dd88178aef9dbced89f4a
+  Flipper: 5ca502d3a39b9b762ebdbbdd143074cbb2dfef89
+  Flipper-Boost-iOSX: fd1e2b8cbef7e662a122412d7ac5f5bea715403c
+  Flipper-DoubleConversion: 38631e41ef4f9b12861c67d17cb5518d06badc41
+  Flipper-Fmt: 60cbdd92fc254826e61d669a5d87ef7015396a9b
+  Flipper-Folly: 584845625005ff068a6ebf41f857f468decd26b3
+  Flipper-Glog: 1dfd6abf1e922806c52ceb8701a3599a79a200a6
+  Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
+  Flipper-RSocket: d9d9ade67cbecf6ac10730304bf5607266dd2541
+  FlipperKit: ebea8d5b146011cfafe481c9b0cdefafb6eacbbd
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   GoogleInterchangeUtilities: d5bc4d88d5b661ab72f9d70c58d02ca8c27ad1f7
   GoogleNetworkingUtilities: 3edd3a8161347494f2da60ea0deddc8a472d94cb
   GoogleSymbolUtilities: 631ee17048aa5e9ab133470d768ea997a5ef9b96
   GoogleUtilitiesLegacy: 5501bedec1646bd284286eb5fc9453f7e23a12f4
   GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
+  libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   MMKV: aac95d817a100479445633f2b3ed8961b4ac5043
-  MMKVCore: ddf41b9d9262f058419f9ba7598719af56c02cd3
+  MMKVCore: 9cfef4c48c6c46f66226fc2e4634d78490206a48
   mosip-inji-face-sdk: d5bc0fb66721c25450f92d3297efcb2cf0117271
   NearbyMessages: bd9e88f2df7fbab78be58fed58580d5d5bd62cbf
+  OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
   Permission-BluetoothPeripheral: 67708853584bb9208c76d36d0e0ea4eafb97ea5b
   Permission-Camera: bf6791b17c7f614b6826019fcfdcc286d3a107f6
   Permission-LocationAccuracy: 76df17de5c6b8bc2eee34e61ee92cdd7a864c73d
@@ -703,9 +814,11 @@ SPEC CHECKSUMS:
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   RNVectorIcons: 31cebfcf94e8cf8686eb5303ae0357da64d7a5a4
   smartshare-react-native: 133dca4c48dea0908649c680701f0948317378c5
+  SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
   Yoga: d1fc3575b8b68891ff5ef3c276daa855e841eb32
+  YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
   ZXingObjC: fdbb269f25dd2032da343e06f10224d62f537bdb
 
-PODFILE CHECKSUM: c9f0fe8dbf7e1bc17ab0a1e74d2edd0a76cd4b7f
+PODFILE CHECKSUM: d8a3205b756b126da3d657e2502c461f1174f217
 
 COCOAPODS: 1.11.3
