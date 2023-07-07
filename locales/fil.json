@@ -186,6 +186,7 @@
     }
   },
   "GetVcModal": {
+    "retrievingId": "Kinukuha ang ID",
     "errors": {
       "input": {
         "empty": "Hindi maaaring walang laman ang input",

@@ -100,7 +100,7 @@
   },
   "RemoveVcWarningOverlay": {
     "alert": "Please Confirm",
-    "RemoveWarning": "Do you want to remove this card",
+    "removeWarning": "Do you want to remove this card?",
     "confirm": "Yes, I confirm",
     "no": "No"
   },
@@ -186,6 +186,7 @@
     }
   },
   "GetVcModal": {
+    "retrievingId": "Retrieving ID",
     "errors": {
       "input": {
         "empty": "Input cannot be empty",

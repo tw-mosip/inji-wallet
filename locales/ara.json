@@ -186,6 +186,7 @@
     }
   },
   "GetVcModal": {
+    "retrievingId": "استرجاع الهوية",
     "errors": {
       "input": {
         "empty": "لا يمكن أن يكون الإدخال فارغًا",

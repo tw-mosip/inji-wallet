@@ -97,7 +97,7 @@
     },
     "RemoveVcWarningOverlay": {
       "alert": "कृपया पुष्टि करें",
-      "RemoveWarning": "क्या आप यह कार्ड हटाना चाहते हैं",
+      "removeWarning": "क्या आप यह कार्ड हटाना चाहते हैं?",
       "confirm": "हां, मैं पुष्टि करता हूं",
       "no": "नहीं"
     },
@@ -183,6 +183,7 @@
       }
     },
     "GetVcModal": {
+      "retrievingId": "आईडी पुनः प्राप्त की जा रही है",
       "errors": {
         "input": {
           "empty": "इनपुट खाली नहीं हो सकता",
