@@ -24,7 +24,7 @@ export interface Typegen0 {
     requestStoredContext: 'xstate.init';
     setBiometrics: 'SETUP_BIOMETRICS';
     setContext: 'STORE_RESPONSE';
-    setLanguage: 'SETUP_PASSCODE';
+    setLanguage: 'SETUP_BIOMETRICS' | 'SETUP_PASSCODE';
     setPasscode: 'SETUP_PASSCODE';
     storeContext:
       | 'SETUP_BIOMETRICS'
