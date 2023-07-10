@@ -129,7 +129,7 @@ export const ProfileScreen: React.FC<MainRouteProps> = (props) => {
             value={controller.credentialRegistry}
             credentialRegistryResponse={controller.credentialRegistryResponse}
             onEdit={controller.UPDATE_CREDENTIAL_REGISTRY}
-            reset={() => controller.UPDATE_CREDENTIAL_REGISTRY_RESPONSE('')}
+            reset={() => controller.RESET_CREDENTIAL_REGISTRY_RESPONSE()}
             Icon="star"
             verifiable
           />

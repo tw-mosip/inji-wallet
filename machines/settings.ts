@@ -31,6 +31,7 @@ const model = createModel(
       UPDATE_CREDENTIAL_REGISTRY: (credentialRegistry: string) => ({
         credentialRegistry,
       }),
+      RESET_CREDENTIAL_REGISTRY_RESPONSE: () => ({}),
       UPDATE_CREDENTIAL_REGISTRY_RESPONSE: (
         credentialRegistryResponse: string
       ) => ({
@@ -84,7 +85,7 @@ export const settingsMachine = model.createMachine(
             actions: ['resetCredentialRegistry'],
             target: 'resetInjiProps',
           },
-          UPDATE_CREDENTIAL_REGISTRY_RESPONSE: {
+          RESET_CREDENTIAL_REGISTRY_RESPONSE: {
             actions: ['resetCredentialRegistry'],
           },
         },

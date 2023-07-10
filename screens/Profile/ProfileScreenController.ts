@@ -128,6 +128,9 @@ export function useProfileScreen({ navigation }: MainRouteProps) {
         )
       ),
 
+    RESET_CREDENTIAL_REGISTRY_RESPONSE: () =>
+      settingsService.send(SettingsEvents.RESET_CREDENTIAL_REGISTRY_RESPONSE()),
+
     TOGGLE_BIOMETRIC: (enable: boolean) =>
       settingsService.send(SettingsEvents.TOGGLE_BIOMETRIC_UNLOCK(enable)),
 
