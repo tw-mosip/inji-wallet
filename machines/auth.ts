@@ -94,7 +94,7 @@ export const authMachine = model.createMachine(
           SETUP_BIOMETRICS: {
             // Note! dont authorized yet we need to setup passcode too as discuss
             // target: 'authorized',
-            actions: ['setBiometrics', 'setLanguage', 'storeContext'],
+            actions: ['setBiometrics', 'storeContext'],
           },
         },
       },
