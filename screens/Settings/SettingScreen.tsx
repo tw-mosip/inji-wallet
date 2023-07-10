@@ -112,6 +112,7 @@ export const SettingScreen: React.FC<SettingProps & MainRouteProps> = (
                   controller.credentialRegistryResponse
                 }
                 onEdit={controller.UPDATE_CREDENTIAL_REGISTRY}
+                reset={() => controller.UPDATE_CREDENTIAL_REGISTRY_RESPONSE('')}
                 Icon="star"
                 verifiable
               />

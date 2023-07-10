@@ -20,7 +20,13 @@ export const EditableListItem: React.FC<EditableListItemProps> = (props) => {
   }, [props.credentialRegistryResponse]);
 
   return (
-    <ListItem bottomDivider topDivider onPress={() => setIsEditing(true)}>
+    <ListItem
+      bottomDivider
+      topDivider
+      onPress={() => {
+        setIsEditing(true);
+        props.reset && props.reset();
+      }}>
       <Icon
         name={props.Icon}
         containerStyle={Theme.Styles.settingsIconBg}
@@ -109,4 +115,5 @@ interface EditableListItemProps {
   display?: 'none' | 'flex';
   credentialRegistryResponse: string;
   verifiable?: boolean;
+  reset?: () => void;
 }

@@ -84,6 +84,9 @@ export const settingsMachine = model.createMachine(
             actions: ['resetCredentialRegistry'],
             target: 'resetInjiProps',
           },
+          UPDATE_CREDENTIAL_REGISTRY_RESPONSE: {
+            actions: ['resetCredentialRegistry'],
+          },
         },
       },
       resetInjiProps: {
