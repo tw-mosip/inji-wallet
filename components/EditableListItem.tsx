@@ -10,11 +10,13 @@ export const EditableListItem: React.FC<EditableListItemProps> = (props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newValue, setNewValue] = useState(props.value);
   const [overlayOpened, setOverlayOpened] = useState(true);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     if (props.credentialRegistryResponse === 'success') {
       closePopup();
     }
+    props.verifiable && setIsVerifying(false);
   }, [props.credentialRegistryResponse]);
 
   return (
@@ -64,7 +66,12 @@ export const EditableListItem: React.FC<EditableListItemProps> = (props) => {
             closePopup()}
           <Row>
             <Button fill type="clear" title={t('cancel')} onPress={dismiss} />
-            <Button fill title={t('save')} onPress={edit} />
+            <Button
+              fill
+              title={t('save')}
+              onPress={edit}
+              loading={isVerifying}
+            />
           </Row>
         </Column>
       </Overlay>
@@ -72,6 +79,7 @@ export const EditableListItem: React.FC<EditableListItemProps> = (props) => {
   );
 
   function edit() {
+    props.verifiable && setIsVerifying(true);
     props.onEdit(newValue);
     if (props.credentialRegistryResponse === undefined) {
       setIsEditing(false);
@@ -79,12 +87,14 @@ export const EditableListItem: React.FC<EditableListItemProps> = (props) => {
   }
 
   function dismiss() {
+    props.verifiable && setIsVerifying(false);
     setNewValue(props.value);
     setIsEditing(false);
     props.credentialRegistryResponse = '';
   }
 
   function closePopup() {
+    props.verifiable && setIsVerifying(false);
     setIsEditing(false);
     setOverlayOpened(false);
   }
@@ -98,4 +108,5 @@ interface EditableListItemProps {
   onEdit: (newValue: string) => void;
   display?: 'none' | 'flex';
   credentialRegistryResponse: string;
+  verifiable?: boolean;
 }

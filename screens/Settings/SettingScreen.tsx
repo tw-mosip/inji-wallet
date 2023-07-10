@@ -113,6 +113,7 @@ export const SettingScreen: React.FC<SettingProps & MainRouteProps> = (
                 }
                 onEdit={controller.UPDATE_CREDENTIAL_REGISTRY}
                 Icon="star"
+                verifiable
               />
             )}
 
