@@ -88,8 +88,7 @@ def reactNativeArchitectures() {
 }
 
 androidGitVersion {
-    baseCode 0
-    codeFormat 'MXXNXXPXX'
+    codeFormat 'MXXNXXP'
     format '% tag %%commit_%%branch%'
 }
 
