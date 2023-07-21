@@ -1,19 +1,47 @@
-import LocationEnabler from 'react-native-location-enabler';
+import RNLocation from 'react-native-location';
 
-const LOCATION_CONFIG = {
-  priority: LocationEnabler.PRIORITIES.BALANCED_POWER_ACCURACY,
-  alwaysShow: false,
-  needBle: true,
-};
+// Initialize RNLocation
+RNLocation.configure({
+  distanceFilter: 5.0, // Example configuration, adjust as needed
+});
 
 export function checkLocation(onEnabled: () => void, onDisabled: () => void) {
-  const subscription = LocationEnabler.addListener(({ locationEnabled }) => {
-    locationEnabled ? onEnabled() : onDisabled();
-  });
-  LocationEnabler.checkSettings(LOCATION_CONFIG);
-  return subscription;
+  RNLocation.checkPermission({
+    ios: 'whenInUse', // or 'always'
+    android: {
+      detail: 'fine', // or 'fine'
+    },
+  })
+    .then((granted) => {
+      if (granted) {
+        return onEnabled();
+      } else {
+        return onDisabled();
+      }
+    })
+    .catch((err) => console.log('Error getting location:', err));
 }
 
-export function requestLocation() {
-  return LocationEnabler.requestResolutionSettings(LOCATION_CONFIG);
+export async function requestLocation(
+  onEnabled: () => void,
+  onDisabled: () => void
+) {
+  try {
+    const granted = await RNLocation.requestPermission({
+      ios: 'whenInUse', // iOS specific configuration (optional)
+      android: {
+        detail: 'fine', // Android specific configuration (optional)
+      },
+    });
+    if (granted) {
+      // Permission granted, proceed with location-related operations
+      return onEnabled();
+    } else {
+      // Permission denied, handle this case (e.g., show a message or disable location features)
+      return onDisabled();
+    }
+  } catch (error) {
+    // Handle permission request errors
+    console.log(error);
+  }
 }
