@@ -7,9 +7,8 @@ RNLocation.configure({
 
 export function checkLocation(onEnabled: () => void, onDisabled: () => void) {
   RNLocation.checkPermission({
-    ios: 'whenInUse', // or 'always'
     android: {
-      detail: 'fine', // or 'fine'
+      detail: 'fine',
     },
   })
     .then((granted) => {
@@ -28,20 +27,16 @@ export async function requestLocation(
 ) {
   try {
     const granted = await RNLocation.requestPermission({
-      ios: 'whenInUse', // iOS specific configuration (optional)
       android: {
-        detail: 'fine', // Android specific configuration (optional)
+        detail: 'fine',
       },
     });
     if (granted) {
-      // Permission granted, proceed with location-related operations
       return onEnabled();
     } else {
-      // Permission denied, handle this case (e.g., show a message or disable location features)
       return onDisabled();
     }
   } catch (error) {
-    // Handle permission request errors
     console.log(error);
   }
 }
