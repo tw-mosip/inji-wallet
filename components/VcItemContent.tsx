@@ -135,7 +135,7 @@ export const VcItemContent: React.FC<VcItemContentProps> = (props) => {
                   {t('idType')}
                 </Text>
                 <Text
-                  weight="regular"
+                  weight="semibold"
                   color={Theme.Colors.Details}
                   size="smaller"
                   style={

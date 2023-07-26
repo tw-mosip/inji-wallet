@@ -34,15 +34,6 @@ const scan: TabScreen = {
     headerShown: false,
   },
 };
-const request: TabScreen = {
-  name: 'Request',
-  component: RequestLayout,
-  icon: 'file-download',
-  options: {
-    title: i18n.t('MainLayout:request'),
-    headerShown: false,
-  },
-};
 const history: TabScreen = {
   name: 'History',
   component: HistoryScreen,
@@ -56,11 +47,6 @@ const history: TabScreen = {
 export const mainRoutes: TabScreen[] = [];
 mainRoutes.push(home);
 mainRoutes.push(scan);
-
-if (Platform.OS !== 'ios') {
-  mainRoutes.push(request);
-}
-
 mainRoutes.push(history);
 
 export type MainBottomTabParamList = {
@@ -68,7 +54,6 @@ export type MainBottomTabParamList = {
     activeTab: number;
   };
   Scan: undefined;
-  Request: undefined;
   History: undefined;
 };
 

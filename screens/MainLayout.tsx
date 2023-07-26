@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/bottom-tabs';
 import { Icon } from 'react-native-elements';
 import { mainRoutes } from '../routes/main';
-import { RootRouteProps } from '../routes';
+import { RequestRouteProps, RootRouteProps } from '../routes';
 import { Theme } from '../components/ui/styleUtils';
 import { useTranslation } from 'react-i18next';
 import { Row } from '../components/ui';
@@ -15,7 +15,9 @@ import { HelpScreen } from '../components/HelpScreen';
 
 const { Navigator, Screen } = createBottomTabNavigator();
 
-export const MainLayout: React.FC<RootRouteProps> = (props) => {
+export const MainLayout: React.FC<RootRouteProps & RequestRouteProps> = (
+  props
+) => {
   const { t } = useTranslation('MainLayout');
 
   const options: BottomTabNavigationOptions = {

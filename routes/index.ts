@@ -11,6 +11,9 @@ import { MainLayout } from '../screens/MainLayout';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { SetupLanguageScreen } from '../screens/SetupLanguageScreen';
 import { IntroSlidersScreen } from '../screens/Home/IntroSlidersScreen';
+import i18n from '../i18n';
+import { RequestLayout } from '../screens/Request/RequestLayout';
+import { RequestStackParamList } from '../screens/Request/RequestLayoutController';
 
 export const baseRoutes: Screen[] = [
   {
@@ -39,6 +42,14 @@ export const baseRoutes: Screen[] = [
   {
     name: 'Biometric',
     component: BiometricScreen,
+  },
+  {
+    name: 'Request',
+    component: RequestLayout,
+    options: {
+      title: i18n.t('SettingScreen:receiveCard'),
+      headerShown: false,
+    },
   },
 ];
 
@@ -88,4 +99,9 @@ export type PasscodeRouteProps = NativeStackScreenProps<
 export type BiometricRouteProps = NativeStackScreenProps<
   RootStackParamList,
   'Biometric'
+>;
+
+export type RequestRouteProps = NativeStackScreenProps<
+  RequestStackParamList,
+  'Request'
 >;
