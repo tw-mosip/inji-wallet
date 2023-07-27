@@ -1,4 +1,9 @@
 PODS:
+  - AppAuth (1.4.0):
+    - AppAuth/Core (= 1.4.0)
+    - AppAuth/ExternalUserAgent (= 1.4.0)
+  - AppAuth/Core (1.4.0)
+  - AppAuth/ExternalUserAgent (1.4.0)
   - boost-for-react-native (1.63.0)
   - BVLinearGradient (2.6.2):
     - React-Core
@@ -278,6 +283,9 @@ PODS:
     - React-jsi (= 0.64.4)
     - React-perflogger (= 0.64.4)
   - React-jsinspector (0.64.4)
+  - react-native-app-auth (6.4.3):
+    - AppAuth (= 1.4.0)
+    - React-Core
   - react-native-location (2.5.0):
     - React
   - react-native-mmkv-storage (0.8.0):
@@ -444,6 +452,7 @@ DEPENDENCIES:
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
+  - react-native-app-auth (from `../node_modules/react-native-app-auth`)
   - react-native-location (from `../node_modules/react-native-location`)
   - react-native-mmkv-storage (from `../node_modules/react-native-mmkv-storage`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
@@ -483,6 +492,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AppAuth
     - boost-for-react-native
     - CatCrypto
     - CrcSwift
@@ -577,6 +587,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsiexecutor"
   React-jsinspector:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
+  react-native-app-auth:
+    :path: "../node_modules/react-native-app-auth"
   react-native-location:
     :path: "../node_modules/react-native-location"
   react-native-mmkv-storage:
@@ -651,6 +663,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BVLinearGradient: 34a999fda29036898a09c6a6b728b0b4189e1a44
   CatCrypto: a477899b6be4954e75be4897e732da098cc0a5a8
@@ -676,6 +689,7 @@ SPEC CHECKSUMS:
   EXUpdates: a83e036243b0f6ece53a8c1cb883b6751c88a5f8
   EXUpdatesInterface: a9814f422d3cd6e7cfd260d13c27786148ece20e
   FBLazyVector: fa8275d5086566e22a26ddc385ab5772e7f9b1bd
+  FBReactNativeSpec: cf74e526fafb31c87e89998fe3f8981e52b8b7d9
   FBReactNativeSpec: c257357b5c489132d39462acd75a0d46e9c55f18
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   GoogleInterchangeUtilities: d5bc4d88d5b661ab72f9d70c58d02ca8c27ad1f7
@@ -703,6 +717,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 8c077bef1c64430b6034f27df1000d194551e2eb
   React-jsinspector: d4f6973dd474357dbaaf6f52f31ffc713bf3e766
   react-native-location: 5a40ec1cc6abf2f6d94df979f98ec76c3a415681
+  react-native-app-auth: fd1eaa667c0bc014199456d14a6440cb74de814e
   react-native-mmkv-storage: 8ba3c0216a6df283ece11205b442a3e435aec4e5
   react-native-netinfo: 42c0965fca99069b92e3f7360ab2d425985e5104
   react-native-restart: 45c8dca02491980f2958595333cbccd6877cb57e
@@ -742,4 +757,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: e8bdbcbb2053c9b2971c35e1aafa6988c4dadeab
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1
