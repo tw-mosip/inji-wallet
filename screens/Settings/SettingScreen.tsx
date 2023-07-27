@@ -14,6 +14,7 @@ import { CREDENTIAL_REGISTRY_EDIT } from 'react-native-dotenv';
 import { AboutInji } from './AboutInji';
 import { EditableListItem } from '../../components/EditableListItem';
 import { RootRouteProps } from '../../routes';
+import { OIDCAuth } from '../../OIDCAuth';
 
 const LanguageSetting: React.FC = () => {
   const { t } = useTranslation('SettingScreen');
@@ -178,6 +179,7 @@ export const SettingScreen: React.FC<SettingProps & RootRouteProps> = (
               </View>
             ) : null}
           </Column>
+          <OIDCAuth />
         </ScrollView>
       </Modal>
     </React.Fragment>
