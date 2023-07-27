@@ -47,7 +47,6 @@ export const baseRoutes: Screen[] = [
     name: 'Request',
     component: RequestLayout,
     options: {
-      title: i18n.t('SettingScreen:receiveCard'),
       headerShown: false,
     },
   },

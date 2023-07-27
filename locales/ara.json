@@ -129,6 +129,7 @@
   "SettingScreen": {
     "header": "إعدادات",
     "injiAsVerifierApp": "  كتطبيق للتحقق إنجي",
+    "receiveCard": "البطاقة المستلمة",
     "basicSettings": "الإعدادات الأساسية",
     "bioUnlock": "افتح مع القياسات الحيوية",
     "language": "لغة",

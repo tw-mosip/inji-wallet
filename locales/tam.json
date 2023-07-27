@@ -125,6 +125,7 @@
   "SettingScreen": {
     "header": "அமைப்புகள்",
     "injiAsVerifierApp": "சரிபார்ப்பு பயன்பாடாக இன்ஜி",
+    "receiveCard": "பெற்ற அட்டை",
     "basicSettings": "அடிப்படை அமைப்புகள்",
     "bioUnlock": "பயோமெட்ரிக்ஸ் மூலம் திறக்கவும்",
     "language": "மொழி",
