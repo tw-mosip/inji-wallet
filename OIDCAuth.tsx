@@ -3,7 +3,7 @@ import { Button, SafeAreaView, Text } from 'react-native';
 import { authorize } from 'react-native-app-auth';
 
 const mimotoConfig = {
-  redirectUrl: 'io.mosip.residentapp://oauthredirect',
+  redirectUrl: 'io.mosip.residentapp.inji://oauthredirect',
   clientId: 'c578665bb6dea8ba01be',
   clientSecret: 'abb3ef56f401a4f821b7777d0352ce5dfd0d0d41',
   scopes: [],
