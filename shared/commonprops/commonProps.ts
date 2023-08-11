@@ -1,6 +1,6 @@
 import { request } from '../request';
 import Storage from '../storage';
-import { init } from 'mosip-inji-face-sdk';
+import { init } from 'mosip-mobileid-sdk';
 import { changeCrendetialRegistry } from '../constants';
 
 export const COMMON_PROPS_KEY: string =
@@ -33,7 +33,7 @@ export async function downloadModel() {
     const resp: string = injiProp != null ? injiProp.faceSdkModelUrl : null;
     if (resp != null) {
       for (let counter = 0; counter < maxRetry; counter++) {
-        var result = await init(resp, false);
+        var result = await init('https://api.dev1.mosip.net/inji/model.tflite');
         console.log('model download result is = ' + result);
         if (result) {
           break;

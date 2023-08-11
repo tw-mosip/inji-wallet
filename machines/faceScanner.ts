@@ -4,7 +4,7 @@ import { Linking } from 'react-native';
 import { assign, EventFrom, StateFrom } from 'xstate';
 import { createModel } from 'xstate/lib/model';
 
-import mosipFaceAuth from '../lib/mosip-inji-face-sdk/faceAuth';
+import { faceAuth } from 'mosip-mobileid-sdk';
 
 const model = createModel(
   {
@@ -220,7 +220,7 @@ export const createFaceScannerMachine = (vcImage: string) =>
           const rxDataURI =
             /data:(?<mime>[\w/\-.]+);(?<encoding>\w+),(?<data>.*)/;
           const matches = rxDataURI.exec(vcImage).groups;
-          return mosipFaceAuth(context.capturedImage.base64, matches.data);
+          return faceAuth(context.capturedImage.base64, matches.data);
         },
       },
 
