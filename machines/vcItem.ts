@@ -42,7 +42,7 @@ const model = createModel(
     storeVerifiableCredential: null as VerifiableCredential,
     requestId: '',
     isVerified: false,
-    isPinned: false,
+    isPinned: null as boolean,
     lastVerifiedOn: null,
     locked: false,
     otp: '',
@@ -1267,13 +1267,14 @@ export const createVcItemMachine = (
   serviceRefs: AppServices,
   vcKey: string
 ) => {
-  const [, idType, id, requestId] = vcKey.split(':');
+  const [, idType, id, requestId, isPinned] = vcKey.split(':');
   return vcItemMachine.withContext({
     ...vcItemMachine.context,
     serviceRefs,
     id,
     idType: idType as VcIdType,
     requestId,
+    isPinned: isPinned as unknown as boolean,
   });
 };
 
