@@ -42,7 +42,7 @@ const model = createModel(
     storeVerifiableCredential: null as VerifiableCredential,
     requestId: '',
     isVerified: false,
-    isPinned: null as boolean,
+    isPinned: false,
     lastVerifiedOn: null,
     locked: false,
     otp: '',
@@ -1274,7 +1274,7 @@ export const createVcItemMachine = (
     id,
     idType: idType as VcIdType,
     requestId,
-    isPinned: isPinned as unknown as boolean,
+    isPinned: isPinned == 'true' ? true : false,
   });
 };
 
