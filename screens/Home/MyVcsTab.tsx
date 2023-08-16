@@ -14,6 +14,7 @@ import {
   MessageOverlay,
 } from '../../components/MessageOverlay';
 import { Icon } from 'react-native-elements';
+import LinearGradient from 'react-native-linear-gradient';
 import { groupBy } from '../../shared/javascript';
 
 const pinIconProps = { iconName: 'pushpin', iconType: 'antdesign' };
@@ -45,9 +46,35 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
       : null;
   }
 
-  const DownloadingVcPopUp: React.FC = () => {
+  const DownloadFABIcon: React.FC = (props) => {
+    const plusIcon = (
+      <Icon
+        name={'plus'}
+        type={'entypo'}
+        size={36}
+        color={Theme.Colors.whiteText}
+      />
+    );
     return (
-      <View testID="downloadingVcPopup">
+      <LinearGradient
+        colors={Theme.Colors.gradientBtn}
+        style={Theme.Styles.downloadFabIcon}>
+        <Button
+          icon={plusIcon}
+          onPress={() => {
+            controller.GOTO_ISSUERS();
+            props.navigation.navigate('IssuersListScreen');
+          }}
+          type={'clearAddIdBtnBg'}
+          fill
+        />
+      </LinearGradient>
+    );
+  };
+
+  const DownloadingIdPopUp: React.FC = () => {
+    return (
+      <View  testID="downloadingVcPopup" style={{ display: controller.isRequestSuccessful ? 'flex' : 'none' }}>
         <Row style={Theme.Styles.downloadingVcPopUp}>
           <Text color={Theme.Colors.whiteText} weight="semibold" size="smaller">
             {t('downloadingYourCard')}
@@ -104,32 +131,36 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                 title={t('downloadCard')}
                 onPress={controller.DOWNLOAD_ID}
               />
+              <DownloadFABIcon {...props} />
             </React.Fragment>
           )}
           {controller.vcsMetadata.length === 0 && (
             <React.Fragment>
               <Column fill style={Theme.Styles.homeScreenContainer}>
-                <Image source={Theme.DigitalIdentityLogo} />
-                <Text
-                  align="center"
-                  weight="bold"
-                  margin="33 0 6 0"
-                  lineHeight={1}>
-                  {t('bringYourDigitalID')}
-                </Text>
-                <Text
-                  style={Theme.TextStyles.bold}
-                  color={Theme.Colors.textLabel}
-                  align="center"
-                  margin="0 12 30 12">
-                  {t('generateVcDescription')}
-                </Text>
-                <Button
-                  type="gradient"
-                  disabled={controller.isRefreshingVcs}
-                  title={t('downloadCard')}
-                  onPress={controller.DOWNLOAD_ID}
-                />
+                <View style={Theme.Styles.homeScreenInnerContainer}>
+                  <Image source={Theme.DigitalIdentityLogo} />
+                  <Text
+                    align="center"
+                    weight="bold"
+                    margin="33 0 6 0"
+                    lineHeight={1}>
+                    {t('bringYourDigitalID')}
+                  </Text>
+                  <Text
+                    style={Theme.TextStyles.bold}
+                    color={Theme.Colors.textLabel}
+                    align="center"
+                    margin="0 12 30 12">
+                    {t('generateVcDescription')}
+                  </Text>
+                    <Button
+                        type="gradient"
+                        disabled={controller.isRefreshingVcs}
+                        title={t('downloadCard')}
+                        onPress={controller.DOWNLOAD_ID}
+                    />
+                </View>
+                <DownloadFABIcon {...props} />
               </Column>
             </React.Fragment>
           )}

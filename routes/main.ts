@@ -4,15 +4,16 @@ import {
   BottomTabScreenProps,
 } from '@react-navigation/bottom-tabs';
 import { Image } from 'react-native';
-import { HomeScreen } from '../screens/Home/HomeScreen';
 import { RootStackParamList } from './index';
 import { ScanLayout } from '../screens/Scan/ScanLayout';
 import { HistoryScreen } from '../screens/History/HistoryScreen';
 import i18n from '../i18n';
+import { Platform } from 'react-native';
+import { HomeScreenLayout } from '../screens/HomeScreenLayout';
 
 const home: TabScreen = {
-  name: 'home',
-  component: HomeScreen,
+  name: 'Home',
+  component: HomeScreenLayout,
   icon: 'home',
   options: {
     headerTitle: '',
