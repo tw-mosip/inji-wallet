@@ -25,6 +25,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
               isVisible={controller.activeTab === 0}
               service={controller.tabRefs.myVcs}
               vcItemActor={controller.selectedVc}
+              {...props}
             />
             <ReceivedVcsTab
               isVisible={controller.activeTab === 1}

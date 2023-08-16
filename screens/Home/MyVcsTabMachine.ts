@@ -18,6 +18,7 @@ import {
 import { AddVcModalMachine } from './MyVcs/AddVcModalMachine';
 import { GetVcModalMachine } from './MyVcs/GetVcModalMachine';
 import Storage from '../../shared/storage';
+import { IssuersMachine } from '../../machines/issuersMachine';
 
 const model = createModel(
   {
@@ -34,10 +35,12 @@ const model = createModel(
       STORE_ERROR: (error: Error) => ({ error }),
       ADD_VC: () => ({}),
       GET_VC: () => ({}),
+      GOTO_ISSUERS: () => ({}),
       STORAGE_AVAILABLE: () => ({}),
       STORAGE_UNAVAILABLE: () => ({}),
       ONBOARDING_DONE: () => ({}),
       IS_TAMPERED: () => ({}),
+      DOWNLOAD_VIA_ID: () => ({}),
     },
   }
 );
@@ -48,7 +51,7 @@ type ViewVcEvent = EventFrom<typeof model, 'VIEW_VC'>;
 
 export const MyVcsTabMachine = model.createMachine(
   {
-    /** @xstate-layout N4IgpgJg5mDOIC5QFkCeA1AxrAKgQwCMA6TACzEwGsBLAOygHlaCB7PAJwjqgGUAXPHwCusAMQ8cDAEoBRAPqyeABQYA5HjIDaABgC6iUAAcWsan2otaBkAA9EANgBMAGhCpEAFidEA7PY+O2j4ArPbajo4AjPYAvjGuaFi4hCTkVNxMrBxc9PyCIuKSsgoyymoampH6SCDGpuaW1nYIjgCcABxEwa0AzK32PU492l6tru4Ike2OXT2Rkdrac5GOPq3BcQkY2PjEllmc3KIAggAip3LoAMI61UYmZhZWNc2RrTPTSyPtPtphwR4fONEO12toiNEPO8PD0PFMej52psQIkdil9mxDvRRGoAEIMY5SU4ASVUAHE5Kc1Fo9NY6o9Gi9EG8PoFhh4fn9tACgW5EMFpl1uYEFt1Wj4QsjUcliNQIAAbMAnc6XG60mr0hrPUDNLw+LprAJvcVBJbAhA+Rz2Ig9EXrH5vdrvKXbGVEOWK0ToYkyADqqtudIeWqa-JcfJakT6vh80UR-g50R6LqSu3dCqVZJkOAD6vu9SeoZaayIgN67WCCO6flC5ui-SIf3ssfmXiWPhTaOIADdqGAAO7cLCiEk8ZDEng8QMa4OFpkIJzmwJOoiOJ32VqQysjWLxFGutN4CA5KDDiCWMDu2jdliUS-HY9YZAsCB4eXT-MM7W2fnhA2tI1WhNX4enNDpWlXADNz6ewBXsKNOzdI8T2HUdx0nD9alnRkdWZKNOnaQEKy8SIAmCRE60BSJfA3S1elhYIo13LZUxSZCh0wIhYD4Fh2COCRpHkRQVHUGk7iwgscJ-C1ohtDw23k94phCSigIhCVY2CcJIj8dZEMPY8OK4ni+OxATihkKQpGkTDNTnXCZOtWEFKhKIfmCOtBmojc2gWdp7HaW0Oz3aUDJQzjkKwHghEwTA4FgAAzIR5RHCd0KnPMJK-It5h6AiiIBeCyIoiNImCCJV0Y2MBlhcJK30lIYD4cx6DPC8rxvO8iDJMA+CfF831s7Dv2aVYILLPLKxCcVYPsMC-F8KCo36OCEJCg9Gt6lrT0wVKxwnDLxLsqTRpLCaKyrGba1K9pZLBCUdw8cjejiPdaBfOBrFCwgg0kkbEAAWkcDxzXIxbm2CSHuRg+r1tY4gyAoGh6EyTETzyYR4BnP6iwCSjglXH5-IGFZ7AGJYGr2Zg0e4X7svncjzSdfU5jBNcOVu7oPEp9NFTpkN5yjJYDVgwL-McdleQmKY-2B4Gyf8ALhg2OGuyIXsBw4-n7OkqZrUtH42mBsEvFBJcFh6G14I08V1h6ZNVaQwzWswbWTs8AF-0A4CzQjYiiE+KIVkBWDIh59iXaIfs8EeegADFeO7TAAGkwAmT8BYcrSZme73fhAusdxjMnAvKvw1yRR2wqM7jeNp7H6aznSvaiID8996WEWtbQyrWN5lnKlWWLViOdqISLMGi2L4qS+U3f+hBN31KZIbmeCnAWMZSvKmYfC8XzAqepjw+dsfYDwXt45jxUIHnosnQglfK2iaIom0LfpYr1cNy01ovh0gKJ9wpcQvtwOO19IC8zAHfec-ROiWjhN0YGQQIhS2ZFWGifxHQInkvbIBNdQFX2oDfdWfZBwuxgQ5ACy8KzP3Xm-D+zIYQeEqgxAUPRqwVh5k1baWBKHSWBnWf4NoJagn8mVTm3CtpGWjrHKACd2BJ1TunLKmdpKWjrD4aMawKzQVqo4WGcQgA */
+    /** @xstate-layout N4IgpgJg5mDOIC5QFkCeA1AxrAKgQwCMA6TACzEwGsBLAOygHlaCB7PAJwjqgGUAXPHwCusAMQ8cDAEoBRAPqyeABQYA5HjIDaABgC6iUAAcWsan2otaBkAA9EANgBMAGhCpEAFidEA7AE5tbQBGewAOJwBmUL97AF9Y1zQsXEIScipuJlYOLnp+QRFxSVkFGWU1DU0g-SQQY1NzS2s7BAjAoiCPUI9HAFZ7CPttHzCfV3cEINDHIl6PQO0IuZ6pmPjEjGx8Yktszm5RABkASQk5U54AVRkpHh0aoxMzCytalsdFohjtPx8++x62ic9nGDn8Xz8ESCUS69h8vQR6xASS2qV2bH29FEAEEACK4uToADC92s9WeTTeiA+ES+Q1+-0BwNBCACtJG9l6fl6-kGfg8ESRKJSO2YGNyUFEagAQgxsVJccdVABxOS4tRaPRkp6NV6gFpBSF0n5-fpMxwgtyIXqhWlzQKOPyhBFDIKOIWbEVEAA21FgfGOsFgQjA7DEEEsYCIdAAbixKFG-cHQ7BkHgyHQwKTauTdc1qUsiB4-CWfCEglNHKFQmMrZNi70IVCfD5htoee6EsjPdsfX6A0GQ2HRIqeMgLtnHg0XvmEI5C8XS+XK9XaxMgnNacWoc7DdE-NCPcle3gIBAsGkKJR+Cx2HgYKII7RE7Q4wmiMKT2eL2Qrze7zACCxiwmCCC89yTnUOozlSCBlj4vihNC86GrCIwsk6Mw+AK0LTFWcL2EER6osQp7npgl5UP+95gI+kbRq+8ZRp+qRkT+6TXnwt40UBjGgbqEHVNq06UvqiCdAMRCEWWvxwhEAT9Cy4QzNuG5AhEAojMRXpsRR-rcTAhzUAAtmYUhgOm5AQCOpzjjwdxajm0GibY4leLS0mGiMPjye2loTE6QREI4OGOo6MQ+X42m9tQEDerReIEsSkG5jBYlwS4dYhNWRaQp0FqOpyTrRaksXxaI6DHDIADqhIko5U4UnqrmTNoXSzPObRltlhGhCyG7eK2JYOm69gxIKXYscQZW0cqMg4HVKXOc1BptaEHURF1FZhL1-Wth4swChafxDDaRGTT2pVxbRJxnBc1y3EtIkrQWjaLr8y7TKu-UeB4b15Q64QRH0HgldN12iKccg4NiyBKDcMi4k9TWztC4IrAeVa9Butp9Vl-S0to4RIW1nIaTWYNEDG1BgAA7twWA2WOE4NVBz2zphwU8q2EQjL0izTP12MzB8mEaVWv2-JTZEM5gdHPgxb5Rti36YMgLAQHg3rI3msG-P1kIIapnTA66E0bMerFnrLTN2Q5DxsyjsEnbMTi-b0bSbYEfgso4IS0iFwMSR8Zbm92lukdb9AXvp7AHBI0jyIoKjqJqDupS5LRQkF9I7vYnJjTWa7UuFRDBPn8kAvzkLS1HUAx1xcdYgnJQ3FI0g62lLXZ1JPx5wXTotr7fvsgKizYTjAq1xKMd4NT9AAGJ4NQ8XWaOdud5niAu-0IV-Z7bQ-MP0K+GP1Yj-ncQXRHRAy9HFG6TwQiYJgcCwAAZkI3q2yz6fLbOO83b70WIfH2dZ5x+ybEENqLZhjzkpjAPg5h77yxfErIgyowB8CwOrTW2tWYZxeggGs9hcp+wtKEImcx-LUmLAhP2MQwjBA9toEKCCsHIPrnLdev9hJO3StA9qvROrDG2uEKY-VOQHTalCAIHgRibSnkiWgGs4DWCmnw3W6UAC0NCEA8l8AEYI84jr8g0pTX8GR6BZHFNwfIwh4BOXZrBHoP1GyOkCDjGsws+iU3RDkbgmiu4tB5BhIICFerZXgtMEIlNfT+kDMmMMQSt4IDGj9dswUcJdGgT4JC8i4n9kSUOWADEzApKIRWYukwPZ+FPlCBEiwPaumnlgCps4ogIWiECBEe95F-SUv0XKDTuQBGgRTa+JFb6q0opxAyYB2kuMLN0zkwjfr9N6BhAUUD+bQL8I4MsvRWl6UbjRIypk+DmUspARZAiGHGkhHIqE8lqmBXqW6fZJY4QeHOhbKZM1bktX2doXw3N+gIh5MEIIkiDzDPyk4GIXJQiU2pnTWWgKDThIQiWEO0QlhLE2fjC0wVITzmwvOYI1Zp7oqcfwlqxZ+qUJmCWYGrClgAmdKDSZOk64XlpsvThC9bwxkwAAaTABMRqWigXVMNPyJsoiC70mpffIgsdAm0ulZizKExHAfAOiy9szp+bySityr8M89Jz24EvFeNzNXBM8EaTo3Q2qyRAdUv2Xhhmk26MIqhKquFqutYvZeq9ozXQxdaH5HQujzDoUMTanrOoKoOU6AEHJA0Xkfs-V+QZP7eijfoissbXUJo9b7YGKkAbyNbH8MOU0iCIM4W0h1qSKwIiLMIp0yk-ZAllYRdkpLoiGg7OwpBssiD8ueIvYVYqJVFrdJ8P6jpqxOD7XCPa7VHTA33iDH5yL4ixCAA */
     predictableActionArguments: true,
     preserveActionOrder: true,
     tsTypes: {} as import('./MyVcsTabMachine.typegen').Typegen0,
@@ -60,7 +63,10 @@ export const MyVcsTabMachine = model.createMachine(
     initial: 'checkingOnboardingStatus',
     states: {
       checkingOnboardingStatus: {
-        entry: ['getOnboardingStatus'],
+        entry: [
+          () => console.log('Entered the MyVC from Start'),
+          'getOnboardingStatus',
+        ],
         on: {
           STORE_RESPONSE: [
             { cond: 'isOnboardingDone', target: 'idle' },
@@ -70,6 +76,9 @@ export const MyVcsTabMachine = model.createMachine(
       },
       onboarding: {
         on: {
+          GOTO_ISSUERS: {
+            target: 'gotoIssuers',
+          },
           ADD_VC: [
             {
               target: 'addVc',
@@ -80,6 +89,13 @@ export const MyVcsTabMachine = model.createMachine(
             target: 'idle',
             actions: ['completeOnboarding'],
           },
+        },
+      },
+      gotoIssuers: {
+        invoke: {
+          id: 'issuersMachine',
+          src: IssuersMachine,
+          onDone: 'addingVc',
         },
       },
       addVc: {
@@ -112,6 +128,7 @@ export const MyVcsTabMachine = model.createMachine(
           ADD_VC: 'addVc',
           VIEW_VC: 'viewingVc',
           GET_VC: 'gettingVc',
+          GOTO_ISSUERS: 'gotoIssuers',
           IS_TAMPERED: {
             target: 'idle',
             actions: ['resetIsTampered', 'refreshMyVc'],

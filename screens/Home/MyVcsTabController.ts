@@ -44,6 +44,8 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
       selectIsMinimumStorageLimitReached
     ),
 
+    GOTO_ISSUERS: () => service.send(MyVcsTabEvents.GOTO_ISSUERS()),
+
     DISMISS: () => service.send(MyVcsTabEvents.DISMISS()),
 
     DOWNLOAD_ID: () => service.send(MyVcsTabEvents.ADD_VC()),
