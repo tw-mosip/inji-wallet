@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Column, Row, Text } from '../../components/ui';
+import React from 'react';
+import { Column, Row, Text } from '../../components/ui';
 import { Theme } from '../../components/ui/styleUtils';
 import { RefreshControl, Image, View } from 'react-native';
 import { useMyVcsTab } from './MyVcsTabController';
@@ -14,7 +14,6 @@ import {
   MessageOverlay,
 } from '../../components/MessageOverlay';
 import { Icon } from 'react-native-elements';
-import LinearGradient from 'react-native-linear-gradient';
 
 export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
   const { t } = useTranslation('MyVcsTab');
@@ -37,45 +36,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
         }, 6000)
       : null;
   }
-
-  useEffect(() => {
-    console.log('useEffect outside -> ', controller.IssuersService);
-    if (controller.IssuersService != undefined) {
-      console.log('useEffect inside -> ', controller.IssuersService);
-      navigateToIssuers();
-    }
-  }, [controller.IssuersService]);
-
-  const navigateToIssuers = () => {
-    props.navigation.navigate('IssuersListScreen', {
-      service: controller.IssuersService,
-    });
-  };
-
-  const DownloadFABIcon: React.FC = (props) => {
-    const plusIcon = (
-      <Icon
-        name={'plus'}
-        type={'entypo'}
-        size={36}
-        color={Theme.Colors.whiteText}
-      />
-    );
-    return (
-      <LinearGradient
-        colors={Theme.Colors.gradientBtn}
-        style={Theme.Styles.downloadFabIcon}>
-        <Button
-          icon={plusIcon}
-          onPress={() => {
-            controller.GOTO_ISSUERS();
-          }}
-          type={'clearAddIdBtnBg'}
-          fill
-        />
-      </LinearGradient>
-    );
-  };
 
   const DownloadingIdPopUp: React.FC = () => {
     return (
@@ -143,7 +103,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                   }
                 })}
               </Column>
-              <DownloadFABIcon {...props} />
             </React.Fragment>
           )}
           {controller.vcKeys.length === 0 && (
@@ -166,7 +125,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                     {t('generateVcDescription')}
                   </Text>
                 </View>
-                <DownloadFABIcon {...props} />
               </Column>
             </React.Fragment>
           )}

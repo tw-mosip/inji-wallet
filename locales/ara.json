@@ -151,6 +151,10 @@
     "version": "الإصدار",
     "tuvaliVersion": "نسخة توفالي"
   },
+  "IssuersListScreen": {
+    "title": "أضف بطاقة جديدة",
+    "header": "الرجاء تحديد طريقة مفضلة أدناه لتنزيل بطاقة جديدة"
+  },
   "HelpScreen": {
     "header": "يساعد",
     "whatIsDigitalCredential?": "ما هو الاعتماد الرقمي؟",

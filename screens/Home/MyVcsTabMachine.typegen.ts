@@ -18,11 +18,6 @@ export interface Typegen0 {
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.issuersMachine': {
-      type: 'done.invoke.issuersMachine';
-      data: unknown;
-      __tip: 'See the XState TS docs to learn how to strongly type this.';
-    };
     'xstate.init': { type: 'xstate.init' };
   };
   'invokeSrcNameMap': {
@@ -53,8 +48,7 @@ export interface Typegen0 {
       | 'done.invoke.GetVcModal'
       | 'done.invoke.MyVcsTab.addVc.checkStorage:invocation[0]';
     GetVcModal: 'GET_VC';
-    checkStorageAvailability: 'ADD_VC' | 'done.invoke.issuersMachine';
-    issuersMachine: 'GOTO_ISSUERS';
+    checkStorageAvailability: 'ADD_VC';
   };
   'matchesStates':
     | 'addVc'
@@ -69,7 +63,6 @@ export interface Typegen0 {
     | 'checkingOnboardingStatus'
     | 'gettingVc'
     | 'gettingVc.waitingForvcKey'
-    | 'gotoIssuers'
     | 'idle'
     | 'onboarding'
     | 'viewingVc'

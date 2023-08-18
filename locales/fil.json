@@ -151,6 +151,10 @@
     "version": "Bersyon",
     "tuvaliVersion": "Tuvali-bersyon"
   },
+  "IssuersListScreen": {
+    "title": "Magdagdag ng bagong card",
+    "header": "Mangyaring pumili ng gustong paraan mula sa ibaba upang mag-download ng bagong card"
+  },
   "HelpScreen": {
     "header": "Tulong",
     "whatIsDigitalCredential?": "Ano ang isang digital na kredensyal?",

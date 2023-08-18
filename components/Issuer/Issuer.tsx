@@ -3,19 +3,10 @@ import { Text, Pressable } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Theme } from '../ui/styleUtils';
 
-export const IssuerBox: React.FC<IssuerBoxProps> = (props: IssuerBoxProps) => {
-  const onPressHandler = () => {
-    if (props.id !== 'UIN, VID, AID') {
-      props.controller.SELECTED_ISSUER(props.id);
-    } else {
-      props.controller.DOWNLOAD_VIA_ID();
-      //props.navigation.goBack();
-    }
-  };
-
+export const Issuer: React.FC<IssuerProps> = (props: IssuerProps) => {
   return (
     <Pressable
-      onPress={onPressHandler}
+      onPress={props.onPress}
       style={({ pressed }) =>
         pressed
           ? Theme.Styles.issuerBoxContainerPressed
@@ -32,9 +23,8 @@ export const IssuerBox: React.FC<IssuerBoxProps> = (props: IssuerBoxProps) => {
   );
 };
 
-export interface IssuerBoxProps {
-  controller: any;
+interface IssuerProps {
   id: string;
   description: string;
-  onPress?: () => void;
+  onPress: () => void;
 }

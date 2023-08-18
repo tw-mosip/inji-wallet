@@ -251,6 +251,10 @@
     "logout": "Cerrar sesión",
     "resetInjiProps": "Restableciendo accesorios Inji..."
   },
+	"IssuersListScreen": {
+		"title": "Agregar nueva tarjeta",
+		"header": "Seleccione un método preferido de los siguientes para descargar una nueva tarjeta"
+	},
 	"QrScreen": {
 		"title": "Inicio de sesión con código QR",
 		"alignQr": "Alinea el código QR dentro del marco para escanearlo",

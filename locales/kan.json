@@ -147,6 +147,10 @@
     "version": "ಆವೃತ್ತಿ",
     "tuvaliVersion": "ಟುವಾಲಿ-ಆವೃತ್ತಿ"
   },
+  "IssuersListScreen": {
+    "title": "ಹೊಸ ಕಾರ್ಡ್ ಸೇರಿಸಿ",
+    "header": "ಹೊಸ ಕಾರ್ಡ್ ಅನ್ನು ಡೌನ್\u200Cಲೋಡ್ ಮಾಡಲು ದಯವಿಟ್ಟು ಕೆಳಗಿನಿಂದ ಆದ್ಯತೆಯ ವಿಧಾನವನ್ನು ಆಯ್ಕೆಮಾಡಿ"
+  },
   "HelpScreen": {
     "header": "ಸಹಾಯ",
     "whatIsDigitalCredential?": "ಡಿಜಿಟಲ್ ರುಜುವಾತು ಎಂದರೇನು?",

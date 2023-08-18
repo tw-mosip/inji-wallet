@@ -32,7 +32,6 @@ export interface Typegen0 {
     services: never;
   };
   'eventsCausingActions': {
-    downloadViaID: 'DOWNLOAD_VIA_ID';
     setIssuers: 'done.invoke.issuersMachine.displayIssuers:invocation[0]';
     setSelectedIssuers: 'done.invoke.issuersMachine.downloadIssuerConfig:invocation[0]';
     setTokenResponse: 'done.invoke.issuersMachine.performAuthorization:invocation[0]';

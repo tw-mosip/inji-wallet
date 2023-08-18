@@ -367,6 +367,7 @@ export const DefaultTheme = {
       height: 36,
       borderRadius: 10,
       backgroundColor: Colors.LightOrange,
+      marginRight: 10,
     },
     receiveCardsContainer: {
       height: Dimensions.get('window').height * 0.12,
@@ -464,12 +465,12 @@ export const DefaultTheme = {
       borderRadius: 200,
       padding: 10,
       backgroundColor: Colors.Orange,
-      alignSelf: 'flex-end',
-      marginRight: 10,
-      marginBottom: 10,
       shadowColor: '#000',
       shadowOpacity: 0.4,
       elevation: 5,
+      position: 'absolute',
+      bottom: Dimensions.get('window').width * 0.1,
+      right: Dimensions.get('window').width * 0.1,
     },
   }),
   QrCodeStyles: StyleSheet.create({

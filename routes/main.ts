@@ -17,11 +17,7 @@ const home: TabScreen = {
   icon: 'home',
   options: {
     headerTitle: '',
-    headerLeft: () =>
-      React.createElement(Image, {
-        source: require('../assets/inji-home-logo.png'),
-        style: { width: 124, height: 27, resizeMode: 'contain' },
-      }),
+    headerShown: false,
   },
 };
 export const scan: TabScreen = {

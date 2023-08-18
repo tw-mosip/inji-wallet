@@ -18,7 +18,6 @@ import {
 import { AddVcModalMachine } from './MyVcs/AddVcModalMachine';
 import { GetVcModalMachine } from './MyVcs/GetVcModalMachine';
 import Storage from '../../shared/storage';
-import { IssuersMachine } from '../../machines/issuersMachine';
 
 const model = createModel(
   {
@@ -35,12 +34,10 @@ const model = createModel(
       STORE_ERROR: (error: Error) => ({ error }),
       ADD_VC: () => ({}),
       GET_VC: () => ({}),
-      GOTO_ISSUERS: () => ({}),
       STORAGE_AVAILABLE: () => ({}),
       STORAGE_UNAVAILABLE: () => ({}),
       ONBOARDING_DONE: () => ({}),
       IS_TAMPERED: () => ({}),
-      DOWNLOAD_VIA_ID: () => ({}),
     },
   }
 );
@@ -76,9 +73,6 @@ export const MyVcsTabMachine = model.createMachine(
       },
       onboarding: {
         on: {
-          GOTO_ISSUERS: {
-            target: 'gotoIssuers',
-          },
           ADD_VC: [
             {
               target: 'addVc',
@@ -89,13 +83,6 @@ export const MyVcsTabMachine = model.createMachine(
             target: 'idle',
             actions: ['completeOnboarding'],
           },
-        },
-      },
-      gotoIssuers: {
-        invoke: {
-          id: 'issuersMachine',
-          src: IssuersMachine,
-          onDone: 'addingVc',
         },
       },
       addVc: {
@@ -128,7 +115,6 @@ export const MyVcsTabMachine = model.createMachine(
           ADD_VC: 'addVc',
           VIEW_VC: 'viewingVc',
           GET_VC: 'gettingVc',
-          GOTO_ISSUERS: 'gotoIssuers',
           IS_TAMPERED: {
             target: 'idle',
             actions: ['resetIsTampered', 'refreshMyVc'],
@@ -274,12 +260,12 @@ export function selectGetVcModal(state: State) {
   return state.children.GetVcModal as ActorRefFrom<typeof GetVcModalMachine>;
 }
 
-export function selectIssuersMachine(state: State) {
-  return state.children.issuersMachine as ActorRefFrom<typeof IssuersMachine>;
-}
-
 export function selectIsOnboarding(state: State) {
   return state.matches('onboarding');
+}
+
+export function selectIsStoring(state: State) {
+  return state.matches('addingVc.storing');
 }
 
 export function selectIsRequestSuccessful(state: State) {

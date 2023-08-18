@@ -13,15 +13,15 @@ const defaultIssuer = [
 
 const model = createModel(
   {
-    issuers: defaultIssuer,
-    selectedIssuer: [],
-    tokenResponse: [],
+    issuers: defaultIssuer as issuerType[],
+    selectedIssuer: [] as issuerType[],
+    tokenResponse: [] as [],
   },
   {
     events: {
       DISMISS: () => ({}),
       SELECTED_ISSUER: (id: string) => ({ id }),
-      DOWNLOAD_VIA_ID: () => ({}),
+      DOWNLOAD_ID: () => ({}),
       COMPLETED: () => ({}),
     },
   }
@@ -54,8 +54,8 @@ export const IssuersMachine = model.createMachine(
       },
       selectingIssuer: {
         on: {
-          DOWNLOAD_VIA_ID: {
-            target: 'done',
+          DOWNLOAD_ID: {
+            actions: sendParent('DOWNLOAD_ID'),
           },
           SELECTED_ISSUER: {
             target: 'downloadIssuerConfig',
@@ -109,6 +109,7 @@ export const IssuersMachine = model.createMachine(
     services: {
       downloadIssuersList: async () => {
         // const response = await request('GET', '/residentmobileapp/issuers');
+        // console.log("Response from downloadIssuersList -> ", JSON.stringify(response, null, 4));
         // return [...defaultIssuer, ...response.response.issuers];
         return defaultIssuer;
       },
@@ -117,15 +118,18 @@ export const IssuersMachine = model.createMachine(
           'GET',
           `/residentmobileapp/issuers/${event.id}`
         );
+        console.log(
+          'Response from downloadIssuerConfig -> ',
+          JSON.stringify(response, null, 4)
+        );
         return response.response;
       },
       invokeAuthorization: async (context) => {
-        console.log(
-          'Response from Selected Issuer',
-          JSON.stringify(context.selectedIssuer, null, 4)
-        );
         const response = await authorize(context.selectedIssuer);
-        console.log(response);
+        console.log(
+          'Response from invokeAuthorization',
+          JSON.stringify(response, null, 4)
+        );
         return response?.response;
       },
     },
@@ -136,4 +140,9 @@ type State = StateFrom<typeof IssuersMachine>;
 
 export function selectIssuers(state: State) {
   return state.context.issuers;
+}
+interface issuerType {
+  id: string;
+  displayName: string;
+  logoUrl: string;
 }
