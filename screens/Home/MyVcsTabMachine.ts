@@ -273,6 +273,10 @@ export function selectGetVcModal(state: State) {
   return state.children.GetVcModal as ActorRefFrom<typeof GetVcModalMachine>;
 }
 
+export function selectIssuersMachine(state: State) {
+  return state.children.issuersMachine as ActorRefFrom<typeof IssuersMachine>;
+}
+
 export function selectIsOnboarding(state: State) {
   return state.matches('onboarding');
 }

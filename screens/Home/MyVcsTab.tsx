@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Column, Row, Text } from '../../components/ui';
 import { Theme } from '../../components/ui/styleUtils';
 import { Image, RefreshControl, View } from 'react-native';
@@ -46,6 +46,20 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
       : null;
   }
 
+  useEffect(() => {
+    console.log('useEffect outside -> ', controller.IssuersService);
+    if (controller.IssuersService != undefined) {
+      console.log('useEffect inside -> ', controller.IssuersService);
+      navigateToIssuers();
+    }
+  }, [controller.IssuersService]);
+
+  const navigateToIssuers = () => {
+    props.navigation.navigate('IssuersListScreen', {
+      service: controller.IssuersService,
+    });
+  };
+
   const DownloadFABIcon: React.FC = (props) => {
     const plusIcon = (
       <Icon
@@ -63,7 +77,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
           icon={plusIcon}
           onPress={() => {
             controller.GOTO_ISSUERS();
-            props.navigation.navigate('IssuersListScreen');
           }}
           type={'clearAddIdBtnBg'}
           fill

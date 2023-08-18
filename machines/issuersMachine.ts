@@ -108,8 +108,9 @@ export const IssuersMachine = model.createMachine(
     },
     services: {
       downloadIssuersList: async () => {
-        const response = await request('GET', '/residentmobileapp/issuers');
-        return [...defaultIssuer, ...response.response.issuers];
+        // const response = await request('GET', '/residentmobileapp/issuers');
+        // return [...defaultIssuer, ...response.response.issuers];
+        return defaultIssuer;
       },
       downloadIssuerConfig: async (_, event) => {
         const response = await request(
@@ -132,10 +133,6 @@ export const IssuersMachine = model.createMachine(
 );
 
 type State = StateFrom<typeof IssuersMachine>;
-
-export function selectIsPerformAuthorization(state: State) {
-  return state.matches('performAuthorization');
-}
 
 export function selectIssuers(state: State) {
   return state.context.issuers;

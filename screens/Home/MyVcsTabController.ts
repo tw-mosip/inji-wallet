@@ -23,6 +23,7 @@ import {
   selectGetVcModal,
   selectIsSavingFailedInIdle,
   selectIsMinimumStorageLimitReached,
+  selectIssuersMachine,
 } from './MyVcsTabMachine';
 import {
   selectShowHardwareKeystoreNotExistsAlert,
@@ -40,6 +41,7 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
     service,
     AddVcModalService: useSelector(service, selectAddVcModal),
     GetVcModalService: useSelector(service, selectGetVcModal),
+    IssuersService: useSelector(service, selectIssuersMachine),
 
     vcsMetadata: useSelector(vcService, selectMyVcsMetadata),
     isTampered: useSelector(storeService, selectIsTampered),
