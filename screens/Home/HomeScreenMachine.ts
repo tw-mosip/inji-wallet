@@ -116,6 +116,7 @@ export const HomeScreenMachine = model.createMachine(
                 actions: 'sendAddEvent',
                 target: 'idle',
               },
+              GOTO_ISSUERS: 'gotoIssuers',
             },
           },
           idle: {
