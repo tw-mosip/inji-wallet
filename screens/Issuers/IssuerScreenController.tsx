@@ -1,24 +1,20 @@
 import {
   IssuerScreenTabEvents,
   IssuersMachine,
-  selectIsPerformAuthorization,
   selectIssuers,
 } from '../../machines/issuersMachine';
 import { useMachine, useSelector } from '@xstate/react';
-import { MyVcsTabEvents, MyVcsTabMachine } from '../Home/MyVcsTabMachine';
+import { ActorRefFrom } from 'xstate';
 
-export function useIssuerScreenController() {
-  const [, , service] = useMachine(IssuersMachine);
+export function useIssuerScreenController({ route }) {
+  const service = route.params.service;
 
-  const isPerformingAuthorization = useSelector(
-    service,
-    selectIsPerformAuthorization
-  );
+  console.log('Inside useIssuersSCreen Controller', route);
+  console.log('Inside useIssuersSCreen Controller service', service);
   const issuers = useSelector(service, selectIssuers);
 
   return {
     issuers,
-    isPerformingAuthorization,
     DOWNLOAD_VIA_ID: () => {
       console.log('IssuersScreenController DONWLOAD_VIA_ID');
       return service.send(IssuerScreenTabEvents.DOWNLOAD_VIA_ID());
@@ -27,4 +23,10 @@ export function useIssuerScreenController() {
       service.send(IssuerScreenTabEvents.SELECTED_ISSUER(id)),
     DISMISS: () => service.send(IssuerScreenTabEvents.DISMISS()),
   };
+}
+
+export interface IssuerModalProps {
+  service?: ActorRefFrom<typeof IssuersMachine>;
+  onPress?: () => void;
+  isVisible?: boolean;
 }

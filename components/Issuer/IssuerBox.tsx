@@ -2,15 +2,13 @@ import React from 'react';
 import { Text, Pressable } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Theme } from '../ui/styleUtils';
-import { useIssuerScreenController } from '../../screens/Issuers/IssuerScreenController';
 
 export const IssuerBox: React.FC<IssuerBoxProps> = (props: IssuerBoxProps) => {
-  const controller = useIssuerScreenController();
   const onPressHandler = () => {
     if (props.id !== 'UIN, VID, AID') {
-      controller.SELECTED_ISSUER(props.id);
+      props.controller.SELECTED_ISSUER(props.id);
     } else {
-      controller.DOWNLOAD_VIA_ID();
+      props.controller.DOWNLOAD_VIA_ID();
       //props.navigation.goBack();
     }
   };
@@ -35,6 +33,7 @@ export const IssuerBox: React.FC<IssuerBoxProps> = (props: IssuerBoxProps) => {
 };
 
 export interface IssuerBoxProps {
+  controller: any;
   id: string;
   description: string;
   onPress?: () => void;

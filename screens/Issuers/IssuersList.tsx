@@ -18,7 +18,8 @@ export const IssuersList: React.FC = (props) => {
     }, [])
   );
 
-  const controller = useIssuerScreenController();
+  console.log('IssuersList props-> ', props);
+  const controller = useIssuerScreenController(props);
   const { t } = useTranslation('IssuersListScreen');
 
   return (
@@ -33,6 +34,7 @@ export const IssuersList: React.FC = (props) => {
               <IssuerBox
                 id={item.id}
                 description={item.displayName}
+                controller={controller}
                 {...props}
               />
             )}
@@ -41,14 +43,6 @@ export const IssuersList: React.FC = (props) => {
           />
         )}
       </Column>
-
-      {controller.isPerformingAuthorization && (
-        <Text>Model should be shown</Text>
-      )}
-      <ProgressingModal
-        isVisible={controller.isPerformingAuthorization}
-        title={'Progress'}
-      />
     </React.Fragment>
   );
 };

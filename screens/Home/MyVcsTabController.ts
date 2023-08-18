@@ -19,6 +19,7 @@ import {
   selectGetVcModal,
   selectIsSavingFailedInIdle,
   selectIsMinimumStorageLimitReached,
+  selectIssuersMachine,
 } from './MyVcsTabMachine';
 
 export function useMyVcsTab(props: HomeScreenTabProps) {
@@ -31,6 +32,7 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
     service,
     AddVcModalService: useSelector(service, selectAddVcModal),
     GetVcModalService: useSelector(service, selectGetVcModal),
+    IssuersService: useSelector(service, selectIssuersMachine),
 
     vcKeys: useSelector(vcService, selectMyVcs),
     isTampered: useSelector(storeService, selectIsTampered),
