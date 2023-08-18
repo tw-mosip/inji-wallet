@@ -23,7 +23,6 @@ import {
   selectGetVcModal,
   selectIsSavingFailedInIdle,
   selectIsMinimumStorageLimitReached,
-  selectIssuersMachine,
 } from './MyVcsTabMachine';
 import {
   selectShowHardwareKeystoreNotExistsAlert,
@@ -41,7 +40,6 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
     service,
     AddVcModalService: useSelector(service, selectAddVcModal),
     GetVcModalService: useSelector(service, selectGetVcModal),
-    IssuersService: useSelector(service, selectIssuersMachine),
 
     vcsMetadata: useSelector(vcService, selectMyVcsMetadata),
     isTampered: useSelector(storeService, selectIsTampered),
@@ -60,8 +58,6 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
       settingsService,
       selectShowHardwareKeystoreNotExistsAlert
     ),
-
-    GOTO_ISSUERS: () => service.send(MyVcsTabEvents.GOTO_ISSUERS()),
 
     DISMISS: () => service.send(MyVcsTabEvents.DISMISS()),
 

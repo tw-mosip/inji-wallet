@@ -1,6 +1,6 @@
-import React from 'react';
-import { Tab } from 'react-native-elements';
-import { Column, Text } from '../../components/ui';
+import React, { useEffect } from 'react';
+import { Icon, Tab } from 'react-native-elements';
+import { Button, Column, Text } from '../../components/ui';
 import { Theme } from '../../components/ui/styleUtils';
 import { HomeRouteProps } from '../../routes/main';
 import { MyVcsTab } from './MyVcsTab';
@@ -11,10 +11,48 @@ import { TabRef } from './HomeScreenMachine';
 import { useTranslation } from 'react-i18next';
 import { ActorRefFrom } from 'xstate';
 import { vcItemMachine } from '../../machines/vcItem';
+import LinearGradient from 'react-native-linear-gradient';
 
 export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
   const { t } = useTranslation('HomeScreen');
   const controller = useHomeScreen(props);
+
+  useEffect(() => {
+    if (controller.IssuersService) {
+      navigateToIssuers();
+    }
+  }, [controller.IssuersService]);
+
+  const navigateToIssuers = () => {
+    props.navigation.navigate('IssuersListScreen', {
+      service: controller.IssuersService,
+    });
+  };
+
+  const DownloadFABIcon: React.FC = () => {
+    const plusIcon = (
+      <Icon
+        name={'plus'}
+        type={'entypo'}
+        size={36}
+        color={Theme.Colors.whiteText}
+      />
+    );
+    return (
+      <LinearGradient
+        colors={Theme.Colors.gradientBtn}
+        style={Theme.Styles.downloadFabIcon}>
+        <Button
+          icon={plusIcon}
+          onPress={() => {
+            controller.GOTO_ISSUERS();
+          }}
+          type={'clearAddIdBtnBg'}
+          fill
+        />
+      </LinearGradient>
+    );
+  };
 
   return (
     <React.Fragment>
@@ -35,6 +73,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
           </Column>
         )}
       </Column>
+      <DownloadFABIcon />
       {controller.selectedVc && (
         <ViewVcModal
           isVisible={controller.isViewingVc}

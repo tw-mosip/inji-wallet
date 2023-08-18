@@ -154,7 +154,7 @@
   },
   "IssuersListScreen": {
     "title": "Add new card",
-    "header": "Please select a preferred method from below to download a new card",
+    "header": "Please select a preferred method from below to download a new card"
   },
   "HelpScreen": {
     "header": "Help",

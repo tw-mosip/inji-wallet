@@ -17,24 +17,35 @@ export interface Typegen0 {
   };
   'eventsCausingActions': {
     resetSelectedVc: 'DISMISS_MODAL' | 'xstate.init';
+    sendAddEvent: 'DOWNLOAD_ID';
     setSelectedVc: 'VIEW_VC';
     spawnTabActors: 'xstate.init';
   };
   'eventsCausingDelays': {};
   'eventsCausingGuards': {};
-  'eventsCausingServices': {};
+  'eventsCausingServices': {
+    issuersMachine: 'GOTO_ISSUERS';
+  };
   'matchesStates':
     | 'modals'
     | 'modals.none'
     | 'modals.viewingVc'
     | 'tabs'
+    | 'tabs.gotoIssuers'
     | 'tabs.history'
+    | 'tabs.idle'
     | 'tabs.init'
     | 'tabs.myVcs'
     | 'tabs.receivedVcs'
     | {
         modals?: 'none' | 'viewingVc';
-        tabs?: 'history' | 'init' | 'myVcs' | 'receivedVcs';
+        tabs?:
+          | 'gotoIssuers'
+          | 'history'
+          | 'idle'
+          | 'init'
+          | 'myVcs'
+          | 'receivedVcs';
       };
   'tags': never;
 }

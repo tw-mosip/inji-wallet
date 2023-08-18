@@ -14,6 +14,7 @@ import {
   createReceivedVcsTabMachine,
   ReceivedVcsTabMachine,
 } from './ReceivedVcsTabMachine';
+import { IssuersMachine } from '../../machines/issuersMachine';
 
 const model = createModel(
   {
@@ -34,6 +35,8 @@ const model = createModel(
         vcItemActor,
       }),
       DISMISS_MODAL: () => ({}),
+      GOTO_ISSUERS: () => ({}),
+      DOWNLOAD_ID: () => ({}),
     },
   }
 );
@@ -66,6 +69,7 @@ export const HomeScreenMachine = model.createMachine(
           SELECT_MY_VCS: '.myVcs',
           SELECT_RECEIVED_VCS: '.receivedVcs',
           SELECT_HISTORY: '.history',
+          GOTO_ISSUERS: '.gotoIssuers',
         },
         states: {
           init: {
@@ -100,6 +104,24 @@ export const HomeScreenMachine = model.createMachine(
           },
           history: {
             entry: [setActiveTab(2)],
+          },
+          gotoIssuers: {
+            invoke: {
+              id: 'issuersMachine',
+              src: IssuersMachine,
+              onDone: 'idle',
+            },
+            on: {
+              DOWNLOAD_ID: {
+                actions: 'sendAddEvent',
+                target: 'idle',
+              },
+            },
+          },
+          idle: {
+            on: {
+              GOTO_ISSUERS: 'gotoIssuers',
+            },
           },
         },
       },
@@ -138,6 +160,9 @@ export const HomeScreenMachine = model.createMachine(
           ),
         }),
       }),
+      sendAddEvent: send('ADD_VC', {
+        to: (context) => context.tabRefs.myVcs,
+      }),
 
       setSelectedVc: model.assign({
         selectedVc: (_, event) => event.vcItemActor,
@@ -156,6 +181,9 @@ function setActiveTab(activeTab: number) {
 
 type State = StateFrom<typeof HomeScreenMachine>;
 
+export function selectIssuersMachine(state: State) {
+  return state.children.issuersMachine as ActorRefFrom<typeof IssuersMachine>;
+}
 export function selectTabRefs(state: State) {
   return state.context.tabRefs;
 }

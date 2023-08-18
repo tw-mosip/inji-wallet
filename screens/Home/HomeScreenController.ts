@@ -6,6 +6,7 @@ import {
   HomeScreenEvents,
   HomeScreenMachine,
   selectActiveTab,
+  selectIssuersMachine,
   selectSelectedVc,
   selectTabRefs,
   selectTabsLoaded,
@@ -39,6 +40,9 @@ export function useHomeScreen(props: HomeRouteProps) {
 
     isViewingVc: useSelector(service, selectViewingVc),
     haveTabsLoaded: useSelector(service, selectTabsLoaded),
+
+    IssuersService: useSelector(service, selectIssuersMachine),
+    GOTO_ISSUERS: () => service.send(HomeScreenEvents.GOTO_ISSUERS()),
 
     SELECT_TAB,
     DISMISS_MODAL: () => service.send(HomeScreenEvents.DISMISS_MODAL()),

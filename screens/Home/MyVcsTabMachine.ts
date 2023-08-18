@@ -281,6 +281,10 @@ export function selectIsOnboarding(state: State) {
   return state.matches('onboarding');
 }
 
+export function selectIsStoring(state: State) {
+  return state.matches('addingVc.storing');
+}
+
 export function selectIsRequestSuccessful(state: State) {
   return state.matches('addingVc.addVcSuccessful');
 }
