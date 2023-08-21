@@ -16,6 +16,8 @@ const model = createModel(
     issuers: defaultIssuer as issuerType[],
     selectedIssuer: [] as issuerType[],
     tokenResponse: [] as [],
+    isError: false as boolean,
+    errorMessage: null as string,
   },
   {
     events: {
@@ -23,6 +25,7 @@ const model = createModel(
       SELECTED_ISSUER: (id: string) => ({ id }),
       DOWNLOAD_ID: () => ({}),
       COMPLETED: () => ({}),
+      TRY_AGAIN: () => ({}),
     },
   }
 );
@@ -49,6 +52,15 @@ export const IssuersMachine = model.createMachine(
           onDone: {
             actions: ['setIssuers'],
             target: 'selectingIssuer',
+          },
+          onError: {
+            actions: ['setError'],
+          },
+        },
+        on: {
+          TRY_AGAIN: {
+            target: 'displayIssuers',
+            actions: 'resetError',
           },
         },
       },
@@ -99,6 +111,22 @@ export const IssuersMachine = model.createMachine(
         issuers: (_, event) => event.data,
       }),
 
+      setError: model.assign((context, event) => {
+        return {
+          ...context,
+          isError: true,
+          errorMessage: 'generic',
+        };
+      }),
+
+      resetError: model.assign((context) => {
+        return {
+          ...context,
+          isError: false,
+          errorMessage: null,
+        };
+      }),
+
       setSelectedIssuers: model.assign({
         selectedIssuer: (_, event) => event.data,
       }),
@@ -141,6 +169,14 @@ type State = StateFrom<typeof IssuersMachine>;
 export function selectIssuers(state: State) {
   return state.context.issuers;
 }
+
+export function selectIsError(state: State) {
+  return state.context.isError;
+}
+export function selectErrorMessage(state: State) {
+  return state.context.errorMessage;
+}
+
 interface issuerType {
   id: string;
   displayName: string;

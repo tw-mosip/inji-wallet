@@ -6,6 +6,7 @@ import { Issuer } from '../../components/Issuer/Issuer';
 import { Text } from 'react-native-elements';
 import { Theme } from '../../components/ui/styleUtils';
 import { useTranslation } from 'react-i18next';
+import { Error } from '../../components/ui/Error';
 
 export const IssuersList: React.FC = (props) => {
   const controller = useIssuerScreenController(props);
@@ -40,6 +41,15 @@ export const IssuersList: React.FC = (props) => {
           />
         )}
       </Column>
+      {controller.isError && (
+        <Error
+          isVisible={controller.isError}
+          title={t(`errors.${controller.errorMessage}.title`)}
+          message={t(`errors.${controller.errorMessage}.message`)}
+          goBack={props.navigation.goBack}
+          tryAgain={controller.TRY_AGAIN}
+        />
+      )}
     </React.Fragment>
   );
 };

@@ -18,6 +18,10 @@ export interface Typegen0 {
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
+    'error.platform.issuersMachine.displayIssuers:invocation[0]': {
+      type: 'error.platform.issuersMachine.displayIssuers:invocation[0]';
+      data: unknown;
+    };
     'xstate.init': { type: 'xstate.init' };
   };
   'invokeSrcNameMap': {
@@ -32,6 +36,8 @@ export interface Typegen0 {
     services: never;
   };
   'eventsCausingActions': {
+    resetError: 'TRY_AGAIN';
+    setError: 'error.platform.issuersMachine.displayIssuers:invocation[0]';
     setIssuers: 'done.invoke.issuersMachine.displayIssuers:invocation[0]';
     setSelectedIssuers: 'done.invoke.issuersMachine.downloadIssuerConfig:invocation[0]';
     setTokenResponse: 'done.invoke.issuersMachine.performAuthorization:invocation[0]';
@@ -40,7 +46,7 @@ export interface Typegen0 {
   'eventsCausingGuards': {};
   'eventsCausingServices': {
     downloadIssuerConfig: 'SELECTED_ISSUER';
-    downloadIssuersList: 'xstate.init';
+    downloadIssuersList: 'TRY_AGAIN' | 'xstate.init';
     invokeAuthorization: 'done.invoke.issuersMachine.downloadIssuerConfig:invocation[0]';
   };
   'matchesStates':
