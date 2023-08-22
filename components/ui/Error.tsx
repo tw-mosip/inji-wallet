@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, Image, Modal as RNModal, View } from 'react-native';
+import { Dimensions, Modal as RNModal, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Button, Column, Row, Text } from '.';
 import { Theme } from './styleUtils';
@@ -10,21 +10,20 @@ export const Error: React.FC<ErrorProps> = (props) => {
       animationType="slide"
       style={Theme.ModalStyles.modal}
       visible={props.isVisible}>
-      <Icon
-        name="arrow-left"
-        type="material-community"
-        onPress={props.goBack}
-        containerStyle={{
-          ...Theme.Styles.backArrowContainer,
-          marginTop: 10,
-          marginLeft: 10,
-        }}
-      />
-      <Column align="center" fill safe style={{ marginHorizontal: 10 }}>
-        <Image
-          source={require('../../assets/Something-went-wrong.png')}
-          style={{ width: 370, height: 150 }}
+      {props.goBack && (
+        <Icon
+          name="arrow-left"
+          type="material-community"
+          onPress={props.goBack}
+          containerStyle={{
+            ...Theme.Styles.backArrowContainer,
+            marginTop: 10,
+            marginLeft: 10,
+          }}
         />
+      )}
+      <Column align="center" fill safe style={{ marginHorizontal: 10 }}>
+        <Row align="center">{props.image}</Row>
         <Row>
           <View
             style={{
@@ -65,6 +64,7 @@ export interface ErrorProps {
   isVisible: boolean;
   title: string;
   message: string;
+  image: React.ReactElement;
   goBack: () => void;
   tryAgain: () => void;
 }
