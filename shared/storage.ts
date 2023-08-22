@@ -157,8 +157,9 @@ const getVCKeyName = async (key: string) => {
 
 const updateAndHashValueInKey = async (key: string) => {
   const splitKey = key.split(':');
-  const uinIndex = splitKey.findIndex((item) => item === 'UIN');
-
+  const uinIndex = splitKey.findIndex(
+    (item) => item === 'UIN' || item === 'VID'
+  );
   if (uinIndex !== -1) {
     const value = String(Number(splitKey[uinIndex + 1]) + 1);
     const hashed = await Storage.getHashedValue(value);
