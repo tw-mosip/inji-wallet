@@ -16,6 +16,7 @@ import {
   getFreeDiskStorageOldSync,
   getFreeDiskStorageSync,
 } from 'react-native-device-info';
+import argon2 from 'react-native-argon2';
 
 const MMKV = new MMKVLoader().initialize();
 const vcKeyRegExp = new RegExp(VC_ITEM_STORE_KEY_REGEX);
@@ -34,10 +35,11 @@ class Storage {
   static getItem = async (key: string, encryptionKey?: string) => {
     try {
       if (vcKeyRegExp.exec(key)) {
-        const path = getFilePath(key);
+        const path = await getFilePath(key);
         const data = await readFile(path, 'utf8');
-
-        const encryptedHMACofCurrentVC = await MMKV.getItem(getVCKeyName(key));
+        const encryptedHMACofCurrentVC = await MMKV.getItem(
+          await getVCKeyName(key)
+        );
         const HMACofCurrentVC = CryptoJS.AES.decrypt(
           encryptedHMACofCurrentVC,
           encryptionKey
@@ -65,10 +67,10 @@ class Storage {
           HMACofVC,
           encryptionKey
         ).toString();
-        await MMKV.setItem(getVCKeyName(key), encryptedHMACofVC);
+        await MMKV.setItem(await getVCKeyName(key), encryptedHMACofVC);
 
         await mkdir(vcDirectoryPath);
-        const path = getFilePath(key);
+        const path = await getFilePath(key);
         return await writeFile(path, data, 'utf8');
       }
       await MMKV.setItem(key, data);
@@ -80,8 +82,8 @@ class Storage {
 
   static removeItem = async (key: string) => {
     if (vcKeyRegExp.exec(key)) {
-      const path = getFilePath(key);
-      return await unlink(path);
+      const path = await getFilePath(key);
+      return await unlink(await path);
     }
     MMKV.removeItem(key);
   };
@@ -112,14 +114,30 @@ class Storage {
 
     return freeDiskStorageInBytes <= minimumStorageLimitInBytes;
   };
+
+  static getHashedValue = async (key: string) => {
+    const salt =
+      '1234567891011121314151617181920212223242526272829303132333435363';
+    const result = await argon2(key, salt, {
+      iterations: 5,
+      memory: 16 * 1024,
+      parallelism: 2,
+      hashLength: 10,
+      mode: 'argon2i',
+    });
+    return result.rawHash;
+  };
 }
 /**
  * The VC file name will not have the pinned / unpinned state, we will splice the state as this will change.
  * replace ':' with '_' in the key to get the file name as ':' are not allowed in filenames
  * eg: "vc:UIN:6732935275:e7426576-112f-466a-961a-1ed9635db628" is changed to "vc_UIN_6732935275_e7426576-112f-466a-961a-1ed9635db628"
  */
-const getFileName = (key: string) => {
-  return key.split(':').splice(0, 4).join('_');
+const getFileName = async (key: string) => {
+  const splitKey = key.split(':');
+  const hashed = await Storage.getHashedValue(splitKey[2]);
+  splitKey[2] = hashed;
+  return splitKey.join('_');
 };
 
 /**
@@ -127,8 +145,8 @@ const getFileName = (key: string) => {
  * android: /data/user/0/io.mosip.residentapp/files/inji/VC/<filename>
  * These paths are coming from DocumentDirectoryPath in react-native-fs.
  */
-const getFilePath = (key: string) => {
-  const fileName = getFileName(key);
+const getFilePath = async (key: string) => {
+  const fileName = await getFileName(key);
   return `${vcDirectoryPath}/${fileName}.txt`;
 };
 
@@ -136,8 +154,11 @@ const getFilePath = (key: string) => {
  * The VC key will not have the pinned / unpinned state, we will splice the state as this will change.
  * eg: "vc:UIN:6732935275:e7426576-112f-466a-961a-1ed9635db628:true" is changed to "vc:UIN:6732935275:e7426576-112f-466a-961a-1ed9635db628"
  */
-const getVCKeyName = (key: string) => {
-  return key.split(':').splice(0, 4).join(':');
+const getVCKeyName = async (key: string) => {
+  const splitKey = key.split(':');
+  const hashed = await Storage.getHashedValue(splitKey[2]);
+  splitKey[2] = hashed;
+  return splitKey.join('_');
 };
 
 export default Storage;
