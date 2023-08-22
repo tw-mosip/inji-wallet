@@ -8,7 +8,7 @@ import { Theme } from '../../components/ui/styleUtils';
 import { useTranslation } from 'react-i18next';
 import { ErrorModal } from '../../components/ui/ErrorModal';
 
-export const IssuersList: React.FC = (props) => {
+export const IssuersScreen: React.FC = (props) => {
   const controller = useIssuerScreenController(props);
   const { t } = useTranslation('IssuersListScreen');
 

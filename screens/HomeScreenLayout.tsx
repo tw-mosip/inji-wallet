@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeScreen } from './Home/HomeScreen';
 import { Icon } from 'react-native-elements';
 import { Theme } from '../components/ui/styleUtils';
-import { IssuersList } from './Issuers/IssuersList';
+import { IssuersScreen } from './Issuers/IssuersScreen';
 import { useTranslation } from 'react-i18next';
 import { Row } from '../components/ui';
 import { HelpScreen } from '../components/HelpScreen';
@@ -62,7 +62,7 @@ export const HomeScreenLayout: React.FC<RootRouteProps> = (props) => {
       <Screen
         key={'Issuers'}
         name={'IssuersListScreen'}
-        component={IssuersList}
+        component={IssuersScreen}
         options={{
           headerShown: true,
           headerLeft: () => (
