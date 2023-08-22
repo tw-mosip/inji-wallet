@@ -156,6 +156,10 @@
     "title": "Add new card",
     "header": "Please select a preferred method from below to download a new card",
     "errors":{
+      "noInternetConnection": {
+        "title": "No internet connection",
+        "message": "Please connect with internet and retry."
+      },
       "generic": {
         "title": "Something went wrong!",
         "message": "Our experts are working hard to make things working again."

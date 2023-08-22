@@ -115,7 +115,10 @@ export const IssuersMachine = model.createMachine(
         return {
           ...context,
           isError: true,
-          errorMessage: 'generic',
+          errorMessage:
+            event.data.message === 'Network request failed'
+              ? 'noInternetConnection'
+              : 'generic',
         };
       }),
 

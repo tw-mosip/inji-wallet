@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIssuerScreenController } from './IssuerScreenController';
-import { FlatList } from 'react-native';
+import { FlatList, Image } from 'react-native';
 import { Column } from '../../components/ui';
 import { Issuer } from '../../components/Issuer/Issuer';
 import { Text } from 'react-native-elements';
@@ -18,6 +18,24 @@ export const IssuersList: React.FC = (props) => {
     } else {
       controller.DOWNLOAD_ID();
     }
+  };
+
+  const isGenericError = () => {
+    return controller.errorMessage === 'generic';
+  };
+
+  const getImage = () => {
+    if (isGenericError()) {
+      return (
+        <Image
+          source={require('../../assets/Something-went-wrong.png')}
+          style={{ width: 370, height: 150 }}
+        />
+      );
+    }
+    return (
+      <Image source={require('../../assets/no-internet-connection.png')} />
+    );
   };
 
   return (
@@ -46,8 +64,11 @@ export const IssuersList: React.FC = (props) => {
           isVisible={controller.isError}
           title={t(`errors.${controller.errorMessage}.title`)}
           message={t(`errors.${controller.errorMessage}.message`)}
-          goBack={props.navigation.goBack}
-          tryAgain={controller.TRY_AGAIN}
+          goBack={isGenericError() ? props.navigation.goBack : null}
+          tryAgain={
+            isGenericError() ? controller.TRY_AGAIN : props.navigation.goBack
+          }
+          image={getImage()}
         />
       )}
     </React.Fragment>
