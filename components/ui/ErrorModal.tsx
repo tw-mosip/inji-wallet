@@ -4,7 +4,7 @@ import { Icon } from 'react-native-elements';
 import { Button, Column, Row, Text } from '.';
 import { Theme } from './styleUtils';
 
-export const Error: React.FC<ErrorProps> = (props) => {
+export const ErrorModal: React.FC<ErrorProps> = (props) => {
   return (
     <RNModal
       animationType="slide"
