@@ -134,10 +134,7 @@ class Storage {
  * eg: "vc:UIN:6732935275:e7426576-112f-466a-961a-1ed9635db628" is changed to "vc_UIN_6732935275_e7426576-112f-466a-961a-1ed9635db628"
  */
 const getFileName = async (key: string) => {
-  const splitKey = key.split(':');
-  const hashed = await Storage.getHashedValue(splitKey[2]);
-  splitKey[2] = hashed;
-  return splitKey.join('_');
+  return await updateAndHashValueInKey(key);
 };
 
 /**
@@ -155,9 +152,18 @@ const getFilePath = async (key: string) => {
  * eg: "vc:UIN:6732935275:e7426576-112f-466a-961a-1ed9635db628:true" is changed to "vc:UIN:6732935275:e7426576-112f-466a-961a-1ed9635db628"
  */
 const getVCKeyName = async (key: string) => {
+  return await updateAndHashValueInKey(key);
+};
+
+const updateAndHashValueInKey = async (key: string) => {
   const splitKey = key.split(':');
-  const hashed = await Storage.getHashedValue(splitKey[2]);
-  splitKey[2] = hashed;
+  const uinIndex = splitKey.findIndex((item) => item === 'UIN');
+
+  if (uinIndex !== -1) {
+    const value = String(Number(splitKey[uinIndex + 1]) + 1);
+    const hashed = await Storage.getHashedValue(value);
+    splitKey[uinIndex + 1] = hashed;
+  }
   return splitKey.join('_');
 };
 
