@@ -26,6 +26,7 @@ export function useIssuerScreenController({ route, navigation }) {
       service.send(IssuerScreenTabEvents.SELECTED_ISSUER(id)),
     DISMISS: () => service.send(IssuerScreenTabEvents.DISMISS()),
     TRY_AGAIN: () => service.send(IssuerScreenTabEvents.TRY_AGAIN()),
+    RESET_ERROR: () => service.send(IssuerScreenTabEvents.RESET_ERROR()),
   };
 }
 
