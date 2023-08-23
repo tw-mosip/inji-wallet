@@ -257,6 +257,7 @@ export const storeMachine =
                     null,
                     context.encryptionKey
                   );
+                  console.log('enum store get ', response);
                   break;
                 }
                 case 'SET': {
@@ -404,6 +405,7 @@ export async function getItem(
 ) {
   try {
     const data = await Storage.getItem(key, encryptionKey);
+    console.log('store data ', data);
     if (data != null) {
       const decryptedData = decryptJson(encryptionKey, data);
       return JSON.parse(decryptedData);
@@ -443,10 +445,30 @@ export async function prependItem(
 ) {
   try {
     const list = await getItem(key, [], encryptionKey);
-    const newList = Array.isArray(value)
-      ? [...value, ...list]
-      : [value, ...list];
+    console.log('qwert 00 key ', key);
+    console.log('qwer 0 value ', value);
+    console.log('qwer 1 list ', list);
+    // const newList = Array.isArray(value)
+    //   ? [...value, ...list]
+    //   : [value, ...list];
 
+    if (typeof value === 'object' && value !== null) {
+      value = value._vcKey;
+      console.log('object val ', value);
+    }
+    console.log('qwert value ', typeof value);
+
+    let newList: unknown;
+    if (Array.isArray(value)) {
+      console.log('inside if');
+      newList = [...value, ...list];
+    } else {
+      console.log('inside else');
+      const hashVal = await Storage.updateAndHashValueInKey(value, ':');
+      console.log('qwer 2 hashval ', hashVal);
+      newList = [hashVal, ...list];
+    }
+    console.log('qwer 3 new list ', newList);
     await setItem(key, newList, encryptionKey);
   } catch (e) {
     console.error('error prependItem:', e);

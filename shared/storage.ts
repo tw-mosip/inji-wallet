@@ -34,9 +34,12 @@ class Storage {
 
   static getItem = async (key: string, encryptionKey?: string) => {
     try {
+      console.log('getitem key regex ', key, vcKeyRegExp.exec(key));
       if (vcKeyRegExp.exec(key)) {
-        const path = await getFilePath(key);
+        const path = await getFilePathGetItem(key);
+        console.log('path in get item ', path);
         const data = await readFile(path, 'utf8');
+        console.log('data in get item ', data);
         const encryptedHMACofCurrentVC = await MMKV.getItem(
           await getVCKeyName(key)
         );
@@ -122,10 +125,25 @@ class Storage {
       iterations: 5,
       memory: 16 * 1024,
       parallelism: 2,
-      hashLength: 10,
+      hashLength: 5,
       mode: 'argon2i',
     });
+    console.log('qwert rawhash ', result.rawHash);
     return result.rawHash;
+  };
+
+  static updateAndHashValueInKey = async (key: string, delimiter: string) => {
+    const splitKey = key.split(':');
+    const uinIndex = splitKey.findIndex(
+      (item) => item === 'UIN' || item === 'VID'
+    );
+    if (uinIndex !== -1) {
+      const value = String(Number(splitKey[uinIndex + 1]) + 1);
+      const hashed = await Storage.getHashedValue(value);
+      splitKey[uinIndex + 1] = hashed;
+    }
+
+    return splitKey.join(delimiter);
   };
 }
 /**
@@ -134,7 +152,7 @@ class Storage {
  * eg: "vc:UIN:6732935275:e7426576-112f-466a-961a-1ed9635db628" is changed to "vc_UIN_6732935275_e7426576-112f-466a-961a-1ed9635db628"
  */
 const getFileName = async (key: string) => {
-  return await updateAndHashValueInKey(key);
+  return await Storage.updateAndHashValueInKey(key, '_');
 };
 
 /**
@@ -147,25 +165,23 @@ const getFilePath = async (key: string) => {
   return `${vcDirectoryPath}/${fileName}.txt`;
 };
 
+const getFilePathGetItem = async (key: string) => {
+  const fileName = await getFileNameGetItem(key);
+  console.log('getfilepathgetitem ', fileName);
+  return `${vcDirectoryPath}/${fileName}.txt`;
+};
+
+const getFileNameGetItem = async (key: string) => {
+  console.log('getFileNameGetItem ', key.split(':').splice(0, 4).join('_'));
+  return key.split(':').splice(0, 4).join('_');
+};
+
 /**
  * The VC key will not have the pinned / unpinned state, we will splice the state as this will change.
  * eg: "vc:UIN:6732935275:e7426576-112f-466a-961a-1ed9635db628:true" is changed to "vc:UIN:6732935275:e7426576-112f-466a-961a-1ed9635db628"
  */
 const getVCKeyName = async (key: string) => {
-  return await updateAndHashValueInKey(key);
-};
-
-const updateAndHashValueInKey = async (key: string) => {
-  const splitKey = key.split(':');
-  const uinIndex = splitKey.findIndex(
-    (item) => item === 'UIN' || item === 'VID'
-  );
-  if (uinIndex !== -1) {
-    const value = String(Number(splitKey[uinIndex + 1]) + 1);
-    const hashed = await Storage.getHashedValue(value);
-    splitKey[uinIndex + 1] = hashed;
-  }
-  return splitKey.join('_');
+  return await Storage.updateAndHashValueInKey(key, '_');
 };
 
 export default Storage;

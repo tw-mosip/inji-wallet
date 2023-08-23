@@ -214,6 +214,12 @@ export const MyVcsTabMachine = model.createMachine(
 
       storeVcItem: send(
         (_context, event) => {
+          console.log(
+            'storeVCItem ',
+            MY_VCS_STORE_KEY,
+            (event as DoneInvokeEvent<string>).data
+          );
+          console.log('contex ', _context.serviceRefs.store);
           return StoreEvents.PREPEND(
             MY_VCS_STORE_KEY,
             (event as DoneInvokeEvent<string>).data

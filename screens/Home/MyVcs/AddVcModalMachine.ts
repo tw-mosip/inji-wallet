@@ -224,7 +224,13 @@ export const AddVcModalMachine =
         },
         done: {
           type: 'final',
-          data: (context) => VC_ITEM_STORE_KEY(context),
+
+          data: (context) => {
+            console.log('contextttt ', context);
+            console.log('contextttt type', typeof VC_ITEM_STORE_KEY(context));
+            console.log('add vc modla data ', VC_ITEM_STORE_KEY(context));
+            return VC_ITEM_STORE_KEY(context);
+          },
         },
       },
     },
@@ -233,11 +239,17 @@ export const AddVcModalMachine =
         forwardToParent: sendParent('DISMISS'),
 
         setId: model.assign({
-          id: (_context, event) => event.id,
+          id: (_context, event) => {
+            console.log('qwertyuiop ID:', event.id);
+            return event.id;
+          },
         }),
 
         setIdType: model.assign({
-          idType: (_context, event) => event.idType,
+          idType: (_context, event) => {
+            console.log('qwertyu idType ', event.id);
+            return event.idType;
+          },
         }),
 
         setOtp: model.assign({
