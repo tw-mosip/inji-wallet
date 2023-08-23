@@ -36,7 +36,7 @@ export interface Typegen0 {
     services: never;
   };
   'eventsCausingActions': {
-    resetError: 'TRY_AGAIN';
+    resetError: 'RESET_ERROR' | 'TRY_AGAIN';
     setError: 'error.platform.issuersMachine.displayIssuers:invocation[0]';
     setIssuers: 'done.invoke.issuersMachine.displayIssuers:invocation[0]';
     setSelectedIssuers: 'done.invoke.issuersMachine.downloadIssuerConfig:invocation[0]';

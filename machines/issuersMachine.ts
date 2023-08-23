@@ -26,6 +26,7 @@ const model = createModel(
       DOWNLOAD_ID: () => ({}),
       COMPLETED: () => ({}),
       TRY_AGAIN: () => ({}),
+      RESET_ERROR: () => ({}),
     },
   }
 );
@@ -60,6 +61,9 @@ export const IssuersMachine = model.createMachine(
         on: {
           TRY_AGAIN: {
             target: 'displayIssuers',
+            actions: 'resetError',
+          },
+          RESET_ERROR: {
             actions: 'resetError',
           },
         },
