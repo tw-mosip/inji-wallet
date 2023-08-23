@@ -8,7 +8,7 @@ import {
   selectIssuers,
 } from '../../machines/issuersMachine';
 
-export function useIssuerScreenController({ route }) {
+export function useIssuerScreenController({ route, navigation }) {
   const service = route.params.service;
 
   const issuers = useSelector(service, selectIssuers);
@@ -18,7 +18,10 @@ export function useIssuerScreenController({ route }) {
     issuers,
     isError,
     errorMessage,
-    DOWNLOAD_ID: () => service.send(IssuerScreenTabEvents.DOWNLOAD_ID()),
+    DOWNLOAD_ID: () => {
+      service.send(IssuerScreenTabEvents.DOWNLOAD_ID());
+      navigation.navigate('Home', { screen: 'HomeScreen' });
+    },
     SELECTED_ISSUER: (id) =>
       service.send(IssuerScreenTabEvents.SELECTED_ISSUER(id)),
     DISMISS: () => service.send(IssuerScreenTabEvents.DISMISS()),
