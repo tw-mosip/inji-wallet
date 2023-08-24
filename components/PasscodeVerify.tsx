@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PinInput } from './PinInput';
 import { hashData } from '../shared/commonUtil';
-import { argon2iConfig } from '../shared/constants';
+import { argon2iConfigForPassword } from '../shared/constants';
 
 export const MAX_PIN = 6;
 
@@ -19,7 +19,11 @@ export const PasscodeVerify: React.FC<PasscodeVerifyProps> = (props) => {
   return <PinInput length={MAX_PIN} onDone={verify} />;
 
   async function verify(value: string) {
-    const hashedPasscode = await hashData(value, props.salt, argon2iConfig);
+    const hashedPasscode = await hashData(
+      value,
+      props.salt,
+      argon2iConfigForPassword
+    );
     if (props.passcode === hashedPasscode) {
       setIsVerified(true);
     } else {

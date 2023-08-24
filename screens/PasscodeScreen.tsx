@@ -8,14 +8,18 @@ import { Theme } from '../components/ui/styleUtils';
 import { PasscodeRouteProps } from '../routes';
 import { usePasscodeScreen } from './PasscodeScreenController';
 import { hashData } from '../shared/commonUtil';
-import { argon2iConfig } from '../shared/constants';
+import { argon2iConfigForPassword } from '../shared/constants';
 
 export const PasscodeScreen: React.FC<PasscodeRouteProps> = (props) => {
   const { t } = useTranslation('PasscodeScreen');
   const controller = usePasscodeScreen(props);
 
   const setPasscode = async (passcode: string) => {
-    const data = await hashData(passcode, controller.storedSalt, argon2iConfig);
+    const data = await hashData(
+      passcode,
+      controller.storedSalt,
+      argon2iConfigForPassword
+    );
     controller.setPasscode(data);
   };
 

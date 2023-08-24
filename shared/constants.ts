@@ -62,10 +62,18 @@ export function isIOS(): boolean {
 }
 
 // Configuration for argon2i hashing algorithm
-export const argon2iConfig: Argon2iConfig = {
+export const argon2iConfigForPassword: Argon2iConfig = {
   iterations: 5,
   memory: 16 * 1024,
   parallelism: 2,
   hashLength: 20,
+  mode: 'argon2i',
+};
+
+export const argon2iConfigForUinVid: Argon2iConfig = {
+  iterations: 5,
+  memory: 16 * 1024,
+  parallelism: 2,
+  hashLength: 5,
   mode: 'argon2i',
 };
