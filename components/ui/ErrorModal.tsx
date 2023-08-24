@@ -10,51 +10,53 @@ export const ErrorModal: React.FC<ErrorProps> = (props) => {
       animationType="slide"
       style={Theme.ModalStyles.modal}
       visible={props.isVisible}>
-      {props.goBack && (
-        <Icon
-          name="arrow-left"
-          type="material-community"
-          onPress={props.goBack}
-          containerStyle={{
-            ...Theme.Styles.backArrowContainer,
-            marginTop: 10,
-            marginLeft: 10,
-          }}
-        />
-      )}
-      <Column align="center" fill safe style={{ marginHorizontal: 10 }}>
-        <Row align="center">{props.image}</Row>
-        <Row>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              marginHorizontal: 18,
-              padding: 12,
-            }}>
-            <Row fill align={'center'}>
-              <Column>
-                <Text
-                  style={{
-                    ...Theme.TextStyles.header,
-                    textAlign: 'center',
-                    padding: 5,
-                  }}>
-                  {props.title}
-                </Text>
-                <Text style={{ textAlign: 'center' }}>{props.message}</Text>
-              </Column>
-            </Row>
+      <Column fill safe>
+        {props.goBack && (
+          <Row elevation={2}>
+            <View style={Theme.ModalStyles.header}>
+              <Row fill align={'flex-start'} margin={'16 0 0 0'}>
+                <Icon
+                  name="arrow-left"
+                  type="material-community"
+                  onPress={props.goBack}
+                  containerStyle={{
+                    ...Theme.Styles.backArrowContainer,
+                  }}
+                />
+              </Row>
+            </View>
+          </Row>
+        )}
+        <Column fill safe align="space-evenly">
+          <View style={{ alignItems: 'center' }}>
+            <View>
+              <Row align="center">{props.image}</Row>
+              <Text
+                style={{
+                  ...Theme.TextStyles.header,
+                  textAlign: 'center',
+                }}>
+                {props.title}
+              </Text>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  ...Theme.TextStyles.regular,
+                  marginTop: 12,
+                  marginBottom: 30,
+                  marginHorizontal: 40,
+                }}>
+                {props.message}
+              </Text>
+            </View>
+            <Button
+              onPress={props.tryAgain}
+              width={Dimensions.get('screen').width * 0.46}
+              title="Try Again"
+              type="outline"
+            />
           </View>
-        </Row>
-        <Row align="center" style={{ padding: 10 }}>
-          <Button
-            onPress={props.tryAgain}
-            width={Dimensions.get('screen').width * 0.46}
-            title="Try again"
-            type="outline"
-          />
-        </Row>
+        </Column>
       </Column>
     </RNModal>
   );
