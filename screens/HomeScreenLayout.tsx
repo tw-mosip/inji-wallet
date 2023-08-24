@@ -13,7 +13,7 @@ import { SettingScreen } from './Settings/SettingScreen';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 export const HomeScreenLayout: React.FC<RootRouteProps> = (props) => {
-  const { t } = useTranslation('IssuersListScreen');
+  const { t } = useTranslation('IssuersScreen');
   const HomeScreenOptions = {
     headerLeft: () =>
       React.createElement(Image, {
@@ -58,7 +58,7 @@ export const HomeScreenLayout: React.FC<RootRouteProps> = (props) => {
       />
       <Screen
         key={'Issuers'}
-        name={'IssuersListScreen'}
+        name={'IssuersScreen'}
         component={IssuersScreen}
         options={{
           headerShown: true,

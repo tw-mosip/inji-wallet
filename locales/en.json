@@ -152,7 +152,7 @@
     "version": "Version",
     "tuvaliVersion": "Tuvali-version"
   },
-  "IssuersListScreen": {
+  "IssuersScreen": {
     "title": "Add new card",
     "header": "Please select a preferred method from below to download a new card",
     "errors":{
