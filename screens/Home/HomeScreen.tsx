@@ -24,7 +24,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
   }, [controller.IssuersService]);
 
   const navigateToIssuers = () => {
-    props.navigation.navigate('IssuersListScreen', {
+    props.navigation.navigate('IssuersScreen', {
       service: controller.IssuersService,
     });
   };

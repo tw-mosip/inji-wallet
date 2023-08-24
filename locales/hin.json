@@ -148,7 +148,7 @@
     "version": "संस्करण",
     "tuvaliVersion": "तुवाली-संस्करण"
   },
-  "IssuersListScreen": {
+  "IssuersScreen": {
     "title": "नया कार्ड जोड़ें",
     "header": "नया कार्ड डाउनलोड करने के लिए कृपया नीचे से कोई पसंदीदा विधि चुनें",
     "errors": {

@@ -11,7 +11,7 @@ import { useIssuerScreenController } from './IssuerScreenController';
 
 export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
   const controller = useIssuerScreenController(props);
-  const { t } = useTranslation('IssuersListScreen');
+  const { t } = useTranslation('IssuersScreen');
 
   const onPressHandler = (id) => {
     if (id !== 'UIN, VID, AID') {

@@ -151,7 +151,7 @@
     "version": "الإصدار",
     "tuvaliVersion": "نسخة توفالي"
   },
-  "IssuersListScreen": {
+  "IssuersScreen": {
     "title": "أضف بطاقة جديدة",
     "header": "الرجاء تحديد طريقة مفضلة أدناه لتنزيل بطاقة جديدة",
     "errors":{
