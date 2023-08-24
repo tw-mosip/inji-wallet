@@ -67,9 +67,9 @@ export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
           />
         )}
       </Column>
-      {controller.isError && (
+      {controller.errorMessage && (
         <ErrorModal
-          isVisible={controller.isError}
+          isVisible={controller.errorMessage !== null}
           title={t(`errors.${controller.errorMessage}.title`)}
           message={t(`errors.${controller.errorMessage}.message`)}
           goBack={isGenericError() ? null : goBack}
