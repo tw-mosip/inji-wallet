@@ -753,6 +753,13 @@ export const PurpleTheme = {
       width: Dimensions.get('screen').width,
       height: Dimensions.get('screen').height,
     },
+    header: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginHorizontal: 18,
+      marginVertical: 8,
+    },
   }),
   UpdateModalStyles: StyleSheet.create({
     modal: {
