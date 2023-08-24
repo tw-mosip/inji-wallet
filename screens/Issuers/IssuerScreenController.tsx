@@ -4,7 +4,6 @@ import {
   IssuerScreenTabEvents,
   IssuersMachine,
   selectErrorMessage,
-  selectIsError,
   selectIssuers,
 } from '../../machines/issuersMachine';
 
@@ -12,11 +11,9 @@ export function useIssuerScreenController({ route, navigation }) {
   const service = route.params.service;
 
   const issuers = useSelector(service, selectIssuers);
-  const isError = useSelector(service, selectIsError);
   const errorMessage = useSelector(service, selectErrorMessage);
   return {
     issuers,
-    isError,
     errorMessage,
     DOWNLOAD_ID: () => {
       service.send(IssuerScreenTabEvents.DOWNLOAD_ID());

@@ -16,7 +16,6 @@ const model = createModel(
     issuers: defaultIssuer as issuerType[],
     selectedIssuer: [] as issuerType[],
     tokenResponse: [] as [],
-    isError: false as boolean,
     errorMessage: null as string,
   },
   {
@@ -115,23 +114,15 @@ export const IssuersMachine = model.createMachine(
         issuers: (_, event) => event.data,
       }),
 
-      setError: model.assign((context, event) => {
-        return {
-          ...context,
-          isError: true,
-          errorMessage:
-            event.data.message === 'Network request failed'
-              ? 'noInternetConnection'
-              : 'generic',
-        };
+      setError: model.assign({
+        errorMessage: (_, event) =>
+          event.data.message === 'Network request failed'
+            ? 'noInternetConnection'
+            : 'generic',
       }),
 
-      resetError: model.assign((context) => {
-        return {
-          ...context,
-          isError: false,
-          errorMessage: null,
-        };
+      resetError: model.assign({
+        errorMessage: null,
       }),
 
       setSelectedIssuers: model.assign({
@@ -177,9 +168,6 @@ export function selectIssuers(state: State) {
   return state.context.issuers;
 }
 
-export function selectIsError(state: State) {
-  return state.context.isError;
-}
 export function selectErrorMessage(state: State) {
   return state.context.errorMessage;
 }
