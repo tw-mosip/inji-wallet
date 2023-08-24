@@ -1045,6 +1045,8 @@ export const PurpleTheme = {
   IntroScanner: require('../../../assets/intro-scanner.png'),
   injiSmallLogo: require('../../../assets/inji_small_logo.png'),
   protectPrivacy: require('../../../assets/phone_mockup_1.png'),
+  NoInternetConnection: require('../../../assets/no-internet-connection.png'),
+  SomethingWentWrong: require('../../../assets/Something-went-wrong.png'),
 
   elevation(level: ElevationLevel): ViewStyle {
     // https://ethercreative.github.io/react-native-shadow-generator/
