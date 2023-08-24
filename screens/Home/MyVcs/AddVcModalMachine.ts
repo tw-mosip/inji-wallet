@@ -235,9 +235,9 @@ export const AddVcModalMachine =
         done: {
           type: 'final',
           data: (context, event) => {
-            console.log('event data ', event.data);
-            console.log('add vc modla data ', VC_ITEM_STORE_KEY(context));
-            return VC_ITEM_STORE_KEY(context);
+            console.log('event data ', event.data as object);
+            console.log('add vc modla data ', VC_ITEM_STORE_KEY(event.data));
+            return VC_ITEM_STORE_KEY(event.data);
           },
         },
       },
