@@ -1,13 +1,13 @@
 import React from 'react';
-import { useIssuerScreenController } from './IssuerScreenController';
-import { FlatList, Image } from 'react-native';
-import { Column } from '../../components/ui';
-import { Issuer } from '../../components/Issuer/Issuer';
-import { Text } from 'react-native-elements';
-import { Theme } from '../../components/ui/styleUtils';
 import { useTranslation } from 'react-i18next';
+import { FlatList, Image } from 'react-native';
+import { Text } from 'react-native-elements';
+import { Issuer } from '../../components/Issuer/Issuer';
+import { Column } from '../../components/ui';
 import { ErrorModal } from '../../components/ui/ErrorModal';
+import { Theme } from '../../components/ui/styleUtils';
 import { HomeRouteProps } from '../../routes/main';
+import { useIssuerScreenController } from './IssuerScreenController';
 
 export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
   const controller = useIssuerScreenController(props);
@@ -26,12 +26,10 @@ export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
   };
 
   const goBack = () => {
-    if (isGenericError()) {
-      controller.RESET_ERROR();
-      setTimeout(() => {
-        props.navigation.goBack();
-      }, 0);
-    }
+    controller.RESET_ERROR();
+    setTimeout(() => {
+      props.navigation.goBack();
+    }, 0);
   };
 
   const getImage = () => {
@@ -74,10 +72,8 @@ export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
           isVisible={controller.isError}
           title={t(`errors.${controller.errorMessage}.title`)}
           message={t(`errors.${controller.errorMessage}.message`)}
-          goBack={goBack}
-          tryAgain={
-            isGenericError() ? controller.TRY_AGAIN : props.navigation.goBack
-          }
+          goBack={isGenericError() ? null : goBack}
+          tryAgain={isGenericError() ? goBack : controller.TRY_AGAIN}
           image={getImage()}
         />
       )}
