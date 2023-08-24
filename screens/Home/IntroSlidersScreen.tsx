@@ -19,19 +19,19 @@ export const IntroSlidersScreen: React.FC<RootRouteProps> = (props) => {
       key: 'one',
       title: t('stepOneTitle'),
       text: t('stepOneText'),
-      image: Theme.protectPrivacy,
+      image: Theme.ProtectPrivacy,
     },
     {
       key: 'two',
       title: t('stepTwoTitle'),
       text: t('stepTwoText'),
-      image: Theme.sharingIntro,
+      image: Theme.SharingIntro,
     },
     {
       key: 'three',
       title: t('stepThreeTitle'),
       text: t('stepThreeText'),
-      image: Theme.walletIntro,
+      image: Theme.WalletIntro,
     },
     {
       key: 'four',
@@ -54,7 +54,7 @@ export const IntroSlidersScreen: React.FC<RootRouteProps> = (props) => {
               }}>
               <Image
                 style={{ marginTop: 50, marginBottom: 30 }}
-                source={Theme.injiSmallLogo}
+                source={Theme.InjiSmallLogo}
               />
             </Column>
 
