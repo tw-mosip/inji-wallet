@@ -36,14 +36,12 @@ export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
     if (isGenericError()) {
       return (
         <Image
-          source={require('../../assets/Something-went-wrong.png')}
+          source={Theme.SomethingWentWrong}
           style={{ width: 370, height: 150 }}
         />
       );
     }
-    return (
-      <Image source={require('../../assets/no-internet-connection.png')} />
-    );
+    return <Image source={Theme.NoInternetConnection} />;
   };
 
   return (
