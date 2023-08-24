@@ -12,6 +12,7 @@ import { BackendResponseError, request } from '../../../shared/request';
 import { VC_ITEM_STORE_KEY } from '../../../shared/constants';
 import { VcIdType } from '../../../types/vc';
 import i18n from '../../../i18n';
+import argon2 from 'react-native-argon2';
 
 const model = createModel(
   {
@@ -206,7 +207,7 @@ export const AddVcModalMachine =
             onDone: [
               {
                 actions: 'setRequestId',
-                target: 'done',
+                target: 'calculatingHashedId',
               },
             ],
             onError: [
@@ -222,9 +223,22 @@ export const AddVcModalMachine =
             ],
           },
         },
+        calculatingHashedId: {
+          invoke: {
+            src: 'calculateHashedId',
+            onDone: {
+              target: 'done',
+            },
+          },
+        },
+
         done: {
           type: 'final',
-          data: (context) => VC_ITEM_STORE_KEY(context),
+          data: (context, event) => {
+            console.log('event data ', event.data);
+            console.log('add vc modla data ', VC_ITEM_STORE_KEY(context));
+            return VC_ITEM_STORE_KEY(context);
+          },
         },
       },
     },
@@ -349,6 +363,18 @@ export const AddVcModalMachine =
           );
           return response.response.requestId;
         },
+
+        calculateHashedId: async (context) => {
+          console.log('contextttt ', context);
+          const hashedContext = context;
+          console.log('hashed context ', hashedContext);
+          console.log('hashed context id ', hashedContext.id);
+          const hashedid = await getHashedValue(hashedContext.id);
+          console.log('hashedid ', hashedid);
+          hashedContext.id = hashedid;
+          console.log('hashed context full ', hashedContext);
+          return hashedContext;
+        },
       },
 
       guards: {
@@ -408,4 +434,18 @@ export function selectIsRequestingOtp(state: State) {
 
 export function selectIsRequestingCredential(state: State) {
   return state.matches('requestingCredential');
+}
+
+async function getHashedValue(key: string) {
+  const salt =
+    '1234567891011121314151617181920212223242526272829303132333435363';
+  const result = await argon2(key, salt, {
+    iterations: 5,
+    memory: 16 * 1024,
+    parallelism: 2,
+    hashLength: 5,
+    mode: 'argon2i',
+  });
+  console.log('qwert rawhash ', result.rawHash);
+  return result.rawHash;
 }
