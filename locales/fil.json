@@ -153,7 +153,17 @@
   },
   "IssuersListScreen": {
     "title": "Magdagdag ng bagong card",
-    "header": "Mangyaring pumili ng gustong paraan mula sa ibaba upang mag-download ng bagong card"
+    "header": "Mangyaring pumili ng gustong paraan mula sa ibaba upang mag-download ng bagong card",
+    "errors": {
+      "noInternetConnection": {
+        "title": "Walang koneksyon sa internet",
+        "message": "Mangyaring kumonekta sa internet at subukang muli."
+      },
+      "generic": {
+        "title": "may nangyaring mali!",
+        "message": "Nagsusumikap ang aming mga eksperto upang gawing muli ang mga bagay."
+      }
+    }
   },
   "HelpScreen": {
     "header": "Tulong",

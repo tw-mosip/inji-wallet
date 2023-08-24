@@ -1,10 +1,13 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, Modal as RNModal, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Button, Column, Row, Text } from '.';
 import { Theme } from './styleUtils';
 
 export const ErrorModal: React.FC<ErrorProps> = (props) => {
+  const { t } = useTranslation('common');
+
   return (
     <RNModal
       animationType="slide"
@@ -52,7 +55,7 @@ export const ErrorModal: React.FC<ErrorProps> = (props) => {
             <Button
               onPress={props.tryAgain}
               width={Dimensions.get('screen').width * 0.46}
-              title="Try Again"
+              title={t('tryAgain')}
               type="outline"
             />
           </View>
