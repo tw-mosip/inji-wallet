@@ -134,10 +134,8 @@ export const IssuersMachine = model.createMachine(
     },
     services: {
       downloadIssuersList: async () => {
-        // const response = await request('GET', '/residentmobileapp/issuers');
-        // console.log("Response from downloadIssuersList -> ", JSON.stringify(response, null, 4));
-        // return [...defaultIssuer, ...response.response.issuers];
-        return defaultIssuer;
+        const response = await request('GET', '/residentmobileapp/issuers');
+        return [...defaultIssuer, ...response.response.issuers];
       },
       downloadIssuerConfig: async (_, event) => {
         const response = await request(
