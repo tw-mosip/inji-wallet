@@ -301,6 +301,8 @@ PODS:
     - React-Core
   - react-native-secure-key-store (2.0.10):
     - React-Core
+  - react-native-secure-keystore (0.1.0):
+    - React-Core
   - react-native-secure-keystore (0.1.1):
     - React-Core
   - react-native-tuvali (0.4.4):
@@ -689,7 +691,6 @@ SPEC CHECKSUMS:
   EXUpdates: a83e036243b0f6ece53a8c1cb883b6751c88a5f8
   EXUpdatesInterface: a9814f422d3cd6e7cfd260d13c27786148ece20e
   FBLazyVector: fa8275d5086566e22a26ddc385ab5772e7f9b1bd
-  FBReactNativeSpec: cf74e526fafb31c87e89998fe3f8981e52b8b7d9
   FBReactNativeSpec: c257357b5c489132d39462acd75a0d46e9c55f18
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   GoogleInterchangeUtilities: d5bc4d88d5b661ab72f9d70c58d02ca8c27ad1f7

@@ -76,7 +76,6 @@ class Storage {
 
         return isCorrupted ? null : data;
       }
-
       return await MMKV.getItem(key);
     } catch (error) {
       console.log('Error Occurred while retriving from Storage.', error);
