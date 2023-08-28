@@ -52,12 +52,14 @@ export const ErrorModal: React.FC<ErrorProps> = (props) => {
                 {props.message}
               </Text>
             </View>
-            <Button
-              onPress={props.tryAgain}
-              width={Dimensions.get('screen').width * 0.46}
-              title={t('tryAgain')}
-              type="outline"
-            />
+            {props.tryAgain && (
+              <Button
+                onPress={props.tryAgain}
+                width={Dimensions.get('screen').width * 0.46}
+                title={t('tryAgain')}
+                type="outline"
+              />
+            )}
           </View>
         </Column>
       </Column>

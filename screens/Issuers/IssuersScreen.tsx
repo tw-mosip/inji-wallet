@@ -70,8 +70,8 @@ export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
           isVisible={controller.errorMessage !== null}
           title={t(`errors.${controller.errorMessage}.title`)}
           message={t(`errors.${controller.errorMessage}.message`)}
-          goBack={isGenericError() ? null : goBack}
-          tryAgain={isGenericError() ? goBack : controller.TRY_AGAIN}
+          goBack={goBack}
+          tryAgain={isGenericError() ? null : controller.TRY_AGAIN}
           image={getImage()}
         />
       )}
