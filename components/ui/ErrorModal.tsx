@@ -10,6 +10,7 @@ export const ErrorModal: React.FC<ErrorProps> = (props) => {
 
   return (
     <RNModal
+      onRequestClose={props.goBack}
       animationType="slide"
       style={Theme.ModalStyles.modal}
       visible={props.isVisible}>
