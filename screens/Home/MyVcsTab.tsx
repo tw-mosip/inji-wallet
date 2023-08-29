@@ -18,6 +18,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { groupBy } from '../../shared/javascript';
 
 const pinIconProps = { iconName: 'pushpin', iconType: 'antdesign' };
+import { ENABLE_OPENID_FOR_VC } from 'react-native-dotenv';
 
 export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
   const { t } = useTranslation('MyVcsTab');
@@ -137,13 +138,15 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                   );
                 })}
               </Column>
-              <Button
-                testID="downloadCard"
-                type="gradient"
-                disabled={controller.isRefreshingVcs}
-                title={t('downloadCard')}
-                onPress={controller.DOWNLOAD_ID}
-              />
+                {ENABLE_OPENID_FOR_VC === 'false' && (
+                  <Button
+                    testID="downloadCard"
+                    type="gradient"
+                    disabled={controller.isRefreshingVcs}
+                    title={t('downloadCard')}
+                    onPress={controller.DOWNLOAD_ID}
+                  />
+                )}
               <DownloadFABIcon {...props} />
             </React.Fragment>
           )}
@@ -166,12 +169,14 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                     margin="0 12 30 12">
                     {t('generateVcDescription')}
                   </Text>
+                    {ENABLE_OPENID_FOR_VC === 'false' && (
                     <Button
                         type="gradient"
                         disabled={controller.isRefreshingVcs}
                         title={t('downloadCard')}
                         onPress={controller.DOWNLOAD_ID}
                     />
+                    )}
                 </View>
                 <DownloadFABIcon {...props} />
               </Column>
