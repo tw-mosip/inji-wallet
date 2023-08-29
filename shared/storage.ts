@@ -183,4 +183,10 @@ const getVCKeyName = (key: string) => {
   return key.split(':').splice(0, 4).join(':');
 };
 
+// call this function in getItem to print the MMKV Data
+// const getMMKVData = async () =>{
+//   const mmkvData = await MMKV.indexer.getKeys()
+//   console.log("mmkv data", mmkvData)
+// }
+
 export default Storage;

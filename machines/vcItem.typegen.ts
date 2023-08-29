@@ -189,6 +189,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]'
       | 'done.invoke.vc-item.verifyingCredential:invocation[0]'
       | 'error.platform.vc-item.verifyingCredential:invocation[0]';
+    editVcKey: 'CREDENTIAL_DOWNLOADED';
     incrementDownloadCounter: 'POLL';
     logDownloaded: 'STORE_RESPONSE';
     logRevoked: 'STORE_RESPONSE';
