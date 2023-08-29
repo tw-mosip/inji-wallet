@@ -2,12 +2,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Image } from 'react-native';
 import { Text } from 'react-native-elements';
-import { Issuer } from '../../components/Issuer/Issuer';
+import { useIssuerScreenController } from './IssuerScreenController';
 import { Column } from '../../components/ui';
+import { Issuer } from '../../components/Issuer/Issuer';
 import { ErrorModal } from '../../components/ui/ErrorModal';
 import { Theme } from '../../components/ui/styleUtils';
 import { HomeRouteProps } from '../../routes/main';
-import { useIssuerScreenController } from './IssuerScreenController';
+import { ProgressingModal } from '../../components/ProgressingModal';
 
 export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
   const controller = useIssuerScreenController(props);
@@ -73,6 +74,15 @@ export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
           goBack={goBack}
           tryAgain={isGenericError() ? null : controller.TRY_AGAIN}
           image={getImage()}
+        />
+      )}
+      {controller.isDownloadingCredentials && (
+        <ProgressingModal
+          isVisible={controller.isDownloadingCredentials}
+          title={t('modal.title')}
+          onCancel={controller.CANCEL}
+          hint={t('modal.hint')}
+          progress={true}
         />
       )}
     </React.Fragment>

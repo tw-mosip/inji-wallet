@@ -2,6 +2,7 @@ import { createModel } from 'xstate/lib/model';
 import { EventFrom, sendParent, StateFrom } from 'xstate';
 import { request } from '../shared/request';
 import { authorize } from 'react-native-app-auth';
+import { HOST } from '../shared/constants';
 
 const defaultIssuer = [
   {
@@ -17,6 +18,7 @@ const model = createModel(
     selectedIssuer: [] as issuerType[],
     tokenResponse: [] as [],
     errorMessage: null as string,
+    credential: '' as string,
   },
   {
     events: {
@@ -26,6 +28,7 @@ const model = createModel(
       COMPLETED: () => ({}),
       TRY_AGAIN: () => ({}),
       RESET_ERROR: () => ({}),
+      CANCEL: () => ({}),
     },
   }
 );
@@ -91,14 +94,33 @@ export const IssuersMachine = model.createMachine(
           src: 'invokeAuthorization',
           onDone: {
             actions: 'setTokenResponse',
-            target: 'done',
+            target: 'downloadCredentials',
           },
         },
       },
+      downloadCredentials: {
+        invoke: {
+          src: 'downloadCredential',
+          onDone: {
+            actions: 'setCredential',
+            target: 'idle',
+          },
+        },
+        on: {
+          CANCEL: {
+            target: 'selectingIssuer',
+          },
+        },
+      },
+      storing: {},
       idle: {
+        entry: () => console.log('entered idle state'),
         on: {
           COMPLETED: {
             target: 'done',
+          },
+          CANCEL: {
+            target: 'selectingIssuer',
           },
         },
       },
@@ -131,6 +153,9 @@ export const IssuersMachine = model.createMachine(
       setTokenResponse: model.assign({
         tokenResponse: (_, event) => event.data,
       }),
+      setCredential: model.assign({
+        credential: (_, event) => event.data,
+      }),
     },
     services: {
       downloadIssuersList: async () => {
@@ -148,13 +173,45 @@ export const IssuersMachine = model.createMachine(
         );
         return response.response;
       },
+      downloadCredential: async (context) => {
+        const response = await fetch(
+          'https://api-internal.dev1.mosip.net/v1/esignet/vci/credential',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + context.tokenResponse?.accessToken,
+            },
+            body: JSON.stringify({}),
+          }
+        );
+        console.log('response', response);
+        const credential = await response.json();
+        console.log(
+          'Response from downloadCredential',
+          JSON.stringify(credential, null, 4)
+        );
+        return JSON.stringify(credential, null, 4);
+      },
       invokeAuthorization: async (context) => {
-        const response = await authorize(context.selectedIssuer);
+        const config = {
+          redirectUrl: 'io.mosip.residentapp.inji://oauthredirect',
+          // redirectUrl: 'io.mosip.residentapp://oauth',
+          clientId: '7-j3xRzU3SODdoNgSGvO_cD8UijH3AIWRDAg1x-M',
+          clientSecret: '',
+          scopes: ['SampleVerifiableCredential_ldp'],
+          additionalHeaders: { Accept: 'application/json' },
+          serviceConfiguration: {
+            authorizationEndpoint: 'https://esignet.dev1.mosip.net/authorize',
+            tokenEndpoint: HOST + '/residentmobileapp/get-token',
+          },
+        };
+        const response = await authorize(config);
         console.log(
           'Response from invokeAuthorization',
           JSON.stringify(response, null, 4)
         );
-        return response?.response;
+        return response;
       },
     },
   }
@@ -166,8 +223,24 @@ export function selectIssuers(state: State) {
   return state.context.issuers;
 }
 
+export function selectCredentials(state: State) {
+  return state.context.credential;
+}
+
 export function selectErrorMessage(state: State) {
   return state.context.errorMessage;
+}
+
+export function selectIsDownloadCredentials(state: State) {
+  return state.matches('downloadCredentials');
+}
+
+export function selectIsDone(state: State) {
+  return state.matches('done');
+}
+
+export function selectIsIdle(state: State) {
+  return state.matches('idle');
 }
 
 interface issuerType {
