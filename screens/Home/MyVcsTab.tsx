@@ -14,6 +14,7 @@ import {
   MessageOverlay,
 } from '../../components/MessageOverlay';
 import { Icon } from 'react-native-elements';
+import { ENABLE_OPENID_FOR_VC } from 'react-native-dotenv';
 
 export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
   const { t } = useTranslation('MyVcsTab');
@@ -103,6 +104,14 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                   }
                 })}
               </Column>
+              {ENABLE_OPENID_FOR_VC === 'false' && (
+                <Button
+                  type="gradient"
+                  disabled={controller.isRefreshingVcs}
+                  title={t('downloadCard')}
+                  onPress={controller.DOWNLOAD_ID}
+                />
+              )}
             </React.Fragment>
           )}
           {controller.vcKeys.length === 0 && (
@@ -125,6 +134,14 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                     {t('generateVcDescription')}
                   </Text>
                 </View>
+                {ENABLE_OPENID_FOR_VC === 'false' && (
+                  <Button
+                    type="gradient"
+                    disabled={controller.isRefreshingVcs}
+                    title={t('downloadCard')}
+                    onPress={controller.DOWNLOAD_ID}
+                  />
+                )}
               </Column>
             </React.Fragment>
           )}

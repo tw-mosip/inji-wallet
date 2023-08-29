@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { ActorRefFrom } from 'xstate';
 import { vcItemMachine } from '../../machines/vcItem';
 import LinearGradient from 'react-native-linear-gradient';
+import { ENABLE_OPENID_FOR_VC } from 'react-native-dotenv';
 
 export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
   const { t } = useTranslation('HomeScreen');
@@ -73,7 +74,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
           </Column>
         )}
       </Column>
-      <DownloadFABIcon />
+      {ENABLE_OPENID_FOR_VC === 'true' && <DownloadFABIcon />}
       {controller.selectedVc && (
         <ViewVcModal
           isVisible={controller.isViewingVc}
