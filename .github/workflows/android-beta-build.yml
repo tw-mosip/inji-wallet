@@ -47,6 +47,14 @@ on:
         options:
           - false
           - true
+      enable_openid_for_vc:
+        description: 'Enable openid for vc'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - false
+          - true
 
 jobs:
   build-android:
@@ -140,3 +148,4 @@ jobs:
           SLACK_URL: '${{ secrets.SLACK_WEBHOOK_DEVOPS }}'
           PLAY_CONSOLE_RELEASE_DESCRIPTION: ${{ github.event.inputs.buildDescription }}
           CREDENTIAL_REGISTRY_EDIT: ${{ github.event.inputs.registry_edit }}
+          ENABLE_OPENID_FOR_VC: ${{ github.event.inputs.enable_openid_for_vc }}
