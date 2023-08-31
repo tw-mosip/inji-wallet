@@ -1,7 +1,7 @@
 {
   "scripts": {
     "prepare": "husky install",
-    "start": "react-native start",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider react-native start",
     "android:mosip": "react-native run-android --variant=mosipDebug",
     "ios": "react-native run-ios",
     "build:android:mosip": "cd android && ./gradlew :app:assembleMosipRelease && cd ..",
