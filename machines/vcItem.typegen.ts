@@ -165,6 +165,7 @@ export interface Typegen0 {
     services: never;
   };
   'eventsCausingActions': {
+    VcUpdated: 'STORE_RESPONSE';
     clearOtp:
       | ''
       | 'CANCEL'
@@ -189,6 +190,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]'
       | 'done.invoke.vc-item.verifyingCredential:invocation[0]'
       | 'error.platform.vc-item.verifyingCredential:invocation[0]';
+    editVcKey: 'CREDENTIAL_DOWNLOADED';
     incrementDownloadCounter: 'POLL';
     logDownloaded: 'STORE_RESPONSE';
     logRevoked: 'STORE_RESPONSE';
@@ -231,7 +233,9 @@ export interface Typegen0 {
     setRevoke: 'done.invoke.vc-item.requestingRevoke:invocation[0]';
     setStoreVerifiableCredential: 'CREDENTIAL_DOWNLOADED';
     setTag: 'SAVE_TAG';
-    setThumbprintForWalletBindingId: 'done.invoke.vc-item.addingWalletBindingId:invocation[0]';
+    setThumbprintForWalletBindingId:
+      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
+      | 'done.invoke.vc-item.kebabPopUp.addingWalletBindingId:invocation[0]';
     setTransactionId:
       | 'INPUT_OTP'
       | 'REVOKE_VC'

@@ -39,7 +39,7 @@ export const MainLayout: React.FC<RootRouteProps & RequestRouteProps> = (
       fontFamily: 'Inter_600SemiBold',
     },
     tabBarStyle: {
-      height: 82,
+      height: 75,
       paddingHorizontal: 10,
     },
     tabBarItemStyle: {

@@ -34,8 +34,9 @@
     "verify": "I-verify"
   },
   "QrScanner": {
-    "missingPermissionText": "Ginagamit ng app na ito ang camera upang i-scan ang QR code ng isa pang device.",
-    "allowCameraButton": "Payagan gamitin ang camera"
+    "cameraAccessDisabled": "Naka-disable ang access sa camera!",
+    "cameraPermissionGuideLabel": "Pumunta sa mga setting at manual na paganahin ang access ng camera.",
+    "flipCamera": "I-flip ang Camera"
   },
   "VcDetails": {
     "generatedOn": "Nilikha noong",
@@ -56,8 +57,8 @@
     "uin": "UIN",
     "vid": "VID",
     "enableVerification": "I-activate",
-    "profileAuthenticated": "Na-activate para sa online na pag-login",
-    "offlineAuthDisabledHeader": "Nakabinbin ang pag-activate para sa online na pag-login",
+    "profileAuthenticated": "Na-activate para sa online na pag-login!",
+    "offlineAuthDisabledHeader": "Nakabinbin ang pag-activate para sa online na pag-login!",
     "offlineAuthDisabledMessage": "Mangyaring i-click ang pindutan sa ibaba upang i-activate ang kredensyal na ito upang magamit para sa online na pag-login.",
     "verificationEnabledSuccess": "Na-activate para sa online na pag-login",
     "goback": "BUMALIK KA",
@@ -82,8 +83,8 @@
     "title": "Higit pang mga Opsyon",
     "unPinCard": "I-unpin ang Card",
     "pinCard": "Pin Card",
-    "offlineAuthenticationDisabled!": "Na-disable ang offline na pagpapatotoo!",
-    "offlineAuthDisabledMessage": "Mag-click dito upang paganahin ang kredensyal na ito na magamit para sa offline na pagpapatotoo.",
+    "offlineAuthenticationDisabled!": "Nakabinbin ang pag-activate para sa online na pag-login!",
+    "offlineAuthDisabledMessage": "Mag-click dito upang paganahin ang mga kredensyal na ito na magamit para sa online na pagpapatotoo.",
     "viewActivityLog": "Tingnan ang log ng aktibidad",
     "removeFromWallet": "Alisin sa wallet",
     "revokeId": "Bawiin ang ID",
@@ -91,7 +92,7 @@
   },
   "WalletBinding": {
     "inProgress": "Isinasagawa",
-    "profileAuthenticated": "Na-authenticate ang profile!"
+    "profileAuthenticated": "Na-activate para sa online na pag-login!"
   },
   "BindingVcWarningOverlay": {
     "alert": "Pakikumpirma",
@@ -369,8 +370,8 @@
     "verifyAndSave": "I-verify at i-save",
     "reject": "Tanggihan",
     "discard": "Itapon",
-    "saving": "ay iniligtas",
     "goToReceivedVCTab": "Natanggap na View card",
+    "saving": "Sine-save ang card",
     "errors": {
       "savingFailed": {
         "title": "Failed to save card",

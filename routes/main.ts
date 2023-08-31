@@ -21,7 +21,7 @@ const home: TabScreen = {
   },
 };
 export const scan: TabScreen = {
-  name: 'Scan',
+  name: 'scan',
   component: ScanLayout,
   icon: 'qr-code-scanner',
   options: {
@@ -30,7 +30,7 @@ export const scan: TabScreen = {
   },
 };
 const history: TabScreen = {
-  name: 'History',
+  name: 'history',
   component: HistoryScreen,
   icon: 'history',
   options: {
