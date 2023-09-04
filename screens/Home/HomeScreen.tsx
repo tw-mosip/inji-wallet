@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { Icon, Tab } from 'react-native-elements';
-import { Button, Column, Text } from '../../components/ui';
+import { Icon } from 'react-native-elements';
+import { Button, Column } from '../../components/ui';
 import { Theme } from '../../components/ui/styleUtils';
 import { HomeRouteProps } from '../../routes/main';
 import { MyVcsTab } from './MyVcsTab';
@@ -8,14 +8,12 @@ import { ReceivedVcsTab } from './ReceivedVcsTab';
 import { ViewVcModal } from './ViewVcModal';
 import { useHomeScreen } from './HomeScreenController';
 import { TabRef } from './HomeScreenMachine';
-import { useTranslation } from 'react-i18next';
 import { ActorRefFrom } from 'xstate';
 import { vcItemMachine } from '../../machines/vcItem';
 import LinearGradient from 'react-native-linear-gradient';
 import { ENABLE_OPENID_FOR_VC } from 'react-native-dotenv';
 
 export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
-  const { t } = useTranslation('HomeScreen');
   const controller = useHomeScreen(props);
 
   useEffect(() => {
@@ -89,19 +87,6 @@ export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
     </React.Fragment>
   );
 };
-
-function TabItem(title: string) {
-  return (
-    <Tab.Item
-      containerStyle={Theme.Styles.tabContainer}
-      title={
-        <Text align="center" color={Theme.Colors.TabItemText}>
-          {title}
-        </Text>
-      }
-    />
-  );
-}
 
 export interface HomeScreenTabProps {
   isVisible: boolean;
