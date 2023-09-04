@@ -5,7 +5,7 @@ import PaginationDot from 'react-native-animated-pagination-dot';
 import { Button, Centered, Column, Row, Text } from '../../components/ui';
 import { Theme } from '../../components/ui/styleUtils';
 
-export const Progressing: React.FC<ProgressingProps> = (props) => {
+export const Loader: React.FC<ProgressingProps> = (props) => {
   const { t } = useTranslation('ScanScreen');
 
   const n = 0;

@@ -9,7 +9,7 @@ import { Theme } from '../../components/ui/styleUtils';
 import { RootRouteProps } from '../../routes';
 import { HomeRouteProps } from '../../routes/main';
 import { useIssuerScreenController } from './IssuerScreenController';
-import { Progressing } from './Progressing';
+import { Loader } from './Loader';
 
 export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
   props
@@ -73,7 +73,7 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
   return (
     <React.Fragment>
       {controller.isLoadingIssuers && (
-        <Progressing isVisible title={t('loading')} progress />
+        <Loader isVisible title={t('loading')} progress />
       )}
       {controller.issuers.length > 0 && (
         <FlatList
