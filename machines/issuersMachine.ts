@@ -1,20 +1,12 @@
-import { createModel } from 'xstate/lib/model';
-import { EventFrom, sendParent, StateFrom } from 'xstate';
-import { request } from '../shared/request';
 import { authorize } from 'react-native-app-auth';
+import { EventFrom, sendParent, StateFrom } from 'xstate';
+import { createModel } from 'xstate/lib/model';
 import { HOST } from '../shared/constants';
-
-const defaultIssuer = [
-  {
-    id: 'UIN, VID, AID',
-    displayName: 'Enter the mentioned ID and download your card',
-    logoUrl: '',
-  },
-];
+import { request } from '../shared/request';
 
 const model = createModel(
   {
-    issuers: defaultIssuer as issuerType[],
+    issuers: [] as issuerType[],
     selectedIssuer: [] as issuerType[],
     tokenResponse: [] as [],
     errorMessage: null as string,
@@ -58,15 +50,19 @@ export const IssuersMachine = model.createMachine(
           },
           onError: {
             actions: ['setError'],
+            target: 'error',
           },
         },
+      },
+      error: {
         on: {
           TRY_AGAIN: {
-            target: 'displayIssuers',
             actions: 'resetError',
+            target: 'displayIssuers',
           },
           RESET_ERROR: {
             actions: 'resetError',
+            target: 'idle',
           },
         },
       },
@@ -137,10 +133,12 @@ export const IssuersMachine = model.createMachine(
       }),
 
       setError: model.assign({
-        errorMessage: (_, event) =>
-          event.data.message === 'Network request failed'
+        errorMessage: (_, event) => {
+          console.log('Error while fetching issuers ', event.data.message);
+          return event.data.message === 'Network request failed'
             ? 'noInternetConnection'
-            : 'generic',
+            : 'generic';
+        },
       }),
 
       resetError: model.assign({
@@ -159,8 +157,14 @@ export const IssuersMachine = model.createMachine(
     },
     services: {
       downloadIssuersList: async () => {
+        const defaultIssuer = {
+          id: 'UIN, VID, AID',
+          displayName: 'Enter the mentioned ID and download your card',
+          logoUrl: '',
+        };
+
         const response = await request('GET', '/residentmobileapp/issuers');
-        return [...defaultIssuer, ...response.response.issuers];
+        return [defaultIssuer, ...response.response.issuers];
       },
       downloadIssuerConfig: async (_, event) => {
         const response = await request(
@@ -241,6 +245,10 @@ export function selectIsDone(state: State) {
 
 export function selectIsIdle(state: State) {
   return state.matches('idle');
+}
+
+export function selectLoadingIssuers(state: State) {
+  return state.matches('displayIssuers');
 }
 
 interface issuerType {

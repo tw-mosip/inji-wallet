@@ -62,8 +62,10 @@ export interface Typegen0 {
     | 'done'
     | 'downloadCredentials'
     | 'downloadIssuerConfig'
+    | 'error'
     | 'idle'
     | 'performAuthorization'
-    | 'selectingIssuer';
+    | 'selectingIssuer'
+    | 'storing';
   'tags': never;
 }

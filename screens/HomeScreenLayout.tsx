@@ -61,7 +61,7 @@ export const HomeScreenLayout: React.FC<RootRouteProps> = (props) => {
         name={'IssuersScreen'}
         component={IssuersScreen}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerLeft: () => (
             <Icon
               name="arrow-left"
