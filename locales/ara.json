@@ -155,6 +155,7 @@
   "IssuersScreen": {
     "title": "أضف بطاقة جديدة",
     "header": "الرجاء تحديد طريقة مفضلة أدناه لتنزيل بطاقة جديدة",
+    "loading": "جار التحميل...",
     "errors":{
       "noInternetConnection": {
         "title": "لا يوجد اتصال بالإنترنت",

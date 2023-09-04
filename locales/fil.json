@@ -155,6 +155,7 @@
   "IssuersScreen": {
     "title": "Magdagdag ng bagong card",
     "header": "Mangyaring pumili ng gustong paraan mula sa ibaba upang mag-download ng bagong card",
+    "loading": "Naglo-load...",
     "errors": {
       "noInternetConnection": {
         "title": "Walang koneksyon sa internet",
