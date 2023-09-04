@@ -45,7 +45,7 @@ mainRoutes.push(scan);
 mainRoutes.push(history);
 
 export type MainBottomTabParamList = {
-  Home: {
+  home: {
     activeTab: number;
   };
   Scan: undefined;
@@ -65,5 +65,5 @@ export type MainRouteProps = BottomTabScreenProps<
 
 export type HomeRouteProps = BottomTabScreenProps<
   MainBottomTabParamList & RootStackParamList,
-  'Home'
+  'home'
 >;

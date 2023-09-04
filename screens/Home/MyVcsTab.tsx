@@ -40,12 +40,13 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
 
   const DownloadingVcPopUp: React.FC = () => {
     return (
-      <View>
+      <View testID="downloadingVcPopup">
         <Row style={Theme.Styles.downloadingVcPopUp}>
           <Text color={Theme.Colors.whiteText} weight="semibold" size="smaller">
             {t('downloadingYourCard')}
           </Text>
           <Icon
+            testID="close"
             name="close"
             onPress={() => {
               controller.DISMISS();
@@ -105,6 +106,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
               </Column>
               {ENABLE_OPENID_FOR_VC === 'false' && (
                 <Button
+                  testId="downloadCard"
                   type="gradient"
                   disabled={controller.isRefreshingVcs}
                   title={t('downloadCard')}
@@ -116,23 +118,21 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
           {controller.vcKeys.length === 0 && (
             <React.Fragment>
               <Column fill style={Theme.Styles.homeScreenContainer}>
-                <View style={Theme.Styles.homeScreenInnerContainer}>
-                  <Image source={Theme.DigitalIdentityLogo} />
-                  <Text
-                    align="center"
-                    weight="bold"
-                    margin="33 0 6 0"
-                    lineHeight={1}>
-                    {t('bringYourDigitalID')}
-                  </Text>
-                  <Text
-                    style={Theme.TextStyles.bold}
-                    color={Theme.Colors.textLabel}
-                    align="center"
-                    margin="0 12 30 12">
-                    {t('generateVcDescription')}
-                  </Text>
-                </View>
+                <Image source={Theme.DigitalIdentityLogo} />
+                <Text
+                  align="center"
+                  weight="bold"
+                  margin="33 0 6 0"
+                  lineHeight={1}>
+                  {t('bringYourDigitalID')}
+                </Text>
+                <Text
+                  style={Theme.TextStyles.bold}
+                  color={Theme.Colors.textLabel}
+                  align="center"
+                  margin="0 12 30 12">
+                  {t('generateVcDescription')}
+                </Text>
                 {ENABLE_OPENID_FOR_VC === 'false' && (
                   <Button
                     type="gradient"
