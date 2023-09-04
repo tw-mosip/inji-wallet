@@ -9,6 +9,7 @@ import {
   selectIsDownloadCredentials,
   selectIsIdle,
   selectIssuers,
+  selectLoadingIssuers,
 } from '../../machines/issuersMachine';
 
 export function useIssuerScreenController({ route, navigation }) {
@@ -31,6 +32,7 @@ export function useIssuerScreenController({ route, navigation }) {
     isIdle,
     credential,
     CANCEL: () => service.send(IssuerScreenTabEvents.CANCEL()),
+    isLoadingIssuers: useSelector(service, selectLoadingIssuers),
     DOWNLOAD_ID: () => {
       service.send(IssuerScreenTabEvents.DOWNLOAD_ID());
       navigation.navigate('Home', { screen: 'HomeScreen' });

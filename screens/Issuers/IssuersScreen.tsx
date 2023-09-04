@@ -1,18 +1,43 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Image } from 'react-native';
-import { Text } from 'react-native-elements';
-import { useIssuerScreenController } from './IssuerScreenController';
-import { Column } from '../../components/ui';
+import { Icon } from 'react-native-elements';
 import { Issuer } from '../../components/Issuer/Issuer';
+import { ProgressingModal } from '../../components/ProgressingModal';
 import { ErrorModal } from '../../components/ui/ErrorModal';
 import { Theme } from '../../components/ui/styleUtils';
+import { RootRouteProps } from '../../routes';
 import { HomeRouteProps } from '../../routes/main';
-import { ProgressingModal } from '../../components/ProgressingModal';
+import { useIssuerScreenController } from './IssuerScreenController';
+import { Progressing } from './Progressing';
 
-export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
+export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
+  props
+) => {
   const controller = useIssuerScreenController(props);
   const { t } = useTranslation('IssuersScreen');
+
+  useLayoutEffect(() => {
+    if (controller.issuers.length > 0) {
+      props.navigation.setOptions({
+        headerShown: true,
+        headerLeft: () => (
+          <Icon
+            name="arrow-left"
+            type="material-community"
+            onPress={props.navigation.goBack}
+            containerStyle={Theme.Styles.backArrowContainer}
+            color={Theme.Colors.Icon}
+          />
+        ),
+        headerTitle: t('title'),
+      });
+    } else {
+      props.navigation.setOptions({
+        headerShown: false,
+      });
+    }
+  }, [controller.issuers]);
 
   const onPressHandler = (id) => {
     if (id !== 'UIN, VID, AID') {
@@ -47,25 +72,25 @@ export const IssuersScreen: React.FC<HomeRouteProps> = (props) => {
 
   return (
     <React.Fragment>
-      <Column style={Theme.Styles.issuerListOuterContainer}>
-        <Text>{t('header')}</Text>
-        {controller.issuers.length > 0 && (
-          <FlatList
-            data={controller.issuers}
-            scrollEnabled={false}
-            renderItem={({ item }) => (
-              <Issuer
-                id={item.id}
-                description={item.displayName}
-                onPress={() => onPressHandler(item.id)}
-                {...props}
-              />
-            )}
-            numColumns={2}
-            keyExtractor={(item) => item.id}
-          />
-        )}
-      </Column>
+      {controller.isLoadingIssuers && (
+        <Progressing isVisible title={t('loading')} progress />
+      )}
+      {controller.issuers.length > 0 && (
+        <FlatList
+          data={controller.issuers}
+          scrollEnabled={false}
+          renderItem={({ item }) => (
+            <Issuer
+              id={item.id}
+              description={item.displayName}
+              onPress={() => onPressHandler(item.id)}
+              {...props}
+            />
+          )}
+          numColumns={2}
+          keyExtractor={(item) => item.id}
+        />
+      )}
       {controller.errorMessage && (
         <ErrorModal
           isVisible={controller.errorMessage !== null}

@@ -159,7 +159,8 @@
       "title": "In Progress",
       "hint": "downloading your credential from issuer"
     },
-    "errors":{
+    "loading": "Loading...",
+    "errors": {
       "noInternetConnection": {
         "title": "No internet connection",
         "message": "Please connect with internet and retry."
