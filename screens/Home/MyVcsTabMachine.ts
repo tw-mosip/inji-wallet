@@ -60,10 +60,7 @@ export const MyVcsTabMachine = model.createMachine(
     initial: 'checkingOnboardingStatus',
     states: {
       checkingOnboardingStatus: {
-        entry: [
-          () => console.log('Entered the MyVC from Start'),
-          'getOnboardingStatus',
-        ],
+        entry: ['getOnboardingStatus'],
         on: {
           STORE_RESPONSE: [
             { cond: 'isOnboardingDone', target: 'idle' },

@@ -492,8 +492,6 @@ export async function getItem(
 ) {
   try {
     const data = await Storage.getItem(key, encryptionKey);
-    console.log('getting item for ' + key);
-    console.log(data);
     if (data != null) {
       const decryptedData = await decryptJson(encryptionKey, data);
       return JSON.parse(decryptedData);
