@@ -14,6 +14,7 @@ import {
   MessageOverlay,
 } from '../../components/MessageOverlay';
 import { Icon } from 'react-native-elements';
+import testID from '../../shared/commonUtil';
 
 export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
   const { t } = useTranslation('MyVcsTab');
@@ -39,13 +40,13 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
 
   const DownloadingVcPopUp: React.FC = () => {
     return (
-      <View testID="downloadingVcPopup">
+      <View {...testID('downloadingVcPopup')}>
         <Row style={Theme.Styles.downloadingVcPopUp}>
           <Text color={Theme.Colors.whiteText} weight="semibold" size="smaller">
             {t('downloadingYourCard')}
           </Text>
           <Icon
-            testID="close"
+            {...testID('close')}
             name="close"
             onPress={() => {
               controller.DISMISS();
@@ -104,7 +105,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                 })}
               </Column>
               <Button
-                testID="downloadCard"
+                {...testID('downloadCard')}
                 type="gradient"
                 disabled={controller.isRefreshingVcs}
                 title={t('downloadCard')}

@@ -16,6 +16,7 @@ import { TouchableOpacity } from 'react-native';
 import { individualId } from '../../../shared/constants';
 import { GET_INDIVIDUAL_ID } from '../../../shared/constants';
 import { MessageOverlay } from '../../../components/MessageOverlay';
+import testID from '../../../shared/commonUtil';
 
 export const IdInputModal: React.FC<IdInputModalProps> = (props) => {
   const { t } = useTranslation('IdInputModal');
@@ -67,7 +68,7 @@ export const IdInputModal: React.FC<IdInputModalProps> = (props) => {
                   height: Platform.OS === 'ios' ? 100 : 'auto',
                 }}>
                 <Picker
-                  testID="selectIdType"
+                  {...testID('selectIdType')}
                   selectedValue={controller.idType}
                   onValueChange={controller.SELECT_ID_TYPE}>
                   <Picker.Item label="UIN" value="UIN" />
@@ -76,7 +77,7 @@ export const IdInputModal: React.FC<IdInputModalProps> = (props) => {
               </Column>
               <Column fill>
                 <Input
-                  testID="inputId"
+                  {...testID('inputId')}
                   inputContainerStyle={
                     controller.id ? Theme.Styles.VidInputBottom : null
                   }
@@ -98,7 +99,7 @@ export const IdInputModal: React.FC<IdInputModalProps> = (props) => {
           </Column>
           <Column>
             <Button
-              testID="generateVc"
+              {...testID('generateVc')}
               type="gradient"
               title={t('generateVc')}
               disabled={!controller.id}
@@ -116,7 +117,7 @@ export const IdInputModal: React.FC<IdInputModalProps> = (props) => {
                 </Text>
                 <TouchableOpacity activeOpacity={1} onPress={props.onPress}>
                   <Text
-                    testID="getItHere"
+                    {...testID('getItHere')}
                     color={Theme.Colors.AddIdBtnBg}
                     weight="semibold"
                     size="small"
