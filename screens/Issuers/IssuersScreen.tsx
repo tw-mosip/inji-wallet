@@ -1,6 +1,6 @@
 import React, { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Image } from 'react-native';
+import { FlatList, Image, Text } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Issuer } from '../../components/Issuer/Issuer';
 import { ProgressingModal } from '../../components/ProgressingModal';
@@ -10,6 +10,7 @@ import { RootRouteProps } from '../../routes';
 import { HomeRouteProps } from '../../routes/main';
 import { useIssuerScreenController } from './IssuerScreenController';
 import { Loader } from './Loader';
+import { Column } from '../../components/ui/Layout';
 
 export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
   props
@@ -76,20 +77,25 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
         <Loader isVisible title={t('loading')} progress />
       )}
       {controller.issuers.length > 0 && (
-        <FlatList
-          data={controller.issuers}
-          scrollEnabled={false}
-          renderItem={({ item }) => (
-            <Issuer
-              id={item.id}
-              description={item.displayName}
-              onPress={() => onPressHandler(item.id)}
-              {...props}
+        <Column style={Theme.Styles.issuerListOuterContainer}>
+          <Text>{t('header')}</Text>
+          {controller.issuers.length > 0 && (
+            <FlatList
+              data={controller.issuers}
+              scrollEnabled={false}
+              renderItem={({ item }) => (
+                <Issuer
+                  id={item.id}
+                  description={item.displayName}
+                  onPress={() => onPressHandler(item.id)}
+                  {...props}
+                />
+              )}
+              numColumns={2}
+              keyExtractor={(item) => item.id}
             />
           )}
-          numColumns={2}
-          keyExtractor={(item) => item.id}
-        />
+        </Column>
       )}
       {controller.errorMessage && (
         <Error
