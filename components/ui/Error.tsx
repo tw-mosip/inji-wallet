@@ -1,19 +1,32 @@
+import { useFocusEffect } from '@react-navigation/native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, Modal as RNModal, View } from 'react-native';
+import { BackHandler, Dimensions, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Button, Column, Row, Text } from '.';
 import { Theme } from './styleUtils';
 
-export const ErrorModal: React.FC<ErrorProps> = (props) => {
+export const Error: React.FC<ErrorProps> = (props) => {
   const { t } = useTranslation('common');
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        props.goBack();
+        return true;
+      };
+
+      const disableBackHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        onBackPress
+      );
+
+      return () => disableBackHandler.remove();
+    }, [])
+  );
+
   return (
-    <RNModal
-      onRequestClose={props.goBack}
-      animationType="slide"
-      style={Theme.ModalStyles.modal}
-      visible={props.isVisible}>
+    <View style={Theme.ModalStyles.modal}>
       <Column fill safe>
         {props.goBack && (
           <Row elevation={2}>
@@ -64,7 +77,7 @@ export const ErrorModal: React.FC<ErrorProps> = (props) => {
           </View>
         </Column>
       </Column>
-    </RNModal>
+    </View>
   );
 };
 

@@ -4,7 +4,7 @@ import { FlatList, Image } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Issuer } from '../../components/Issuer/Issuer';
 import { ProgressingModal } from '../../components/ProgressingModal';
-import { ErrorModal } from '../../components/ui/ErrorModal';
+import { Error } from '../../components/ui/Error';
 import { Theme } from '../../components/ui/styleUtils';
 import { RootRouteProps } from '../../routes';
 import { HomeRouteProps } from '../../routes/main';
@@ -92,7 +92,7 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
         />
       )}
       {controller.errorMessage && (
-        <ErrorModal
+        <Error
           isVisible={controller.errorMessage !== null}
           title={t(`errors.${controller.errorMessage}.title`)}
           message={t(`errors.${controller.errorMessage}.message`)}
