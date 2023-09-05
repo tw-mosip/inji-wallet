@@ -18,9 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ navigation, title }) => {
             marginBottom: 22,
             marginVertical: 16,
           }}>
-          <TouchableOpacity
-            style={{ position: 'absolute' }}
-            onPress={navigation.goBack}>
+          <TouchableOpacity onPress={navigation.goBack}>
             <Icon
               name="arrow-left"
               type="material-community"
@@ -34,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ navigation, title }) => {
           </TouchableOpacity>
           <Row fill align={'center'}>
             <Column>
-              <View style={{ alignItems: 'center' }}>
+              <View style={{ alignItems: 'center', marginLeft: -40 }}>
                 <Text style={Theme.TextStyles.semiBoldHeader}>{title}</Text>
               </View>
             </Column>
