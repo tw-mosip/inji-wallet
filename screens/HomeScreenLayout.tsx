@@ -1,14 +1,15 @@
-import React from 'react';
-import { RootRouteProps } from '../routes';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { HomeScreen } from './Home/HomeScreen';
-import { Icon } from 'react-native-elements';
-import { Theme } from '../components/ui/styleUtils';
-import { IssuersScreen } from './Issuers/IssuersScreen';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Row } from '../components/ui';
-import { HelpScreen } from '../components/HelpScreen';
 import { Image } from 'react-native';
+import { Icon } from 'react-native-elements';
+import { HelpScreen } from '../components/HelpScreen';
+import { Row } from '../components/ui';
+import { Header } from '../components/ui/Header';
+import { Theme } from '../components/ui/styleUtils';
+import { RootRouteProps } from '../routes';
+import { HomeScreen } from './Home/HomeScreen';
+import { IssuersScreen } from './Issuers/IssuersScreen';
 import { SettingScreen } from './Settings/SettingScreen';
 
 const { Navigator, Screen } = createNativeStackNavigator();
@@ -61,17 +62,9 @@ export const HomeScreenLayout: React.FC<RootRouteProps> = (props) => {
         name={'IssuersScreen'}
         component={IssuersScreen}
         options={{
-          headerShown: false,
-          headerLeft: () => (
-            <Icon
-              name="arrow-left"
-              type="material-community"
-              onPress={props.navigation.goBack}
-              containerStyle={Theme.Styles.backArrowContainer}
-              color={Theme.Colors.Icon}
-            />
+          header: (props) => (
+            <Header navigation={props.navigation} title={t('title')} />
           ),
-          headerTitle: t('title'),
         }}
       />
     </Navigator>

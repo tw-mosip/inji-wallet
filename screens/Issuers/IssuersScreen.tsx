@@ -1,16 +1,16 @@
 import React, { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Image, Text } from 'react-native';
+import { FlatList, Image, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Issuer } from '../../components/Issuer/Issuer';
 import { ProgressingModal } from '../../components/ProgressingModal';
 import { Error } from '../../components/ui/Error';
+import { Column } from '../../components/ui/Layout';
 import { Theme } from '../../components/ui/styleUtils';
 import { RootRouteProps } from '../../routes';
 import { HomeRouteProps } from '../../routes/main';
 import { useIssuerScreenController } from './IssuerScreenController';
 import { Loader } from './Loader';
-import { Column } from '../../components/ui/Layout';
 
 export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
   props
@@ -78,23 +78,32 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
       )}
       {controller.issuers.length > 0 && (
         <Column style={Theme.Styles.issuerListOuterContainer}>
-          <Text>{t('header')}</Text>
-          {controller.issuers.length > 0 && (
-            <FlatList
-              data={controller.issuers}
-              scrollEnabled={false}
-              renderItem={({ item }) => (
-                <Issuer
-                  id={item.id}
-                  description={item.displayName}
-                  onPress={() => onPressHandler(item.id)}
-                  {...props}
-                />
-              )}
-              numColumns={2}
-              keyExtractor={(item) => item.id}
-            />
-          )}
+          <Text
+            style={{
+              ...Theme.TextStyles.regularGrey,
+              marginVertical: 14,
+              marginHorizontal: 9,
+            }}>
+            {t('header')}
+          </Text>
+          <View style={Theme.issuersScreenStyles.issuersContainer}>
+            {controller.issuers.length > 0 && (
+              <FlatList
+                data={controller.issuers}
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <Issuer
+                    id={item.id}
+                    description={item.displayName}
+                    onPress={() => onPressHandler(item.id)}
+                    {...props}
+                  />
+                )}
+                numColumns={2}
+                keyExtractor={(item) => item.id}
+              />
+            )}
+          </View>
         </Column>
       )}
       {controller.errorMessage && (
