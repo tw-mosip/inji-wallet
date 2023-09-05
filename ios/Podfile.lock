@@ -301,10 +301,10 @@ PODS:
     - React-Core
   - react-native-secure-key-store (2.0.10):
     - React-Core
-  - react-native-secure-keystore (0.1.0):
-    - React-Core
   - react-native-secure-keystore (0.1.1):
     - React-Core
+  - react-native-spinkit (1.4.1):
+    - React
   - react-native-tuvali (0.4.4):
     - CrcSwift (~> 0.0.3)
     - GzipSwift
@@ -463,6 +463,7 @@ DEPENDENCIES:
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-secure-key-store (from `../node_modules/react-native-secure-key-store`)
   - react-native-secure-keystore (from `../node_modules/react-native-secure-keystore`)
+  - react-native-spinkit (from `../node_modules/react-native-spinkit`)
   - react-native-tuvali (from `../node_modules/react-native-tuvali`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -607,6 +608,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-secure-key-store"
   react-native-secure-keystore:
     :path: "../node_modules/react-native-secure-keystore"
+  react-native-spinkit:
+    :path: "../node_modules/react-native-spinkit"
   react-native-tuvali:
     :path: "../node_modules/react-native-tuvali"
   React-perflogger:
@@ -727,6 +730,7 @@ SPEC CHECKSUMS:
   react-native-secure-key-store: 910e6df6bc33cb790aba6ee24bc7818df1fe5898
   react-native-secure-keystore: d9e791a495d23c33db7711732f3a761533b882db
   react-native-tuvali: 6c4660b1d72c8d049ea8f6470cc67aa22c89b40d
+  react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   React-perflogger: 5a890ca0911669421b7611661e9b58f91c805f5c
   React-RCTActionSheet: bd180e0879f8424a73650c5c28fbef4f3b5b27fb
   React-RCTAnimation: 1004d2b4be1f2cedfdc4cb2326adc95b989e6c6b

@@ -6,6 +6,11 @@ import { Image } from 'react-native';
 import { Theme } from './ui/styleUtils';
 import PaginationDot from 'react-native-animated-pagination-dot';
 
+/*
+ * Loader component exists with an animating loader in screens/Issuers/Loader.tsx.
+ * This loader is used in IssuersScreen and can be used further for other loading scenarios to maintain consistency
+ */
+
 export const ProgressingModal: React.FC<ProgressingModalProps> = (props) => {
   const { t } = useTranslation('ScanScreen');
 
