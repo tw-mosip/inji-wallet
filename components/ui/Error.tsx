@@ -26,7 +26,11 @@ export const Error: React.FC<ErrorProps> = (props) => {
   );
 
   return (
-    <View style={Theme.ModalStyles.modal}>
+    <View
+      style={{
+        ...Theme.ModalStyles.modal,
+        backgroundColor: Theme.Colors.whiteBackgroundColor,
+      }}>
       <Column fill safe>
         {props.goBack && (
           <Row elevation={2}>
@@ -36,9 +40,8 @@ export const Error: React.FC<ErrorProps> = (props) => {
                   name="arrow-left"
                   type="material-community"
                   onPress={props.goBack}
-                  containerStyle={{
-                    ...Theme.Styles.backArrowContainer,
-                  }}
+                  containerStyle={Theme.Styles.backArrowContainer}
+                  color={Theme.Colors.Icon}
                 />
               </Row>
             </View>
@@ -47,24 +50,11 @@ export const Error: React.FC<ErrorProps> = (props) => {
         <Column fill safe align="space-evenly">
           <View style={{ alignItems: 'center' }}>
             <View>
-              <Row align="center">{props.image}</Row>
-              <Text
-                style={{
-                  ...Theme.TextStyles.header,
-                  textAlign: 'center',
-                }}>
-                {props.title}
-              </Text>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  ...Theme.TextStyles.regular,
-                  marginTop: 12,
-                  marginBottom: 30,
-                  marginHorizontal: 40,
-                }}>
-                {props.message}
-              </Text>
+              <Row align="center" style={Theme.ErrorStyles.image}>
+                {props.image}
+              </Row>
+              <Text style={Theme.ErrorStyles.title}>{props.title}</Text>
+              <Text style={Theme.ErrorStyles.message}>{props.message}</Text>
             </View>
             {props.tryAgain && (
               <Button
