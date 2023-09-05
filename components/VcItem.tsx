@@ -59,6 +59,7 @@ export const VcItem: React.FC<VcItemProps> = (props) => {
         }>
         <VcItemContent
           context={context}
+          /* TODO: set the custom logo from state machine if given */
           verifiableCredential={verifiableCredential}
           generatedOn={generatedOn}
           tag={tag}

@@ -44,7 +44,10 @@ export const VcDetails: React.FC<VcDetailsProps> = (props) => {
 
             <QrCodeOverlay qrCodeDetailes={String(props.vc.credential)} />
             <Column margin="20 0 0 0">
-              <Image source={Theme.MosipLogo} style={Theme.Styles.logo} />
+              <Image
+                source={props.logo ? props.logo : Theme.MosipLogo}
+                style={Theme.Styles.logo}
+              />
             </Column>
           </Column>
           <Column align="space-evenly">
@@ -350,6 +353,7 @@ interface VcDetailsProps {
   isBindingPending: boolean;
   onBinding?: () => void;
   activeTab?: Number;
+  logo?: string;
 }
 
 function getFullAddress(credential: CredentialSubject) {

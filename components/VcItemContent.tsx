@@ -179,7 +179,7 @@ export const VcItemContent: React.FC<VcItemContentProps> = (props) => {
           <Column
             style={{ display: props.verifiableCredential ? 'flex' : 'none' }}>
             <Image
-              source={Theme.MosipLogo}
+              source={props.logo ? props.logo : Theme.MosipLogo}
               style={Theme.Styles.logo}
               resizeMethod="auto"
             />
@@ -198,6 +198,7 @@ interface VcItemContentProps {
   tag: string;
   selectable: boolean;
   selected: boolean;
+  logo?: string;
   iconName?: string;
   iconType?: string;
   service: any;
