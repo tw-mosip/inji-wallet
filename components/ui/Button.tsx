@@ -58,6 +58,7 @@ export const Button: React.FC<ButtonProps> = (props) => {
       icon={props.icon}
       onPress={handleOnPress}
       loading={props.loading}
+      testID={props.testID}
     />
   ) : (
     <RNEButton
@@ -86,6 +87,7 @@ export const Button: React.FC<ButtonProps> = (props) => {
       icon={props.icon}
       onPress={handleOnPress}
       loading={props.loading}
+      testID={props.testID}
     />
   );
 };

@@ -11,6 +11,7 @@ import { Theme } from '../components/ui/styleUtils';
 import { Icon } from 'react-native-elements';
 import { RootRouteProps } from '../routes';
 import { useWelcomeScreen } from './WelcomeScreenController';
+import testID from '../shared/commonUtil';
 
 export const SetupLanguageScreen: React.FC<RootRouteProps> = (props) => {
   const { t } = useTranslation('SetupLanguage');
@@ -70,6 +71,7 @@ export const SetupLanguageScreen: React.FC<RootRouteProps> = (props) => {
       />
 
       <Button
+        {...testID('save')}
         type="gradient"
         title={t('save')}
         onPress={() => {

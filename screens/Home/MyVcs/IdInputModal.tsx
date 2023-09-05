@@ -117,7 +117,7 @@ export const IdInputModal: React.FC<IdInputModalProps> = (props) => {
                 </Text>
                 <TouchableOpacity activeOpacity={1} onPress={props.onPress}>
                   <Text
-                    {...testID('getItHere')}
+                    testID="getItHere"
                     color={Theme.Colors.AddIdBtnBg}
                     weight="semibold"
                     size="small"
