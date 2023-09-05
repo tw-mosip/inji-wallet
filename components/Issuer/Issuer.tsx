@@ -12,13 +12,17 @@ export const Issuer: React.FC<IssuerProps> = (props: IssuerProps) => {
           ? Theme.Styles.issuerBoxContainerPressed
           : Theme.Styles.issuerBoxContainer
       }>
+      {/* This bento icon is a placeholder until the logo of the issuer is rendered. */}
       <Icon
-        name={'star'}
+        name={'bento'}
+        size={30}
         color={Theme.Colors.Icon}
-        style={Theme.Styles.issuersIcon}
+        style={Theme.issuersScreenStyles.issuerIcon}
       />
-      <Text>{props.id}</Text>
-      <Text>{props.description}</Text>
+      <Text style={Theme.issuersScreenStyles.issuerHeading}>{props.id}</Text>
+      <Text style={Theme.issuersScreenStyles.issuerDescription}>
+        {props.description}
+      </Text>
     </Pressable>
   );
 };
