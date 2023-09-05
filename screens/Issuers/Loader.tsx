@@ -1,15 +1,12 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, SafeAreaView } from 'react-native';
-import PaginationDot from 'react-native-animated-pagination-dot';
+import Spinner from 'react-native-spinkit';
 import { Button, Centered, Column, Row, Text } from '../../components/ui';
 import { Theme } from '../../components/ui/styleUtils';
 
 export const Loader: React.FC<ProgressingProps> = (props) => {
   const { t } = useTranslation('ScanScreen');
-
-  const n = 0;
-  const [curPage, setCurPage] = useState(n);
 
   return (
     <Fragment>
@@ -26,15 +23,13 @@ export const Loader: React.FC<ProgressingProps> = (props) => {
             source={Theme.InjiProgressingLogo}
             height={2}
             width={2}
-            style={{ marginBottom: 15, marginLeft: -6 }}
+            style={{ marginLeft: -6 }}
           />
-          {props.progress && (
-            <PaginationDot
-              activeDotColor={'black'}
-              curPage={curPage}
-              maxPage={3}
-            />
-          )}
+          <Spinner
+            type="ThreeBounce"
+            color={Theme.Colors.Loading}
+            style={{ marginLeft: 6 }}
+          />
         </Column>
 
         <Column style={{ display: props.hint ? 'flex' : 'none' }}>
