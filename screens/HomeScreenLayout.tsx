@@ -1,3 +1,4 @@
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +16,31 @@ import { SettingScreen } from './Settings/SettingScreen';
 const { Navigator, Screen } = createNativeStackNavigator();
 export const HomeScreenLayout: React.FC<RootRouteProps> = (props) => {
   const { t } = useTranslation('IssuersScreen');
+
+  React.useLayoutEffect(() => {
+    const routeName = getFocusedRouteNameFromRoute(props.route);
+    if (routeName === 'IssuersScreen') {
+      props.navigation.setOptions({ tabBarStyle: { display: 'none' } });
+    } else {
+      props.navigation.setOptions({
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: Theme.Colors.IconBg,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontFamily: 'Inter_600SemiBold',
+        },
+        tabBarStyle: {
+          height: 75,
+          paddingHorizontal: 10,
+        },
+        tabBarItemStyle: {
+          height: 83,
+          padding: 11,
+        },
+      });
+    }
+  }, [props.navigation, props.route]);
+
   const HomeScreenOptions = {
     headerLeft: () =>
       React.createElement(Image, {
@@ -63,7 +89,7 @@ export const HomeScreenLayout: React.FC<RootRouteProps> = (props) => {
         component={IssuersScreen}
         options={{
           header: (props) => (
-            <Header navigation={props.navigation} title={t('title')} />
+            <Header goBack={props.navigation.goBack} title={t('title')} />
           ),
         }}
       />
