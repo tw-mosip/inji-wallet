@@ -1,10 +1,10 @@
 import React, { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Image, Text, View } from 'react-native';
-import { Icon } from 'react-native-elements';
 import { Issuer } from '../../components/Issuer/Issuer';
 import { ProgressingModal } from '../../components/ProgressingModal';
 import { Error } from '../../components/ui/Error';
+import { Header } from '../../components/ui/Header';
 import { Column } from '../../components/ui/Layout';
 import { Theme } from '../../components/ui/styleUtils';
 import { RootRouteProps } from '../../routes';
@@ -22,16 +22,9 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
     if (controller.issuers.length > 0) {
       props.navigation.setOptions({
         headerShown: true,
-        headerLeft: () => (
-          <Icon
-            name="arrow-left"
-            type="material-community"
-            onPress={props.navigation.goBack}
-            containerStyle={Theme.Styles.backArrowContainer}
-            color={Theme.Colors.Icon}
-          />
+        header: (props) => (
+          <Header goBack={props.navigation.goBack} title={t('title')} />
         ),
-        headerTitle: t('title'),
       });
     } else {
       props.navigation.setOptions({

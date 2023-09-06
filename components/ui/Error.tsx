@@ -2,8 +2,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BackHandler, Dimensions, View } from 'react-native';
-import { Icon } from 'react-native-elements';
 import { Button, Column, Row, Text } from '.';
+import { Header } from './Header';
 import { Theme } from './styleUtils';
 
 export const Error: React.FC<ErrorProps> = (props) => {
@@ -32,21 +32,7 @@ export const Error: React.FC<ErrorProps> = (props) => {
         backgroundColor: Theme.Colors.whiteBackgroundColor,
       }}>
       <Column fill safe>
-        {props.goBack && (
-          <Row elevation={2}>
-            <View style={Theme.ModalStyles.header}>
-              <Row fill align={'flex-start'} margin={'16 0 0 0'}>
-                <Icon
-                  name="arrow-left"
-                  type="material-community"
-                  onPress={props.goBack}
-                  containerStyle={Theme.Styles.backArrowContainer}
-                  color={Theme.Colors.Icon}
-                />
-              </Row>
-            </View>
-          </Row>
-        )}
+        {props.goBack && <Header goBack={props.goBack} title="" />}
         <Column fill safe align="space-evenly">
           <View style={{ alignItems: 'center' }}>
             <View>
