@@ -23,6 +23,7 @@ import {
   isVCFromOpenId4VCI,
 } from '../../shared/openId4VCI/Utils';
 import { VCItem } from '../../components/openId4VCI/VCItem';
+import testID from '../../shared/commonUtil';
 
 export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
   const { t } = useTranslation('MyVcsTab');
@@ -184,8 +185,9 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                     margin="0 12 30 12">
                     {t('generateVcDescription')}
                   </Text>
-                    {isOpenId4VCIEnabled() && (
+                    {!isOpenId4VCIEnabled() && (
                     <Button
+                        testID="downloadCard"
                         type="gradient"
                         disabled={controller.isRefreshingVcs}
                         title={t('downloadCard')}
