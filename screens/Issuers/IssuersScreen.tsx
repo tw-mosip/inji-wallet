@@ -89,6 +89,7 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
                     key={item.id}
                     id={item.id}
                     description={item.displayName}
+                    logoUrl={item.logoUrl}
                     onPress={() => onPressHandler(item.id)}
                     {...props}
                   />
