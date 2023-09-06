@@ -154,7 +154,7 @@
   },
   "IssuersScreen": {
     "title": "Add new card",
-    "header": "Please select a preferred method from below to download a new card",
+    "header": "Please select a preferred method from below to add a new card",
     "modal": {
       "title": "In Progress",
       "hint": "downloading your credential from issuer"
