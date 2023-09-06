@@ -48,12 +48,15 @@ function createLayout(
 
     return props.scroll ? (
       <ScrollView
+        testID={props.testID}
         contentContainerStyle={styles}
         refreshControl={props.refreshControl}>
         {props.children}
       </ScrollView>
     ) : (
-      <ViewType style={styles}>{props.children}</ViewType>
+      <ViewType testID={props.testID} style={styles}>
+        {props.children}
+      </ViewType>
     );
   };
 
@@ -73,6 +76,7 @@ export const HorizontallyCentered = createLayout(
 );
 
 interface LayoutProps {
+  testID?: string;
   fill?: boolean;
   align?: FlexStyle['justifyContent'];
   crossAlign?: FlexStyle['alignItems'];
