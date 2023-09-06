@@ -1,5 +1,5 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { Dimensions, StyleSheet, ViewStyle } from 'react-native';
+import { Dimensions, Platform, StyleSheet, ViewStyle } from 'react-native';
 import { Spacing } from '../styleUtils';
 
 const Colors = {
@@ -182,9 +182,6 @@ export const DefaultTheme = {
       margin: 5,
       flex: 1,
       padding: 10,
-      shadowColor: '#000',
-      shadowOpacity: 0.4,
-      elevation: 5,
       borderRadius: 6,
       alignItems: 'flex-start',
       justifyContent: 'space-evenly',
@@ -197,9 +194,6 @@ export const DefaultTheme = {
       margin: 5,
       flex: 1,
       padding: 10,
-      shadowColor: '#000',
-      shadowOpacity: 0.4,
-      elevation: 5,
       borderRadius: 6,
       alignItems: 'flex-start',
       justifyContent: 'space-evenly',
@@ -492,6 +486,7 @@ export const DefaultTheme = {
       bottom: Dimensions.get('window').width * 0.1,
       right: Dimensions.get('window').width * 0.1,
     },
+    boxShadow: generateBoxShadowStyle(),
   }),
   QrCodeStyles: StyleSheet.create({
     magnifierZoom: {
@@ -1152,3 +1147,19 @@ export const DefaultTheme = {
     };
   },
 };
+
+function generateBoxShadowStyle() {
+  if (Platform.OS === 'ios') {
+    return {
+      shadowColor: '#000',
+      shadowOffset: { width: 1, height: 1.2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 2.5,
+    };
+  } else if (Platform.OS === 'android') {
+    return {
+      elevation: 4,
+      shadowColor: '#000',
+    };
+  }
+}
