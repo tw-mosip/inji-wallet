@@ -259,7 +259,7 @@
 	},
 	"IssuersScreen": {
 		"title": "Agregar nueva tarjeta",
-		"header": "Seleccione un método preferido de los siguientes para descargar una nueva tarjeta",
+		"header": "Seleccione un método preferido a continuación para agregar una nueva tarjeta",
 		"loading": "Cargando...",
 		"errors": {
 			"noInternetConnection": {
