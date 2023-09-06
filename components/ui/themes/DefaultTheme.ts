@@ -1055,7 +1055,14 @@ export const DefaultTheme = {
       paddingVertical: 5,
       paddingHorizontal: 3,
     },
-    issuerIcon: { paddingTop: 5, marginBottom: 8, paddingHorizontal: 3 },
+    issuerIcon: {
+      resizeMode: 'contain',
+      height: 33,
+      width: 32,
+      marginBottom: 9,
+      marginTop: 8,
+      marginLeft: 2.5,
+    },
   }),
   ErrorStyles: StyleSheet.create({
     image: { marginTop: -60, paddingBottom: 26 },
@@ -1104,6 +1111,7 @@ export const DefaultTheme = {
   ProtectPrivacy: require('../../../assets/phone_mockup_1.png'),
   NoInternetConnection: require('../../../assets/no-internet-connection.png'),
   SomethingWentWrong: require('../../../assets/Something-went-wrong.png'),
+  DigitIcon: require('../../../assets/digit-icon.png'),
 
   elevation(level: ElevationLevel): ViewStyle {
     // https://ethercreative.github.io/react-native-shadow-generator/

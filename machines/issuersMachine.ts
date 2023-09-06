@@ -1,6 +1,7 @@
 import { authorize } from 'react-native-app-auth';
 import { EventFrom, sendParent, StateFrom } from 'xstate';
 import { createModel } from 'xstate/lib/model';
+import { Theme } from '../components/ui/styleUtils';
 import { HOST } from '../shared/constants';
 import { request } from '../shared/request';
 
@@ -160,7 +161,7 @@ export const IssuersMachine = model.createMachine(
         const defaultIssuer = {
           id: 'UIN, VID, AID',
           displayName: 'Enter the mentioned ID and download your card',
-          logoUrl: '',
+          logoUrl: Theme.DigitIcon,
         };
 
         const response = await request('GET', '/residentmobileapp/issuers');
