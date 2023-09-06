@@ -86,6 +86,7 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
                 scrollEnabled={false}
                 renderItem={({ item }) => (
                   <Issuer
+                    key={item.id}
                     id={item.id}
                     description={item.displayName}
                     onPress={() => onPressHandler(item.id)}
