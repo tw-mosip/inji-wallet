@@ -70,7 +70,7 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
         <Loader isVisible title={t('loading')} progress />
       )}
       {controller.issuers.length > 0 && (
-        <Column style={Theme.Styles.issuerListOuterContainer}>
+        <Column style={Theme.issuersScreenStyles.issuerListOuterContainer}>
           <Text
             style={{
               ...Theme.TextStyles.regularGrey,
