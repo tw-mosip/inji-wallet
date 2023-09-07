@@ -517,8 +517,9 @@ export const DefaultTheme = {
       color: Colors.Black,
       fontFamily: 'Inter_700Bold',
       fontSize: 18,
-      lineHeight: 22,
+      lineHeight: 19,
       paddingTop: 4,
+      marginLeft: -30,
     },
     semiBoldHeader: {
       color: Colors.Black,
@@ -781,6 +782,7 @@ export const DefaultTheme = {
   }),
   KebabPopUpStyles: StyleSheet.create({
     kebabPopUp: {
+      flex: 1,
       borderTopLeftRadius: 15,
       borderTopRightRadius: 15,
       width: Dimensions.get('screen').width,
@@ -789,9 +791,7 @@ export const DefaultTheme = {
     kebabHeaderStyle: {
       justifyContent: 'space-between',
       fontFamily: 'Inter_700Bold',
-      paddingRight: 15,
-      paddingLeft: 130,
-      paddingTop: 18,
+      paddingTop: 15,
     },
   }),
   MessageOverlayStyles: StyleSheet.create({

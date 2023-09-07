@@ -106,7 +106,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
               </Column>
               {ENABLE_OPENID_FOR_VC === 'false' && (
                 <Button
-                  testId="downloadCard"
+                  testID="downloadCard"
                   type="gradient"
                   disabled={controller.isRefreshingVcs}
                   title={t('downloadCard')}
