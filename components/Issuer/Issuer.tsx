@@ -25,8 +25,14 @@ export const Issuer: React.FC<IssuerProps> = (props: IssuerProps) => {
       onPress={props.onPress}
       style={({ pressed }) =>
         pressed
-          ? [Theme.Styles.issuerBoxContainerPressed, Theme.Styles.boxShadow]
-          : [Theme.Styles.issuerBoxContainer, Theme.Styles.boxShadow]
+          ? [
+              Theme.issuersScreenStyles.issuerBoxContainerPressed,
+              Theme.Styles.boxShadow,
+            ]
+          : [
+              Theme.issuersScreenStyles.issuerBoxContainer,
+              Theme.Styles.boxShadow,
+            ]
       }>
       <Image
         style={Theme.issuersScreenStyles.issuerIcon}
