@@ -11,7 +11,8 @@ import { TabRef } from './HomeScreenMachine';
 import { ActorRefFrom } from 'xstate';
 import { vcItemMachine } from '../../machines/vcItem';
 import LinearGradient from 'react-native-linear-gradient';
-import { ENABLE_OPENID_FOR_VC } from 'react-native-dotenv';
+import { isOpenId4VCIEnabled } from '../../shared/openId4VCI/Utils';
+import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
 
 export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
   const controller = useHomeScreen(props);
@@ -72,7 +73,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
           </Column>
         )}
       </Column>
-      {ENABLE_OPENID_FOR_VC === 'true' && <DownloadFABIcon />}
+      {isOpenId4VCIEnabled() && <DownloadFABIcon />}
       {controller.selectedVc && (
         <ViewVcModal
           isVisible={controller.isViewingVc}
@@ -91,5 +92,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
 export interface HomeScreenTabProps {
   isVisible: boolean;
   service: TabRef;
-  vcItemActor: ActorRefFrom<typeof vcItemMachine>;
+  vcItemActor:
+    | ActorRefFrom<typeof vcItemMachine>
+    | ActorRefFrom<typeof VCItemMachine>;
 }

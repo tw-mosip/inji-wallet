@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { HistoryTab } from '../screens/Home/MyVcs/HistoryTab';
 import { RemoveVcWarningOverlay } from '../screens/Home/MyVcs/RemoveVcWarningOverlay';
 import { ScrollView } from 'react-native-gesture-handler';
+import { VCItemMachine } from './openId4VCI/VCItemMachine';
 
 export const KebabPopUp: React.FC<KebabPopUpProps> = (props) => {
   const controller = useKebabPopUp(props);
@@ -92,5 +93,7 @@ export interface KebabPopUpProps {
   vcKey: string;
   isVisible: boolean;
   onDismiss: () => void;
-  service: ActorRefFrom<typeof vcItemMachine>;
+  service:
+    | ActorRefFrom<typeof vcItemMachine>
+    | ActorRefFrom<typeof VCItemMachine>;
 }

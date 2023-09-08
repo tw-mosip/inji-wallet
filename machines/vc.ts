@@ -12,6 +12,8 @@ import {
   VC_ITEM_STORE_KEY,
   isSameVC,
 } from '../shared/constants';
+import { OpenId4VCIProtocol } from '../shared/openId4VCI/Utils';
+import { VCItemEvents } from '../components/openId4VCI/VCItemMachine';
 
 const model = createModel(
   {
@@ -31,6 +33,7 @@ const model = createModel(
       VC_UPDATED: (vcKey: string) => ({ vcKey }),
       VC_RECEIVED: (vcKey: string) => ({ vcKey }),
       VC_DOWNLOADED: (vc: VC) => ({ vc }),
+      VC_DOWNLOADED_FROM_OPENID4VCI: (vc: VC, vcKey: string) => ({ vc, vcKey }),
       VC_UPDATE: (vc: VC) => ({ vc }),
       REFRESH_MY_VCS: () => ({}),
       REFRESH_MY_VCS_TWO: (vc: VC) => ({ vc }),
@@ -151,6 +154,9 @@ export const vcMachine =
             VC_DOWNLOADED: {
               actions: 'setDownloadedVc',
             },
+            VC_DOWNLOADED_FROM_OPENID4VCI: {
+              actions: 'setDownloadedVCFromOpenId4VCI',
+            },
             VC_UPDATE: {
               actions: 'setVcUpdate',
             },
@@ -176,6 +182,9 @@ export const vcMachine =
 
         getVcItemResponse: respond((context, event) => {
           const vc = context.vcs[event.vcKey];
+          if (event.protocol === OpenId4VCIProtocol) {
+            return VCItemEvents.GET_VC_RESPONSE(vc);
+          }
           return VcItemEvents.GET_VC_RESPONSE(vc);
         }),
 
@@ -198,7 +207,10 @@ export const vcMachine =
         setDownloadedVc: (context, event) => {
           context.vcs[VC_ITEM_STORE_KEY(event.vc)] = event.vc;
         },
-
+        setDownloadedVCFromOpenId4VCI: (context, event) => {
+          if (event?.vc.credential != null)
+            context.vcs[event?.vcKey] = event?.vc.credential;
+        },
         setVcUpdate: (context, event) => {
           Object.keys(context.vcs).map((vcKey) => {
             if (isSameVC(vcKey, VC_ITEM_STORE_KEY(event.vc))) {

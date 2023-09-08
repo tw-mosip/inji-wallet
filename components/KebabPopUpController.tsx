@@ -18,19 +18,27 @@ import {
 import { selectActivities } from '../machines/activityLog';
 import { GlobalContext } from '../shared/GlobalContext';
 import { useContext } from 'react';
+import { VCItemEvents, VCItemMachine } from './openId4VCI/VCItemMachine';
+import { isVCFromOpenId4VCI } from '../shared/openId4VCI/Utils';
 
 export function useKebabPopUp(props) {
-  const service = props.service as ActorRefFrom<typeof vcItemMachine>;
-  const PIN_CARD = () => service.send(VcItemEvents.PIN_CARD());
-  const KEBAB_POPUP = () => service.send(VcItemEvents.KEBAB_POPUP());
+  const service = props.service as
+    | ActorRefFrom<typeof vcItemMachine>
+    | ActorRefFrom<typeof VCItemMachine>;
+  const vcEvents =
+    props.vcKey !== undefined && isVCFromOpenId4VCI(props?.vcKey)
+      ? VCItemEvents
+      : VcItemEvents;
+  const PIN_CARD = () => service.send(vcEvents.PIN_CARD());
+  const KEBAB_POPUP = () => service.send(vcEvents.KEBAB_POPUP());
   const ADD_WALLET_BINDING_ID = () =>
-    service.send(VcItemEvents.ADD_WALLET_BINDING_ID());
-  const CONFIRM = () => service.send(VcItemEvents.CONFIRM());
-  const REMOVE = (vcKey: string) => service.send(VcItemEvents.REMOVE(vcKey));
-  const DISMISS = () => service.send(VcItemEvents.DISMISS());
-  const CANCEL = () => service.send(VcItemEvents.CANCEL());
-  const SHOW_ACTIVITY = () => service.send(VcItemEvents.SHOW_ACTIVITY());
-  const INPUT_OTP = (otp: string) => service.send(VcItemEvents.INPUT_OTP(otp));
+    service.send(vcEvents.ADD_WALLET_BINDING_ID());
+  const CONFIRM = () => service.send(vcEvents.CONFIRM());
+  const REMOVE = (vcKey: string) => service.send(vcEvents.REMOVE(vcKey));
+  const DISMISS = () => service.send(vcEvents.DISMISS());
+  const CANCEL = () => service.send(vcEvents.CANCEL());
+  const SHOW_ACTIVITY = () => service.send(vcEvents.SHOW_ACTIVITY());
+  const INPUT_OTP = (otp: string) => service.send(vcEvents.INPUT_OTP(otp));
   const isPinned = useSelector(service, selectIsPinned);
   const isBindingWarning = useSelector(service, selectKebabPopUpBindingWarning);
   const isRemoveWalletWarning = useSelector(service, selectRemoveWalletWarning);

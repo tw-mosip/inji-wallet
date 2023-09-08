@@ -14,7 +14,11 @@ import {
   MessageOverlay,
 } from '../../components/MessageOverlay';
 import { Icon } from 'react-native-elements';
-import { ENABLE_OPENID_FOR_VC } from 'react-native-dotenv';
+import {
+  isOpenId4VCIEnabled,
+  isVCFromOpenId4VCI,
+} from '../../shared/openId4VCI/Utils';
+import { VCItem } from '../../components/openId4VCI/VCItem';
 
 export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
   const { t } = useTranslation('MyVcsTab');
@@ -89,6 +93,15 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                         iconType="antdesign"
                       />
                     );
+                  } else if (isOpenId4VCIEnabled && isVCFromOpenId4VCI(vcKey)) {
+                    return (
+                      <VCItem
+                        key={`${vcKey}-${index}`}
+                        vcKey={vcKey}
+                        margin="0 2 8 2"
+                        onPress={controller.VIEW_VC}
+                      />
+                    );
                   }
                 })}
                 {controller.vcKeys.map((vcKey, index) => {
@@ -102,9 +115,20 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                       />
                     );
                   }
+                  //todo once pinning feature is finalised need to remove the negation before isOpenId4VCIEnabled.
+                  else if (!isOpenId4VCIEnabled && isVCFromOpenId4VCI(vcKey)) {
+                    return (
+                      <VCItem
+                        key={`${vcKey}-${index}`}
+                        vcKey={vcKey}
+                        margin="0 2 8 2"
+                        onPress={controller.VIEW_VC}
+                      />
+                    );
+                  }
                 })}
               </Column>
-              {ENABLE_OPENID_FOR_VC === 'false' && (
+              {!isOpenId4VCIEnabled() && (
                 <Button
                   testID="downloadCard"
                   type="gradient"
@@ -133,7 +157,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                   margin="0 12 30 12">
                   {t('generateVcDescription')}
                 </Text>
-                {ENABLE_OPENID_FOR_VC === 'false' && (
+                {!isOpenId4VCIEnabled && (
                   <Button
                     type="gradient"
                     disabled={controller.isRefreshingVcs}

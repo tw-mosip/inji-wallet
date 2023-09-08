@@ -28,6 +28,7 @@ import {
   selectShowHardwareKeystoreNotExistsAlert,
   SettingsEvents,
 } from '../../machines/settings';
+import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
 
 export function useMyVcsTab(props: HomeScreenTabProps) {
   const service = props.service as ActorRefFrom<typeof MyVcsTabMachine>;
@@ -66,7 +67,11 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
 
     REFRESH: () => vcService.send(VcEvents.REFRESH_MY_VCS()),
 
-    VIEW_VC: (vcRef: ActorRefFrom<typeof vcItemMachine>) => {
+    VIEW_VC: (
+      vcRef:
+        | ActorRefFrom<typeof vcItemMachine>
+        | ActorRefFrom<typeof VCItemMachine>
+    ) => {
       return service.send(MyVcsTabEvents.VIEW_VC(vcRef));
     },
 

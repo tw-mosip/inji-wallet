@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { VcDetails } from '../../components/VcDetails';
 import { OtpVerificationModal } from './MyVcs/OtpVerificationModal';
 import { BindingVcWarningOverlay } from './MyVcs/BindingVcWarningOverlay';
+import { isVCFromOpenId4VCI } from '../../shared/openId4VCI/Utils';
+import { VCDetails } from '../../components/openId4VCI/VCDetails';
 
 export const ViewVcModal: React.FC<ViewVcModalProps> = (props) => {
   const { t } = useTranslation('ViewVcModal');
@@ -39,12 +41,21 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = (props) => {
       headerElevation={2}>
       <Column scroll>
         <Column fill>
-          <VcDetails
-            vc={controller.vc}
-            onBinding={controller.addtoWallet}
-            isBindingPending={controller.isWalletBindingPending}
-            activeTab={props.activeTab}
-          />
+          {isVCFromOpenId4VCI(controller.vc.credential.id) ? (
+            <VCDetails
+              vc={controller.vc}
+              onBinding={controller.addtoWallet}
+              isBindingPending={controller.isWalletBindingPending}
+              activeTab={props.activeTab}
+            />
+          ) : (
+            <VcDetails
+              vc={controller.vc}
+              onBinding={controller.addtoWallet}
+              isBindingPending={controller.isWalletBindingPending}
+              activeTab={props.activeTab}
+            />
+          )}
         </Column>
       </Column>
       {controller.isEditingTag && (
