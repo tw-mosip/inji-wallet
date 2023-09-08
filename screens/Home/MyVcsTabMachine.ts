@@ -20,6 +20,7 @@ import { GetVcModalMachine } from './MyVcs/GetVcModalMachine';
 import Storage from '../../shared/storage';
 import { IssuersMachine } from '../../machines/issuersMachine';
 import { VCMetadata } from '../../shared/VCMetadata';
+import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
 
 const model = createModel(
   {
@@ -28,7 +29,11 @@ const model = createModel(
   {
     events: {
       REFRESH: () => ({}),
-      VIEW_VC: (vcItemActor: ActorRefFrom<typeof vcItemMachine>) => ({
+      VIEW_VC: (
+        vcItemActor:
+          | ActorRefFrom<typeof vcItemMachine>
+          | ActorRefFrom<typeof VCItemMachine>
+      ) => ({
         vcItemActor,
       }),
       DISMISS: () => ({}),
@@ -87,6 +92,7 @@ export const MyVcsTabMachine = model.createMachine(
             target: 'idle',
             actions: ['completeOnboarding'],
           },
+          VIEW_VC: 'viewingVc',
         },
       },
       gotoIssuers: {

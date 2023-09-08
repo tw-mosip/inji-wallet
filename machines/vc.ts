@@ -7,6 +7,8 @@ import { log, respond } from 'xstate/lib/actions';
 import { VcItemEvents } from './vcItem';
 import { MY_VCS_STORE_KEY, RECEIVED_VCS_STORE_KEY } from '../shared/constants';
 import { VCMetadata } from '../shared/VCMetadata';
+import { OpenId4VCIProtocol } from '../shared/openId4VCI/Utils';
+import { VCItemEvents } from '../components/openId4VCI/VCItemMachine';
 
 const model = createModel(
   {
@@ -26,6 +28,7 @@ const model = createModel(
       VC_UPDATED: (vcMetadata: VCMetadata) => ({ vcMetadata }),
       VC_RECEIVED: (vcMetadata: VCMetadata) => ({ vcMetadata }),
       VC_DOWNLOADED: (vc: VC) => ({ vc }),
+      VC_DOWNLOADED_FROM_OPENID4VCI: (vc: VC, vcMetadata: VCMetadata) => ({ vc, vcKey }),
       VC_UPDATE: (vc: VC) => ({ vc }),
       REFRESH_MY_VCS: () => ({}),
       REFRESH_MY_VCS_TWO: (vc: VC) => ({ vc }),
@@ -146,6 +149,9 @@ export const vcMachine =
             VC_DOWNLOADED: {
               actions: 'setDownloadedVc',
             },
+            VC_DOWNLOADED_FROM_OPENID4VCI: {
+              actions: 'setDownloadedVCFromOpenId4VCI',
+            },
             VC_UPDATE: {
               actions: 'setVcUpdate',
             },
@@ -171,6 +177,9 @@ export const vcMachine =
 
         getVcItemResponse: respond((context, event) => {
           const vc = context.vcs[event.vcMetadata?.uniqueId()];
+          if (event.protocol === OpenId4VCIProtocol) {
+            return VCItemEvents.GET_VC_RESPONSE(vc);
+          }
           return VcItemEvents.GET_VC_RESPONSE(vc);
         }),
 
@@ -198,7 +207,10 @@ export const vcMachine =
           const vcUniqueId = VCMetadata.fromVC(event.vc, true).uniqueId();
           context.vcs[vcUniqueId] = event.vc;
         },
-
+        setDownloadedVCFromOpenId4VCI: (context, event) => {
+          if (event?.vc.credential != null)
+            context.vcs[event?.vcMetadata] = event?.vc.credential;
+        },
         setVcUpdate: (context, event) => {
           Object.keys(context.vcs).map((vcUniqueId) => {
             const eventVCMetadata = VCMetadata.fromVC(event.vc, true);

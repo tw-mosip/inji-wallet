@@ -1,8 +1,7 @@
 import React, { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Image, Text, View } from 'react-native';
-import { Issuer } from '../../components/Issuer/Issuer';
-import { ProgressingModal } from '../../components/ProgressingModal';
+import { Issuer } from '../../components/openId4VCI/Issuer';
 import { Error } from '../../components/ui/Error';
 import { Header } from '../../components/ui/Header';
 import { Column } from '../../components/ui/Layout';
@@ -31,7 +30,11 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
         headerShown: false,
       });
     }
-  }, [controller.issuers]);
+
+    if (controller.isStoring) {
+      props.navigation.goBack();
+    }
+  }, [controller.issuers, controller.isStoring]);
 
   const onPressHandler = (id) => {
     if (id !== 'UIN, VID, AID') {
@@ -64,11 +67,24 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
     return <Image source={Theme.NoInternetConnection} />;
   };
 
+  if (controller.isLoadingIssuers) {
+    return <Loader isVisible title={t('loading')} progress />;
+  }
+
+  if (controller.isDownloadingCredentials) {
+    return (
+      <Loader
+        isVisible={controller.isDownloadingCredentials}
+        title={t('modal.title')}
+        onCancel={controller.CANCEL}
+        hint={t('modal.hint')}
+        progress={true}
+      />
+    );
+  }
+
   return (
     <React.Fragment>
-      {controller.isLoadingIssuers && (
-        <Loader isVisible title={t('loading')} progress />
-      )}
       {controller.issuers.length > 0 && (
         <Column style={Theme.issuersScreenStyles.issuerListOuterContainer}>
           <Text
@@ -109,15 +125,6 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
           goBack={goBack}
           tryAgain={isGenericError() ? null : controller.TRY_AGAIN}
           image={getImage()}
-        />
-      )}
-      {controller.isDownloadingCredentials && (
-        <ProgressingModal
-          isVisible={controller.isDownloadingCredentials}
-          title={t('modal.title')}
-          onCancel={controller.CANCEL}
-          hint={t('modal.hint')}
-          progress={true}
         />
       )}
     </React.Fragment>

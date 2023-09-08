@@ -623,6 +623,12 @@ export const PurpleTheme = {
       fontSize: 12,
     },
   }),
+  LoaderStyles: StyleSheet.create({
+    titleContainer: {
+      marginLeft: Dimensions.get('screen').width * 0.08,
+      marginVertical: Dimensions.get('screen').height * 0.025,
+    },
+  }),
   ButtonStyles: StyleSheet.create({
     fill: {
       flex: 1,

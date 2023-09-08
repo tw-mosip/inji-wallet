@@ -12,7 +12,10 @@ export const Loader: React.FC<ProgressingProps> = (props) => {
     <Fragment>
       <Row elevation={3}>
         <SafeAreaView style={Theme.ModalStyles.header}>
-          <Row fill align={'flex-start'} margin={'16 0 17 0'}>
+          <Row
+            fill
+            align={'flex-start'}
+            style={Theme.LoaderStyles.titleContainer}>
             <Text style={Theme.TextStyles.header}>{props.title}</Text>
           </Row>
         </SafeAreaView>

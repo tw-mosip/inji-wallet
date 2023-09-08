@@ -48,6 +48,10 @@ export interface Typegen0 {
     setIssuers: 'done.invoke.issuersMachine.displayIssuers:invocation[0]';
     setSelectedIssuers: 'done.invoke.issuersMachine.downloadIssuerConfig:invocation[0]';
     setTokenResponse: 'done.invoke.issuersMachine.performAuthorization:invocation[0]';
+    storeVcData: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
+    storeVcMeta: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
+    storeVcMetaContext: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
+    storeVcsContext: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
   };
   'eventsCausingDelays': {};
   'eventsCausingGuards': {};

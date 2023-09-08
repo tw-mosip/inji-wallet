@@ -15,6 +15,7 @@ import {
   ReceivedVcsTabMachine,
 } from './ReceivedVcsTabMachine';
 import { IssuersMachine } from '../../machines/issuersMachine';
+import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
 
 const model = createModel(
   {
@@ -23,7 +24,9 @@ const model = createModel(
       myVcs: {} as ActorRefFrom<typeof MyVcsTabMachine>,
       receivedVcs: {} as ActorRefFrom<typeof ReceivedVcsTabMachine>,
     },
-    selectedVc: null as ActorRefFrom<typeof vcItemMachine>,
+    selectedVc: null as
+      | ActorRefFrom<typeof vcItemMachine>
+      | ActorRefFrom<typeof VCItemMachine>,
     activeTab: 0,
   },
   {
@@ -31,7 +34,11 @@ const model = createModel(
       SELECT_MY_VCS: () => ({}),
       SELECT_RECEIVED_VCS: () => ({}),
       SELECT_HISTORY: () => ({}),
-      VIEW_VC: (vcItemActor: ActorRefFrom<typeof vcItemMachine>) => ({
+      VIEW_VC: (
+        vcItemActor:
+          | ActorRefFrom<typeof vcItemMachine>
+          | ActorRefFrom<typeof VCItemMachine>
+      ) => ({
         vcItemActor,
       }),
       DISMISS_MODAL: () => ({}),
@@ -109,6 +116,10 @@ export const HomeScreenMachine = model.createMachine(
             invoke: {
               id: 'issuersMachine',
               src: IssuersMachine,
+              data: (context) => ({
+                ...IssuersMachine.context,
+                serviceRefs: context.serviceRefs, // the value you want to pass to child machine
+              }),
               onDone: 'idle',
             },
             on: {

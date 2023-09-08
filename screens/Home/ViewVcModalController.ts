@@ -26,6 +26,7 @@ import {
 } from '../../machines/vcItem';
 import { selectPasscode } from '../../machines/auth';
 import { biometricsMachine, selectIsSuccess } from '../../machines/biometrics';
+import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
 
 export function useViewVcModal({
   vcItemActor,
@@ -172,7 +173,9 @@ export function useViewVcModal({
 }
 
 export interface ViewVcModalProps extends ModalProps {
-  vcItemActor: ActorRefFrom<typeof vcItemMachine>;
+  vcItemActor:
+    | ActorRefFrom<typeof vcItemMachine>
+    | ActorRefFrom<typeof VCItemMachine>;
   onDismiss: () => void;
   onRevokeDelete: () => void;
   activeTab: Number;

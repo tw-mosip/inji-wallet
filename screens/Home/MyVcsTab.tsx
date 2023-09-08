@@ -18,7 +18,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import { groupBy } from '../../shared/javascript';
 
 const pinIconProps = { iconName: 'pushpin', iconType: 'antdesign' };
-import { ENABLE_OPENID_FOR_VC } from 'react-native-dotenv';
+import {
+  isOpenId4VCIEnabled,
+  isVCFromOpenId4VCI,
+} from '../../shared/openId4VCI/Utils';
+import { VCItem } from '../../components/openId4VCI/VCItem';
 
 export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
   const { t } = useTranslation('MyVcsTab');
@@ -127,18 +131,29 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                 }>
                 {vcMetadataOrderedByPinStatus.map((vcMetadata, index) => {
                   const iconProps = vcMetadata.isPinned ? pinIconProps : {};
-                  return (
-                    <VcItem
-                      {...iconProps}
-                      key={`${vcMetadata}-${index}`}
-                      vcMetadata={vcMetadata}
-                      margin="0 2 8 2"
-                      onPress={controller.VIEW_VC}
-                    />
-                  );
+                  if(!isVCFromOpenId4VCI("")) {
+                      return (
+                          <VcItem
+                              {...iconProps}
+                              key={`${vcMetadata}-${index}`}
+                              vcMetadata={vcMetadata}
+                              margin="0 2 8 2"
+                              onPress={controller.VIEW_VC}
+                          />
+                      );
+                  } else {
+                      return (
+                          <VCItem
+                              key={`${""}-${index}`}
+                              vcKey={"vcKey"}
+                              margin="0 2 8 2"
+                              onPress={controller.VIEW_VC}
+                          />
+                      );
+                  }
                 })}
               </Column>
-                {ENABLE_OPENID_FOR_VC === 'false' && (
+                {!isOpenId4VCIEnabled() && (
                   <Button
                     testID="downloadCard"
                     type="gradient"
@@ -169,7 +184,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                     margin="0 12 30 12">
                     {t('generateVcDescription')}
                   </Text>
-                    {ENABLE_OPENID_FOR_VC === 'false' && (
+                    {isOpenId4VCIEnabled() && (
                     <Button
                         type="gradient"
                         disabled={controller.isRefreshingVcs}

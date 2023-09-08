@@ -21,6 +21,7 @@ export interface Typegen0 {
     prependToMyVcs: 'VC_ADDED';
     prependToReceivedVcs: 'VC_RECEIVED';
     removeVcFromMyVcs: 'REMOVE_VC_FROM_CONTEXT';
+    setDownloadedVCFromOpenId4VCI: 'VC_DOWNLOADED_FROM_OPENID4VCI';
     setDownloadedVc: 'VC_DOWNLOADED';
     setMyVcs: 'STORE_RESPONSE';
     setReceivedVcs: 'STORE_RESPONSE';
