@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground, View } from 'react-native';
+import { Image, ImageBackground } from 'react-native';
 import { getLocalizedField } from '../i18n';
 import { VerifiableCredential } from '../types/vc';
 import { VcItemTags } from './VcItemTags';
@@ -71,6 +71,16 @@ const getDetails = (arg1, arg2, verifiableCredential) => {
   }
 };
 
+const MOSIPvc = 'MOSIPVerifiableCredential';
+
+/**
+ * isMOSIPvc returns true if the VC is of type=MOSIP
+ */
+const isMOSIPvc = (vc: VerifiableCredential) => {
+  if (!vc) return true; // should ideally throw an error
+  return vc.type.includes(MOSIPvc);
+};
+
 export const VcItemContent: React.FC<VcItemContentProps> = (props) => {
   //Assigning the UIN and VID from the VC details to display the idtype label
   const uin = props.verifiableCredential?.credentialSubject.UIN;
@@ -88,107 +98,132 @@ export const VcItemContent: React.FC<VcItemContentProps> = (props) => {
       onPress={() => props.onPress()}
     />
   ) : null;
+  if (isMOSIPvc(props.verifiableCredential)) {
+    return (
+      <ImageBackground
+        source={!props.verifiableCredential ? null : Theme.CloseCard}
+        resizeMode="stretch"
+        borderRadius={4}
+        style={
+          !props.verifiableCredential
+            ? Theme.Styles.vertloadingContainer
+            : Theme.Styles.backgroundImageContainer
+        }>
+        <Column>
+          <Row align="space-between">
+            <Row>
+              <ImageBackground
+                source={
+                  !props.verifiableCredential
+                    ? Theme.ProfileIcon
+                    : { uri: props.context.credential.biometrics.face }
+                }
+                style={Theme.Styles.closeCardImage}>
+                {props.iconName && (
+                  <Icon
+                    name={props.iconName}
+                    type={props.iconType}
+                    color={Theme.Colors.Icon}
+                    style={{ marginLeft: -80 }}
+                  />
+                )}
+              </ImageBackground>
+              <Column margin="0 0 0 10">
+                {getDetails(
+                  t('fullName'),
+                  fullName,
+                  props.verifiableCredential
+                )}
 
-  return (
-    <ImageBackground
-      source={!props.verifiableCredential ? null : Theme.CloseCard}
-      resizeMode="stretch"
-      borderRadius={4}
-      style={
-        !props.verifiableCredential
-          ? Theme.Styles.vertloadingContainer
-          : Theme.Styles.backgroundImageContainer
-      }>
-      <Column>
-        <Row align="space-between">
-          <Row>
-            <ImageBackground
-              source={
-                !props.verifiableCredential
-                  ? Theme.ProfileIcon
-                  : { uri: props.context.credential.biometrics.face }
-              }
-              style={Theme.Styles.closeCardImage}>
-              {props.iconName && (
-                <Icon
-                  name={props.iconName}
-                  type={props.iconType}
-                  color={Theme.Colors.Icon}
-                  style={{ marginLeft: -80 }}
-                />
-              )}
-            </ImageBackground>
-            <Column margin="0 0 0 10">
-              {getDetails(t('fullName'), fullName, props.verifiableCredential)}
-
-              <Column margin="10 0 0 0">
-                <Text
-                  color={
-                    !props.verifiableCredential
-                      ? Theme.Colors.LoadingDetailsLabel
-                      : Theme.Colors.DetailsLabel
-                  }
-                  weight="semibold"
-                  size="smaller"
-                  align="left">
-                  {t('idType')}
-                </Text>
-                <Text
-                  weight="semibold"
-                  color={Theme.Colors.Details}
-                  size="smaller"
-                  style={
-                    !props.verifiableCredential
-                      ? Theme.Styles.loadingTitle
-                      : Theme.Styles.subtitle
-                  }>
-                  {t('nationalCard')}
-                </Text>
+                <Column margin="10 0 0 0">
+                  <Text
+                    color={
+                      !props.verifiableCredential
+                        ? Theme.Colors.LoadingDetailsLabel
+                        : Theme.Colors.DetailsLabel
+                    }
+                    weight="semibold"
+                    size="smaller"
+                    align="left">
+                    {t('idType')}
+                  </Text>
+                  <Text
+                    weight="semibold"
+                    color={Theme.Colors.Details}
+                    size="smaller"
+                    style={
+                      !props.verifiableCredential
+                        ? Theme.Styles.loadingTitle
+                        : Theme.Styles.subtitle
+                    }>
+                    {t('nationalCard')}
+                  </Text>
+                </Column>
               </Column>
+            </Row>
+
+            <Column>
+              {props.verifiableCredential ? selectableOrCheck : null}
             </Column>
           </Row>
 
-          <Column>
-            {props.verifiableCredential ? selectableOrCheck : null}
-          </Column>
-        </Row>
-
-        <Row
-          align="space-between"
-          margin="5 0 0 0"
-          style={
-            !props.verifiableCredential ? Theme.Styles.loadingContainer : null
-          }>
-          <Column>
-            {uin ? getDetails(t('uin'), uin, props.verifiableCredential) : null}
-            {vid ? getDetails(t('vid'), vid, props.verifiableCredential) : null}
-            {!props.verifiableCredential
-              ? getDetails(t('id'), uin || vid, props.verifiableCredential)
-              : null}
-            {getDetails(
-              t('generatedOn'),
-              props.generatedOn,
-              props.verifiableCredential
-            )}
-          </Column>
-          <Column>
-            {props.verifiableCredential
-              ? getDetails(t('status'), isvalid, props.verifiableCredential)
-              : null}
-          </Column>
-          <Column
-            style={{ display: props.verifiableCredential ? 'flex' : 'none' }}>
-            <Image
-              source={props.logo ? props.logo : Theme.MosipLogo}
-              style={Theme.Styles.logo}
-              resizeMethod="auto"
-            />
-          </Column>
-        </Row>
-      </Column>
-      <VcItemTags tag={props.tag} />
-    </ImageBackground>
-  );
+          <Row
+            align="space-between"
+            margin="5 0 0 0"
+            style={
+              !props.verifiableCredential ? Theme.Styles.loadingContainer : null
+            }>
+            <Column>
+              {uin
+                ? getDetails(t('uin'), uin, props.verifiableCredential)
+                : null}
+              {vid
+                ? getDetails(t('vid'), vid, props.verifiableCredential)
+                : null}
+              {!props.verifiableCredential
+                ? getDetails(t('id'), uin || vid, props.verifiableCredential)
+                : null}
+              {getDetails(
+                t('generatedOn'),
+                props.generatedOn,
+                props.verifiableCredential
+              )}
+            </Column>
+            <Column>
+              {props.verifiableCredential
+                ? getDetails(t('status'), isvalid, props.verifiableCredential)
+                : null}
+            </Column>
+            <Column
+              style={{ display: props.verifiableCredential ? 'flex' : 'none' }}>
+              <Image
+                source={props.logo ? props.logo : Theme.MosipLogo}
+                style={Theme.Styles.logo}
+                resizeMethod="auto"
+              />
+            </Column>
+          </Row>
+        </Column>
+        <VcItemTags tag={props.tag} />
+      </ImageBackground>
+    );
+  } else {
+    const vcEntities = props.verifiableCredential.credentialSubject;
+    const items = Object.keys(vcEntities);
+    return (
+      <>
+        {items.map(function (key) {
+          return (
+            <Column margin="5 5 5 5" key={key}>
+              {typeof vcEntities[key] !== 'object'
+                ? getDetails(key, vcEntities[key], props.verifiableCredential)
+                : null}
+            </Column>
+          );
+        })}
+      </>
+    );
+  }
 };
 
 interface VcItemContentProps {
