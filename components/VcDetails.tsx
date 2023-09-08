@@ -4,7 +4,7 @@ import * as DateFnsLocale from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { Image, ImageBackground, View } from 'react-native';
 import { Icon } from 'react-native-elements';
-import { VC, CredentialSubject } from '../types/vc';
+import { CredentialSubject } from '../types/vc';
 import { Button, Column, Row, Text } from './ui';
 import { Theme } from './ui/styleUtils';
 import { TextItem } from './ui/TextItem';
@@ -13,6 +13,7 @@ import VerifiedIcon from './VerifiedIcon';
 import { getLocalizedField } from '../i18n';
 import { CREDENTIAL_REGISTRY_EDIT } from 'react-native-dotenv';
 import { QrCodeOverlay } from './QrCodeOverlay';
+import { VcDetailsProps } from './VcDetailsWrapper';
 
 export const VcDetails: React.FC<VcDetailsProps> = (props) => {
   const { t, i18n } = useTranslation('VcDetails');
@@ -347,14 +348,6 @@ export const VcDetails: React.FC<VcDetailsProps> = (props) => {
     </Column>
   );
 };
-
-interface VcDetailsProps {
-  vc: VC;
-  isBindingPending: boolean;
-  onBinding?: () => void;
-  activeTab?: Number;
-  logo?: string;
-}
 
 function getFullAddress(credential: CredentialSubject) {
   if (!credential) {

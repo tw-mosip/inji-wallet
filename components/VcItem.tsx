@@ -17,11 +17,11 @@ import { VcItemEvents } from '../machines/vcItem';
 import { ErrorMessageOverlay } from './MessageOverlay';
 import { Theme } from './ui/styleUtils';
 import { GlobalContext } from '../shared/GlobalContext';
-import { VcItemContent } from './VcItemContent';
 import { VcItemActivationStatus } from './VcItemActivationStatus';
 import { Row } from './ui';
 import { KebabPopUp } from './KebabPopUp';
 import { logState } from '../machines/app';
+import { VcItemContentWrapper } from './VcItemContentWrapper';
 
 export const VcItem: React.FC<VcItemProps> = (props) => {
   const { appService } = useContext(GlobalContext);
@@ -57,7 +57,7 @@ export const VcItem: React.FC<VcItemProps> = (props) => {
             ? Theme.Styles.selectedBindedVc
             : Theme.Styles.closeCardBgContainer
         }>
-        <VcItemContent
+        <VcItemContentWrapper
           context={context}
           /* TODO: set the custom logo from state machine if given */
           verifiableCredential={verifiableCredential}

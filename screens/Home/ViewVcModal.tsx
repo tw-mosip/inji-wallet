@@ -1,7 +1,6 @@
 import React from 'react';
-import { DropdownIcon } from '../../components/DropdownIcon';
 import { TextEditOverlay } from '../../components/TextEditOverlay';
-import { Column, Text } from '../../components/ui';
+import { Column } from '../../components/ui';
 import { Modal } from '../../components/ui/Modal';
 import { MessageOverlay } from '../../components/MessageOverlay';
 import { ToastItem } from '../../components/ui/ToastItem';
@@ -9,9 +8,9 @@ import { RevokeConfirmModal } from '../../components/RevokeConfirm';
 import { OIDcAuthenticationModal } from '../../components/OIDcAuth';
 import { useViewVcModal, ViewVcModalProps } from './ViewVcModalController';
 import { useTranslation } from 'react-i18next';
-import { VcDetails } from '../../components/VcDetails';
 import { OtpVerificationModal } from './MyVcs/OtpVerificationModal';
 import { BindingVcWarningOverlay } from './MyVcs/BindingVcWarningOverlay';
+import { VcDetailsWrapper } from '../../components/VcDetailsWrapper';
 
 export const ViewVcModal: React.FC<ViewVcModalProps> = (props) => {
   const { t } = useTranslation('ViewVcModal');
@@ -39,7 +38,7 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = (props) => {
       headerElevation={2}>
       <Column scroll>
         <Column fill>
-          <VcDetails
+          <VcDetailsWrapper
             vc={controller.vc}
             onBinding={controller.addtoWallet}
             isBindingPending={controller.isWalletBindingPending}
