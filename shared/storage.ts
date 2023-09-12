@@ -23,6 +23,7 @@ import {
   HMAC_ALIAS,
   isCustomSecureKeystore,
 } from './cryptoutil/cryptoUtil';
+import { isVCFromOpenId4VCI } from './openId4VCI/Utils';
 
 const MMKV = new MMKVLoader().initialize();
 const vcKeyRegExp = new RegExp(VC_ITEM_STORE_KEY_REGEX);
@@ -54,8 +55,7 @@ class Storage {
     encryptionKey?: string
   ) => {
     try {
-      const isSavingVC = vcKeyRegExp.exec(key);
-      if (isSavingVC) {
+      if (this.isVCKey(key)) {
         await this.storeVcHmac(encryptionKey, data, key);
         return await this.storeVC(key, data);
       }
@@ -69,9 +69,7 @@ class Storage {
 
   static getItem = async (key: string, encryptionKey?: string) => {
     try {
-      const isSavingVC = vcKeyRegExp.exec(key);
-
-      if (isSavingVC) {
+      if (this.isVCKey(key)) {
         const data = await this.readVCFromFile(key);
         const isCorrupted = await this.isCorruptedVC(key, encryptionKey, data);
 
@@ -108,6 +106,7 @@ class Storage {
   private static async storeVC(key: string, data: string) {
     await mkdir(vcDirectoryPath);
     const path = getFilePath(key);
+    console.log(`\n ${key} stored in ${path}`);
     return await writeFile(path, data, 'utf8');
   }
 
@@ -122,12 +121,16 @@ class Storage {
   }
 
   static removeItem = async (key: string) => {
-    if (vcKeyRegExp.exec(key)) {
+    if (this.isVCKey(key)) {
       const path = getFilePath(key);
       return await unlink(path);
     }
     MMKV.removeItem(key);
   };
+
+  private static isVCKey(key: string) {
+    return vcKeyRegExp.exec(key) || isVCFromOpenId4VCI(key);
+  }
 
   static clear = async () => {
     try {

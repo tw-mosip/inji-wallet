@@ -67,7 +67,6 @@ export const VCItem: React.FC<VCItemProps> = (props) => {
               props.activeTab != 'sharingVcScreen' && (
                 <VcItemActivationStatus
                   verifiableCredential={credentials}
-                  onPress={() => props.onPress(service)}
                   showOnlyBindedVc={props.showOnlyBindedVc}
                   emptyWalletBindingId
                 />

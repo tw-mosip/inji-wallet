@@ -55,8 +55,9 @@ const WalletUnverifiedActivationDetails: React.FC<
             !props.verifiableCredential
               ? Theme.Styles.loadingTitle
               : Theme.Styles.statusLabel
-          }
-          children={t('offlineAuthDisabledHeader')}></Text>
+          }>
+          {t('profileAuthenticated')}
+        </Text>
       </Row>
     </Row>
   );
@@ -86,8 +87,9 @@ const WalletVerifiedActivationDetails: React.FC<WalletVerifiedDetailsProps> = (
             !props.verifiableCredential
               ? Theme.Styles.loadingTitle
               : Theme.Styles.subtitle
-          }
-          children={t('profileAuthenticated')}></Text>
+          }>
+          {t('profileAuthenticated')}
+        </Text>
       </Row>
     </Row>
   );
@@ -101,13 +103,11 @@ export const VcItemActivationStatus: React.FC<VcItemActivationStatusProps> = (
       {props.emptyWalletBindingId ? (
         <WalletUnverifiedActivationDetails
           verifiableCredential={props.verifiableCredential}
-          onPress={props.onPress}
         />
       ) : (
         <WalletVerifiedActivationDetails
           verifiableCredential={props.verifiableCredential}
           showOnlyBindedVc={props.showOnlyBindedVc}
-          onPress={props.onPress}
         />
       )}
     </Row>
@@ -116,18 +116,15 @@ export const VcItemActivationStatus: React.FC<VcItemActivationStatusProps> = (
 
 interface VcItemActivationStatusProps {
   showOnlyBindedVc: boolean;
-  onPress: (vcRef?: ActorRefFrom<typeof vcItemMachine>) => void;
   verifiableCredential: VerifiableCredential;
   emptyWalletBindingId: boolean;
 }
 
 interface WalletVerifiedDetailsProps {
   showOnlyBindedVc: boolean;
-  onPress: (vcRef?: ActorRefFrom<typeof vcItemMachine>) => void;
   verifiableCredential: VerifiableCredential;
 }
 
 interface WalletUnVerifiedDetailsProps {
-  onPress: (vcRef?: ActorRefFrom<typeof vcItemMachine>) => void;
   verifiableCredential: VerifiableCredential;
 }

@@ -76,7 +76,6 @@ export const VcItem: React.FC<VcItemProps> = (props) => {
                 <VcItemActivationStatus
                   verifiableCredential={verifiableCredential}
                   emptyWalletBindingId={emptyWalletBindingId}
-                  onPress={() => props.onPress(service)}
                   showOnlyBindedVc={props.showOnlyBindedVc}
                 />
               )}
