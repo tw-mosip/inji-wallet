@@ -157,7 +157,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                   margin="0 12 30 12">
                   {t('generateVcDescription')}
                 </Text>
-                {!isOpenId4VCIEnabled && (
+                {!isOpenId4VCIEnabled() && (
                   <Button
                     type="gradient"
                     disabled={controller.isRefreshingVcs}
