@@ -3,7 +3,6 @@
 export interface Typegen0 {
   '@@xstate/typegen': true;
   'internalEvents': {
-    '': { type: '' };
     'done.invoke.vc-item-openid4vci.addKeyPair:invocation[0]': {
       type: 'done.invoke.vc-item-openid4vci.addKeyPair:invocation[0]';
       data: unknown;
@@ -41,11 +40,6 @@ export interface Typegen0 {
     };
     'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]': {
       type: 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
-      data: unknown;
-      __tip: 'See the XState TS docs to learn how to strongly type this.';
-    };
-    'done.invoke.vc-item-openid4vci.verifyingCredential:invocation[0]': {
-      type: 'done.invoke.vc-item-openid4vci.verifyingCredential:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
@@ -96,7 +90,6 @@ export interface Typegen0 {
     updatePrivateKey:
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.updatingPrivateKey:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
-    verifyCredential: 'done.invoke.vc-item-openid4vci.verifyingCredential:invocation[0]';
   };
   'missingImplementations': {
     actions: 'clearTransactionId' | 'setVcKey';
@@ -123,7 +116,6 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.updatingPrivateKey:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
-    markVcValid: 'done.invoke.vc-item-openid4vci.verifyingCredential:invocation[0]';
     removeVcItem: 'CONFIRM';
     removedVc: 'STORE_RESPONSE';
     requestStoredContext: 'GET_VC_RESPONSE' | 'REFRESH';
@@ -165,8 +157,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.updatingPrivateKey:invocation[0]'
-      | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]'
-      | 'done.invoke.vc-item-openid4vci.verifyingCredential:invocation[0]';
+      | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
     updatePrivateKey:
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.updatingPrivateKey:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
@@ -175,8 +166,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.updatingPrivateKey:invocation[0]'
-      | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]'
-      | 'done.invoke.vc-item-openid4vci.verifyingCredential:invocation[0]';
+      | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
   };
   'eventsCausingDelays': {};
   'eventsCausingGuards': {
@@ -186,7 +176,6 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addKeyPair:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addingWalletBindingId:invocation[0]';
-    isVcValid: '';
   };
   'eventsCausingServices': {
     addWalletBindnigId:
@@ -197,7 +186,6 @@ export interface Typegen0 {
     updatePrivateKey:
       | 'done.invoke.vc-item-openid4vci.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addingWalletBindingId:invocation[0]';
-    verifyCredential: '' | 'VERIFY';
   };
   'matchesStates':
     | 'acceptingBindingOtp'
@@ -205,7 +193,6 @@ export interface Typegen0 {
     | 'addingWalletBindingId'
     | 'checkingStore'
     | 'checkingVc'
-    | 'checkingVerificationStatus'
     | 'idle'
     | 'kebabPopUp'
     | 'kebabPopUp.acceptingBindingOtp'
@@ -224,7 +211,6 @@ export interface Typegen0 {
     | 'showBindingWarning'
     | 'showingWalletBindingError'
     | 'updatingPrivateKey'
-    | 'verifyingCredential'
     | {
         kebabPopUp?:
           | 'acceptingBindingOtp'

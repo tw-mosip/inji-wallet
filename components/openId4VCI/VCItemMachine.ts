@@ -25,7 +25,6 @@ import {
 } from '../../shared/keystore/SecureKeystore';
 import { ActivityLogEvents } from '../../machines/activityLog';
 import SecureKeystore from 'react-native-secure-keystore';
-import { verifyCredential } from '../../shared/vcjs/verifyCredential';
 
 const model = createModel(
   {
@@ -103,7 +102,7 @@ export const VCItemMachine = model.createMachine(
             {
               actions: ['setCredential'],
               cond: 'hasCredential',
-              target: 'checkingVerificationStatus',
+              target: 'idle',
             },
             {
               target: 'checkingStore',
@@ -117,39 +116,9 @@ export const VCItemMachine = model.createMachine(
         on: {
           STORE_RESPONSE: {
             actions: ['setCredential', 'updateVc'],
-            target: 'checkingVerificationStatus',
-          },
-        },
-      },
-      verifyingCredential: {
-        invoke: {
-          src: 'verifyCredential',
-          onDone: [
-            {
-              actions: ['markVcValid', 'storeContext', 'updateVc'],
-              target: 'idle',
-            },
-          ],
-          onError: [
-            {
-              actions: log((_, event) => (event.data as Error).message),
-              target: 'idle',
-            },
-          ],
-        },
-      },
-      checkingVerificationStatus: {
-        description:
-          'Check if VC verification is still valid. VCs stored on the device must be re-checked once every [N] time has passed.',
-        always: [
-          {
-            cond: 'isVcValid',
             target: 'idle',
           },
-          {
-            target: 'verifyingCredential',
-          },
-        ],
+        },
       },
       showBindingWarning: {
         on: {
@@ -273,9 +242,6 @@ export const VCItemMachine = model.createMachine(
       },
       idle: {
         on: {
-          VERIFY: {
-            target: 'verifyingCredential',
-          },
           DISMISS: {
             target: 'checkingVc',
           },
@@ -609,6 +575,21 @@ export const VCItemMachine = model.createMachine(
         }),
         {
           to: (context) => context.serviceRefs.vc,
+        }
+      ),
+      logDownloaded: send(
+        (context) => {
+          const { serviceRefs, ...data } = context;
+          return ActivityLogEvents.LOG_ACTIVITY({
+            _vcKey: VC_ITEM_STORE_KEY(data),
+            type: 'VC_DOWNLOADED',
+            timestamp: Date.now(),
+            deviceName: '',
+            vcLabel: data.id,
+          });
+        },
+        {
+          to: (context) => context.serviceRefs.activityLog,
         }
       ),
 

@@ -14,9 +14,10 @@ import {
 } from '../shared/cryptoutil/cryptoUtil';
 import SecureKeystore from 'react-native-secure-keystore';
 import { KeyPair } from 'react-native-rsa-native';
-import { log } from 'xstate/lib/actions';
 import { ActivityLogEvents } from './activityLog';
 import forge from 'node-forge';
+import { log } from 'xstate/lib/actions';
+import { VerifiableCredential } from '../types/vc';
 
 const model = createModel(
   {
@@ -24,7 +25,7 @@ const model = createModel(
     selectedIssuer: [] as issuerType[],
     tokenResponse: [] as [],
     errorMessage: null as string,
-    credential: null as object,
+    credential: null as VerifiableCredential,
     serviceRefs: {} as AppServices,
 
     publicKey: null as string,
@@ -113,6 +114,10 @@ export const IssuersMachine = model.createMachine(
             actions: ['setTokenResponse', 'getKeyPairFromStore', 'loadKeyPair'],
             target: 'checkKeyPair',
           },
+          onError: {
+            actions: [() => console.log('error in invokeAuth - ', event.data)],
+            target: 'downloadCredentials',
+          },
         },
       },
       checkKeyPair: {
@@ -157,13 +162,30 @@ export const IssuersMachine = model.createMachine(
           src: 'downloadCredential',
           onDone: {
             actions: 'setCredential',
-            target: 'storing',
+            target: 'verifyingCredential',
           },
         },
         on: {
           CANCEL: {
             target: 'selectingIssuer',
           },
+        },
+      },
+      verifyingCredential: {
+        invoke: {
+          src: 'verifyCredential',
+          onDone: [
+            {
+              target: 'storing',
+            },
+          ],
+          onError: [
+            {
+              actions: log((_, event) => (event.data as Error).message),
+              //TODO: Move to state according to the required flow when verification of VC fails
+              target: 'idle',
+            },
+          ],
         },
       },
       storing: {
@@ -366,6 +388,30 @@ export const IssuersMachine = model.createMachine(
           JSON.stringify(credential, null, 4)
         );
         return JSON.stringify(credential, null, 4);
+
+        // return {
+        //   format: 'ldp_vc',
+        //   credential: {
+        //     'issuanceDate': '2023-08-28T10:26:58.953Z',
+        //     'credentialSubject': {
+        //       name: 'Person2',
+        //       id: 'did:example:456',
+        //       age: 32,
+        //     },
+        //     'id': 'urn:uuid:3978344f-8596-4c3a-a978-8fcaba390413',
+        //     'proof': {
+        //       type: 'RsaSignature2018',
+        //       created: '2023-08-28T10:26:58Z',
+        //       proofPurpose: 'assertionMethod',
+        //       verificationMethod:
+        //         'https://esignet.dev1.mosip.net/v1/esignet/oauth/.well-known/jwks.json',
+        //       jws: 'eyJ4NWMiOlsiTUlJRHZUQ0NBcVdnQXdJQkFnSUl2U1ZGWjBheVd1c3dEUVlKS29aSWh2Y05BUUVMQlFBd2R6RUxNQWtHQTFVRUJoTUNTVTR4Q3pBSkJnTlZCQWdNQWt0Qk1SSXdFQVlEVlFRSERBbENRVTVIUVV4UFVrVXhEVEFMQmdOVkJBb01CRWxKVkVJeEdqQVlCZ05WQkFzTUVVMVBVMGxRTFZSRlEwZ3RRMFZPVkVWU01Sd3dHZ1lEVlFRRERCTjNkM2N1Ylc5emFYQXVhVzhnS0ZKUFQxUXBNQjRYRFRJek1EY3hOREEwTVRJME5Gb1hEVEkyTURjeE16QTBNVEkwTkZvd2Z6RUxNQWtHQTFVRUJoTUNTVTR4Q3pBSkJnTlZCQWdNQWt0Qk1SSXdFQVlEVlFRSERBbENRVTVIUVV4UFVrVXhEVEFMQmdOVkJBb01CRWxKVkVJeEdqQVlCZ05WQkFzTUVVMVBVMGxRTFZSRlEwZ3RRMFZPVkVWU01TUXdJZ1lEVlFRRERCdDNkM2N1Ylc5emFYQXVhVzhnS0U5SlJFTmZVMFZTVmtsRFJTa3dnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDdXBUTkJSN2tiZkMwVjhGQk9uVmdqS2NnSVNWNEJlYldzbVFOdlRpTTRTbzRrZ09VOFRjZzFFUitRazUrL3Y2YzNOR1o4WnVBRjhveEVXNzV4czZsdE4yejZOSUEzUTlmRTZwWUpYZjlpeFBzT3pac241YmpZTUp3OEMxTm1FNVVpWWZ6UUNBUmg4ZFhZKzhlQTlXaWdvRHpDRklXZUFkYjMzWDRTODZ5aURzSXVZMVY4bXhBNFBXRVI5MjlTc2cvTm5yMDRaSGRGRmJjdFBMZm5HMXhKTWhlbFRjK3YwSDk1RndZNUNvdEtmaXBGeTZ3VVcxWkVKTDF1RGpuc2ZCcmdOSDFIYlR2WU96Uk55Vy9UdFFGSTc0eFNoUm9UaFlzOWdHY0hQRU5ob2Y4S1NQUlZ3Unp0UDdBV0ZKcUFLaEFuWEdtcll5RE9iVVpXYTJMY3p1b0xBZ01CQUFHalJUQkRNQklHQTFVZEV3RUIvd1FJTUFZQkFmOENBUUV3SFFZRFZSME9CQllFRkt6SnV5VXc5UlFmZmFKYU1OdlBNR1U1YlNSdE1BNEdBMVVkRHdFQi93UUVBd0lDaERBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQW1HRXplb2tWMHE2c05rcGJzbG5jbkZpN01hcDMzYkd2OTRWdldQZ0EyZkZxYzFPUXEvZkhZYXI4UzhoZ1FlcVFleUZGOFJRUGE4R2EvUkpmQTZhMFZTMjgwbk8zUS9JVEhmdUd6MWc2UU54Y2ZFMWQ1T09kUXdlMXNkQWJjNTNrQVg3WmFzVEV1YW03SUkxSC9PMHdmdEZXVTM2OW1BV1ZmbXAvOERDdEY3STZpcjg0U25QeU5GeElOaGdnU0x4cVBMR3VaREs4eGJ6MERzQjJlQmtsZitCK2R3VU00OENmd1Ezc0FGQnJVOGx4cXJVWE1LL2ZLVitCWkx5ZWM3KzdHMUo4dXB4VUdEdlZnV29BN2pmU3RBOGpkcVdOZmZpNjQrMUdVK0t0VmhhN1BqbnlhYmttTHdtbThUU1ZVSGV3WGExUDdQaXV6S2ZQSGx0b2lqR1F5dz09Il0sIng1dCNTMjU2IjoiQXBkZzZTNlJtamtpQmp2RVVZWUNhLUtGLXlySmJsNngxd3pLcmM0c210MCIsImtpZCI6IkdURVJDT212RDVQbFo2NWxvMk5hLTRVZGMyeGdBNkVrYUh1RXNuTWV2UkEiLCJhbGciOiJSUzI1NiJ9..crY546Ej4Dmp_TtFkDKaXJfLi5OSzv8UVQ3wXXnrV9aeq9i2g87T73wRFYrWFJbKbjm-YJUyNCTtDKPzR1o66BSuCdPFALG2VivdkEb_9AVqdg4hwVkcPhzqeXJgbQ5QEsxiNyUp51uCJNcJB5g7qXGK9AMVECalzcXkQyM_WdkIUWbX5eFiFKpg7jyK1Da-DhQlUqmTgm5WT_CTokY5QfeFk-MJ90OHQ5Af9144z_ZBPDVioOrx9Xhd3XNgqRvmS4zXvdDWXs2CR-bC0ufc7nklAgSHzJjchh6-rTFnrtM-E6vyAFvEOKQFbo-xz-rbrSM7Hd8GLavXYyCX9f1A3g',
+        //     },
+        //     'type': ['VerifiableCredential'],
+        //     '@context': ['https://www.w3.org/2018/credentials/v1'],
+        //     'issuer': 'did:example:123',
+        //   },
+        // };
       },
       invokeAuthorization: async (context) => {
         const response = await authorize(context.selectedIssuer);
@@ -382,6 +428,11 @@ export const IssuersMachine = model.createMachine(
           0
         );
         return context;
+      },
+      verifyCredential: async (context) => {
+        //TODO: Verify the credental instead of sending true always
+        // return verifyCredential(context.credential);
+        return true;
       },
     },
     guards: {
