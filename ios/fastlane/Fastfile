@@ -157,4 +157,22 @@ platform :ios do
     delete_temp_keychain(keychain_name)
 
   end
+
+  lane :build_app_for_simulator do
+   build_ios_app(
+     workspace: "Inji.xcworkspace",
+     scheme: "Inji",
+     configuration: "Release",
+     clean: true,
+     sdk: "iphonesimulator",
+     build_path: "./build",
+     derived_data_path: "./DerivedDataBu",
+     skip_codesigning: true,
+     skip_archive: true,
+     skip_package_ipa: true,
+     include_symbols: false,
+     include_bitcode: false,
+     xcargs: "-UseModernBuildSystem=YES"
+   )
+  end
 end

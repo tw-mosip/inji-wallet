@@ -1,0 +1,76 @@
+name: Inji iOS app file
+
+on:
+  push:
+    branches:
+      - test-automation
+
+#   workflow_dispatch:
+#     inputs:
+#       backendServiceUrl:
+#         description: 'Backend service URL'
+#         required: true
+#         default: 'https://api.sandbox.mosip.net'
+#         type: string
+#       theme:
+#         description: 'Application Theme'
+#         required: true
+#         default: 'orange'
+#         type: choice
+#         options:
+#           - orange
+#           - purple
+#       registry_edit:
+#         description: 'Edit Registry'
+#         required: true
+#         default: 'true'
+#         type: choice
+#         options:
+#           - false
+#           - true
+
+jobs:
+  build_ios:
+    name: Deploying to Testflight
+    runs-on: macos-13
+
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install npm dependencies
+        run: |
+          npm install
+
+      - name: Install Pod
+        run: |
+          cd ios
+          pod install
+          pod install
+
+      - name: Deploy iOS Beta to TestFlight
+        run: |
+          cd ios
+          fastlane build_app_for_simulator
+
+      - name: Deploy iOS Beta to TestFlight
+        run: |
+          cd ios
+          fastlane build_app_for_simulator
+
+      - name: Upload Runner Log on Failure
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: Products/Release-iphoneos/Inji.app
+          path: ios/DerivedData/Build/Products/Release-iphoneos
+          retention-days: 1
+
+      - name: Upload Runner Log on Failure
+        if: failure() # Only run this step if the previous steps failed
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: runner-log
+          path: /Users/runner/Library/Logs/gym/
+          retention-days: 1
