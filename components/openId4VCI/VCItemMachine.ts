@@ -696,7 +696,7 @@ export const VCItemMachine = model.createMachine(
             request: {
               authFactorType: 'WLA',
               format: 'jwt',
-              individualId: context.id,
+              individualId: context.credential.id,
               transactionId: context.transactionId,
               publicKey: context.publicKey,
               challengeList: [
@@ -741,7 +741,7 @@ export const VCItemMachine = model.createMachine(
           {
             requestTime: String(new Date().toISOString()),
             request: {
-              individualId: context.id,
+              individualId: context.credential.id,
               otpChannels: ['EMAIL', 'PHONE'],
             },
           }
