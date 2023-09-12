@@ -22,6 +22,7 @@ import {
   HMAC_ALIAS,
   isCustomSecureKeystore,
 } from './cryptoutil/cryptoUtil';
+import { isVCFromOpenId4VCI } from './openId4VCI/Utils';
 import { VCMetadata } from './VCMetadata';
 
 const MMKV = new MMKVLoader().initialize();

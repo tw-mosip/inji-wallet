@@ -621,26 +621,11 @@ export const VCItemMachine = model.createMachine(
           to: (context) => context.serviceRefs.vc,
         }
       ),
-      logDownloaded: send(
-        (context) => {
-          const { serviceRefs, ...data } = context;
-          return ActivityLogEvents.LOG_ACTIVITY({
-            _vcKey: VC_ITEM_STORE_KEY(data),
-            type: 'VC_DOWNLOADED',
-            timestamp: Date.now(),
-            deviceName: '',
-            vcLabel: data.tag || data.id,
-          });
-        },
-        {
-          to: (context) => context.serviceRefs.activityLog,
-        }
-      ),
 
       logWalletBindingSuccess: send(
-        (context, event) =>
+        (context) =>
           ActivityLogEvents.LOG_ACTIVITY({
-            _vcKey: VC_ITEM_STORE_KEY(context),
+            _vcKey: context.vcKey,
             type: 'WALLET_BINDING_SUCCESSFULL',
             timestamp: Date.now(),
             deviceName: '',
@@ -652,9 +637,9 @@ export const VCItemMachine = model.createMachine(
       ),
 
       logWalletBindingFailure: send(
-        (context, event) =>
+        (context) =>
           ActivityLogEvents.LOG_ACTIVITY({
-            _vcKey: VC_ITEM_STORE_KEY(context),
+            _vcKey: context.vcKey,
             type: 'WALLET_BINDING_FAILURE',
             timestamp: Date.now(),
             deviceName: '',
@@ -682,9 +667,9 @@ export const VCItemMachine = model.createMachine(
       ),
 
       logVCremoved: send(
-        (context, _) =>
+        (context) =>
           ActivityLogEvents.LOG_ACTIVITY({
-            _vcKey: VC_ITEM_STORE_KEY(context),
+            _vcKey: context.vcKey,
             type: 'VC_REMOVED',
             timestamp: Date.now(),
             deviceName: '',
