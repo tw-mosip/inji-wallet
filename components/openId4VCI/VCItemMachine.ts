@@ -653,11 +653,6 @@ export const VCItemMachine = model.createMachine(
     },
 
     services: {
-      //todo mock has to be reverted to verify the credential properly.
-      verifyCredential: async (context) => {
-        return true;
-        //return verifyCredential(context.credential);
-      },
       updatePrivateKey: async (context) => {
         const hasSetPrivateKey: boolean = await savePrivateKey(
           context.walletBindingResponse.walletBindingId,
