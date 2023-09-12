@@ -31,7 +31,7 @@ on:
 
 jobs:
   build_ios:
-    name: Deploying to Testflight
+    name: iOS app file for automation tests
     runs-on: macos-13
 
     steps:
@@ -50,12 +50,12 @@ jobs:
           pod install
           pod install
 
-      - name: Deploy iOS Beta to TestFlight
+      - name: Build iOS for simulator
         run: |
           cd ios
           fastlane build_app_for_simulator
 
-      - name: Upload Runner Log on Failure
+      - name: Upload Inji.app artifact 
         uses: actions/upload-artifact@v3.1.1
         with:
           name: Products/Release-iphoneos/Inji.app
