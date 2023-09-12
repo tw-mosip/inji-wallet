@@ -18,7 +18,6 @@ import {
   MyVcsTabEvents,
   MyVcsTabMachine,
   selectAddVcModal,
-  selectIsOnboarding,
   selectIsRequestSuccessful,
   selectGetVcModal,
   selectIsSavingFailedInIdle,
@@ -47,7 +46,6 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
 
     isRefreshingVcs: useSelector(vcService, selectIsRefreshingMyVcs),
     isRequestSuccessful: useSelector(service, selectIsRequestSuccessful),
-    isOnboarding: useSelector(service, selectIsOnboarding),
     isSavingFailedInIdle: useSelector(service, selectIsSavingFailedInIdle),
     walletBindingError: useSelector(service, selectWalletBindingError),
     isBindingError: useSelector(service, selectShowWalletBindingError),
@@ -75,8 +73,6 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
     ) => {
       return service.send(MyVcsTabEvents.VIEW_VC(vcRef));
     },
-
-    ONBOARDING_DONE: () => service.send(MyVcsTabEvents.ONBOARDING_DONE()),
 
     IS_TAMPERED: () => service.send(MyVcsTabEvents.IS_TAMPERED()),
 

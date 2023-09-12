@@ -11,10 +11,7 @@ import { StoreEvents, StoreResponseEvent } from '../../machines/store';
 import { VcEvents } from '../../machines/vc';
 import { vcItemMachine } from '../../machines/vcItem';
 import { AppServices } from '../../shared/GlobalContext';
-import {
-  MY_VCS_STORE_KEY,
-  ONBOARDING_STATUS_STORE_KEY,
-} from '../../shared/constants';
+import { MY_VCS_STORE_KEY } from '../../shared/constants';
 import { AddVcModalMachine } from './MyVcs/AddVcModalMachine';
 import { GetVcModalMachine } from './MyVcs/GetVcModalMachine';
 import Storage from '../../shared/storage';
@@ -44,7 +41,6 @@ const model = createModel(
       GOTO_ISSUERS: () => ({}),
       STORAGE_AVAILABLE: () => ({}),
       STORAGE_UNAVAILABLE: () => ({}),
-      ONBOARDING_DONE: () => ({}),
       IS_TAMPERED: () => ({}),
       DOWNLOAD_VIA_ID: () => ({}),
     },
@@ -66,42 +62,8 @@ export const MyVcsTabMachine = model.createMachine(
       events: {} as EventFrom<typeof model>,
     },
     id: 'MyVcsTab',
-    initial: 'checkingOnboardingStatus',
+    initial: 'idle',
     states: {
-      checkingOnboardingStatus: {
-        entry: ['getOnboardingStatus'],
-        on: {
-          STORE_RESPONSE: [
-            { cond: 'isOnboardingDone', target: 'idle' },
-            { target: 'onboarding' },
-          ],
-        },
-      },
-      onboarding: {
-        on: {
-          GOTO_ISSUERS: {
-            target: 'gotoIssuers',
-          },
-          ADD_VC: [
-            {
-              target: 'addVc',
-              actions: ['completeOnboarding'],
-            },
-          ],
-          ONBOARDING_DONE: {
-            target: 'idle',
-            actions: ['completeOnboarding'],
-          },
-          VIEW_VC: 'viewingVc',
-        },
-      },
-      gotoIssuers: {
-        invoke: {
-          id: 'issuersMachine',
-          src: IssuersMachine,
-          onDone: 'addingVc',
-        },
-      },
       addVc: {
         initial: 'checkStorage',
         states: {
@@ -223,16 +185,6 @@ export const MyVcsTabMachine = model.createMachine(
         model.events.VIEW_VC(event.vcItemActor)
       ),
 
-      getOnboardingStatus: send(
-        () => StoreEvents.GET(ONBOARDING_STATUS_STORE_KEY),
-        { to: (context) => context.serviceRefs.store }
-      ),
-
-      completeOnboarding: send(
-        () => StoreEvents.SET(ONBOARDING_STATUS_STORE_KEY, true),
-        { to: (context) => context.serviceRefs.store }
-      ),
-
       storeVcItem: send(
         (_context, event) => {
           return StoreEvents.PREPEND(
@@ -253,10 +205,6 @@ export const MyVcsTabMachine = model.createMachine(
     },
 
     guards: {
-      isOnboardingDone: (_context, event: StoreResponseEvent) => {
-        return event.response === true;
-      },
-
       isMinimumStorageLimitReached: (_context, event) => Boolean(event.data),
     },
   }
@@ -281,10 +229,6 @@ export function selectGetVcModal(state: State) {
 
 export function selectIssuersMachine(state: State) {
   return state.children.issuersMachine as ActorRefFrom<typeof IssuersMachine>;
-}
-
-export function selectIsOnboarding(state: State) {
-  return state.matches('onboarding');
 }
 
 export function selectIsStoring(state: State) {
