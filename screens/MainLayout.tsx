@@ -15,6 +15,7 @@ import { HelpScreen } from '../components/HelpScreen';
 
 import { GlobalContext } from '../shared/GlobalContext';
 import { ScanEvents } from '../machines/bleShare/scan/scanMachine';
+import testIDProps from '../shared/commonUtil';
 const { Navigator, Screen } = createBottomTabNavigator();
 
 export const MainLayout: React.FC<RootRouteProps & RequestRouteProps> = (
@@ -25,6 +26,36 @@ export const MainLayout: React.FC<RootRouteProps & RequestRouteProps> = (
   const scanService = appService.children.get('scan');
 
   const options: BottomTabNavigationOptions = {
+    headerRight: () => (
+      <Row align="space-between">
+        <HelpScreen
+          triggerComponent={
+            <Image
+              {...testIDProps('help')}
+              source={require('../assets/help-icon.png')}
+              style={{ width: 36, height: 36 }}
+            />
+          }
+          navigation={undefined}
+          route={undefined}
+        />
+
+        <SettingScreen
+          triggerComponent={
+            <Icon
+              {...testIDProps('settings')}
+              name="settings"
+              type="simple-line-icon"
+              size={21}
+              style={Theme.Styles.IconContainer}
+              color={Theme.Colors.Icon}
+            />
+          }
+          navigation={props.navigation}
+          route={undefined}
+        />
+      </Row>
+    ),
     headerTitleStyle: {
       fontFamily: 'Inter_600SemiBold',
       fontSize: 30,
@@ -67,6 +98,7 @@ export const MainLayout: React.FC<RootRouteProps & RequestRouteProps> = (
             title: t(route.name),
             tabBarIcon: ({ focused }) => (
               <Icon
+                {...testIDProps(route.name)}
                 name={route.icon}
                 color={focused ? Theme.Colors.Icon : Theme.Colors.GrayIcon}
                 style={focused ? Theme.Styles.bottomTabIconStyle : null}
