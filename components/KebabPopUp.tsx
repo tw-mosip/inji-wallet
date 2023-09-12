@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { HistoryTab } from '../screens/Home/MyVcs/HistoryTab';
 import { RemoveVcWarningOverlay } from '../screens/Home/MyVcs/RemoveVcWarningOverlay';
 import { ScrollView } from 'react-native-gesture-handler';
+import testIDProps from '../shared/commonUtil';
 import { VCMetadata } from '../shared/VCMetadata';
 import { VCItemMachine } from './openId4VCI/VCItemMachine';
 
@@ -20,6 +21,7 @@ export const KebabPopUp: React.FC<KebabPopUpProps> = (props) => {
   return (
     <Column>
       <Icon
+        testID={props.testID}
         name={props.iconName}
         type={props.iconType}
         color={Theme.Colors.GrayIcon}
@@ -30,7 +32,9 @@ export const KebabPopUp: React.FC<KebabPopUpProps> = (props) => {
         overlayStyle={Theme.KebabPopUpStyles.kebabPopUp}>
         <Row style={Theme.KebabPopUpStyles.kebabHeaderStyle}>
           <View></View>
-          <Text weight="bold">{t('title')}</Text>
+          <Text testID="kebabTitle" weight="bold">
+            {t('title')}
+          </Text>
           <Icon
             name="close"
             onPress={props.onDismiss}
@@ -40,7 +44,7 @@ export const KebabPopUp: React.FC<KebabPopUpProps> = (props) => {
         </Row>
         <ScrollView>
           <ListItem bottomDivider>
-            <ListItem.Content>
+            <ListItem.Content {...testIDProps('pinOrUnPinCard')}>
               <ListItem.Title>
                 <Pressable onPress={controller.PIN_CARD}>
                   <Text size="small" weight="bold">
@@ -58,12 +62,13 @@ export const KebabPopUp: React.FC<KebabPopUpProps> = (props) => {
           />
 
           <HistoryTab
+            testID="viewActivityLog"
             service={props.service}
             label={t('viewActivityLog')}
             vcMetadata={props.vcMetadata}
           />
 
-          <ListItem bottomDivider>
+          <ListItem testID="removeFromWallet" bottomDivider>
             <ListItem.Content>
               <ListItem.Title>
                 <Pressable onPress={() => controller.REMOVE(props.vcMetadata)}>
@@ -87,6 +92,7 @@ export const KebabPopUp: React.FC<KebabPopUpProps> = (props) => {
 };
 
 export interface KebabPopUpProps {
+  testID?: string;
   iconName: string;
   iconType?: string;
   vcMetadata: VCMetadata;
