@@ -58,8 +58,8 @@ jobs:
       - name: Upload Inji.app artifact 
         uses: actions/upload-artifact@v3.1.1
         with:
-          name: Inji.app
-          path: ios/DerivedData/Build/Products/Release-iphoneos
+          name: Inji
+          path: ios/DerivedData/Build/Products/Release-iphoneos/Inji.app
           retention-days: 1
 
       - name: Upload Runner Log on Failure
