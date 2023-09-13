@@ -17,9 +17,12 @@ import { KeyPair } from 'react-native-rsa-native';
 import { ActivityLogEvents } from './activityLog';
 import forge from 'node-forge';
 import { log } from 'xstate/lib/actions';
-import { VerifiableCredential } from '../types/vc';
 import jose from 'node-jose';
 import jwtDecode from 'jwt-decode';
+import {
+  VerifiableCredential,
+  VerifiableCredentialWithFormat,
+} from '../types/vc';
 
 const model = createModel(
   {
@@ -28,6 +31,7 @@ const model = createModel(
     tokenResponse: [] as [],
     errorMessage: null as string,
     credential: null as VerifiableCredential,
+    verifiableCredential: null as VerifiableCredentialWithFormat,
     serviceRefs: {} as AppServices,
 
     publicKey: ``,
@@ -192,8 +196,8 @@ export const IssuersMachine = model.createMachine(
       },
       storing: {
         entry: [
-          'storeVcMeta',
-          'storeVcData',
+          'storeVerifiableCredentialMeta',
+          'storeVerifiableCredentialData',
           'storeVcsContext',
           'storeVcMetaContext',
           'logDownloaded',
@@ -261,7 +265,6 @@ export const IssuersMachine = model.createMachine(
           to: (context) => context.serviceRefs.store,
         }
       ),
-
       storeVcData: send(
         (context) => {
           return StoreEvents.SET(context?.credential.id, context.credential);
@@ -270,6 +273,30 @@ export const IssuersMachine = model.createMachine(
           to: (context) => context.serviceRefs.store,
         }
       ),
+
+      storeVerifiableCredentialMeta: send(
+        (context) =>
+          StoreEvents.PREPEND(
+            MY_VCS_STORE_KEY,
+            context?.verifiableCredential?.credential.id
+          ),
+        {
+          to: (context) => context.serviceRefs.store,
+        }
+      ),
+
+      storeVerifiableCredentialData: send(
+        (context) => {
+          return StoreEvents.SET(
+            context?.verifiableCredential?.credential.id,
+            context.verifiableCredential
+          );
+        },
+        {
+          to: (context) => context.serviceRefs.store,
+        }
+      ),
+
       storeVcMetaContext: send(
         (context) => {
           return {
@@ -288,7 +315,7 @@ export const IssuersMachine = model.createMachine(
             type: 'VC_DOWNLOADED_FROM_OPENID4VCI',
             vcKey: context?.credential.id,
             vc: {
-              credential: context.credential,
+              credential: context.verifiableCredential,
             },
           };
         },
@@ -305,6 +332,7 @@ export const IssuersMachine = model.createMachine(
       }),
       setCredential: model.assign({
         credential: (_, event) => event.data.credential,
+        verifiableCredential: (_, event) => event.data,
       }),
       setPublicKey: assign({
         publicKey: (context, event) => {

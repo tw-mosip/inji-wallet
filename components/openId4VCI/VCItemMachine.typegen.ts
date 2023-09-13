@@ -134,6 +134,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addingWalletBindingId:invocation[0]';
     setVcKey: 'REMOVE';
+    setVerifiableCredential: 'GET_VC_RESPONSE' | 'STORE_RESPONSE';
     setWalletBindingError:
       | 'error.platform.vc-item-openid4vci.addKeyPair:invocation[0]'
       | 'error.platform.vc-item-openid4vci.addingWalletBindingId:invocation[0]'

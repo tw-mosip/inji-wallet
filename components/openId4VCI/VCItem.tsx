@@ -6,8 +6,8 @@ import { ActorRefFrom } from 'xstate';
 import {
   createVCItemMachine,
   selectContext,
-  selectCredentials,
   selectGeneratedOn,
+  selectVerifiableCredentials,
   VCItemEvents,
   VCItemMachine,
 } from './VCItemMachine';
@@ -37,7 +37,7 @@ export const VCItem: React.FC<VCItemProps> = (props) => {
   const DISMISS = () => service.send(VCItemEvents.DISMISS());
   const KEBAB_POPUP = () => service.send(VCItemEvents.KEBAB_POPUP());
 
-  const credentials = useSelector(service, selectCredentials);
+  const credentials = useSelector(service, selectVerifiableCredentials);
   const generatedOn = useSelector(service, selectGeneratedOn);
 
   return (

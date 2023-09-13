@@ -70,10 +70,10 @@ export interface Typegen0 {
     setSelectedIssuers: 'done.invoke.issuersMachine.downloadIssuerConfig:invocation[0]';
     setTokenResponse: 'done.invoke.issuersMachine.performAuthorization:invocation[0]';
     storeKeyPair: 'done.invoke.issuersMachine.generateKeyPair:invocation[0]';
-    storeVcData: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
-    storeVcMeta: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
     storeVcMetaContext: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
     storeVcsContext: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
+    storeVerifiableCredentialData: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
+    storeVerifiableCredentialMeta: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
   };
   'eventsCausingDelays': {};
   'eventsCausingGuards': {

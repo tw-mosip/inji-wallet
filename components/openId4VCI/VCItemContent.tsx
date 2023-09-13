@@ -43,7 +43,7 @@ export const VCItemContent: React.FC<VcItemContentProps> = (props) => {
 
   const fullName = !props.credential
     ? ''
-    : props.credential.credentialSubject.name;
+    : props.credential.credentialSubject?.name;
   const { t } = useTranslation('VcDetails');
   const isvalid = !props.credential ? '' : t('valid');
   const selectableOrCheck = props.selectable ? (
