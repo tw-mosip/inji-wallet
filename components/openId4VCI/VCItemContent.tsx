@@ -1,29 +1,58 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ImageBackground } from 'react-native';
-
 import { CheckBox, Icon } from 'react-native-elements';
 import { Column, Row, Text } from '../ui';
-import { Theme } from '../ui/styleUtils';
 import VerifiedIcon from '../VerifiedIcon';
+import { Theme } from '../ui/styleUtils';
+import { getLocalizedField } from '../../i18n';
 import { VerifiableCredential } from '../../types/vc';
 
 const getDetails = (arg1, arg2, credential) => {
-  return (
-    <Column>
-      <Text
-        weight="bold"
-        size="smaller"
-        color={
-          !credential
-            ? Theme.Colors.LoadingDetailsLabel
-            : Theme.Colors.DetailsLabel
-        }>
-        {arg1}
-      </Text>
-      <Row>
+  if (arg1 === 'Status') {
+    return (
+      <Column>
         <Text
-          numLines={1}
+          weight="bold"
+          size="smaller"
+          color={
+            !credential
+              ? Theme.Colors.LoadingDetailsLabel
+              : Theme.Colors.DetailsLabel
+          }>
+          {arg1}
+        </Text>
+        <Row>
+          <Text
+            numLines={1}
+            color={Theme.Colors.Details}
+            weight="bold"
+            size="smaller"
+            style={
+              !credential ? Theme.Styles.loadingTitle : Theme.Styles.subtitle
+            }>
+            {!credential ? '' : arg2}
+          </Text>
+          {!credential ? null : <VerifiedIcon />}
+        </Row>
+      </Column>
+    );
+  } else {
+    return (
+      <Column>
+        <Text
+          color={
+            !credential
+              ? Theme.Colors.LoadingDetailsLabel
+              : Theme.Colors.DetailsLabel
+          }
+          size="smaller"
+          weight={'bold'}
+          style={Theme.Styles.vcItemLabelHeader}>
+          {arg1}
+        </Text>
+        <Text
+          numLines={4}
           color={Theme.Colors.Details}
           weight="bold"
           size="smaller"
@@ -32,18 +61,15 @@ const getDetails = (arg1, arg2, credential) => {
           }>
           {!credential ? '' : arg2}
         </Text>
-        {!credential ? null : <VerifiedIcon />}
-      </Row>
-    </Column>
-  );
+      </Column>
+    );
+  }
 };
 
 export const VCItemContent: React.FC<VcItemContentProps> = (props) => {
-  //Assigning the UIN and VID from the VC details to display the idtype label
-
   const fullName = !props.credential
     ? ''
-    : props.credential.credentialSubject?.name;
+    : getLocalizedField(props.credential.credentialSubject.fullName);
   const { t } = useTranslation('VcDetails');
   const isvalid = !props.credential ? '' : t('valid');
   const selectableOrCheck = props.selectable ? (
@@ -72,7 +98,7 @@ export const VCItemContent: React.FC<VcItemContentProps> = (props) => {
               source={
                 !props.credential
                   ? Theme.ProfileIcon
-                  : { uri: props.context.credential?.biometrics?.face }
+                  : { uri: props.credential.credentialSubject.face }
               }
               style={Theme.Styles.closeCardImage}>
               {props.iconName && (
@@ -123,7 +149,7 @@ export const VCItemContent: React.FC<VcItemContentProps> = (props) => {
           style={!props.credential ? Theme.Styles.loadingContainer : null}>
           <Column>
             {!props.credential
-              ? getDetails(t('id'), props.credential?.id, props.credential)
+              ? getDetails(t('id'), 'newid', props.credential)
               : null}
             {getDetails(t('generatedOn'), props.generatedOn, props.credential)}
           </Column>
