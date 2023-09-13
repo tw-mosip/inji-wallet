@@ -1,13 +1,15 @@
 import { Platform } from 'react-native';
 import {
-  GOOGLE_NEARBY_MESSAGES_API_KEY,
   MIMOTO_HOST,
+  ESIGNET_HOST,
+  GOOGLE_NEARBY_MESSAGES_API_KEY,
 } from 'react-native-dotenv';
 import { Argon2iConfig } from './commonUtil';
 
-export let HOST = MIMOTO_HOST;
+export let MIMOTO_BASE_URL = MIMOTO_HOST;
+export const ESIGNET_BASE_URL = ESIGNET_HOST;
 
-export const changeCrendetialRegistry = (host) => (HOST = host);
+export const changeCrendetialRegistry = (host) => (MIMOTO_BASE_URL = host);
 
 export const MY_VCS_STORE_KEY = 'myVCs';
 

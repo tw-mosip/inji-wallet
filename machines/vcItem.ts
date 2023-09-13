@@ -1,6 +1,9 @@
 import { assign, ErrorPlatformEvent, EventFrom, send, StateFrom } from 'xstate';
 import { createModel } from 'xstate/lib/model';
-import { HOST, MY_VCS_STORE_KEY } from '../shared/constants';
+import {
+  MIMOTO_BASE_URL,
+  MY_VCS_STORE_KEY,
+} from '../shared/constants';
 import { AppServices } from '../shared/GlobalContext';
 import { CredentialDownloadResponse, request } from '../shared/request';
 import {
@@ -908,7 +911,7 @@ export const vcItemMachine =
         storeContext: send(
           (context) => {
             const { serviceRefs, ...data } = context;
-            data.credentialRegistry = HOST;
+            data.credentialRegistry = MIMOTO_BASE_URL;
             return StoreEvents.SET(
               VCMetadata.fromVC(context, true).getVcKey(),
               data
