@@ -72,7 +72,7 @@ const model = createModel(
       FACE_INVALID: () => ({}),
       RETRY_VERIFICATION: () => ({}),
     },
-  }
+  },
 );
 export const RequestEvents = model.events;
 
@@ -616,7 +616,7 @@ export const requestMachine =
               VCMetadata.fromVC(context.incomingVc, true).getVcKey(),
               context.incomingVc
             ),
-          { to: (context) => context.serviceRefs.store }
+          {to: context => context.serviceRefs.store},
         ),
 
         setReceiveLogTypeRegular: model.assign({
@@ -829,7 +829,7 @@ export const requestMachine =
         DESTROY_TIMEOUT: 500,
         SHARING_TIMEOUT: 15 * 1000,
       },
-    }
+    },
   );
 
 type State = StateFrom<typeof requestMachine>;

@@ -44,7 +44,7 @@ const model = createModel(
       IS_TAMPERED: () => ({}),
       DOWNLOAD_VIA_ID: () => ({}),
     },
-  }
+  },
 );
 
 export const MyVcsTabEvents = model.events;
@@ -167,7 +167,7 @@ export const MyVcsTabMachine = model.createMachine(
     services: {
       checkStorageAvailability: () => async () => {
         return Promise.resolve(
-          Storage.isMinimumLimitReached('minStorageRequired')
+          Storage.isMinimumLimitReached('minStorageRequired'),
         );
       },
     },
@@ -192,22 +192,22 @@ export const MyVcsTabMachine = model.createMachine(
             JSON.stringify((event as DoneInvokeEvent<VCMetadata>).data)
           );
         },
-        { to: (context) => context.serviceRefs.store }
+        {to: context => context.serviceRefs.store},
       ),
 
       sendVcAdded: send(
         (_context, event) =>
           VcEvents.VC_ADDED(VCMetadata.fromVCKey(event.response)),
         {
-          to: (context) => context.serviceRefs.vc,
-        }
+          to: context => context.serviceRefs.vc,
+        },
       ),
     },
 
     guards: {
       isMinimumStorageLimitReached: (_context, event) => Boolean(event.data),
     },
-  }
+  },
 );
 
 export function createMyVcsTabMachine(serviceRefs: AppServices) {
