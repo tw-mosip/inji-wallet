@@ -3,17 +3,18 @@ import {
   Button as RNEButton,
   ButtonProps as RNEButtonProps,
 } from 'react-native-elements';
-import { GestureResponderEvent, StyleProp, ViewStyle } from 'react-native';
-import { Text } from './Text';
-import { Theme, Spacing } from './styleUtils';
+import {GestureResponderEvent, StyleProp, ViewStyle} from 'react-native';
+import {Text} from './Text';
+import {Theme, Spacing} from './styleUtils';
+import testIDProps from '../../shared/commonUtil';
 
-export const Button: React.FC<ButtonProps> = (props) => {
+export const Button: React.FC<ButtonProps> = props => {
   const type =
     props.type || 'solid' || 'radius' || 'gradient' || 'clearAddIdBtnBg';
   const buttonStyle: StyleProp<ViewStyle> = [
     props.fill ? Theme.ButtonStyles.fill : null,
     Theme.ButtonStyles[type],
-    { width: props.width ?? '100%' },
+    {width: props.width ?? '100%'},
   ];
   const containerStyle: StyleProp<ViewStyle> = [
     !(type === 'gradient') ? Theme.ButtonStyles.container : null,
@@ -34,6 +35,7 @@ export const Button: React.FC<ButtonProps> = (props) => {
 
   return !(type === 'gradient') ? (
     <RNEButton
+      {...testIDProps(props.testID)}
       buttonStyle={buttonStyle}
       containerStyle={[
         props.fill ? Theme.ButtonStyles.fill : null,
@@ -62,6 +64,7 @@ export const Button: React.FC<ButtonProps> = (props) => {
     />
   ) : (
     <RNEButton
+      {...testIDProps(props.testID)}
       buttonStyle={buttonStyle}
       ViewComponent={require('react-native-linear-gradient').default}
       linearGradientProps={{

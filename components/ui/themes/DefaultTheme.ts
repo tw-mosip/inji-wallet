@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { Dimensions, Platform, StyleSheet, ViewStyle } from 'react-native';
-import { Spacing } from '../styleUtils';
+import {Dimensions, Platform, StyleSheet, ViewStyle} from 'react-native';
+import {Spacing} from '../styleUtils';
 
 const Colors = {
   Black: '#000000',
@@ -28,8 +28,9 @@ const Colors = {
   LightOrange: '#FDF1E6',
   GradientColors: ['#F59B4B', '#E86E04'],
   DisabledColors: ['#C7C7C7', '#C7C7C7'],
+  captureIconBorder: '#F59B4B',
   TimeoutHintBoxColor: '#FFF7E5',
-  TimoutText: '#8B6105',
+  TimoutHintText: '#8B6105',
   resendCodeTimer: '#555555',
 };
 
@@ -95,7 +96,7 @@ export const DefaultTheme = {
     DisabledColors: Colors.DisabledColors,
     getVidColor: Colors.Zambezi,
     TimeoutHintBoxColor: Colors.TimeoutHintBoxColor,
-    TimoutText: Colors.TimoutText,
+    TimoutHintText: Colors.TimoutHintText,
     walletbindingLabel: Colors.Black,
     walletbindingContent: Colors.Gray40,
     resendCodeTimer: Colors.resendCodeTimer,
@@ -200,7 +201,7 @@ export const DefaultTheme = {
       margin: 8,
       backgroundColor: '#fff',
       shadowColor: '#000',
-      shadowOffset: { width: -1, height: 1 },
+      shadowOffset: {width: -1, height: 1},
       shadowOpacity: 0.4,
       shadowRadius: 3,
       elevation: 4,
@@ -262,7 +263,7 @@ export const DefaultTheme = {
       margin: 8,
       backgroundColor: '#fff',
       shadowColor: '#000',
-      shadowOffset: { width: -1, height: 1 },
+      shadowOffset: {width: -1, height: 1},
       shadowOpacity: 0.4,
       shadowRadius: 3,
       elevation: 4,
@@ -327,6 +328,14 @@ export const DefaultTheme = {
       height: 36,
       borderRadius: 10,
       backgroundColor: Colors.LightOrange,
+    },
+    cameraFlipIcon: {
+      height: 42,
+      width: 42,
+    },
+    imageCaptureButton: {
+      marginLeft: 130,
+      marginRight: 50,
     },
     settingsIconBg: {
       padding: 6,
@@ -846,9 +855,9 @@ export const DefaultTheme = {
       flex: 1,
       width: Dimensions.get('screen').width,
     },
-    revokeView: { padding: 20 },
-    flexRow: { flexDirection: 'row', margin: 0, padding: 0 },
-    rowStyle: { flexDirection: 'column', justifyContent: 'space-between' },
+    revokeView: {padding: 20},
+    flexRow: {flexDirection: 'row', margin: 0, padding: 0},
+    rowStyle: {flexDirection: 'column', justifyContent: 'space-between'},
     viewContainer: {
       backgroundColor: 'rgba(0,0,0,.6)',
       width: Dimensions.get('screen').width,
@@ -1019,7 +1028,7 @@ export const DefaultTheme = {
       flex: 1,
       backgroundColor: Colors.White,
     },
-    issuersContainer: { marginHorizontal: 3 },
+    issuersContainer: {marginHorizontal: 3},
     issuerBoxContainer: {
       margin: 5,
       flex: 1,
@@ -1068,7 +1077,7 @@ export const DefaultTheme = {
     },
   }),
   ErrorStyles: StyleSheet.create({
-    image: { marginTop: -60, paddingBottom: 26 },
+    image: {marginTop: -60, paddingBottom: 26},
     title: {
       color: Colors.Black,
       fontFamily: 'Inter_600SemiBold',
@@ -1094,6 +1103,7 @@ export const DefaultTheme = {
   MosipSplashLogo: require('../../../assets/icon.png'),
   MosipLogo: require('../../../assets/mosip-logo.png'),
   CameraFlipIcon: require('../../../assets/camera-flip-icon.png'),
+  ImageCaptureButton: require('../../../assets/capture-button.png'),
   DomainWarningLogo: require('../../../assets/domain-warning.png'),
   WarningLogo: require('../../../assets/warningLogo.png'),
   OtpLogo: require('../../../assets/otp-mobile-logo.png'),
@@ -1163,7 +1173,7 @@ function generateBoxShadowStyle() {
   if (Platform.OS === 'ios') {
     return {
       shadowColor: '#000',
-      shadowOffset: { width: 1, height: 1.2 },
+      shadowOffset: {width: 1, height: 1.2},
       shadowOpacity: 0.3,
       shadowRadius: 2.5,
     };
