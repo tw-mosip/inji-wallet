@@ -7,22 +7,19 @@ import { request } from '../shared/request';
 import { StoreEvents } from './store';
 import { AppServices } from '../shared/GlobalContext';
 import {
-  createSignature,
-  encodeB64,
   generateKeys,
   isCustomSecureKeystore,
 } from '../shared/cryptoutil/cryptoUtil';
 import SecureKeystore from 'react-native-secure-keystore';
 import { KeyPair } from 'react-native-rsa-native';
 import { ActivityLogEvents } from './activityLog';
-import forge from 'node-forge';
 import { log } from 'xstate/lib/actions';
-import jose from 'node-jose';
-import jwtDecode from 'jwt-decode';
 import {
   VerifiableCredential,
   VerifiableCredentialWithFormat,
 } from '../types/vc';
+import { verifyCredential } from '../shared/vcjs/verifyCredential';
+import { getBody } from '../shared/openId4VCI/Utils';
 
 const model = createModel(
   {
@@ -260,14 +257,20 @@ export const IssuersMachine = model.createMachine(
       ),
       storeVcMeta: send(
         (context) =>
-          StoreEvents.PREPEND(MY_VCS_STORE_KEY, context?.credential.id),
+          StoreEvents.PREPEND(
+            MY_VCS_STORE_KEY,
+            context?.credential.credentialSubject.email
+          ),
         {
           to: (context) => context.serviceRefs.store,
         }
       ),
       storeVcData: send(
         (context) => {
-          return StoreEvents.SET(context?.credential.id, context.credential);
+          return StoreEvents.SET(
+            context?.credential.credentialSubject.email,
+            context.credential
+          );
         },
         {
           to: (context) => context.serviceRefs.store,
@@ -278,7 +281,7 @@ export const IssuersMachine = model.createMachine(
         (context) =>
           StoreEvents.PREPEND(
             MY_VCS_STORE_KEY,
-            context?.verifiableCredential?.credential.id
+            context?.verifiableCredential?.credential.credentialSubject.email
           ),
         {
           to: (context) => context.serviceRefs.store,
@@ -288,7 +291,7 @@ export const IssuersMachine = model.createMachine(
       storeVerifiableCredentialData: send(
         (context) => {
           return StoreEvents.SET(
-            context?.verifiableCredential?.credential.id,
+            context?.verifiableCredential?.credential.credentialSubject.email,
             context.verifiableCredential
           );
         },
@@ -301,7 +304,7 @@ export const IssuersMachine = model.createMachine(
         (context) => {
           return {
             type: 'VC_ADDED',
-            vcKey: context?.credential.id,
+            vcKey: context?.credential.credentialSubject.email,
           };
         },
         {
@@ -313,7 +316,7 @@ export const IssuersMachine = model.createMachine(
         (context) => {
           return {
             type: 'VC_DOWNLOADED_FROM_OPENID4VCI',
-            vcKey: context?.credential.id,
+            vcKey: context?.credential.credentialSubject.email,
             vc: {
               credential: context.verifiableCredential,
             },
@@ -381,20 +384,8 @@ export const IssuersMachine = model.createMachine(
         );
         return response.response;
       },
-      //todo mock changes has to be reverted
       downloadCredential: async (context) => {
-        const proofJWT = await getJWT(context);
-        const body = {
-          format: 'ldp_vc',
-          credential_definition: {
-            '@context': ['https://www.w3.org/2018/credentials/v1'],
-            'type': ['VerifiableCredential', 'MOSIPVerifiableCredential'],
-          },
-          proof: {
-            proof_type: 'jwt',
-            jwt: proofJWT,
-          },
-        };
+        const body = await getBody(context);
         const response = await fetch(
           'https://api-internal.dev1.mosip.net/v1/esignet/vci/credential',
           {
@@ -407,11 +398,12 @@ export const IssuersMachine = model.createMachine(
           }
         );
         const credential = await response.json();
+
         console.log(
           'Response from downloadCredential',
           JSON.stringify(credential, null, 4)
         );
-        return JSON.stringify(credential, null, 4);
+        return credential;
       },
       invokeAuthorization: async (context) => {
         const response = await authorize(context.selectedIssuer);
@@ -430,9 +422,7 @@ export const IssuersMachine = model.createMachine(
         return context;
       },
       verifyCredential: async (context) => {
-        //TODO: Verify the credental instead of sending true always
-        // return verifyCredential(context.credential);
-        return true;
+        return verifyCredential(context.credential);
       },
     },
     guards: {
@@ -483,40 +473,3 @@ interface issuerType {
   displayName: string;
   logoUrl: string;
 }
-
-export const getJWK = async (publicKey) => {
-  const publicKeyJWKString = await jose.JWK.asKey(publicKey, 'pem');
-  const publicKeyJWK = publicKeyJWKString.toJSON();
-  return {
-    ...publicKeyJWK,
-    alg: 'RS256',
-    use: 'sig',
-  };
-};
-export const getJWT = async (context) => {
-  try {
-    const header64 = encodeB64(
-      JSON.stringify({
-        alg: 'RS256',
-        jwk: await getJWK(context.publicKey),
-        typ: 'openid4vci-proof+jwt',
-      })
-    );
-    const decodedToken = jwtDecode(context.tokenResponse.accessToken);
-    const payload64 = encodeB64(
-      JSON.stringify({
-        iss: context.selectedIssuer.clientId,
-        nonce: decodedToken.c_nonce,
-        aud: 'https://esignet.dev1.mosip.net/v1/esignet',
-        iat: Math.floor(new Date().getTime() / 1000),
-        exp: Math.floor(new Date().getTime() / 1000) + 18000,
-      })
-    );
-    const preHash = header64 + '.' + payload64;
-    const signature64 = await createSignature(context.privateKey, preHash, '');
-    return header64 + '.' + payload64 + '.' + signature64;
-  } catch (e) {
-    console.log(e);
-    throw e;
-  }
-};

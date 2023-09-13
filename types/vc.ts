@@ -51,6 +51,7 @@ export interface CredentialSubject {
   gender: LocalizedField[] | string;
   id: string;
   phone: string;
+  face?: string;
   postalCode: string;
   province: LocalizedField[] | string;
   region: LocalizedField[] | string;

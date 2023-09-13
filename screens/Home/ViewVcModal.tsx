@@ -1,7 +1,6 @@
 import React from 'react';
-import { DropdownIcon } from '../../components/DropdownIcon';
 import { TextEditOverlay } from '../../components/TextEditOverlay';
-import { Column, Text } from '../../components/ui';
+import { Column } from '../../components/ui';
 import { Modal } from '../../components/ui/Modal';
 import { MessageOverlay } from '../../components/MessageOverlay';
 import { ToastItem } from '../../components/ui/ToastItem';
@@ -18,7 +17,6 @@ import { VCDetails } from '../../components/openId4VCI/VCDetails';
 export const ViewVcModal: React.FC<ViewVcModalProps> = (props) => {
   const { t } = useTranslation('ViewVcModal');
   const controller = useViewVcModal(props);
-
   const DATA = [
     {
       idType: 'VID',
@@ -41,7 +39,10 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = (props) => {
       headerElevation={2}>
       <Column scroll>
         <Column fill>
-          {isVCFromOpenId4VCI(controller.vc.credential.id) ? (
+          {isVCFromOpenId4VCI(
+            controller.vc?.verifiableCredential?.credential.credentialSubject
+              .email
+          ) ? (
             <VCDetails
               vc={controller.vc}
               onBinding={controller.addtoWallet}
