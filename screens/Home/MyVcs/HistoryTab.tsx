@@ -45,19 +45,19 @@ export const HistoryTab: React.FC<HistoryTabProps> = (props) => {
             ))}
           {controller.activities.length === 0 && (
             <Centered fill>
-              <Icon
-                testID="sentiment-dissatisfied"
-                style={{ marginBottom: 20 }}
-                size={40}
-                name="sentiment-dissatisfied"
-              />
-              <Text
-                testID="noHistory"
-                align="center"
-                weight="semibold"
-                margin="0 0 4 0">
-                {t('noHistory')}
-              </Text>
+                <Icon
+                    testID="sentiment-dissatisfied"
+                    style={{ marginBottom: 20 }}
+                    size={40}
+                    name="sentiment-dissatisfied"
+                />
+                <Text
+                    testID="noHistory"
+                    align="center"
+                    weight="semibold"
+                    margin="0 0 4 0">
+                    {t('noHistory')}
+                </Text>
             </Centered>
           )}
         </Column>
