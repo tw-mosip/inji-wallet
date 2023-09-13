@@ -1,7 +1,11 @@
 import { assign, ErrorPlatformEvent, EventFrom, send, StateFrom } from 'xstate';
 import { createModel } from 'xstate/lib/model';
 import { AppServices } from '../../shared/GlobalContext';
-import { VC, VerifiableCredential } from '../../types/vc';
+import {
+  VC,
+  VerifiableCredential,
+  VerifiableCredentialWithFormat,
+} from '../../types/vc';
 import {
   generateKeys,
   isCustomSecureKeystore,
@@ -32,6 +36,7 @@ const model = createModel(
     vcKey: '' as string,
     generatedOn: null as Date,
     credential: null as VerifiableCredential,
+    verifiableCredential: null as VerifiableCredentialWithFormat,
     isPinned: false,
     hashedId: '',
 
@@ -100,7 +105,7 @@ export const VCItemMachine = model.createMachine(
         on: {
           GET_VC_RESPONSE: [
             {
-              actions: ['setCredential'],
+              actions: ['setCredential', 'setVerifiableCredential'],
               cond: 'hasCredential',
               target: 'idle',
             },
@@ -115,7 +120,7 @@ export const VCItemMachine = model.createMachine(
         description: 'Check if VC data is in secured local storage.',
         on: {
           STORE_RESPONSE: {
-            actions: ['setCredential', 'updateVc'],
+            actions: ['setCredential', 'setVerifiableCredential', 'updateVc'],
             target: 'idle',
           },
         },
@@ -466,8 +471,11 @@ export const VCItemMachine = model.createMachine(
       ),
       updateVc: send(
         (context) => {
-          const { credential } = context;
-          return { type: 'VC_DOWNLOADED_FROM_OPENID4VCI', credential };
+          const { verifiableCredential } = context;
+          return {
+            type: 'VC_DOWNLOADED_FROM_OPENID4VCI',
+            verifiableCredential,
+          };
         },
         {
           to: (context) => context.serviceRefs.vc,
@@ -476,21 +484,21 @@ export const VCItemMachine = model.createMachine(
       setCredential: model.assign({
         credential: (_, event) => {
           if (event.type === 'GET_VC_RESPONSE') {
-            return event.vc;
+            return event.vc.credential;
           }
-          return event.response.credential === undefined
-            ? event?.response
-            : event?.response.credential;
+          return event.response;
         },
       }),
 
-      markVcValid: assign((context) => {
-        return {
-          ...context,
-          isVerified: true,
-          lastVerifiedOn: Date.now(),
-        };
+      setVerifiableCredential: model.assign({
+        verifiableCredential: (_, event) => {
+          if (event.type === 'GET_VC_RESPONSE') {
+            return event.vc;
+          }
+          return event.response;
+        },
       }),
+
       storeContext: send(
         (context) => {
           const { serviceRefs, ...data } = context;
@@ -746,9 +754,6 @@ export const VCItemMachine = model.createMachine(
         return vc != null;
       },
 
-      isVcValid: (context) => {
-        return context.isVerified;
-      },
       isCustomSecureKeystore: () => isCustomSecureKeystore(),
     },
   }
@@ -769,6 +774,10 @@ type State = StateFrom<typeof VCItemMachine>;
 
 export function selectCredentials(state: State) {
   return state.context.credential;
+}
+
+export function selectVerifiableCredentials(state: State) {
+  return state.context.verifiableCredential?.credential;
 }
 
 export function selectContext(state: State) {

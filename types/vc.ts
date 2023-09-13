@@ -74,6 +74,10 @@ export interface VerifiableCredential {
   };
   'type': VerifiableCredentialType[];
 }
+export interface VerifiableCredentialWithFormat {
+  format: string;
+  credential: VerifiableCredential;
+}
 
 export interface VerifiablePresentation {
   '@context': VCContext;

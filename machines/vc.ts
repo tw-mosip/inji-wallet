@@ -208,8 +208,7 @@ export const vcMachine =
           context.vcs[VC_ITEM_STORE_KEY(event.vc)] = event.vc;
         },
         setDownloadedVCFromOpenId4VCI: (context, event) => {
-          if (event?.vc.credential != null)
-            context.vcs[event?.vcKey] = event?.vc.credential;
+          if (event.vc) context.vcs[event.vcKey] = event.vc;
         },
         setVcUpdate: (context, event) => {
           Object.keys(context.vcs).map((vcKey) => {
