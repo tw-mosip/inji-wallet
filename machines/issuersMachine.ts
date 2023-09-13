@@ -2,7 +2,7 @@ import { authorize } from 'react-native-app-auth';
 import { assign, EventFrom, send, sendParent, StateFrom } from 'xstate';
 import { createModel } from 'xstate/lib/model';
 import { Theme } from '../components/ui/styleUtils';
-import { MY_VCS_STORE_KEY, VC_ITEM_STORE_KEY } from '../shared/constants';
+import { MY_VCS_STORE_KEY } from '../shared/constants';
 import { request } from '../shared/request';
 import { StoreEvents } from './store';
 import { AppServices } from '../shared/GlobalContext';
@@ -18,6 +18,8 @@ import { ActivityLogEvents } from './activityLog';
 import forge from 'node-forge';
 import { log } from 'xstate/lib/actions';
 import { VerifiableCredential } from '../types/vc';
+import jose from 'node-jose';
+import jwtDecode from 'jwt-decode';
 
 const model = createModel(
   {
@@ -28,8 +30,8 @@ const model = createModel(
     credential: null as VerifiableCredential,
     serviceRefs: {} as AppServices,
 
-    publicKey: null as string,
-    privateKey: null as string,
+    publicKey: ``,
+    privateKey: ``,
   },
   {
     events: {
@@ -242,10 +244,10 @@ export const IssuersMachine = model.createMachine(
         to: (context) => context.serviceRefs.store,
       }),
       storeKeyPair: send(
-        (context, event) => {
+        (_, event) => {
           return StoreEvents.SET(Issuers_Key_Ref, {
-            publicKey: context.publicKey,
-            privateKey: context.privateKey,
+            publicKey: (event.data as KeyPair).public + ``,
+            privateKey: (event.data as KeyPair).private + ``,
           });
         },
         {
@@ -349,10 +351,6 @@ export const IssuersMachine = model.createMachine(
           'GET',
           `/residentmobileapp/issuers/${event.id}`
         );
-        console.log(
-          'Response from downloadIssuerConfig -> ',
-          JSON.stringify(response, null, 4)
-        );
         return response.response;
       },
       //todo mock changes has to be reverted
@@ -369,8 +367,6 @@ export const IssuersMachine = model.createMachine(
             jwt: proofJWT,
           },
         };
-
-        console.log('downloadCredential body: ', JSON.stringify(body, null, 4));
         const response = await fetch(
           'https://api-internal.dev1.mosip.net/v1/esignet/vci/credential',
           {
@@ -388,30 +384,6 @@ export const IssuersMachine = model.createMachine(
           JSON.stringify(credential, null, 4)
         );
         return JSON.stringify(credential, null, 4);
-
-        // return {
-        //   format: 'ldp_vc',
-        //   credential: {
-        //     'issuanceDate': '2023-08-28T10:26:58.953Z',
-        //     'credentialSubject': {
-        //       name: 'Person2',
-        //       id: 'did:example:456',
-        //       age: 32,
-        //     },
-        //     'id': 'urn:uuid:3978344f-8596-4c3a-a978-8fcaba390413',
-        //     'proof': {
-        //       type: 'RsaSignature2018',
-        //       created: '2023-08-28T10:26:58Z',
-        //       proofPurpose: 'assertionMethod',
-        //       verificationMethod:
-        //         'https://esignet.dev1.mosip.net/v1/esignet/oauth/.well-known/jwks.json',
-        //       jws: 'eyJ4NWMiOlsiTUlJRHZUQ0NBcVdnQXdJQkFnSUl2U1ZGWjBheVd1c3dEUVlKS29aSWh2Y05BUUVMQlFBd2R6RUxNQWtHQTFVRUJoTUNTVTR4Q3pBSkJnTlZCQWdNQWt0Qk1SSXdFQVlEVlFRSERBbENRVTVIUVV4UFVrVXhEVEFMQmdOVkJBb01CRWxKVkVJeEdqQVlCZ05WQkFzTUVVMVBVMGxRTFZSRlEwZ3RRMFZPVkVWU01Sd3dHZ1lEVlFRRERCTjNkM2N1Ylc5emFYQXVhVzhnS0ZKUFQxUXBNQjRYRFRJek1EY3hOREEwTVRJME5Gb1hEVEkyTURjeE16QTBNVEkwTkZvd2Z6RUxNQWtHQTFVRUJoTUNTVTR4Q3pBSkJnTlZCQWdNQWt0Qk1SSXdFQVlEVlFRSERBbENRVTVIUVV4UFVrVXhEVEFMQmdOVkJBb01CRWxKVkVJeEdqQVlCZ05WQkFzTUVVMVBVMGxRTFZSRlEwZ3RRMFZPVkVWU01TUXdJZ1lEVlFRRERCdDNkM2N1Ylc5emFYQXVhVzhnS0U5SlJFTmZVMFZTVmtsRFJTa3dnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDdXBUTkJSN2tiZkMwVjhGQk9uVmdqS2NnSVNWNEJlYldzbVFOdlRpTTRTbzRrZ09VOFRjZzFFUitRazUrL3Y2YzNOR1o4WnVBRjhveEVXNzV4czZsdE4yejZOSUEzUTlmRTZwWUpYZjlpeFBzT3pac241YmpZTUp3OEMxTm1FNVVpWWZ6UUNBUmg4ZFhZKzhlQTlXaWdvRHpDRklXZUFkYjMzWDRTODZ5aURzSXVZMVY4bXhBNFBXRVI5MjlTc2cvTm5yMDRaSGRGRmJjdFBMZm5HMXhKTWhlbFRjK3YwSDk1RndZNUNvdEtmaXBGeTZ3VVcxWkVKTDF1RGpuc2ZCcmdOSDFIYlR2WU96Uk55Vy9UdFFGSTc0eFNoUm9UaFlzOWdHY0hQRU5ob2Y4S1NQUlZ3Unp0UDdBV0ZKcUFLaEFuWEdtcll5RE9iVVpXYTJMY3p1b0xBZ01CQUFHalJUQkRNQklHQTFVZEV3RUIvd1FJTUFZQkFmOENBUUV3SFFZRFZSME9CQllFRkt6SnV5VXc5UlFmZmFKYU1OdlBNR1U1YlNSdE1BNEdBMVVkRHdFQi93UUVBd0lDaERBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQW1HRXplb2tWMHE2c05rcGJzbG5jbkZpN01hcDMzYkd2OTRWdldQZ0EyZkZxYzFPUXEvZkhZYXI4UzhoZ1FlcVFleUZGOFJRUGE4R2EvUkpmQTZhMFZTMjgwbk8zUS9JVEhmdUd6MWc2UU54Y2ZFMWQ1T09kUXdlMXNkQWJjNTNrQVg3WmFzVEV1YW03SUkxSC9PMHdmdEZXVTM2OW1BV1ZmbXAvOERDdEY3STZpcjg0U25QeU5GeElOaGdnU0x4cVBMR3VaREs4eGJ6MERzQjJlQmtsZitCK2R3VU00OENmd1Ezc0FGQnJVOGx4cXJVWE1LL2ZLVitCWkx5ZWM3KzdHMUo4dXB4VUdEdlZnV29BN2pmU3RBOGpkcVdOZmZpNjQrMUdVK0t0VmhhN1BqbnlhYmttTHdtbThUU1ZVSGV3WGExUDdQaXV6S2ZQSGx0b2lqR1F5dz09Il0sIng1dCNTMjU2IjoiQXBkZzZTNlJtamtpQmp2RVVZWUNhLUtGLXlySmJsNngxd3pLcmM0c210MCIsImtpZCI6IkdURVJDT212RDVQbFo2NWxvMk5hLTRVZGMyeGdBNkVrYUh1RXNuTWV2UkEiLCJhbGciOiJSUzI1NiJ9..crY546Ej4Dmp_TtFkDKaXJfLi5OSzv8UVQ3wXXnrV9aeq9i2g87T73wRFYrWFJbKbjm-YJUyNCTtDKPzR1o66BSuCdPFALG2VivdkEb_9AVqdg4hwVkcPhzqeXJgbQ5QEsxiNyUp51uCJNcJB5g7qXGK9AMVECalzcXkQyM_WdkIUWbX5eFiFKpg7jyK1Da-DhQlUqmTgm5WT_CTokY5QfeFk-MJ90OHQ5Af9144z_ZBPDVioOrx9Xhd3XNgqRvmS4zXvdDWXs2CR-bC0ufc7nklAgSHzJjchh6-rTFnrtM-E6vyAFvEOKQFbo-xz-rbrSM7Hd8GLavXYyCX9f1A3g',
-        //     },
-        //     'type': ['VerifiableCredential'],
-        //     '@context': ['https://www.w3.org/2018/credentials/v1'],
-        //     'issuer': 'did:example:123',
-        //   },
-        // };
       },
       invokeAuthorization: async (context) => {
         const response = await authorize(context.selectedIssuer);
@@ -484,37 +456,36 @@ interface issuerType {
   logoUrl: string;
 }
 
-export const getJWK = (publicKey) => {
-  const publicKeyJWK = forge.pki.publicKeyFromPem(publicKey);
-  const publicKeyBase64 = forge.util.encode64(publicKeyJWK);
-  publicKeyBase64.alg = 'RS256';
-  publicKeyBase64.use = 'sig';
-  console.log('PublicKey from Pem -> ', JSON.stringify(publicKeyBase64));
-  return publicKeyJWK;
+export const getJWK = async (publicKey) => {
+  const publicKeyJWKString = await jose.JWK.asKey(publicKey, 'pem');
+  const publicKeyJWK = publicKeyJWKString.toJSON();
+  return {
+    ...publicKeyJWK,
+    alg: 'RS256',
+    use: 'sig',
+  };
 };
 export const getJWT = async (context) => {
   try {
     const header64 = encodeB64(
       JSON.stringify({
         alg: 'RS256',
-        jwk: getJWK(context.publicKey),
+        jwk: await getJWK(context.publicKey),
         typ: 'openid4vci-proof+jwt',
       })
     );
-
+    const decodedToken = jwtDecode(context.tokenResponse.accessToken);
     const payload64 = encodeB64(
       JSON.stringify({
         iss: context.selectedIssuer.clientId,
-        nonce: context.tokenResponse.authorizeAdditionalParameters.nonce,
-        aud: context.selectedIssuer.serviceConfiguration.authorizationEndpoint,
+        nonce: decodedToken.c_nonce,
+        aud: 'https://esignet.dev1.mosip.net/v1/esignet',
         iat: Math.floor(new Date().getTime() / 1000),
         exp: Math.floor(new Date().getTime() / 1000) + 18000,
       })
     );
     const preHash = header64 + '.' + payload64;
-
     const signature64 = await createSignature(context.privateKey, preHash, '');
-
     return header64 + '.' + payload64 + '.' + signature64;
   } catch (e) {
     console.log(e);
