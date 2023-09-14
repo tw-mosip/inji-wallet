@@ -1,25 +1,25 @@
-import { authorize } from 'react-native-app-auth';
-import { assign, EventFrom, send, sendParent, StateFrom } from 'xstate';
-import { createModel } from 'xstate/lib/model';
-import { Theme } from '../components/ui/styleUtils';
-import { MY_VCS_STORE_KEY } from '../shared/constants';
-import { request } from '../shared/request';
-import { StoreEvents } from './store';
-import { AppServices } from '../shared/GlobalContext';
+import {authorize} from 'react-native-app-auth';
+import {assign, EventFrom, send, sendParent, StateFrom} from 'xstate';
+import {createModel} from 'xstate/lib/model';
+import {Theme} from '../components/ui/styleUtils';
+import {MY_VCS_STORE_KEY} from '../shared/constants';
+import {request} from '../shared/request';
+import {StoreEvents} from './store';
+import {AppServices} from '../shared/GlobalContext';
 import {
   generateKeys,
   isCustomSecureKeystore,
 } from '../shared/cryptoutil/cryptoUtil';
 import SecureKeystore from 'react-native-secure-keystore';
-import { KeyPair } from 'react-native-rsa-native';
-import { ActivityLogEvents } from './activityLog';
-import { log } from 'xstate/lib/actions';
+import {KeyPair} from 'react-native-rsa-native';
+import {ActivityLogEvents} from './activityLog';
+import {log} from 'xstate/lib/actions';
 import {
   VerifiableCredential,
   VerifiableCredentialWithFormat,
 } from '../types/vc';
-import { verifyCredential } from '../shared/vcjs/verifyCredential';
-import { getBody } from '../shared/openId4VCI/Utils';
+import {verifyCredential} from '../shared/vcjs/verifyCredential';
+import {getBody, getIdentifier} from '../shared/openId4VCI/Utils';
 
 const model = createModel(
   {
@@ -27,6 +27,7 @@ const model = createModel(
     selectedIssuer: [] as issuerType[],
     tokenResponse: [] as [],
     errorMessage: null as string,
+    loadingReason: 'displayIssuers' as string,
     credential: null as VerifiableCredential,
     verifiableCredential: null as VerifiableCredentialWithFormat,
     serviceRefs: {} as AppServices,
@@ -37,7 +38,7 @@ const model = createModel(
   {
     events: {
       DISMISS: () => ({}),
-      SELECTED_ISSUER: (id: string) => ({ id }),
+      SELECTED_ISSUER: (id: string) => ({id}),
       DOWNLOAD_ID: () => ({}),
       COMPLETED: () => ({}),
       TRY_AGAIN: () => ({}),
@@ -45,7 +46,7 @@ const model = createModel(
       CHECK_KEY_PAIR: () => ({}),
       CANCEL: () => ({}),
     },
-  }
+  },
 );
 
 export const IssuerScreenTabEvents = model.events;
@@ -125,10 +126,10 @@ export const IssuersMachine = model.createMachine(
       },
       checkKeyPair: {
         entry: [
-          (context) =>
+          context =>
             log(
               'Reached CheckKeyPair context -> ',
-              JSON.stringify(context, null, 4)
+              JSON.stringify(context, null, 4),
             ),
           send('CHECK_KEY_PAIR'),
         ],
@@ -221,6 +222,7 @@ export const IssuersMachine = model.createMachine(
     actions: {
       setIssuers: model.assign({
         issuers: (_, event) => event.data,
+        loadingReason: null,
       }),
 
       setError: model.assign({
@@ -242,7 +244,7 @@ export const IssuersMachine = model.createMachine(
           event.privateKey ? event.privateKey : context.privateKey,
       }),
       getKeyPairFromStore: send(StoreEvents.GET(Issuers_Key_Ref), {
-        to: (context) => context.serviceRefs.store,
+        to: context => context.serviceRefs.store,
       }),
       storeKeyPair: send(
         (_, event) => {
@@ -252,68 +254,68 @@ export const IssuersMachine = model.createMachine(
           });
         },
         {
-          to: (context) => context.serviceRefs.store,
-        }
+          to: context => context.serviceRefs.store,
+        },
       ),
       storeVcMeta: send(
-        (context) =>
+        context =>
           StoreEvents.PREPEND(
             MY_VCS_STORE_KEY,
-            context?.credential.credentialSubject.email
+            context?.credential.credentialSubject.email,
           ),
         {
-          to: (context) => context.serviceRefs.store,
-        }
+          to: context => context.serviceRefs.store,
+        },
       ),
       storeVcData: send(
-        (context) => {
+        context => {
           return StoreEvents.SET(
             context?.credential.credentialSubject.email,
-            context.credential
+            context.credential,
           );
         },
         {
-          to: (context) => context.serviceRefs.store,
-        }
+          to: context => context.serviceRefs.store,
+        },
       ),
 
       storeVerifiableCredentialMeta: send(
-        (context) =>
+        context =>
           StoreEvents.PREPEND(
             MY_VCS_STORE_KEY,
-            context?.verifiableCredential?.credential.credentialSubject.email
+            context?.verifiableCredential?.credential.credentialSubject.email,
           ),
         {
-          to: (context) => context.serviceRefs.store,
-        }
+          to: context => context.serviceRefs.store,
+        },
       ),
 
       storeVerifiableCredentialData: send(
-        (context) => {
+        context => {
           return StoreEvents.SET(
             context?.verifiableCredential?.credential.credentialSubject.email,
-            context.verifiableCredential
+            context.verifiableCredential,
           );
         },
         {
-          to: (context) => context.serviceRefs.store,
-        }
+          to: context => context.serviceRefs.store,
+        },
       ),
 
       storeVcMetaContext: send(
-        (context) => {
+        context => {
           return {
             type: 'VC_ADDED',
             vcKey: context?.credential.credentialSubject.email,
           };
         },
         {
-          to: (context) => context.serviceRefs.vc,
-        }
+          to: context => context.serviceRefs.vc,
+        },
       ),
 
       storeVcsContext: send(
-        (context) => {
+        context => {
           return {
             type: 'VC_DOWNLOADED_FROM_OPENID4VCI',
             vcKey: context?.credential.credentialSubject.email,
@@ -323,8 +325,8 @@ export const IssuersMachine = model.createMachine(
           };
         },
         {
-          to: (context) => context.serviceRefs.vc,
-        }
+          to: context => context.serviceRefs.vc,
+        },
       ),
 
       setSelectedIssuers: model.assign({
@@ -332,6 +334,7 @@ export const IssuersMachine = model.createMachine(
       }),
       setTokenResponse: model.assign({
         tokenResponse: (_, event) => event.data,
+        loadingReason: 'settingUp',
       }),
       setCredential: model.assign({
         credential: (_, event) => event.data.credential,
@@ -344,6 +347,7 @@ export const IssuersMachine = model.createMachine(
           }
           return event.data as string;
         },
+        loadingReason: 'downloadingCredentials',
       }),
 
       setPrivateKey: assign({
@@ -351,8 +355,8 @@ export const IssuersMachine = model.createMachine(
       }),
 
       logDownloaded: send(
-        (context) => {
-          const { credential } = context;
+        context => {
+          const {credential} = context;
           return ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: credential.id,
             type: 'VC_DOWNLOADED',
@@ -362,8 +366,8 @@ export const IssuersMachine = model.createMachine(
           });
         },
         {
-          to: (context) => context.serviceRefs.activityLog,
-        }
+          to: context => context.serviceRefs.activityLog,
+        },
       ),
     },
     services: {
@@ -380,11 +384,11 @@ export const IssuersMachine = model.createMachine(
       downloadIssuerConfig: async (_, event) => {
         const response = await request(
           'GET',
-          `/residentmobileapp/issuers/${event.id}`
+          `/residentmobileapp/issuers/${event.id}`,
         );
         return response.response;
       },
-      downloadCredential: async (context) => {
+      downloadCredential: async context => {
         const body = await getBody(context);
         const response = await fetch(
           'https://api-internal.dev1.mosip.net/v1/esignet/vci/credential',
@@ -392,24 +396,24 @@ export const IssuersMachine = model.createMachine(
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + context.tokenResponse?.accessToken,
+              Authorization: 'Bearer ' + context.tokenResponse?.accessToken,
             },
             body: JSON.stringify(body),
-          }
+          },
         );
         const credential = await response.json();
-
+        credential.identifier = getIdentifier(context, credential);
         console.log(
           'Response from downloadCredential',
-          JSON.stringify(credential, null, 4)
+          JSON.stringify(credential, null, 4),
         );
         return credential;
       },
-      invokeAuthorization: async (context) => {
+      invokeAuthorization: async context => {
         const response = await authorize(context.selectedIssuer);
         return response;
       },
-      generateKeyPair: async (context) => {
+      generateKeyPair: async context => {
         if (!isCustomSecureKeystore()) {
           return await generateKeys();
         }
@@ -417,21 +421,21 @@ export const IssuersMachine = model.createMachine(
         return SecureKeystore.generateKeyPair(
           Issuers_Key_Ref,
           isBiometricsEnabled,
-          0
+          0,
         );
         return context;
       },
-      verifyCredential: async (context) => {
+      verifyCredential: async context => {
         return verifyCredential(context.credential);
       },
     },
     guards: {
-      hasKeyPair: (context) => {
+      hasKeyPair: context => {
         return context.publicKey != null;
       },
       isCustomSecureKeystore: () => isCustomSecureKeystore(),
     },
-  }
+  },
 );
 
 type State = StateFrom<typeof IssuersMachine>;
@@ -448,6 +452,10 @@ export function selectErrorMessage(state: State) {
   return state.context.errorMessage;
 }
 
+export function selectLoadingReason(state: State) {
+  return state.context.loadingReason;
+}
+
 export function selectIsDownloadCredentials(state: State) {
   return state.matches('downloadCredentials');
 }
@@ -458,10 +466,6 @@ export function selectIsDone(state: State) {
 
 export function selectIsIdle(state: State) {
   return state.matches('idle');
-}
-
-export function selectLoadingIssuers(state: State) {
-  return state.matches('displayIssuers');
 }
 
 export function selectStoring(state: State) {

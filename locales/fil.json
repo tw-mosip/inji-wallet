@@ -159,7 +159,14 @@
   "IssuersScreen": {
     "title": "Magdagdag ng bagong card",
     "header": "Mangyaring pumili ng gustong paraan mula sa ibaba upang magdagdag ng bagong card",
-    "loading": "Naglo-load...",
+    "loaders": {
+      "loading": "Naglo-load...",
+      "subTitle": {
+        "displayIssuers": "Fetching Issuers",
+        "settingUp": "Setting up",
+        "downloadingCredentials": "Downloading Credentials",
+      }
+    },
     "errors": {
       "noInternetConnection": {
         "title": "Walang koneksyon sa internet",
