@@ -1,12 +1,12 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground } from 'react-native';
-import { CheckBox, Icon } from 'react-native-elements';
-import { Column, Row, Text } from '../ui';
+import {useTranslation} from 'react-i18next';
+import {Image, ImageBackground} from 'react-native';
+import {CheckBox, Icon} from 'react-native-elements';
+import {Column, Row, Text} from '../ui';
 import VerifiedIcon from '../VerifiedIcon';
-import { Theme } from '../ui/styleUtils';
-import { getLocalizedField } from '../../i18n';
-import { VerifiableCredential } from '../../types/vc';
+import {Theme} from '../ui/styleUtils';
+import {getLocalizedField} from '../../i18n';
+import {VerifiableCredential} from '../../types/vc';
 
 const getDetails = (arg1, arg2, credential) => {
   if (arg1 === 'Status') {
@@ -66,11 +66,13 @@ const getDetails = (arg1, arg2, credential) => {
   }
 };
 
-export const VCItemContent: React.FC<VcItemContentProps> = (props) => {
+export const VCItemContent: React.FC<VcItemContentProps> = props => {
   const fullName = !props.credential
     ? ''
-    : getLocalizedField(props.credential.credentialSubject.fullName);
-  const { t } = useTranslation('VcDetails');
+    : getLocalizedField(
+        props.credential?.credential.credentialSubject?.fullName,
+      );
+  const {t} = useTranslation('VcDetails');
   const isvalid = !props.credential ? '' : t('valid');
   const selectableOrCheck = props.selectable ? (
     <CheckBox
@@ -80,6 +82,13 @@ export const VCItemContent: React.FC<VcItemContentProps> = (props) => {
       onPress={() => props.onPress()}
     />
   ) : null;
+
+  function getSource() {
+    if (!props.credential) {
+      return Theme.ProfileIcon;
+    }
+    return {uri: props.credential?.credential.credentialSubject.face};
+  }
 
   return (
     <ImageBackground
@@ -98,7 +107,7 @@ export const VCItemContent: React.FC<VcItemContentProps> = (props) => {
               source={
                 !props.credential
                   ? Theme.ProfileIcon
-                  : { uri: props.credential.credentialSubject.face }
+                  : {uri: props.credential?.credential.credentialSubject.face}
               }
               style={Theme.Styles.closeCardImage}>
               {props.iconName && (
@@ -106,12 +115,16 @@ export const VCItemContent: React.FC<VcItemContentProps> = (props) => {
                   name={props.iconName}
                   type={props.iconType}
                   color={Theme.Colors.Icon}
-                  style={{ marginLeft: -80 }}
+                  style={{marginLeft: -80}}
                 />
               )}
             </ImageBackground>
             <Column margin="0 0 0 10">
-              {getDetails(t('fullName'), fullName, props.credential)}
+              {getDetails(
+                t('fullName'),
+                fullName,
+                props.credential?.credential,
+              )}
 
               <Column margin="10 0 0 0">
                 <Text
@@ -149,16 +162,21 @@ export const VCItemContent: React.FC<VcItemContentProps> = (props) => {
           style={!props.credential ? Theme.Styles.loadingContainer : null}>
           <Column>
             {!props.credential
-              ? getDetails(t('id'), 'newid', props.credential)
+              ? getDetails(t('id'), 'newid', props.credential?.credential)
               : null}
-            {getDetails(t('generatedOn'), props.generatedOn, props.credential)}
+            {getDetails(
+              t('generatedOn'),
+              props.generatedOn,
+              props.credential?.credential,
+            )}
           </Column>
           <Column>
             {props.credential
-              ? getDetails(t('status'), isvalid, props.credential)
+              ? getDetails(t('status'), isvalid, props.credential?.credential)
               : null}
           </Column>
-          <Column style={{ display: props.credential ? 'flex' : 'none' }}>
+          <Column
+            style={{display: props.credential?.credential ? 'flex' : 'none'}}>
             <Image
               source={Theme.MosipLogo}
               style={Theme.Styles.logo}

@@ -2,7 +2,7 @@
 
 export interface Typegen0 {
   '@@xstate/typegen': true;
-  'internalEvents': {
+  internalEvents: {
     'done.invoke.vc-item-openid4vci.addKeyPair:invocation[0]': {
       type: 'done.invoke.vc-item-openid4vci.addKeyPair:invocation[0]';
       data: unknown;
@@ -75,9 +75,9 @@ export interface Typegen0 {
       type: 'error.platform.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
       data: unknown;
     };
-    'xstate.init': { type: 'xstate.init' };
+    'xstate.init': {type: 'xstate.init'};
   };
-  'invokeSrcNameMap': {
+  invokeSrcNameMap: {
     addWalletBindnigId:
       | 'done.invoke.vc-item-openid4vci.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addingWalletBindingId:invocation[0]';
@@ -91,13 +91,13 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.updatingPrivateKey:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
   };
-  'missingImplementations': {
+  missingImplementations: {
     actions: 'clearTransactionId' | 'setVcKey';
     delays: never;
     guards: never;
     services: never;
   };
-  'eventsCausingActions': {
+  eventsCausingActions: {
     VcUpdated: 'STORE_RESPONSE';
     clearOtp:
       | 'DISMISS'
@@ -121,7 +121,6 @@ export interface Typegen0 {
     requestStoredContext: 'GET_VC_RESPONSE' | 'REFRESH';
     requestVcContext: 'DISMISS' | 'xstate.init';
     sendVcUpdated: 'STORE_RESPONSE';
-    setCredential: 'GET_VC_RESPONSE' | 'STORE_RESPONSE';
     setOtp: 'INPUT_OTP';
     setPinCard: 'PIN_CARD';
     setPrivateKey:
@@ -169,8 +168,8 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.updatingPrivateKey:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
   };
-  'eventsCausingDelays': {};
-  'eventsCausingGuards': {
+  eventsCausingDelays: {};
+  eventsCausingGuards: {
     hasCredential: 'GET_VC_RESPONSE';
     isCustomSecureKeystore:
       | 'done.invoke.vc-item-openid4vci.addKeyPair:invocation[0]'
@@ -178,7 +177,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addKeyPair:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addingWalletBindingId:invocation[0]';
   };
-  'eventsCausingServices': {
+  eventsCausingServices: {
     addWalletBindnigId:
       | 'done.invoke.vc-item-openid4vci.addKeyPair:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addKeyPair:invocation[0]';
@@ -188,7 +187,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.kebabPopUp.addingWalletBindingId:invocation[0]';
   };
-  'matchesStates':
+  matchesStates:
     | 'acceptingBindingOtp'
     | 'addKeyPair'
     | 'addingWalletBindingId'
@@ -226,5 +225,5 @@ export interface Typegen0 {
           | 'showingWalletBindingError'
           | 'updatingPrivateKey';
       };
-  'tags': never;
+  tags: never;
 }
