@@ -1,6 +1,6 @@
-import { assign, ErrorPlatformEvent, EventFrom, send, StateFrom } from 'xstate';
-import { createModel } from 'xstate/lib/model';
-import { AppServices } from '../../shared/GlobalContext';
+import {assign, ErrorPlatformEvent, EventFrom, send, StateFrom} from 'xstate';
+import {createModel} from 'xstate/lib/model';
+import {AppServices} from '../../shared/GlobalContext';
 import {
   VC,
   VerifiableCredential,
@@ -11,31 +11,31 @@ import {
   isCustomSecureKeystore,
   WalletBindingResponse,
 } from '../../shared/cryptoutil/cryptoUtil';
-import { log } from 'xstate/lib/actions';
-import { StoreEvents } from '../../machines/store';
+import {log} from 'xstate/lib/actions';
+import {StoreEvents} from '../../machines/store';
 import {
   HOST,
   MY_VCS_STORE_KEY,
   VC_ITEM_STORE_KEY,
 } from '../../shared/constants';
-import { OpenId4VCIProtocol } from '../../shared/openId4VCI/Utils';
-import { VcEvents } from '../../machines/vc';
-import { request } from '../../shared/request';
+import {OpenId4VCIProtocol} from '../../shared/openId4VCI/Utils';
+import {VcEvents} from '../../machines/vc';
+import {request} from '../../shared/request';
 import i18n from '../../i18n';
-import { KeyPair } from 'react-native-rsa-native';
+import {KeyPair} from 'react-native-rsa-native';
 import {
   getBindingCertificateConstant,
   savePrivateKey,
 } from '../../shared/keystore/SecureKeystore';
-import { ActivityLogEvents } from '../../machines/activityLog';
+import {ActivityLogEvents} from '../../machines/activityLog';
 import SecureKeystore from 'react-native-secure-keystore';
 
 const model = createModel(
   {
     serviceRefs: {} as AppServices,
     vcKey: '' as string,
+    //TODO: set it in issuersMachine
     generatedOn: null as Date,
-    credential: null as VerifiableCredential,
     verifiableCredential: null as VerifiableCredentialWithFormat,
     isPinned: false,
     hashedId: '',
@@ -53,30 +53,30 @@ const model = createModel(
   },
   {
     events: {
-      KEY_RECEIVED: (key: string) => ({ key }),
-      KEY_ERROR: (error: Error) => ({ error }),
+      KEY_RECEIVED: (key: string) => ({key}),
+      KEY_ERROR: (error: Error) => ({error}),
       STORE_READY: () => ({}),
       DISMISS: () => ({}),
-      CREDENTIAL_DOWNLOADED: (vc: VC) => ({ vc }),
-      STORE_RESPONSE: (response: VC) => ({ response }),
+      CREDENTIAL_DOWNLOADED: (vc: VC) => ({vc}),
+      STORE_RESPONSE: (response: VC) => ({response}),
       POLL: () => ({}),
       DOWNLOAD_READY: () => ({}),
-      GET_VC_RESPONSE: (vc: VC) => ({ vc }),
+      GET_VC_RESPONSE: (vc: VC) => ({vc}),
       VERIFY: () => ({}),
       LOCK_VC: () => ({}),
-      INPUT_OTP: (otp: string) => ({ otp }),
+      INPUT_OTP: (otp: string) => ({otp}),
       REFRESH: () => ({}),
       REVOKE_VC: () => ({}),
       ADD_WALLET_BINDING_ID: () => ({}),
       CANCEL: () => ({}),
       CONFIRM: () => ({}),
-      STORE_ERROR: (error: Error) => ({ error }),
+      STORE_ERROR: (error: Error) => ({error}),
       PIN_CARD: () => ({}),
       KEBAB_POPUP: () => ({}),
       SHOW_ACTIVITY: () => ({}),
-      REMOVE: (vcKey: string) => ({ vcKey }),
+      REMOVE: (vcKey: string) => ({vcKey}),
     },
-  }
+  },
 );
 
 export const VCItemEvents = model.events;
@@ -105,7 +105,7 @@ export const VCItemMachine = model.createMachine(
         on: {
           GET_VC_RESPONSE: [
             {
-              actions: ['setCredential', 'setVerifiableCredential'],
+              actions: ['setVerifiableCredential'],
               cond: 'hasCredential',
               target: 'idle',
             },
@@ -120,7 +120,7 @@ export const VCItemMachine = model.createMachine(
         description: 'Check if VC data is in secured local storage.',
         on: {
           STORE_RESPONSE: {
-            actions: ['setCredential', 'setVerifiableCredential', 'updateVc'],
+            actions: ['setVerifiableCredential', 'updateVc'],
             target: 'idle',
           },
         },
@@ -452,43 +452,35 @@ export const VCItemMachine = model.createMachine(
   {
     actions: {
       requestVcContext: send(
-        (context) => ({
+        context => ({
           type: 'GET_VC_ITEM',
           vcKey: context.vcKey,
           protocol: OpenId4VCIProtocol,
         }),
         {
-          to: (context) => context.serviceRefs.vc,
-        }
+          to: context => context.serviceRefs.vc,
+        },
       ),
       requestStoredContext: send(
-        (context) => {
+        context => {
           return StoreEvents.GET(context.vcKey);
         },
         {
-          to: (context) => context.serviceRefs.store,
-        }
+          to: context => context.serviceRefs.store,
+        },
       ),
       updateVc: send(
-        (context) => {
-          const { verifiableCredential } = context;
+        context => {
+          const {verifiableCredential} = context;
           return {
             type: 'VC_DOWNLOADED_FROM_OPENID4VCI',
             verifiableCredential,
           };
         },
         {
-          to: (context) => context.serviceRefs.vc,
-        }
-      ),
-      setCredential: model.assign({
-        credential: (_, event) => {
-          if (event.type === 'GET_VC_RESPONSE') {
-            return event.vc.credential;
-          }
-          return event.response;
+          to: context => context.serviceRefs.vc,
         },
-      }),
+      ),
 
       setVerifiableCredential: model.assign({
         verifiableCredential: (_, event) => {
@@ -500,37 +492,37 @@ export const VCItemMachine = model.createMachine(
       }),
 
       storeContext: send(
-        (context) => {
-          const { serviceRefs, ...data } = context;
+        context => {
+          const {serviceRefs, ...data} = context;
           data.credentialRegistry = HOST;
           return StoreEvents.SET(context.vcKey, data);
         },
         {
-          to: (context) => context.serviceRefs.store,
-        }
+          to: context => context.serviceRefs.store,
+        },
       ),
-      setPinCard: assign((context) => {
+      setPinCard: assign(context => {
         return {
           ...context,
           isPinned: !context.isPinned,
         };
       }),
       VcUpdated: send(
-        (context) => {
-          const { serviceRefs, ...vc } = context;
-          return { type: 'VC_UPDATE', vc };
+        context => {
+          const {serviceRefs, ...vc} = context;
+          return {type: 'VC_UPDATE', vc};
         },
         {
-          to: (context) => context.serviceRefs.vc,
-        }
+          to: context => context.serviceRefs.vc,
+        },
       ),
 
       sendVcUpdated: send(
         (_context, event) =>
           VcEvents.VC_UPDATED(VC_ITEM_STORE_KEY(event.response) as string),
         {
-          to: (context) => context.serviceRefs.vc,
-        }
+          to: context => context.serviceRefs.vc,
+        },
       ),
       setWalletBindingError: assign({
         walletBindingError: (context, event) =>
@@ -562,19 +554,19 @@ export const VCItemMachine = model.createMachine(
           event.data as WalletBindingResponse,
       }),
       setThumbprintForWalletBindingId: send(
-        (context) => {
-          const { walletBindingResponse } = context;
+        context => {
+          const {walletBindingResponse} = context;
           const walletBindingIdKey = getBindingCertificateConstant(
-            walletBindingResponse.walletBindingId
+            walletBindingResponse.walletBindingId,
           );
           return StoreEvents.SET(
             walletBindingIdKey,
-            walletBindingResponse.thumbprint
+            walletBindingResponse.thumbprint,
           );
         },
         {
-          to: (context) => context.serviceRefs.store,
-        }
+          to: context => context.serviceRefs.store,
+        },
       ),
 
       removedVc: send(
@@ -582,12 +574,12 @@ export const VCItemMachine = model.createMachine(
           type: 'REFRESH_MY_VCS',
         }),
         {
-          to: (context) => context.serviceRefs.vc,
-        }
+          to: context => context.serviceRefs.vc,
+        },
       ),
       logDownloaded: send(
-        (context) => {
-          const { serviceRefs, ...data } = context;
+        context => {
+          const {serviceRefs, ...data} = context;
           return ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: VC_ITEM_STORE_KEY(data),
             type: 'VC_DOWNLOADED',
@@ -597,12 +589,12 @@ export const VCItemMachine = model.createMachine(
           });
         },
         {
-          to: (context) => context.serviceRefs.activityLog,
-        }
+          to: context => context.serviceRefs.activityLog,
+        },
       ),
 
       logWalletBindingSuccess: send(
-        (context) =>
+        context =>
           ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: context.vcKey,
             type: 'WALLET_BINDING_SUCCESSFULL',
@@ -611,12 +603,12 @@ export const VCItemMachine = model.createMachine(
             vcLabel: context.id,
           }),
         {
-          to: (context) => context.serviceRefs.activityLog,
-        }
+          to: context => context.serviceRefs.activityLog,
+        },
       ),
 
       logWalletBindingFailure: send(
-        (context) =>
+        context =>
           ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: context.vcKey,
             type: 'WALLET_BINDING_FAILURE',
@@ -625,8 +617,8 @@ export const VCItemMachine = model.createMachine(
             vcLabel: context.id,
           }),
         {
-          to: (context) => context.serviceRefs.activityLog,
-        }
+          to: context => context.serviceRefs.activityLog,
+        },
       ),
       setOtp: model.assign({
         otp: (_, event) => event.otp,
@@ -637,16 +629,16 @@ export const VCItemMachine = model.createMachine(
           (event as ErrorPlatformEvent).data.message,
       }),
 
-      clearOtp: assign({ otp: '' }),
+      clearOtp: assign({otp: ''}),
       removeVcItem: send(
         (_context, event) => {
           return StoreEvents.REMOVE(MY_VCS_STORE_KEY, _context.vcKey);
         },
-        { to: (context) => context.serviceRefs.store }
+        {to: context => context.serviceRefs.store},
       ),
 
       logVCremoved: send(
-        (context) =>
+        context =>
           ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: context.vcKey,
             type: 'VC_REMOVED',
@@ -655,23 +647,23 @@ export const VCItemMachine = model.createMachine(
             vcLabel: context.id,
           }),
         {
-          to: (context) => context.serviceRefs.activityLog,
-        }
+          to: context => context.serviceRefs.activityLog,
+        },
       ),
     },
 
     services: {
-      updatePrivateKey: async (context) => {
+      updatePrivateKey: async context => {
         const hasSetPrivateKey: boolean = await savePrivateKey(
           context.walletBindingResponse.walletBindingId,
-          context.privateKey
+          context.privateKey,
         );
         if (!hasSetPrivateKey) {
           throw new Error('Could not store private key in keystore.');
         }
         return '';
       },
-      addWalletBindnigId: async (context) => {
+      addWalletBindnigId: async context => {
         const response = await request(
           'POST',
           '/residentmobileapp/wallet-binding',
@@ -680,7 +672,7 @@ export const VCItemMachine = model.createMachine(
             request: {
               authFactorType: 'WLA',
               format: 'jwt',
-              individualId: context.credential.id,
+              individualId: context.verifiableCredential.credential.id,
               transactionId: context.transactionId,
               publicKey: context.publicKey,
               challengeList: [
@@ -691,12 +683,12 @@ export const VCItemMachine = model.createMachine(
                 },
               ],
             },
-          }
+          },
         );
         const certificate = response.response.certificate;
         await savePrivateKey(
           getBindingCertificateConstant(context.id),
-          certificate
+          certificate,
         );
 
         const walletResponse: WalletBindingResponse = {
@@ -707,7 +699,7 @@ export const VCItemMachine = model.createMachine(
         };
         return walletResponse;
       },
-      generateKeyPair: async (context) => {
+      generateKeyPair: async context => {
         if (!isCustomSecureKeystore()) {
           return await generateKeys();
         }
@@ -715,26 +707,26 @@ export const VCItemMachine = model.createMachine(
         return SecureKeystore.generateKeyPair(
           context.id,
           isBiometricsEnabled,
-          0
+          0,
         );
       },
-      requestBindingOtp: async (context) => {
+      requestBindingOtp: async context => {
         const response = await request(
           'POST',
           '/residentmobileapp/binding-otp',
           {
             requestTime: String(new Date().toISOString()),
             request: {
-              individualId: context.credential.id,
+              individualId: context.verifiableCredential.credential.id,
               otpChannels: ['EMAIL', 'PHONE'],
             },
-          }
+          },
         );
         if (response.response == null) {
           throw new Error('Could not process request');
         }
       },
-      requestOtp: async (context) => {
+      requestOtp: async context => {
         try {
           return request('POST', '/residentmobileapp/req/otp', {
             individualId: context.id,
@@ -756,12 +748,12 @@ export const VCItemMachine = model.createMachine(
 
       isCustomSecureKeystore: () => isCustomSecureKeystore(),
     },
-  }
+  },
 );
 
 export const createVCItemMachine = (
   serviceRefs: AppServices,
-  vcKey: string
+  vcKey: string,
 ) => {
   return VCItemMachine.withContext({
     ...VCItemMachine.context,
@@ -772,12 +764,8 @@ export const createVCItemMachine = (
 
 type State = StateFrom<typeof VCItemMachine>;
 
-export function selectCredentials(state: State) {
-  return state.context.credential;
-}
-
 export function selectVerifiableCredentials(state: State) {
-  return state.context.verifiableCredential?.credential;
+  return state.context.verifiableCredential;
 }
 
 export function selectContext(state: State) {

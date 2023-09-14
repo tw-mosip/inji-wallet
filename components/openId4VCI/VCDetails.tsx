@@ -1,16 +1,16 @@
-import { formatDistanceToNow } from 'date-fns';
+import {formatDistanceToNow} from 'date-fns';
 import React from 'react';
 import * as DateFnsLocale from 'date-fns/locale';
-import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground, View } from 'react-native';
-import { Icon } from 'react-native-elements';
-import { CREDENTIAL_REGISTRY_EDIT } from 'react-native-dotenv';
-import { Button, Column, Row, Text } from '../ui';
-import { Theme } from '../ui/styleUtils';
-import { QrCodeOverlay } from '../QrCodeOverlay';
-import { getLocalizedField } from '../../i18n';
+import {useTranslation} from 'react-i18next';
+import {Image, ImageBackground, View} from 'react-native';
+import {Icon} from 'react-native-elements';
+import {CREDENTIAL_REGISTRY_EDIT} from 'react-native-dotenv';
+import {Button, Column, Row, Text} from '../ui';
+import {Theme} from '../ui/styleUtils';
+import {QrCodeOverlay} from '../QrCodeOverlay';
+import {getLocalizedField} from '../../i18n';
 import VerifiedIcon from '../VerifiedIcon';
-import { TextItem } from '../ui/TextItem';
+import {TextItem} from '../ui/TextItem';
 import {
   CredentialSubject,
   VcIdType,
@@ -18,10 +18,10 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '../../types/vc';
-import { WalletBindingResponse } from '../../shared/cryptoutil/cryptoUtil';
+import {WalletBindingResponse} from '../../shared/cryptoutil/cryptoUtil';
 
-export const VCDetails: React.FC<VcDetailsProps> = (props) => {
-  const { t, i18n } = useTranslation('VcDetails');
+export const VCDetails: React.FC<VcDetailsProps> = props => {
+  const {t, i18n} = useTranslation('VcDetails');
 
   if (props.vc?.verifiableCredential == null) {
     return <Text align="center">Loading details...</Text>;
@@ -37,7 +37,8 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
           <Column align="space-evenly" crossAlign="center">
             <Image
               source={
-                props.vc?.credential.credentialSubject?.face
+                props.vc?.verifiableCredential.credential.credentialSubject
+                  ?.face
                   ? {
                       uri: props.vc?.verifiableCredential.credential
                         .credentialSubject.face,
@@ -66,7 +67,7 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
                 color={Theme.Colors.Details}>
                 {getLocalizedField(
                   props.vc?.verifiableCredential.credential.credentialSubject
-                    .fullName
+                    .fullName,
                 )}
               </Text>
             </Column>
@@ -86,7 +87,7 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
                     {t('nationalCard')}
                   </Text>
                 </Column>
-                {props.vc?.credential.id ? (
+                {props.vc?.verifiableCredential.credential.id ? (
                   <Column margin="20 0 0 0">
                     <Text
                       weight="bold"
@@ -98,7 +99,7 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
                       weight="semibold"
                       size="smaller"
                       color={Theme.Colors.Details}>
-                      {props.vc?.credential.id}
+                      {props.vc?.verifiableCredential.credential.id}
                     </Text>
                   </Column>
                 ) : null}
@@ -116,8 +117,8 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
                     {new Date(
                       getLocalizedField(
                         props.vc?.verifiableCredential.credential
-                          .credentialSubject.dateOfBirth
-                      )
+                          .credentialSubject.dateOfBirth,
+                      ),
                     ).toLocaleDateString()}
                   </Text>
                 </Column>
@@ -136,7 +137,7 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
                     color={Theme.Colors.Details}>
                     {getLocalizedField(
                       props.vc?.verifiableCredential.credential
-                        .credentialSubject.gender
+                        .credentialSubject.gender,
                     )}
                   </Text>
                 </Column>
@@ -184,7 +185,7 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
                     color={Theme.Colors.Details}>
                     {getLocalizedField(
                       props.vc?.verifiableCredential.credential
-                        .credentialSubject.phone
+                        .credentialSubject.phone,
                     )}
                   </Text>
                 </Column>
@@ -206,15 +207,15 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
                 style={
                   props.vc?.verifiableCredential.credential.credentialSubject
                     .email.length > 25
-                    ? { flex: 1 }
-                    : { flex: 0 }
+                    ? {flex: 1}
+                    : {flex: 0}
                 }
                 weight="semibold"
                 size="smaller"
                 color={Theme.Colors.Details}>
                 {getLocalizedField(
                   props.vc?.verifiableCredential.credential.credentialSubject
-                    .email
+                    .email,
                 )}
               </Text>
             </Row>
@@ -229,12 +230,12 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
             </Text>
             <Row>
               <Text
-                style={{ flex: 1 }}
+                style={{flex: 1}}
                 weight="semibold"
                 size="smaller"
                 color={Theme.Colors.Details}>
                 {getFullAddress(
-                  props.vc?.verifiableCredential.credential.credentialSubject
+                  props.vc?.verifiableCredential.credential.credentialSubject,
                 )}
               </Text>
             </Row>
@@ -287,7 +288,7 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
                 type="material-community"
               />
               <Text
-                style={{ flex: 1 }}
+                style={{flex: 1}}
                 weight="semibold"
                 size="small"
                 margin={'0 0 5 0'}
@@ -296,7 +297,7 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
               </Text>
             </Row>
             <Text
-              style={{ flex: 1 }}
+              style={{flex: 1}}
               weight="regular"
               size="small"
               margin={'0 0 5 0'}
@@ -317,7 +318,7 @@ export const VCDetails: React.FC<VcDetailsProps> = (props) => {
                 name="verified-user"
                 color={Theme.Colors.VerifiedIcon}
                 size={28}
-                containerStyle={{ marginStart: 4, bottom: 1 }}
+                containerStyle={{marginStart: 4, bottom: 1}}
               />
               <Text
                 numLines={1}
@@ -377,7 +378,7 @@ function getFullAddress(credential: CredentialSubject) {
   ];
 
   return fields
-    .map((field) => getLocalizedField(credential[field]))
+    .map(field => getLocalizedField(credential[field]))
     .concat(credential.postalCode)
     .filter(Boolean)
     .join(', ');

@@ -15,7 +15,6 @@ import {KeyPair} from 'react-native-rsa-native';
 import {ActivityLogEvents} from './activityLog';
 import {log} from 'xstate/lib/actions';
 import {
-  VerifiableCredential,
   VerifiableCredentialWithFormat,
 } from '../types/vc';
 import {verifyCredential} from '../shared/vcjs/verifyCredential';
@@ -28,7 +27,6 @@ const model = createModel(
     tokenResponse: [] as [],
     errorMessage: null as string,
     loadingReason: 'displayIssuers' as string,
-    credential: null as VerifiableCredential,
     verifiableCredential: null as VerifiableCredentialWithFormat,
     serviceRefs: {} as AppServices,
 
@@ -257,27 +255,6 @@ export const IssuersMachine = model.createMachine(
           to: context => context.serviceRefs.store,
         },
       ),
-      storeVcMeta: send(
-        context =>
-          StoreEvents.PREPEND(
-            MY_VCS_STORE_KEY,
-            context?.credential.credentialSubject.email,
-          ),
-        {
-          to: context => context.serviceRefs.store,
-        },
-      ),
-      storeVcData: send(
-        context => {
-          return StoreEvents.SET(
-            context?.credential.credentialSubject.email,
-            context.credential,
-          );
-        },
-        {
-          to: context => context.serviceRefs.store,
-        },
-      ),
 
       storeVerifiableCredentialMeta: send(
         context =>
@@ -306,7 +283,8 @@ export const IssuersMachine = model.createMachine(
         context => {
           return {
             type: 'VC_ADDED',
-            vcKey: context?.credential.credentialSubject.email,
+            vcKey:
+              context?.verifiableCredential.credential.credentialSubject.email,
           };
         },
         {
@@ -318,10 +296,9 @@ export const IssuersMachine = model.createMachine(
         context => {
           return {
             type: 'VC_DOWNLOADED_FROM_OPENID4VCI',
-            vcKey: context?.credential.credentialSubject.email,
-            vc: {
-              credential: context.verifiableCredential,
-            },
+            vcKey:
+              context?.verifiableCredential.credential.credentialSubject.email,
+            vc: context.verifiableCredential,
           };
         },
         {
@@ -337,7 +314,6 @@ export const IssuersMachine = model.createMachine(
         loadingReason: 'settingUp',
       }),
       setCredential: model.assign({
-        credential: (_, event) => event.data.credential,
         verifiableCredential: (_, event) => event.data,
       }),
       setPublicKey: assign({
@@ -356,7 +332,9 @@ export const IssuersMachine = model.createMachine(
 
       logDownloaded: send(
         context => {
-          const {credential} = context;
+          const {
+            verifiableCredential: {credential},
+          } = context;
           return ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: credential.id,
             type: 'VC_DOWNLOADED',
@@ -426,7 +404,7 @@ export const IssuersMachine = model.createMachine(
         return context;
       },
       verifyCredential: async context => {
-        return verifyCredential(context.credential);
+        return verifyCredential(context.verifiableCredential.credential);
       },
     },
     guards: {
@@ -442,10 +420,6 @@ type State = StateFrom<typeof IssuersMachine>;
 
 export function selectIssuers(state: State) {
   return state.context.issuers;
-}
-
-export function selectCredentials(state: State) {
-  return state.context.credential;
 }
 
 export function selectErrorMessage(state: State) {

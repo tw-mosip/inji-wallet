@@ -2,7 +2,6 @@ import {useSelector} from '@xstate/react';
 import {
   IssuerScreenTabEvents,
   IssuersMachine,
-  selectCredentials,
   selectErrorMessage,
   selectIsDone,
   selectIsDownloadCredentials,
@@ -12,6 +11,7 @@ import {
   selectStoring,
 } from '../../machines/issuersMachine';
 import {ActorRefFrom} from 'xstate';
+import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
 
 export function useIssuerScreenController({route, navigation}) {
   const service = route.params.service;
@@ -22,7 +22,6 @@ export function useIssuerScreenController({route, navigation}) {
     isDownloadingCredentials: useSelector(service, selectIsDownloadCredentials),
     isDone: useSelector(service, selectIsDone),
     isIdle: useSelector(service, selectIsIdle),
-    credential: useSelector(service, selectCredentials),
     loadingReason: useSelector(service, selectLoadingReason),
     isStoring: useSelector(service, selectStoring),
 
@@ -34,7 +33,7 @@ export function useIssuerScreenController({route, navigation}) {
     RESET_ERROR: () => service.send(IssuerScreenTabEvents.RESET_ERROR()),
     DOWNLOAD_ID: () => {
       service.send(IssuerScreenTabEvents.DOWNLOAD_ID());
-      navigation.navigate('Home', {screen: 'HomeScreen'});
+      navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
     },
   };
 }
