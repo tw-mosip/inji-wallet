@@ -523,7 +523,6 @@ export const DefaultTheme = {
   }),
   TextStyles: StyleSheet.create({
     header: {
-      color: Colors.Black,
       fontFamily: 'Inter_700Bold',
       fontSize: 18,
       lineHeight: 19,
@@ -1074,6 +1073,10 @@ export const DefaultTheme = {
       marginBottom: 9,
       marginTop: 8,
       marginLeft: 2.5,
+    },
+    loaderHeadingText: {
+      flex: 1,
+      flexDirection: 'column',
     },
   }),
   ErrorStyles: StyleSheet.create({

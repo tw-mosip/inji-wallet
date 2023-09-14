@@ -156,7 +156,15 @@
   "IssuersScreen": {
     "title": "नया कार्ड जोड़ें",
     "header": "नया कार्ड जोड़ने के लिए कृपया नीचे से कोई पसंदीदा विधि चुनें",
-    "loading": "लोड हो रहा है...",
+
+    "loaders": {
+      "loading": "लोड हो रहा है...",
+      "subTitle": {
+        "displayIssuers": "Fetching Issuers",
+        "settingUp": "Setting up",
+        "downloadingCredentials": "Downloading Credentials",
+      }
+    },
     "errors": {
       "noInternetConnection": {
         "title": "कोई इंटरनेट कनेक्शन नहीं",

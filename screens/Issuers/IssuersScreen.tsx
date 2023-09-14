@@ -1,27 +1,27 @@
-import React, { useLayoutEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { FlatList, Image, Text, View } from 'react-native';
-import { Issuer } from '../../components/openId4VCI/Issuer';
-import { Error } from '../../components/ui/Error';
-import { Header } from '../../components/ui/Header';
-import { Column } from '../../components/ui/Layout';
-import { Theme } from '../../components/ui/styleUtils';
-import { RootRouteProps } from '../../routes';
-import { HomeRouteProps } from '../../routes/main';
-import { useIssuerScreenController } from './IssuerScreenController';
-import { Loader } from './Loader';
+import React, {useLayoutEffect} from 'react';
+import {useTranslation} from 'react-i18next';
+import {FlatList, Image, Text, View} from 'react-native';
+import {Issuer} from '../../components/openId4VCI/Issuer';
+import {Error} from '../../components/ui/Error';
+import {Header} from '../../components/ui/Header';
+import {Column} from '../../components/ui/Layout';
+import {Theme} from '../../components/ui/styleUtils';
+import {RootRouteProps} from '../../routes';
+import {HomeRouteProps} from '../../routes/main';
+import {useIssuerScreenController} from './IssuerScreenController';
+import {Loader} from './Loader';
 
-export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
-  props
-) => {
+export const IssuersScreen: React.FC<
+  HomeRouteProps | RootRouteProps
+> = props => {
   const controller = useIssuerScreenController(props);
-  const { t } = useTranslation('IssuersScreen');
+  const {t} = useTranslation('IssuersScreen');
 
   useLayoutEffect(() => {
-    if (controller.issuers.length > 0) {
+    if (!controller.loadingReason) {
       props.navigation.setOptions({
         headerShown: true,
-        header: (props) => (
+        header: props => (
           <Header goBack={props.navigation.goBack} title={t('title')} />
         ),
       });
@@ -34,9 +34,9 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
     if (controller.isStoring) {
       props.navigation.goBack();
     }
-  }, [controller.issuers, controller.isStoring]);
+  }, [controller.loadingReason, controller.isStoring]);
 
-  const onPressHandler = (id) => {
+  const onPressHandler = id => {
     if (id !== 'UIN, VID, AID') {
       controller.SELECTED_ISSUER(id);
     } else {
@@ -60,25 +60,20 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
       return (
         <Image
           source={Theme.SomethingWentWrong}
-          style={{ width: 370, height: 150 }}
+          style={{width: 370, height: 150}}
         />
       );
     }
     return <Image source={Theme.NoInternetConnection} />;
   };
 
-  if (controller.isLoadingIssuers) {
-    return <Loader isVisible title={t('loading')} progress />;
-  }
-
-  if (controller.isDownloadingCredentials) {
+  if (controller.loadingReason) {
     return (
       <Loader
-        isVisible={controller.isDownloadingCredentials}
-        title={t('modal.title')}
-        onCancel={controller.CANCEL}
-        hint={t('modal.hint')}
-        progress={true}
+        isVisible
+        title={t('loaders.loading')}
+        subTitle={t(`loaders.subTitle.${controller.loadingReason}`)}
+        progress
       />
     );
   }
@@ -100,7 +95,7 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
               <FlatList
                 data={controller.issuers}
                 scrollEnabled={false}
-                renderItem={({ item }) => (
+                renderItem={({item}) => (
                   <Issuer
                     key={item.id}
                     id={item.id}
@@ -111,7 +106,7 @@ export const IssuersScreen: React.FC<HomeRouteProps | RootRouteProps> = (
                   />
                 )}
                 numColumns={2}
-                keyExtractor={(item) => item.id}
+                keyExtractor={item => item.id}
               />
             )}
           </View>

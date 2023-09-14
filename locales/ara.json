@@ -159,7 +159,14 @@
   "IssuersScreen": {
     "title": "أضف بطاقة جديدة",
     "header": "يرجى تحديد الطريقة المفضلة من الأسفل لإضافة بطاقة جديدة",
-    "loading": "جار التحميل...",
+    "loaders": {
+      "loading": "جار التحميل...",
+      "subTitle": {
+        "displayIssuers": "Fetching Issuers",
+        "settingUp": "Setting up",
+        "downloadingCredentials": "Downloading Credentials",
+      }
+    },
     "errors":{
       "noInternetConnection": {
         "title": "لا يوجد اتصال بالإنترنت",

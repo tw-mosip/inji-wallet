@@ -1,12 +1,12 @@
-import React, { Fragment } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Image, SafeAreaView } from 'react-native';
+import React, {Fragment} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Image, SafeAreaView, View} from 'react-native';
 import Spinner from 'react-native-spinkit';
-import { Button, Centered, Column, Row, Text } from '../../components/ui';
-import { Theme } from '../../components/ui/styleUtils';
+import {Button, Centered, Column, Row, Text} from '../../components/ui';
+import {Theme} from '../../components/ui/styleUtils';
 
-export const Loader: React.FC<ProgressingProps> = (props) => {
-  const { t } = useTranslation('ScanScreen');
+export const Loader: React.FC<ProgressingProps> = props => {
+  const {t} = useTranslation('ScanScreen');
 
   return (
     <Fragment>
@@ -16,7 +16,16 @@ export const Loader: React.FC<ProgressingProps> = (props) => {
             fill
             align={'flex-start'}
             style={Theme.LoaderStyles.titleContainer}>
-            <Text style={Theme.TextStyles.header}>{props.title}</Text>
+            <View style={Theme.issuersScreenStyles.loaderHeadingText}>
+              <Text style={Theme.TextStyles.header}>{props.title}</Text>
+              {props.subTitle && (
+                <Text
+                  style={{...Theme.TextStyles.header, paddingTop: 10}}
+                  color={Theme.Colors.profileValue}>
+                  {props.subTitle}
+                </Text>
+              )}
+            </View>
           </Row>
         </SafeAreaView>
       </Row>
@@ -26,16 +35,16 @@ export const Loader: React.FC<ProgressingProps> = (props) => {
             source={Theme.InjiProgressingLogo}
             height={2}
             width={2}
-            style={{ marginLeft: -6 }}
+            style={{marginLeft: -6}}
           />
           <Spinner
             type="ThreeBounce"
             color={Theme.Colors.Loading}
-            style={{ marginLeft: 6 }}
+            style={{marginLeft: 6}}
           />
         </Column>
 
-        <Column style={{ display: props.hint ? 'flex' : 'none' }}>
+        <Column style={{display: props.hint ? 'flex' : 'none'}}>
           <Column style={Theme.SelectVcOverlayStyles.timeoutHintContainer}>
             <Text
               align="center"
@@ -60,6 +69,7 @@ export const Loader: React.FC<ProgressingProps> = (props) => {
 export interface ProgressingProps {
   isVisible: boolean;
   title?: string;
+  subTitle?: string;
   label?: string;
   hint?: string;
   onCancel?: () => void;

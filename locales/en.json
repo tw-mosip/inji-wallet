@@ -163,7 +163,14 @@
       "title": "In Progress",
       "hint": "downloading your credential from issuer"
     },
-    "loading": "Loading...",
+    "loaders": {
+      "loading": "Loading...",
+      "subTitle": {
+        "displayIssuers": "Fetching Issuers",
+        "settingUp": "Setting up",
+        "downloadingCredentials": "Downloading Credentials",
+      }
+    },
     "errors": {
       "noInternetConnection": {
         "title": "No internet connection",
