@@ -22,8 +22,7 @@ import {WalletBindingResponse} from '../../shared/cryptoutil/cryptoUtil';
 
 export const VCDetails: React.FC<VcDetailsProps> = props => {
   const {t, i18n} = useTranslation('VcDetails');
-
-  if (props.vc?.verifiableCredential == null) {
+  if (props.vc?.verifiableCredential === null) {
     return <Text align="center">Loading details...</Text>;
   }
 
@@ -50,7 +49,10 @@ export const VCDetails: React.FC<VcDetailsProps> = props => {
 
             <QrCodeOverlay qrCodeDetailes={String(props.vc.credential)} />
             <Column margin="20 0 0 0">
-              <Image source={Theme.MosipLogo} style={Theme.Styles.logo} />
+              <Image
+                src={props.vc?.verifiableCredential.logo}
+                style={Theme.Styles.logo}
+              />
             </Column>
           </Column>
           <Column align="space-evenly">
@@ -348,6 +350,9 @@ export interface VC {
   id: string;
   idType: VcIdType;
   tag: string;
+  // ref: https://stackoverflow.com/q/43621934
+  // https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types
+  // NOTE: The VC in real life has a field named verifiableCredential but the type is named as credential
   credential: VerifiableCredential;
   verifiablePresentation?: VerifiablePresentation;
   generatedOn: Date;
