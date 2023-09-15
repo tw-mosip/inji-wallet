@@ -171,7 +171,7 @@ export const IssuersMachine = model.createMachine(
         invoke: {
           src: 'downloadCredential',
           onDone: {
-            actions: 'setCredential',
+            actions: 'setVerifiableCredential',
             target: 'verifyingCredential',
           },
         },
@@ -324,7 +324,7 @@ export const IssuersMachine = model.createMachine(
         tokenResponse: (_, event) => event.data,
         loadingReason: 'settingUp',
       }),
-      setCredential: model.assign({
+      setVerifiableCredential: model.assign({
         verifiableCredential: (_, event) => event.data,
       }),
       setPublicKey: assign({
@@ -393,6 +393,7 @@ export const IssuersMachine = model.createMachine(
         const credential = await response.json();
         credential.identifier = getIdentifier(context, credential);
         credential.credential.credentialSubject.vid = '2187984397';
+        credential.generatedOn = new Date();
         console.log(
           'Response from downloadCredential',
           JSON.stringify(credential, null, 4),
