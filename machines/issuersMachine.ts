@@ -21,7 +21,7 @@ import {getBody, getIdentifier} from '../shared/openId4VCI/Utils';
 const model = createModel(
   {
     issuers: [] as issuerType[],
-    selectedIssuer: [] as issuerType[],
+    selectedIssuer: {} as issuerType,
     tokenResponse: [] as [],
     errorMessage: null as string,
     loadingReason: 'displayIssuers' as string,
@@ -391,6 +391,7 @@ export const IssuersMachine = model.createMachine(
           },
         );
         const credential = await response.json();
+        credential.logo = context.selectedIssuer.logoUrl;
         credential.identifier = getIdentifier(context, credential);
         credential.credential.credentialSubject.vid = '2187984397';
         console.log(

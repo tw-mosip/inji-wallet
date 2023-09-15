@@ -1,4 +1,4 @@
-import { WalletBindingResponse } from '../shared/cryptoutil/cryptoUtil';
+import {WalletBindingResponse} from '../shared/cryptoutil/cryptoUtil';
 
 export interface VC {
   id: string;
@@ -62,29 +62,30 @@ type VCContext = (string | Record<string, unknown>)[];
 
 export interface VerifiableCredential {
   '@context': VCContext;
-  'credentialSubject': CredentialSubject;
-  'id': string;
-  'issuanceDate': string;
-  'issuer': string;
-  'proof': {
+  credentialSubject: CredentialSubject;
+  id: string;
+  issuanceDate: string;
+  issuer: string;
+  proof: {
     created: string;
     jws: string;
     proofPurpose: 'assertionMethod' | string;
     type: 'RsaSignature2018' | string;
     verificationMethod: string;
   };
-  'type': VerifiableCredentialType[];
+  type: VerifiableCredentialType[];
 }
 export interface VerifiableCredentialWithFormat {
   format: string;
   credential: VerifiableCredential;
+  logo: string;
 }
 
 export interface VerifiablePresentation {
   '@context': VCContext;
-  'verifiableCredential': VerifiableCredential[];
-  'type': 'VerifiablePresentation';
-  'proof': {
+  verifiableCredential: VerifiableCredential[];
+  type: 'VerifiablePresentation';
+  proof: {
     created: string;
     jws: string;
     proofPurpose: 'authentication' | string;

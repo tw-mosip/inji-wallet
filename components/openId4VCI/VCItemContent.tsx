@@ -6,7 +6,7 @@ import {Column, Row, Text} from '../ui';
 import VerifiedIcon from '../VerifiedIcon';
 import {Theme} from '../ui/styleUtils';
 import {getLocalizedField} from '../../i18n';
-import {VerifiableCredential} from '../../types/vc';
+import {VerifiableCredentialWithFormat} from '../../types/vc';
 
 const getDetails = (arg1, arg2, credential) => {
   if (arg1 === 'Status') {
@@ -178,7 +178,7 @@ export const VCItemContent: React.FC<VcItemContentProps> = props => {
           <Column
             style={{display: props.credential?.credential ? 'flex' : 'none'}}>
             <Image
-              source={Theme.MosipLogo}
+              src={props.credential?.logo}
               style={Theme.Styles.logo}
               resizeMethod="auto"
             />
@@ -191,7 +191,7 @@ export const VCItemContent: React.FC<VcItemContentProps> = props => {
 
 interface VcItemContentProps {
   context: any;
-  credential: VerifiableCredential;
+  credential: VerifiableCredentialWithFormat;
   generatedOn: string;
   selectable: boolean;
   selected: boolean;
