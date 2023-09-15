@@ -672,7 +672,8 @@ export const VCItemMachine = model.createMachine(
             request: {
               authFactorType: 'WLA',
               format: 'jwt',
-              individualId: context.verifiableCredential.credential.id,
+              individualId:
+                context.verifiableCredential.credential.credentialSubject.vid,
               transactionId: context.transactionId,
               publicKey: context.publicKey,
               challengeList: [
@@ -717,25 +718,14 @@ export const VCItemMachine = model.createMachine(
           {
             requestTime: String(new Date().toISOString()),
             request: {
-              individualId: context.verifiableCredential.credential.id,
+              individualId:
+                context.verifiableCredential.credential.credentialSubject.vid,
               otpChannels: ['EMAIL', 'PHONE'],
             },
           },
         );
         if (response.response == null) {
           throw new Error('Could not process request');
-        }
-      },
-      requestOtp: async context => {
-        try {
-          return request('POST', '/residentmobileapp/req/otp', {
-            individualId: context.id,
-            individualIdType: context.idType,
-            otpChannel: ['EMAIL', 'PHONE'],
-            transactionID: context.transactionId,
-          });
-        } catch (error) {
-          console.error(error);
         }
       },
     },

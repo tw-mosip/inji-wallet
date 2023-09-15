@@ -99,7 +99,7 @@ export const IssuersScreen: React.FC<
                   <Issuer
                     key={item.id}
                     id={item.id}
-                    description={item.displayName}
+                    displayName={item.displayName}
                     logoUrl={item.logoUrl}
                     onPress={() => onPressHandler(item.id)}
                     {...props}

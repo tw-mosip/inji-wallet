@@ -20,7 +20,7 @@ export const Loader: React.FC<ProgressingProps> = props => {
               <Text style={Theme.TextStyles.header}>{props.title}</Text>
               {props.subTitle && (
                 <Text
-                  style={{...Theme.TextStyles.header, paddingTop: 10}}
+                  style={Theme.TextStyles.subHeader}
                   color={Theme.Colors.profileValue}>
                   {props.subTitle}
                 </Text>
