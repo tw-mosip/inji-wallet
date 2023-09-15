@@ -105,7 +105,7 @@ export const VCItemMachine = model.createMachine(
         on: {
           GET_VC_RESPONSE: [
             {
-              actions: ['setVerifiableCredential'],
+              actions: ['setVerifiableCredential', 'setGeneratedOn'],
               cond: 'hasCredential',
               target: 'idle',
             },
@@ -120,7 +120,7 @@ export const VCItemMachine = model.createMachine(
         description: 'Check if VC data is in secured local storage.',
         on: {
           STORE_RESPONSE: {
-            actions: ['setVerifiableCredential', 'updateVc'],
+            actions: ['setVerifiableCredential', 'setGeneratedOn', 'updateVc'],
             target: 'idle',
           },
         },
@@ -488,6 +488,12 @@ export const VCItemMachine = model.createMachine(
             return event.vc;
           }
           return event.response;
+        },
+      }),
+
+      setGeneratedOn: model.assign({
+        generatedOn: (context, _event) => {
+          return context.verifiableCredential.generatedOn;
         },
       }),
 
