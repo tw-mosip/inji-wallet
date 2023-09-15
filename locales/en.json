@@ -159,6 +159,8 @@
   "IssuersScreen": {
     "title": "Add new card",
     "header": "Please select a preferred method from below to add a new card",
+    "itemHeading":"Download via {{issuer}}",
+    "itemSubHeading": "Enter the mentioned ID and get your card",
     "modal": {
       "title": "In Progress",
       "hint": "downloading your credential from issuer"
@@ -168,7 +170,7 @@
       "subTitle": {
         "displayIssuers": "Fetching Issuers",
         "settingUp": "Setting up",
-        "downloadingCredentials": "Downloading Credentials",
+        "downloadingCredentials": "Downloading Credentials"
       }
     },
     "errors": {

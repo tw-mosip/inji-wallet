@@ -14,9 +14,7 @@ import SecureKeystore from 'react-native-secure-keystore';
 import {KeyPair} from 'react-native-rsa-native';
 import {ActivityLogEvents} from './activityLog';
 import {log} from 'xstate/lib/actions';
-import {
-  VerifiableCredentialWithFormat,
-} from '../types/vc';
+import {VerifiableCredentialWithFormat} from '../types/vc';
 import {verifyCredential} from '../shared/vcjs/verifyCredential';
 import {getBody, getIdentifier} from '../shared/openId4VCI/Utils';
 
@@ -66,6 +64,7 @@ export const IssuersMachine = model.createMachine(
     },
     states: {
       displayIssuers: {
+        description: 'displays the issuers downloaded from the server',
         invoke: {
           src: 'downloadIssuersList',
           onDone: {
@@ -79,6 +78,7 @@ export const IssuersMachine = model.createMachine(
         },
       },
       error: {
+        description: 'reaches here when any error happens',
         on: {
           TRY_AGAIN: {
             actions: 'resetError',
@@ -91,6 +91,7 @@ export const IssuersMachine = model.createMachine(
         },
       },
       selectingIssuer: {
+        description: 'waits for the user to select any issuer',
         on: {
           DOWNLOAD_ID: {
             actions: sendParent('DOWNLOAD_ID'),
@@ -101,6 +102,7 @@ export const IssuersMachine = model.createMachine(
         },
       },
       downloadIssuerConfig: {
+        description: 'downloads the configuration of the selected issuer',
         invoke: {
           src: 'downloadIssuerConfig',
           onDone: {
@@ -110,6 +112,8 @@ export const IssuersMachine = model.createMachine(
         },
       },
       performAuthorization: {
+        description:
+          'invokes the issuers authorization endpoint and gets the access token',
         invoke: {
           src: 'invokeAuthorization',
           onDone: {
@@ -123,6 +127,7 @@ export const IssuersMachine = model.createMachine(
         },
       },
       checkKeyPair: {
+        description: 'checks whether key pair is generated',
         entry: [
           context =>
             log(
@@ -144,6 +149,8 @@ export const IssuersMachine = model.createMachine(
         },
       },
       generateKeyPair: {
+        description:
+          'if keypair is not generated, new one is created and stored',
         invoke: {
           src: 'generateKeyPair',
           onDone: [
@@ -160,6 +167,7 @@ export const IssuersMachine = model.createMachine(
         },
       },
       downloadCredentials: {
+        description: 'credential is downloaded from the selected issuer',
         invoke: {
           src: 'downloadCredential',
           onDone: {
@@ -174,6 +182,8 @@ export const IssuersMachine = model.createMachine(
         },
       },
       verifyingCredential: {
+        description:
+          'once the credential is downloaded, it is verified before saving',
         invoke: {
           src: 'verifyCredential',
           onDone: [
@@ -191,6 +201,7 @@ export const IssuersMachine = model.createMachine(
         },
       },
       storing: {
+        description: 'all the verified credential is stored.',
         entry: [
           'storeVerifiableCredentialMeta',
           'storeVerifiableCredentialData',
@@ -352,7 +363,7 @@ export const IssuersMachine = model.createMachine(
       downloadIssuersList: async () => {
         const defaultIssuer = {
           id: 'UIN, VID, AID',
-          displayName: 'Enter the mentioned ID and download your card',
+          displayName: 'UIN, VID, AID',
           logoUrl: Theme.DigitIcon,
         };
 
@@ -381,6 +392,7 @@ export const IssuersMachine = model.createMachine(
         );
         const credential = await response.json();
         credential.identifier = getIdentifier(context, credential);
+        credential.credential.credentialSubject.vid = '2187984397';
         console.log(
           'Response from downloadCredential',
           JSON.stringify(credential, null, 4),
