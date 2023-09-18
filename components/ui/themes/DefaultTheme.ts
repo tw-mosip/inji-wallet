@@ -293,8 +293,9 @@ export const DefaultTheme = {
       justifyContent: 'space-between',
     },
     logo: {
-      height: 35,
-      width: 90,
+      resizeMode: 'contain',
+      aspectRatio: 1,
+      height: 60,
     },
     homeCloseCardDetailsHeader: {
       flex: 1,

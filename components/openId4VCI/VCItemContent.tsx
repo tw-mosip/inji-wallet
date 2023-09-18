@@ -177,11 +177,7 @@ export const VCItemContent: React.FC<VcItemContentProps> = props => {
           </Column>
           <Column
             style={{display: props.credential?.credential ? 'flex' : 'none'}}>
-            <Image
-              src={props.credential?.logo}
-              style={Theme.Styles.logo}
-              resizeMethod="auto"
-            />
+            <Image src={props.credential?.logo} style={Theme.Styles.logo} />
           </Column>
         </Row>
       </Column>
