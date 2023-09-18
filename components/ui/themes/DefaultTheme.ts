@@ -39,7 +39,7 @@ export const DefaultTheme = {
   Colors: {
     TabItemText: Colors.Orange,
     Details: Colors.Black,
-    DetailsLabel: Colors.Orange,
+    DetailsLabel: Colors.Gray40,
     LoadingDetailsLabel: Colors.Orange,
     AddIdBtnBg: Colors.Orange,
     AddIdBtnTxt: Colors.Orange,

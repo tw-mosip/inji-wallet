@@ -70,6 +70,24 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
               <Column>
                 <Column>
                   <Text
+                    testID="gender"
+                    weight="bold"
+                    size="smaller"
+                    color={Theme.Colors.DetailsLabel}>
+                    {t('gender')}
+                  </Text>
+                  <Text
+                    testID="genderValue"
+                    weight="semibold"
+                    size="smaller"
+                    color={Theme.Colors.Details}>
+                    {getLocalizedField(
+                      props.vc?.verifiableCredential.credentialSubject.gender,
+                    )}
+                  </Text>
+                </Column>
+                <Column margin="20 0 0 0">
+                  <Text
                     testID="idType"
                     weight="bold"
                     size="smaller"
@@ -123,6 +141,24 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 ) : null}
                 <Column margin="20 0 0 0">
                   <Text
+                    testID="generatedOnTitle"
+                    weight="bold"
+                    size="smaller"
+                    color={Theme.Colors.DetailsLabel}>
+                    {t('generatedOn')}
+                  </Text>
+                  <Text
+                    testID="generatedOnValue"
+                    weight="semibold"
+                    size="smaller"
+                    color={Theme.Colors.Details}>
+                    {new Date(props.vc?.generatedOn).toLocaleDateString()}
+                  </Text>
+                </Column>
+              </Column>
+              <Column margin="0 0 0 40">
+                <Column>
+                  <Text
                     testID="dateOfBirth"
                     weight="bold"
                     size="smaller"
@@ -140,42 +176,6 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                           .dateOfBirth,
                       ),
                     ).toLocaleDateString()}
-                  </Text>
-                </Column>
-              </Column>
-              <Column margin="0 0 0 40">
-                <Column>
-                  <Text
-                    testID="gender"
-                    weight="bold"
-                    size="smaller"
-                    color={Theme.Colors.DetailsLabel}>
-                    {t('gender')}
-                  </Text>
-                  <Text
-                    testID="genderValue"
-                    weight="semibold"
-                    size="smaller"
-                    color={Theme.Colors.Details}>
-                    {getLocalizedField(
-                      props.vc?.verifiableCredential.credentialSubject.gender,
-                    )}
-                  </Text>
-                </Column>
-                <Column margin="20 0 0 0">
-                  <Text
-                    testID="generatedOnTitle"
-                    weight="bold"
-                    size="smaller"
-                    color={Theme.Colors.DetailsLabel}>
-                    {t('generatedOn')}
-                  </Text>
-                  <Text
-                    testID="generatedOnValue"
-                    weight="semibold"
-                    size="smaller"
-                    color={Theme.Colors.Details}>
-                    {new Date(props.vc?.generatedOn).toLocaleDateString()}
                   </Text>
                 </Column>
                 <Column margin="20 0 0 0">
@@ -197,7 +197,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                     {props.vc?.isVerified && <VerifiedIcon />}
                   </Row>
                 </Column>
-                <Column margin="20 0 0 0">
+                <Column margin="78 0 0 0">
                   <Text
                     testID="phoneNumber"
                     weight="bold"
