@@ -101,7 +101,7 @@ export const VCDetails: React.FC<VcDetailsProps> = props => {
                       weight="semibold"
                       size="smaller"
                       color={Theme.Colors.Details}>
-                      {props.vc?.verifiableCredential.credential.id}
+                      {'Not Available'}
                     </Text>
                   </Column>
                 ) : null}
