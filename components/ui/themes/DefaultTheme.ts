@@ -99,6 +99,7 @@ export const DefaultTheme = {
     walletbindingContent: Colors.Gray40,
     resendCodeTimer: Colors.resendCodeTimer,
     statusLabel: Colors.Black,
+    statusMessage: Colors.Gray40,
   },
   Styles: StyleSheet.create({
     title: {
@@ -121,7 +122,7 @@ export const DefaultTheme = {
       color: Colors.Black,
     },
     verifiedIconContainer: {
-      marginTop: 2,
+      marginTop: 3,
       marginRight: 3,
     },
     verifiedIconInner: {
@@ -370,9 +371,10 @@ export const DefaultTheme = {
       borderRadius: 5,
     },
     openCardImage: {
-      width: 105,
-      height: 135,
+      width: 100,
+      height: 106,
       borderRadius: 5,
+      marginTop: 10,
     },
     versionContainer: {
       backgroundColor: Colors.Grey6,
@@ -440,8 +442,10 @@ export const DefaultTheme = {
     },
     hrLine: {
       borderBottomColor: Colors.Gray44,
-      borderBottomWidth: 0.5,
+      borderBottomWidth: 0.3,
       marginTop: 10,
+      marginLeft: 10,
+      marginRight: 10,
     },
   }),
   QrCodeStyles: StyleSheet.create({
@@ -472,6 +476,17 @@ export const DefaultTheme = {
     warningText: {
       color: Colors.Red,
       fontSize: 18,
+    },
+    QrView: {
+      padding: 6,
+      backgroundColor: 'white',
+      marginTop: 20,
+      borderRadius: 10,
+      elevation: 10,
+      shadowColor: '#000',
+      shadowOffset: {width: -1, height: 1},
+      shadowOpacity: 0.4,
+      shadowRadius: 3,
     },
   }),
   PinInputStyle: StyleSheet.create({

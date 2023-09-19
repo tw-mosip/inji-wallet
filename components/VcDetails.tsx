@@ -70,7 +70,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
             </Column>
             <Row>
               <Column>
-                <Column>
+                <Column margin="20 0 0 0">
                   <Text
                     testID="gender"
                     weight="regular"
@@ -88,7 +88,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                     )}
                   </Text>
                 </Column>
-                <Column margin="20 0 0 0">
+                <Column margin="25 0 0 0">
                   <Text
                     testID="idType"
                     weight="regular"
@@ -105,7 +105,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                   </Text>
                 </Column>
                 {uin ? (
-                  <Column margin="20 0 0 0">
+                  <Column margin="25 0 0 0">
                     <Text
                       testID="uin"
                       weight="regular"
@@ -124,7 +124,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 ) : null}
 
                 {vid ? (
-                  <Column margin="20 0 0 0">
+                  <Column margin="25 0 0 0">
                     <Text
                       testID="vid"
                       weight="regular"
@@ -141,7 +141,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                     </Text>
                   </Column>
                 ) : null}
-                <Column margin="20 0 0 0">
+                <Column margin="30 0 0 0">
                   <Text
                     testID="generatedOnTitle"
                     weight="regular"
@@ -159,7 +159,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 </Column>
               </Column>
               <Column margin="0 0 0 40">
-                <Column>
+                <Column margin="20 0 0 0">
                   <Text
                     testID="dateOfBirth"
                     weight="regular"
@@ -180,7 +180,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                     ).toLocaleDateString()}
                   </Text>
                 </Column>
-                <Column margin="20 0 0 0">
+                <Column margin="25 0 0 0">
                   <Text
                     testID="status"
                     weight="regular"
@@ -199,7 +199,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                     </Text>
                   </Row>
                 </Column>
-                <Column margin="78 0 0 0">
+                <Column margin="92 0 0 0">
                   <Text
                     testID="phoneNumber"
                     weight="regular"
@@ -318,25 +318,25 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
       {props.activeTab !== 1 ? (
         props.isBindingPending ? (
           <Column style={Theme.Styles.openCardBgContainer} padding="10">
-            <Column margin={'0 0 5 0'} crossAlign={'flex-start'}>
+            <Column margin={'0 0 4 0'} crossAlign={'flex-start'}>
               <Image source={Theme.activationPending}></Image>
               <Text
                 testID="offlineAuthDisabledHeader"
                 style={{flex: 1}}
                 weight="semibold"
                 size="small"
-                margin={'5 0 5 0'}
+                margin={'5 0 0 0'}
                 color={Theme.Colors.statusLabel}>
                 {t('offlineAuthDisabledHeader')}
               </Text>
             </Column>
             <Text
               testID="offlineAuthDisabledMessage"
-              style={{flex: 1}}
+              style={{flex: 1, lineHeight: 17}}
               weight="regular"
-              size="smaller"
-              margin={'0 0 5 0'}
-              color={Theme.Colors.statusLabel}>
+              size="small"
+              margin={'3 0 0 0'}
+              color={Theme.Colors.statusMessage}>
               {t('offlineAuthDisabledMessage')}
             </Text>
 
@@ -344,7 +344,8 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
               testID="enableVerification"
               title={t('enableVerification')}
               onPress={props.onBinding}
-              type="radius"
+              type="gradient"
+              styles={{width: '100%'}}
             />
           </Column>
         ) : (

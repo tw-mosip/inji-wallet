@@ -101,6 +101,7 @@ export const PurpleTheme = {
     walletbindingContent: Colors.Gray40,
     resendCodeTimer: Colors.resendCodeTimer,
     statusLabel: Colors.Black,
+    statusMessage: Colors.Gray40,
   },
   Styles: StyleSheet.create({
     title: {
@@ -475,6 +476,17 @@ export const PurpleTheme = {
     warningText: {
       color: Colors.Red,
       fontSize: 18,
+    },
+    QrView: {
+      padding: 6,
+      backgroundColor: 'white',
+      marginTop: 20,
+      borderRadius: 10,
+      elevation: 10,
+      shadowColor: '#000',
+      shadowOffset: {width: -1, height: 1},
+      shadowOpacity: 0.4,
+      shadowRadius: 3,
     },
   }),
   PinInputStyle: StyleSheet.create({
