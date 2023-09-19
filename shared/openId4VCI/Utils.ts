@@ -9,7 +9,8 @@ export const isVCFromOpenId4VCI = (vcKey: string) => {
 };
 
 export const isOpenId4VCIEnabled = () => {
-  return ENABLE_OPENID_FOR_VC === 'true';
+  //return ENABLE_OPENID_FOR_VC === 'true';
+  return true;
 };
 
 export const getIdentifier = (context, credential) => {

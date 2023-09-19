@@ -766,6 +766,10 @@ export function selectVerifiableCredentials(state: State) {
   return state.context.verifiableCredential;
 }
 
+export function selectKebabPopUp(state: State) {
+  return state.matches('kebabPopUp');
+}
+
 export function selectContext(state: State) {
   return state.context;
 }

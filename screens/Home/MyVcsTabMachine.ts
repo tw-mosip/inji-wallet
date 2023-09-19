@@ -38,7 +38,6 @@ const model = createModel(
       STORE_ERROR: (error: Error) => ({error}),
       ADD_VC: () => ({}),
       GET_VC: () => ({}),
-      GOTO_ISSUERS: () => ({}),
       STORAGE_AVAILABLE: () => ({}),
       STORAGE_UNAVAILABLE: () => ({}),
       IS_TAMPERED: () => ({}),
@@ -94,7 +93,6 @@ export const MyVcsTabMachine = model.createMachine(
           ADD_VC: 'addVc',
           VIEW_VC: 'viewingVc',
           GET_VC: 'gettingVc',
-          GOTO_ISSUERS: 'gotoIssuers',
           IS_TAMPERED: {
             target: 'idle',
             actions: ['resetIsTampered', 'refreshMyVc'],
@@ -225,10 +223,6 @@ export function selectAddVcModal(state: State) {
 
 export function selectGetVcModal(state: State) {
   return state.children.GetVcModal as ActorRefFrom<typeof GetVcModalMachine>;
-}
-
-export function selectIssuersMachine(state: State) {
-  return state.children.issuersMachine as ActorRefFrom<typeof IssuersMachine>;
 }
 
 export function selectIsStoring(state: State) {

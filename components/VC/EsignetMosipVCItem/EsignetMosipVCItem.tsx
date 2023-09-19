@@ -7,14 +7,12 @@ import {
   createEsignetMosipVCItemMachine,
   EsignetMosipVCItemEvents,
   EsignetMosipVCItemMachine,
+  selectContext,
   selectGeneratedOn,
+  selectKebabPopUp,
+  selectVerifiableCredentials,
 } from './EsignetMosipVCItemMachine';
 import {logState} from '../../../machines/app';
-import {
-  selectContext,
-  selectVerifiableCredentials,
-} from '../../openId4VCI/VCItemMachine';
-import {selectKebabPopUp} from '../ExistingMosipVC/ExistingMosipVCItemMachine';
 import {Theme} from '../../ui/styleUtils';
 import {Row} from '../../ui';
 import {KebabPopUp} from '../../KebabPopUp';

@@ -53,46 +53,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
       : null;
   }
 
-  useEffect(() => {
-    console.log('useEffect outside -> ', controller.IssuersService);
-    if (controller.IssuersService != undefined) {
-      console.log('useEffect inside -> ', controller.IssuersService);
-      navigateToIssuers();
-    }
-  }, [controller.IssuersService]);
-
-  const navigateToIssuers = () => {
-    props.navigation.navigate('IssuersListScreen', {
-      service: controller.IssuersService,
-    });
-  };
-
-  const DownloadFABIcon: React.FC = props => {
-    const plusIcon = (
-      <Icon
-        name={'plus'}
-        type={'entypo'}
-        size={36}
-        color={Theme.Colors.whiteText}
-      />
-    );
-    return (
-      <LinearGradient
-        colors={Theme.Colors.gradientBtn}
-        style={Theme.Styles.downloadFabIcon}>
-        <Button
-          icon={plusIcon}
-          onPress={() => {
-            controller.GOTO_ISSUERS();
-          }}
-          type={'clearAddIdBtnBg'}
-          fill
-        />
-      </LinearGradient>
-    );
-  };
-
-  const DownloadingIdPopUp: React.FC = () => {
+  const DownloadingVcPopUp: React.FC = () => {
     return (
       <View
         testID="downloadingVcPopup"
@@ -155,7 +116,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
                   onPress={controller.DOWNLOAD_ID}
                 />
               )}
-              <DownloadFABIcon {...props} />
             </React.Fragment>
           )}
           {controller.vcsMetadata.length === 0 && (
@@ -188,7 +148,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
                     />
                   )}
                 </View>
-                <DownloadFABIcon {...props} />
               </Column>
             </React.Fragment>
           )}
