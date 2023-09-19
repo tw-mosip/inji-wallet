@@ -56,65 +56,18 @@
     "reasonForSharing": "Reason for sharing",
     "idType": "ID type",
     "id": "Id",
-    "qrCodeHeader": "QR Code",
     "nationalCard": "National Card",
     "uin": "UIN",
     "vid": "VID",
     "enableVerification": "Activate",
-    "profileAuthenticated": "Activated for online login!",
-    "offlineAuthDisabledHeader": "Activation pending for online login!",
-    "offlineAuthDisabledMessage": "Please click the button below to activate this credential to be used for online login.",
-    "verificationEnabledSuccess": "Activated for online login",
-    "goback": "GO BACK",
-    "BindingWarning": "If you have enabled verification for this credential on another wallet, it will get overridden. Do you want to proceed?",
-    "yes_confirm": "Yes, I Confirm",
-    "no": "No",
-    "Alert": "Alert",
-    "ok": "Okay",
-    "credentialRegistry": "Credential Registry",
-    "errors": {
-      "savingFailed": {
-        "title": "Failed to save the Card",
-        "message": "Something went wrong while saving Card to the store."
-      },
-      "diskFullError": {
-        "title": "Failed to save the Card",
-        "message": "No more Cards can be received or saved as App Data is full."
-      }
-    }
-  },
-  "HomeScreenKebabPopUp": {
-    "title": "More Options",
-    "unPinCard": "Unpin Card",
-    "pinCard": "Pin Card",
-    "offlineAuthenticationDisabled!": "Activation pending for online login!",
-    "offlineAuthDisabledMessage": "Click here to enable this credentials to be used for online authentication.",
-    "viewActivityLog": "View Activity Log",
-    "removeFromWallet": "Remove from Wallet",
-    "revokeId": "Revoke ID",
-    "revokeMessage": "Revoke the virtual ID for this profile"
-  },
-  "WalletBinding": {
-    "inProgress": "In progress",
-    "profileAuthenticated": "Activated for online login!"
-  },
-  "BindingVcWarningOverlay": {
-    "alert": "Alert",
-    "BindingWarning": "You have already activated online login for this credential on another device. You will no longer be able to use that device for login if you activate it again on this device. Do you want to proceed?",
-    "yesConfirm": "Yes, I Confirm",
-    "no": "No"
-  },
-  "RemoveVcWarningOverlay": {
-    "alert": "Please Confirm",
-    "removeWarning": "Do you want to remove this card?",
-    "confirm": "Yes, I confirm",
-    "no": "No"
+    "profileAuthenticated": "Credentials are enabled for online authentication.",
+    "offlineAuthDisabledHeader": "Activation pending for online login",
+    "offlineAuthDisabledMessage": "Please click the button below to activate this credential to be used for online login."
   },
   "AuthScreen": {
-    "header": "Select App Unlock Method",
-    "Description": "Would you like to use biometrics to unlock the application?",
-    "useBiometrics": "Use Biometrics",
-    "usePasscode": "Use Passcode",
+    "header": "Would you like to use biometrics to unlock the application?",
+    "useBiometrics": "Use biometrics",
+    "usePasscode": "I'd rather use a passcode",
     "errors": {
       "unavailable": "Device does not support Biometrics",
       "unenrolled": "To use Biometrics, please enroll your biometrics in your device settings",

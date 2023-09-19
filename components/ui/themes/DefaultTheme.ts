@@ -121,7 +121,8 @@ export const DefaultTheme = {
       color: Colors.Black,
     },
     verifiedIconContainer: {
-      marginLeft: 5,
+      marginTop: 2,
+      marginRight: 3,
     },
     verifiedIconInner: {
       backgroundColor: 'white',
@@ -261,7 +262,6 @@ export const DefaultTheme = {
       shadowOpacity: 0.4,
       shadowRadius: 3,
       elevation: 4,
-      padding: 10,
     },
     backgroundImageContainer: {
       flex: 1,
@@ -439,8 +439,8 @@ export const DefaultTheme = {
       fontFamily: 'Inter_600SemiBold',
     },
     hrLine: {
-      borderBottomColor: 'black',
-      borderBottomWidth: 1,
+      borderBottomColor: Colors.Gray44,
+      borderBottomWidth: 0.5,
       marginTop: 10,
     },
   }),
@@ -452,7 +452,6 @@ export const DefaultTheme = {
       alignItems: 'center',
       padding: 5,
       borderTopLeftRadius: 11,
-      elevation: 4,
     },
     expandedQrCode: {
       backgroundColor: Colors.White,
@@ -975,7 +974,7 @@ export const DefaultTheme = {
       backgroundColor: Colors.Transparent,
     },
   }),
-  OpenCard: '',
+  OpenCard: require('../../../assets/card_bg.png'),
   CloseCard: '',
   ProfileIcon: require('../../../assets/placeholder-photo.png'),
   MosipSplashLogo: require('../../../assets/icon.png'),
@@ -1000,6 +999,7 @@ export const DefaultTheme = {
   IntroScanner: require('../../../assets/intro-scanner.png'),
   injiSmallLogo: require('../../../assets/inji_small_logo.png'),
   protectPrivacy: require('../../../assets/phone_mockup_1.png'),
+  activationPending: require('../../../assets/pending_activation.png'),
 
   elevation(level: ElevationLevel): ViewStyle {
     // https://ethercreative.github.io/react-native-shadow-generator/

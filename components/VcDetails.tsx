@@ -28,10 +28,12 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
   return (
     <Column margin="10">
       <ImageBackground
-        borderRadius={10}
+        imageStyle={{width: '100%'}}
+        resizeMethod="scale"
+        resizeMode="stretch"
         style={Theme.Styles.openCardBgContainer}
         source={Theme.OpenCard}>
-        <Row align="space-between">
+        <Row align="space-between" padding="10" margin="0 10 0 10">
           <Column align="space-evenly" crossAlign="center">
             <Image
               source={
@@ -47,11 +49,11 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
               <Image source={Theme.MosipLogo} style={Theme.Styles.logo} />
             </Column>
           </Column>
-          <Column align="space-evenly">
+          <Column align="space-evenly" padding="10">
             <Column>
               <Text
                 testID="fullNameTitle"
-                weight="bold"
+                weight="regular"
                 size="smaller"
                 color={Theme.Colors.DetailsLabel}>
                 {t('fullName')}
@@ -71,7 +73,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 <Column>
                   <Text
                     testID="gender"
-                    weight="bold"
+                    weight="regular"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('gender')}
@@ -89,7 +91,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 <Column margin="20 0 0 0">
                   <Text
                     testID="idType"
-                    weight="bold"
+                    weight="regular"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('idType')}
@@ -106,7 +108,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                   <Column margin="20 0 0 0">
                     <Text
                       testID="uin"
-                      weight="bold"
+                      weight="regular"
                       size="smaller"
                       color={Theme.Colors.DetailsLabel}>
                       {t('uin')}
@@ -125,7 +127,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                   <Column margin="20 0 0 0">
                     <Text
                       testID="vid"
-                      weight="bold"
+                      weight="regular"
                       size="smaller"
                       color={Theme.Colors.DetailsLabel}>
                       {t('vid')}
@@ -142,7 +144,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 <Column margin="20 0 0 0">
                   <Text
                     testID="generatedOnTitle"
-                    weight="bold"
+                    weight="regular"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('generatedOn')}
@@ -160,7 +162,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 <Column>
                   <Text
                     testID="dateOfBirth"
-                    weight="bold"
+                    weight="regular"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('dateOfBirth')}
@@ -181,12 +183,13 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 <Column margin="20 0 0 0">
                   <Text
                     testID="status"
-                    weight="bold"
+                    weight="regular"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('status')}
                   </Text>
                   <Row>
+                    {props.vc?.isVerified && <VerifiedIcon />}
                     <Text
                       testID="valid"
                       weight="semibold"
@@ -194,13 +197,12 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                       color={Theme.Colors.Details}>
                       {t('valid')}
                     </Text>
-                    {props.vc?.isVerified && <VerifiedIcon />}
                   </Row>
                 </Column>
                 <Column margin="78 0 0 0">
                   <Text
                     testID="phoneNumber"
-                    weight="bold"
+                    weight="regular"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('phoneNumber')}
@@ -220,11 +222,11 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
           </Column>
         </Row>
         <View style={Theme.Styles.hrLine}></View>
-        <Column>
+        <Column padding="10">
           <Column fill style={Theme.Styles.labelPart}>
             <Text
               testID="emailId"
-              weight="bold"
+              weight="regular"
               size="smaller"
               color={Theme.Colors.DetailsLabel}>
               {t('email')}
@@ -251,7 +253,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
           <Column style={Theme.Styles.labelPart}>
             <Text
               testID="address"
-              weight="bold"
+              weight="regular"
               size="smaller"
               color={Theme.Colors.DetailsLabel}>
               {t('address')}
@@ -273,7 +275,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
             <Column fill style={Theme.Styles.labelPart}>
               <Text
                 testID="credentialRegistry"
-                weight="bold"
+                weight="regular"
                 size="smaller"
                 color={Theme.Colors.DetailsLabel}>
                 {t('credentialRegistry')}
@@ -315,29 +317,24 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
 
       {props.activeTab !== 1 ? (
         props.isBindingPending ? (
-          <Column style={Theme.Styles.openCardBgContainer}>
-            <Row margin={'0 0 5 0'} crossAlign={'center'}>
-              <Icon
-                name="shield-alert"
-                color={Theme.Colors.Icon}
-                size={30}
-                type="material-community"
-              />
+          <Column style={Theme.Styles.openCardBgContainer} padding="10">
+            <Column margin={'0 0 5 0'} crossAlign={'flex-start'}>
+              <Image source={Theme.activationPending}></Image>
               <Text
                 testID="offlineAuthDisabledHeader"
                 style={{flex: 1}}
                 weight="semibold"
                 size="small"
-                margin={'0 0 5 0'}
+                margin={'5 0 5 0'}
                 color={Theme.Colors.statusLabel}>
                 {t('offlineAuthDisabledHeader')}
               </Text>
-            </Row>
+            </Column>
             <Text
               testID="offlineAuthDisabledMessage"
               style={{flex: 1}}
               weight="regular"
-              size="small"
+              size="smaller"
               margin={'0 0 5 0'}
               color={Theme.Colors.statusLabel}>
               {t('offlineAuthDisabledMessage')}
@@ -351,7 +348,7 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
             />
           </Column>
         ) : (
-          <Column style={Theme.Styles.openCardBgContainer}>
+          <Column style={Theme.Styles.openCardBgContainer} padding="10">
             <Row crossAlign="center">
               <Icon
                 name="verified-user"
