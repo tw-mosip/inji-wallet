@@ -2,11 +2,9 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {Dimensions} from 'react-native';
 import {Icon} from 'react-native-elements';
-import {ActorRefFrom} from 'xstate';
-import {vcItemMachine} from '../machines/vcItem';
-import {VerifiableCredential} from '../types/vc';
-import {Row, Text} from './ui';
-import {Theme} from './ui/styleUtils';
+import {Theme} from '../../ui/styleUtils';
+import {Row, Text} from '../../ui';
+import {VerifiableCredential} from '../../../types/vc';
 
 const WalletUnverifiedIcon: React.FC = () => {
   return (
@@ -97,8 +95,8 @@ const WalletVerifiedActivationDetails: React.FC<
   );
 };
 
-export const VcItemActivationStatus: React.FC<
-  VcItemActivationStatusProps
+export const EsignetMosipVCActivationStatus: React.FC<
+  EsignetMosipVCActivationStatusProps
 > = props => {
   return (
     <Row>
@@ -116,7 +114,7 @@ export const VcItemActivationStatus: React.FC<
   );
 };
 
-interface VcItemActivationStatusProps {
+export interface EsignetMosipVCActivationStatusProps {
   showOnlyBindedVc: boolean;
   verifiableCredential: VerifiableCredential;
   emptyWalletBindingId: boolean;

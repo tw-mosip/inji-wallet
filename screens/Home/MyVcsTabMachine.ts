@@ -6,18 +6,18 @@ import {
   sendParent,
   StateFrom,
 } from 'xstate';
-import { createModel } from 'xstate/lib/model';
-import { StoreEvents, StoreResponseEvent } from '../../machines/store';
-import { VcEvents } from '../../machines/vc';
-import { vcItemMachine } from '../../machines/vcItem';
-import { AppServices } from '../../shared/GlobalContext';
-import { MY_VCS_STORE_KEY } from '../../shared/constants';
-import { AddVcModalMachine } from './MyVcs/AddVcModalMachine';
-import { GetVcModalMachine } from './MyVcs/GetVcModalMachine';
+import {createModel} from 'xstate/lib/model';
+import {StoreEvents, StoreResponseEvent} from '../../machines/store';
+import {VcEvents} from '../../machines/vc';
+import {vcItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {AppServices} from '../../shared/GlobalContext';
+import {MY_VCS_STORE_KEY} from '../../shared/constants';
+import {AddVcModalMachine} from './MyVcs/AddVcModalMachine';
+import {GetVcModalMachine} from './MyVcs/GetVcModalMachine';
 import Storage from '../../shared/storage';
-import { IssuersMachine } from '../../machines/issuersMachine';
-import { VCMetadata } from '../../shared/VCMetadata';
-import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
+import {IssuersMachine} from '../../machines/issuersMachine';
+import {VCMetadata} from '../../shared/VCMetadata';
+import {EsignetMosipVCItemMachine} from '../../components/VC/EsignetMosipVCItem/EsignetMosipVCItemMachine';
 
 const model = createModel(
   {
@@ -29,13 +29,13 @@ const model = createModel(
       VIEW_VC: (
         vcItemActor:
           | ActorRefFrom<typeof vcItemMachine>
-          | ActorRefFrom<typeof VCItemMachine>
+          | ActorRefFrom<typeof EsignetMosipVCItemMachine>,
       ) => ({
         vcItemActor,
       }),
       DISMISS: () => ({}),
-      STORE_RESPONSE: (response?: unknown) => ({ response }),
-      STORE_ERROR: (error: Error) => ({ error }),
+      STORE_RESPONSE: (response?: unknown) => ({response}),
+      STORE_ERROR: (error: Error) => ({error}),
       ADD_VC: () => ({}),
       GET_VC: () => ({}),
       GOTO_ISSUERS: () => ({}),
@@ -173,23 +173,23 @@ export const MyVcsTabMachine = model.createMachine(
     },
 
     actions: {
-      refreshMyVc: send((_context) => VcEvents.REFRESH_MY_VCS(), {
-        to: (context) => context.serviceRefs.vc,
+      refreshMyVc: send(_context => VcEvents.REFRESH_MY_VCS(), {
+        to: context => context.serviceRefs.vc,
       }),
 
       resetIsTampered: send(() => StoreEvents.RESET_IS_TAMPERED(), {
-        to: (context) => context.serviceRefs.store,
+        to: context => context.serviceRefs.store,
       }),
 
       viewVcFromParent: sendParent((_context, event: ViewVcEvent) =>
-        model.events.VIEW_VC(event.vcItemActor)
+        model.events.VIEW_VC(event.vcItemActor),
       ),
 
       storeVcItem: send(
         (_context, event) => {
           return StoreEvents.PREPEND(
             MY_VCS_STORE_KEY,
-            JSON.stringify((event as DoneInvokeEvent<VCMetadata>).data)
+            JSON.stringify((event as DoneInvokeEvent<VCMetadata>).data),
           );
         },
         {to: context => context.serviceRefs.store},

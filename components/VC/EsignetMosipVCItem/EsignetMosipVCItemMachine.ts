@@ -1,39 +1,32 @@
 import {assign, ErrorPlatformEvent, EventFrom, send, StateFrom} from 'xstate';
 import {createModel} from 'xstate/lib/model';
-import {AppServices} from '../../shared/GlobalContext';
-import {
-  VC,
-  VerifiableCredential,
-  VerifiableCredentialWithFormat,
-} from '../../types/vc';
+import {AppServices} from '../../../shared/GlobalContext';
+import {VCMetadata} from '../../../shared/VCMetadata';
+import {VC, VerifiableCredentialWithFormat} from '../../../types/vc';
 import {
   generateKeys,
   isCustomSecureKeystore,
   WalletBindingResponse,
-} from '../../shared/cryptoutil/cryptoUtil';
+} from '../../../shared/cryptoutil/cryptoUtil';
 import {log} from 'xstate/lib/actions';
-import {StoreEvents} from '../../machines/store';
-import {
-  HOST,
-  MY_VCS_STORE_KEY,
-  VC_ITEM_STORE_KEY,
-} from '../../shared/constants';
-import {OpenId4VCIProtocol} from '../../shared/openId4VCI/Utils';
-import {VcEvents} from '../../machines/vc';
-import {request} from '../../shared/request';
-import i18n from '../../i18n';
+import {OpenId4VCIProtocol} from '../../../shared/openId4VCI/Utils';
+import {StoreEvents} from '../../../machines/store';
+import {MIMOTO_BASE_URL, MY_VCS_STORE_KEY} from '../../../shared/constants';
+import {VcEvents} from '../../../machines/vc';
+import i18n from '../../../i18n';
 import {KeyPair} from 'react-native-rsa-native';
 import {
   getBindingCertificateConstant,
   savePrivateKey,
-} from '../../shared/keystore/SecureKeystore';
-import {ActivityLogEvents} from '../../machines/activityLog';
+} from '../../../shared/keystore/SecureKeystore';
+import {ActivityLogEvents} from '../../../machines/activityLog';
+import {request} from '../../../shared/request';
 import SecureKeystore from 'react-native-secure-keystore';
 
 const model = createModel(
   {
     serviceRefs: {} as AppServices,
-    vcKey: '' as string,
+    vcMetadata: {} as VCMetadata,
     //TODO: set it in issuersMachine
     generatedOn: null as Date,
     verifiableCredential: null as VerifiableCredentialWithFormat,
@@ -74,14 +67,14 @@ const model = createModel(
       PIN_CARD: () => ({}),
       KEBAB_POPUP: () => ({}),
       SHOW_ACTIVITY: () => ({}),
-      REMOVE: (vcKey: string) => ({vcKey}),
+      REMOVE: (vcMetadata: VCMetadata) => ({vcMetadata}),
     },
   },
 );
 
-export const VCItemEvents = model.events;
+export const EsignetMosipVCItemEvents = model.events;
 
-export const VCItemMachine = model.createMachine(
+export const EsignetMosipVCItemMachine = model.createMachine(
   {
     predictableActionArguments: true,
     preserveActionOrder: true,
@@ -454,7 +447,7 @@ export const VCItemMachine = model.createMachine(
       requestVcContext: send(
         context => ({
           type: 'GET_VC_ITEM',
-          vcKey: context.vcKey,
+          vcMetadata: context.vcMetadata,
           protocol: OpenId4VCIProtocol,
         }),
         {
@@ -463,7 +456,7 @@ export const VCItemMachine = model.createMachine(
       ),
       requestStoredContext: send(
         context => {
-          return StoreEvents.GET(context.vcKey);
+          return StoreEvents.GET(VCMetadata.fromVC(context, true).getVcKey());
         },
         {
           to: context => context.serviceRefs.store,
@@ -500,8 +493,11 @@ export const VCItemMachine = model.createMachine(
       storeContext: send(
         context => {
           const {serviceRefs, ...data} = context;
-          data.credentialRegistry = HOST;
-          return StoreEvents.SET(context.vcKey, data);
+          data.credentialRegistry = MIMOTO_BASE_URL;
+          return StoreEvents.SET(
+            VCMetadata.fromVC(context, true).getVcKey(),
+            data,
+          );
         },
         {
           to: context => context.serviceRefs.store,
@@ -525,7 +521,9 @@ export const VCItemMachine = model.createMachine(
 
       sendVcUpdated: send(
         (_context, event) =>
-          VcEvents.VC_UPDATED(VC_ITEM_STORE_KEY(event.response) as string),
+          VcEvents.VC_UPDATED(
+            VCMetadata.fromVC(context, true).getVcKey() as string,
+          ),
         {
           to: context => context.serviceRefs.vc,
         },
@@ -587,26 +585,25 @@ export const VCItemMachine = model.createMachine(
         context => {
           const {serviceRefs, ...data} = context;
           return ActivityLogEvents.LOG_ACTIVITY({
-            _vcKey: VC_ITEM_STORE_KEY(data),
+            _vcKey: VCMetadata.fromVC(data, true).getVcKey(),
             type: 'VC_DOWNLOADED',
             timestamp: Date.now(),
             deviceName: '',
-            vcLabel: data.id,
+            vcLabel: data.tag || data.id,
           });
         },
         {
           to: context => context.serviceRefs.activityLog,
         },
       ),
-
       logWalletBindingSuccess: send(
         context =>
           ActivityLogEvents.LOG_ACTIVITY({
-            _vcKey: context.vcKey,
+            _vcKey: VCMetadata.fromVC(context, true).getVcKey(),
             type: 'WALLET_BINDING_SUCCESSFULL',
             timestamp: Date.now(),
             deviceName: '',
-            vcLabel: context.id,
+            vcLabel: context.tag || context.id,
           }),
         {
           to: context => context.serviceRefs.activityLog,
@@ -616,11 +613,11 @@ export const VCItemMachine = model.createMachine(
       logWalletBindingFailure: send(
         context =>
           ActivityLogEvents.LOG_ACTIVITY({
-            _vcKey: context.vcKey,
+            _vcKey: VCMetadata.fromVC(context, true).getVcKey(),
             type: 'WALLET_BINDING_FAILURE',
             timestamp: Date.now(),
             deviceName: '',
-            vcLabel: context.id,
+            vcLabel: context.tag || context.id,
           }),
         {
           to: context => context.serviceRefs.activityLog,
@@ -637,16 +634,21 @@ export const VCItemMachine = model.createMachine(
 
       clearOtp: assign({otp: ''}),
       removeVcItem: send(
-        (_context, event) => {
-          return StoreEvents.REMOVE(MY_VCS_STORE_KEY, _context.vcKey);
+        _context => {
+          return StoreEvents.REMOVE(
+            MY_VCS_STORE_KEY,
+            _context.vcMetadata.uniqueId(),
+          );
         },
         {to: context => context.serviceRefs.store},
       ),
-
+      setVcKey: model.assign({
+        vcMetadata: (_, event) => event.vcMetadata,
+      }),
       logVCremoved: send(
-        context =>
+        (context, _) =>
           ActivityLogEvents.LOG_ACTIVITY({
-            _vcKey: context.vcKey,
+            _vcKey: VCMetadata.fromVC(context, true).getVcKey(),
             type: 'VC_REMOVED',
             timestamp: Date.now(),
             deviceName: '',
@@ -747,18 +749,18 @@ export const VCItemMachine = model.createMachine(
   },
 );
 
-export const createVCItemMachine = (
+export const createEsignetMosipVCItemMachine = (
   serviceRefs: AppServices,
-  vcKey: string,
+  vcMetadata: VCMetadata,
 ) => {
-  return VCItemMachine.withContext({
-    ...VCItemMachine.context,
+  return EsignetMosipVCItemMachine.withContext({
+    ...EsignetMosipVCItemMachine.context,
     serviceRefs,
-    vcKey,
+    vcMetadata,
   });
 };
 
-type State = StateFrom<typeof VCItemMachine>;
+type State = StateFrom<typeof EsignetMosipVCItemMachine>;
 
 export function selectVerifiableCredentials(state: State) {
   return state.context.verifiableCredential;

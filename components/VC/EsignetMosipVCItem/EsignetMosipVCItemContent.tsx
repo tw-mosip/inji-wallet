@@ -2,11 +2,11 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {Image, ImageBackground} from 'react-native';
 import {CheckBox, Icon} from 'react-native-elements';
-import {Column, Row, Text} from '../ui';
-import VerifiedIcon from '../VerifiedIcon';
-import {Theme} from '../ui/styleUtils';
-import {getLocalizedField} from '../../i18n';
-import {VerifiableCredential} from '../../types/vc';
+import {Column, Row, Text} from '../../ui';
+import {Theme} from '../../ui/styleUtils';
+import VerifiedIcon from '../../VerifiedIcon';
+import {getLocalizedField} from '../../../i18n';
+import {VerifiableCredential} from '../../../types/vc';
 
 const getDetails = (arg1, arg2, credential) => {
   if (arg1 === 'Status') {
@@ -66,7 +66,9 @@ const getDetails = (arg1, arg2, credential) => {
   }
 };
 
-export const VCItemContent: React.FC<VcItemContentProps> = props => {
+export const EsignetMosipVCItemContent: React.FC<
+  EsignetMosipVCItemContentProps
+> = props => {
   const fullName = !props.credential
     ? ''
     : getLocalizedField(
@@ -189,7 +191,7 @@ export const VCItemContent: React.FC<VcItemContentProps> = props => {
   );
 };
 
-interface VcItemContentProps {
+interface EsignetMosipVCItemContentProps {
   context: any;
   credential: VerifiableCredential;
   generatedOn: string;

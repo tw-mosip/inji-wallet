@@ -1,18 +1,18 @@
 import React from 'react';
-import { Icon, ListItem } from 'react-native-elements';
-import { useTranslation } from 'react-i18next';
-import { Modal } from '../../../components/ui/Modal';
-import { Centered, Column, Text } from '../../../components/ui';
-import { ActivityLogText } from '../../../components/ActivityLogText';
-import { ActorRefFrom } from 'xstate';
-import { vcItemMachine } from '../../../machines/vcItem';
-import { useKebabPopUp } from '../../../components/KebabPopUpController';
-import { Theme } from '../../../components/ui/styleUtils';
-import { VCMetadata } from '../../../shared/VCMetadata';
+import {Icon, ListItem} from 'react-native-elements';
+import {useTranslation} from 'react-i18next';
+import {Modal} from '../../../components/ui/Modal';
+import {Centered, Column, Text} from '../../../components/ui';
+import {ActivityLogText} from '../../../components/ActivityLogText';
+import {ActorRefFrom} from 'xstate';
+import {vcItemMachine} from '../../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {useKebabPopUp} from '../../../components/KebabPopUpController';
+import {Theme} from '../../../components/ui/styleUtils';
+import {VCMetadata} from '../../../shared/VCMetadata';
 import testIDProps from '../../../shared/commonUtil';
 
-export const HistoryTab: React.FC<HistoryTabProps> = (props) => {
-  const { t } = useTranslation('HistoryTab');
+export const HistoryTab: React.FC<HistoryTabProps> = props => {
+  const {t} = useTranslation('HistoryTab');
   const controller = useKebabPopUp(props);
 
   return (
@@ -34,10 +34,10 @@ export const HistoryTab: React.FC<HistoryTabProps> = (props) => {
         onDismiss={controller.DISMISS}>
         <Column fill>
           {controller.activities
-            .filter((activity) =>
-              VCMetadata.fromVCKey(activity._vcKey).equals(props.vcMetadata)
+            .filter(activity =>
+              VCMetadata.fromVCKey(activity._vcKey).equals(props.vcMetadata),
             )
-            .map((activity) => (
+            .map(activity => (
               <ActivityLogText
                 key={`${activity.timestamp}-${activity._vcKey}`}
                 activity={activity}
@@ -45,19 +45,19 @@ export const HistoryTab: React.FC<HistoryTabProps> = (props) => {
             ))}
           {controller.activities.length === 0 && (
             <Centered fill>
-                <Icon
-                    testID="sentiment-dissatisfied"
-                    style={{ marginBottom: 20 }}
-                    size={40}
-                    name="sentiment-dissatisfied"
-                />
-                <Text
-                    testID="noHistory"
-                    align="center"
-                    weight="semibold"
-                    margin="0 0 4 0">
-                    {t('noHistory')}
-                </Text>
+              <Icon
+                testID="sentiment-dissatisfied"
+                style={{marginBottom: 20}}
+                size={40}
+                name="sentiment-dissatisfied"
+              />
+              <Text
+                testID="noHistory"
+                align="center"
+                weight="semibold"
+                margin="0 0 4 0">
+                {t('noHistory')}
+              </Text>
             </Centered>
           )}
         </Column>

@@ -1,41 +1,44 @@
-import React, { useContext, useRef } from 'react';
-import { useInterpret, useSelector } from '@xstate/react';
-import { Pressable } from 'react-native';
-import { ActorRefFrom } from 'xstate';
-
+import React, {useContext, useRef} from 'react';
+import {useInterpret, useSelector} from '@xstate/react';
+import {Pressable} from 'react-native';
+import {ActorRefFrom} from 'xstate';
+import {GlobalContext} from '../../../shared/GlobalContext';
 import {
-  createVCItemMachine,
-  selectContext,
+  createEsignetMosipVCItemMachine,
+  EsignetMosipVCItemEvents,
+  EsignetMosipVCItemMachine,
   selectGeneratedOn,
+} from './EsignetMosipVCItemMachine';
+import {logState} from '../../../machines/app';
+import {
+  selectContext,
   selectVerifiableCredentials,
-  VCItemEvents,
-  VCItemMachine,
-} from './VCItemMachine';
-import { logState } from '../../machines/app';
-import { Theme } from '../ui/styleUtils';
-import { GlobalContext } from '../../shared/GlobalContext';
-import { Row } from '../ui';
-import { VcItemActivationStatus } from '../VcItemActivationStatus';
-import { VCItemContent } from './VCItemContent';
-import { KebabPopUp } from '../KebabPopUp';
-import { selectKebabPopUp } from '../../machines/vcItem';
+} from '../../openId4VCI/VCItemMachine';
+import {selectKebabPopUp} from '../ExistingMosipVC/ExistingMosipVCItemMachine';
+import {Theme} from '../../ui/styleUtils';
+import {Row} from '../../ui';
+import {KebabPopUp} from '../../KebabPopUp';
+import {VCMetadata} from '../../../shared/VCMetadata';
+import {EsignetMosipVCItemContent} from './EsignetMosipVCItemContent';
+import {EsignetMosipVCActivationStatus} from './EsignetMosipVCItemActivationStatus';
 
-export const VCItem: React.FC<VCItemProps> = (props) => {
-  const { appService } = useContext(GlobalContext);
+export const EsignetMosipVCItem: React.FC<EsignetMosipVCItemProps> = props => {
+  const {appService} = useContext(GlobalContext);
   const machine = useRef(
-    createVCItemMachine(
+    createEsignetMosipVCItemMachine(
       appService.getSnapshot().context.serviceRefs,
-      props.vcKey
-    )
+      props.vcMetadata,
+    ),
   );
 
-  const service = useInterpret(machine.current, { devTools: __DEV__ });
+  const service = useInterpret(machine.current, {devTools: __DEV__});
   service.subscribe(logState);
   const context = useSelector(service, selectContext);
 
   const isKebabPopUp = useSelector(service, selectKebabPopUp);
-  const DISMISS = () => service.send(VCItemEvents.DISMISS());
-  const KEBAB_POPUP = () => service.send(VCItemEvents.KEBAB_POPUP());
+  const DISMISS = () => service.send(EsignetMosipVCItemEvents.DISMISS());
+  const KEBAB_POPUP = () =>
+    service.send(EsignetMosipVCItemEvents.KEBAB_POPUP());
 
   const credentials = useSelector(service, selectVerifiableCredentials);
   const generatedOn = useSelector(service, selectGeneratedOn);
@@ -50,7 +53,7 @@ export const VCItem: React.FC<VCItemProps> = (props) => {
             ? Theme.Styles.selectedBindedVc
             : Theme.Styles.closeCardBgContainer
         }>
-        <VCItemContent
+        <EsignetMosipVCItemContent
           context={context}
           credential={credentials}
           generatedOn={generatedOn}
@@ -65,7 +68,7 @@ export const VCItem: React.FC<VCItemProps> = (props) => {
           <Row crossAlign="center">
             {props.activeTab !== 'receivedVcsTab' &&
               props.activeTab != 'sharingVcScreen' && (
-                <VcItemActivationStatus
+                <EsignetMosipVCActivationStatus
                   verifiableCredential={credentials}
                   showOnlyBindedVc={props.showOnlyBindedVc}
                   emptyWalletBindingId
@@ -73,7 +76,7 @@ export const VCItem: React.FC<VCItemProps> = (props) => {
               )}
             <Pressable onPress={KEBAB_POPUP}>
               <KebabPopUp
-                vcKey={props.vcKey}
+                vcMetadata={props.vcMetadata}
                 iconName="dots-three-horizontal"
                 iconType="entypo"
                 isVisible={isKebabPopUp}
@@ -88,14 +91,14 @@ export const VCItem: React.FC<VCItemProps> = (props) => {
   );
 };
 
-interface VCItemProps {
-  vcKey: string;
+export interface EsignetMosipVCItemProps {
+  vcMetadata: VCMetadata;
   margin?: string;
   selectable?: boolean;
   selected?: boolean;
   showOnlyBindedVc?: boolean;
-  onPress?: (vcRef?: ActorRefFrom<typeof VCItemMachine>) => void;
-  onShow?: (vcRef?: ActorRefFrom<typeof VCItemMachine>) => void;
+  onPress?: (vcRef?: ActorRefFrom<typeof EsignetMosipVCItemMachine>) => void;
+  onShow?: (vcRef?: ActorRefFrom<typeof EsignetMosipVCItemMachine>) => void;
   activeTab?: string;
   iconName?: string;
   iconType?: string;

@@ -1,5 +1,5 @@
 //Regex expression to evaluate if the key is for a VC
-import { VC, VcIdType } from '../types/vc';
+import {VC, VcIdType} from '../types/vc';
 
 const VC_ITEM_STORE_KEY_REGEX =
   '^vc:(UIN|VID):[a-z0-9]+:[a-z0-9-]+:[true|false]+(:[0-9-]+)?$';
@@ -10,6 +10,9 @@ export class VCMetadata {
   requestId = '';
   isPinned = false;
   id = '';
+  issuer?: string = '';
+  protocol?: string = '';
+
   static vcKeyRegExp = new RegExp(VC_ITEM_STORE_KEY_REGEX);
 
   constructor({
@@ -17,12 +20,16 @@ export class VCMetadata {
     hashedId = '',
     requestId = '',
     isPinned = false,
+    issuer = '',
+    protocol = '',
     id = null,
   } = {}) {
     this.idType = idType;
     this.hashedId = hashedId;
     this.requestId = requestId;
     this.isPinned = isPinned;
+    this.protocol = protocol;
+    this.issuer = issuer;
     this.id = id;
   }
 
@@ -32,6 +39,8 @@ export class VCMetadata {
       hashedId: vc.hashedId,
       requestId: vc.requestId,
       isPinned: vc.isPinned,
+      protocol: vc.protocol,
+      issuer: vc.issuer,
       id: includeId ? vc.id : null,
     });
   }
@@ -53,6 +62,26 @@ export class VCMetadata {
       console.error('Invalid VC Key provided');
       return new VCMetadata();
     }
+  }
+
+  static fromOpenId4VCIKey(vcKey: string) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [issuer, protocol, id] = vcKey.split(':');
+
+      return new VCMetadata({
+        id: id ? id : null,
+        issuer: issuer,
+        protocol: protocol,
+      });
+    } catch (e) {
+      console.error('Invalid VC Key provided');
+      return new VCMetadata();
+    }
+  }
+
+  isFromOpenId4VCI(): boolean {
+    return this.protocol != null;
   }
 
   static isVCKey(key): boolean {

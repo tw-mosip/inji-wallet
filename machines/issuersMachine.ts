@@ -17,6 +17,7 @@ import {log} from 'xstate/lib/actions';
 import {VerifiableCredentialWithFormat} from '../types/vc';
 import {verifyCredential} from '../shared/vcjs/verifyCredential';
 import {getBody, getIdentifier} from '../shared/openId4VCI/Utils';
+import {VCMetadata} from '../shared/VCMetadata';
 
 const model = createModel(
   {
@@ -271,7 +272,7 @@ export const IssuersMachine = model.createMachine(
         context =>
           StoreEvents.PREPEND(
             MY_VCS_STORE_KEY,
-            context?.verifiableCredential?.credential.credentialSubject.email,
+            context?.verifiableCredential?.identifier,
           ),
         {
           to: context => context.serviceRefs.store,
@@ -281,7 +282,7 @@ export const IssuersMachine = model.createMachine(
       storeVerifiableCredentialData: send(
         context => {
           return StoreEvents.SET(
-            context?.verifiableCredential?.credential.credentialSubject.email,
+            context?.verifiableCredential?.identifier,
             context.verifiableCredential,
           );
         },
@@ -294,8 +295,9 @@ export const IssuersMachine = model.createMachine(
         context => {
           return {
             type: 'VC_ADDED',
-            vcKey:
-              context?.verifiableCredential.credential.credentialSubject.email,
+            vcMetadata: VCMetadata.fromOpenId4VCIKey(
+              context.verifiableCredential.identifier,
+            ),
           };
         },
         {
@@ -307,8 +309,9 @@ export const IssuersMachine = model.createMachine(
         context => {
           return {
             type: 'VC_DOWNLOADED_FROM_OPENID4VCI',
-            vcKey:
-              context?.verifiableCredential.credential.credentialSubject.email,
+            vcMetadata: VCMetadata.fromOpenId4VCIKey(
+              context.verifiableCredential.identifier,
+            ),
             vc: context.verifiableCredential,
           };
         },
@@ -347,7 +350,10 @@ export const IssuersMachine = model.createMachine(
             verifiableCredential: {credential},
           } = context;
           return ActivityLogEvents.LOG_ACTIVITY({
-            _vcKey: credential.id,
+            _vcKey: VCMetadata.fromVC(
+              context.verifiableCredential,
+              true,
+            ).getVcKey(),
             type: 'VC_DOWNLOADED',
             timestamp: Date.now(),
             deviceName: '',
@@ -392,7 +398,6 @@ export const IssuersMachine = model.createMachine(
         );
         const credential = await response.json();
         credential.identifier = getIdentifier(context, credential);
-        credential.credential.credentialSubject.vid = '2187984397';
         credential.generatedOn = new Date();
         console.log(
           'Response from downloadCredential',

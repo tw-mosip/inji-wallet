@@ -8,11 +8,9 @@ import {RevokeConfirmModal} from '../../components/RevokeConfirm';
 import {OIDcAuthenticationModal} from '../../components/OIDcAuth';
 import {useViewVcModal, ViewVcModalProps} from './ViewVcModalController';
 import {useTranslation} from 'react-i18next';
-import {VcDetails} from '../../components/VcDetails';
 import {OtpVerificationModal} from './MyVcs/OtpVerificationModal';
 import {BindingVcWarningOverlay} from './MyVcs/BindingVcWarningOverlay';
-import {isVCFromOpenId4VCI} from '../../shared/openId4VCI/Utils';
-import {VCDetails} from '../../components/openId4VCI/VCDetails';
+import {VcDetailsContainer} from '../../components/VC/VcDetailsContainer';
 
 export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
   const {t} = useTranslation('ViewVcModal');
@@ -39,24 +37,12 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
       headerElevation={2}>
       <Column scroll>
         <Column fill>
-          {isVCFromOpenId4VCI(
-            controller.vc?.verifiableCredential?.credential?.credentialSubject
-              .email,
-          ) ? (
-            <VCDetails
-              vc={controller.vc}
-              onBinding={controller.addtoWallet}
-              isBindingPending={controller.isWalletBindingPending}
-              activeTab={props.activeTab}
-            />
-          ) : (
-            <VcDetails
-              vc={controller.vc}
-              onBinding={controller.addtoWallet}
-              isBindingPending={controller.isWalletBindingPending}
-              activeTab={props.activeTab}
-            />
-          )}
+          <VcDetailsContainer
+            vc={controller.vc}
+            onBinding={controller.addtoWallet}
+            isBindingPending={controller.isWalletBindingPending}
+            activeTab={props.activeTab}
+          />
         </Column>
       </Column>
       {controller.isEditingTag && (

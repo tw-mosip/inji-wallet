@@ -1,25 +1,29 @@
-import {formatDistanceToNow} from 'date-fns';
 import React from 'react';
-import * as DateFnsLocale from 'date-fns/locale';
 import {useTranslation} from 'react-i18next';
+import {Button, Column, Row, Text} from '../../ui';
 import {Image, ImageBackground, View} from 'react-native';
-import {Icon} from 'react-native-elements';
-import {VC, CredentialSubject} from '../types/vc';
-import {Button, Column, Row, Text} from './ui';
-import {Theme} from './ui/styleUtils';
-import {TextItem} from './ui/TextItem';
-import {VcItemTags} from './VcItemTags';
-import VerifiedIcon from './VerifiedIcon';
-import {getLocalizedField} from '../i18n';
+import {Theme} from '../../ui/styleUtils';
+import {QrCodeOverlay} from '../../QrCodeOverlay';
+import {getLocalizedField} from '../../../i18n';
+import VerifiedIcon from '../../VerifiedIcon';
 import {CREDENTIAL_REGISTRY_EDIT} from 'react-native-dotenv';
-import {QrCodeOverlay} from './QrCodeOverlay';
+import {TextItem} from '../../ui/TextItem';
+import {formatDistanceToNow} from 'date-fns';
+import DateFnsLocale from 'date-fns/locale';
+import {Icon} from 'react-native-elements';
+import {
+  CredentialSubject,
+  VcIdType,
+  VCSharingReason,
+  VerifiableCredential,
+  VerifiablePresentation,
+} from '../../../types/vc';
+import {WalletBindingResponse} from '../../../shared/cryptoutil/cryptoUtil';
 
-export const VcDetails: React.FC<VcDetailsProps> = props => {
+export const EsignetMosipVCItemDetails: React.FC<
+  EsignetMosipVCItemDetailsProps
+> = props => {
   const {t, i18n} = useTranslation('VcDetails');
-
-  //Assigning the UIN and VID from the VC details to display the idtype label
-  const uin = props.vc?.verifiableCredential.credentialSubject.UIN;
-  const vid = props.vc?.verifiableCredential.credentialSubject.VID;
 
   if (props.vc?.verifiableCredential == null) {
     return <Text align="center">Loading details...</Text>;
@@ -35,8 +39,12 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
           <Column align="space-evenly" crossAlign="center">
             <Image
               source={
-                props.vc?.credential.biometrics?.face
-                  ? {uri: props.vc?.credential.biometrics.face}
+                props.vc?.verifiableCredential.credential.credentialSubject
+                  ?.face
+                  ? {
+                      uri: props.vc?.verifiableCredential.credential
+                        .credentialSubject.face,
+                    }
                   : Theme.ProfileIcon
               }
               style={Theme.Styles.openCardImage}
@@ -50,19 +58,18 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
           <Column align="space-evenly">
             <Column>
               <Text
-                testID="fullNameTitle"
                 weight="bold"
                 size="smaller"
                 color={Theme.Colors.DetailsLabel}>
                 {t('fullName')}
               </Text>
               <Text
-                testID="fullNameValue"
                 weight="semibold"
                 size="smaller"
                 color={Theme.Colors.Details}>
                 {getLocalizedField(
-                  props.vc?.verifiableCredential.credentialSubject.fullName,
+                  props.vc?.verifiableCredential.credential.credentialSubject
+                    .fullName,
                 )}
               </Text>
             </Column>
@@ -70,74 +77,49 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
               <Column>
                 <Column>
                   <Text
-                    testID="idType"
                     weight="bold"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('idType')}
                   </Text>
                   <Text
-                    testID="nationalCard"
                     weight="bold"
                     size="smaller"
                     color={Theme.Colors.Details}>
                     {t('nationalCard')}
                   </Text>
                 </Column>
-                {uin ? (
+                {props.vc?.verifiableCredential.credential.id ? (
                   <Column margin="20 0 0 0">
                     <Text
-                      testID="uin"
                       weight="bold"
                       size="smaller"
                       color={Theme.Colors.DetailsLabel}>
                       {t('uin')}
                     </Text>
                     <Text
-                      testID="uinNumber"
                       weight="semibold"
                       size="smaller"
                       color={Theme.Colors.Details}>
-                      {uin}
-                    </Text>
-                  </Column>
-                ) : null}
-
-                {vid ? (
-                  <Column margin="20 0 0 0">
-                    <Text
-                      testID="vid"
-                      weight="bold"
-                      size="smaller"
-                      color={Theme.Colors.DetailsLabel}>
-                      {t('vid')}
-                    </Text>
-                    <Text
-                      testID="vidNumber"
-                      weight="semibold"
-                      size="smaller"
-                      color={Theme.Colors.Details}>
-                      {vid}
+                      {props.vc?.verifiableCredential.credential.id}
                     </Text>
                   </Column>
                 ) : null}
                 <Column margin="20 0 0 0">
                   <Text
-                    testID="dateOfBirth"
                     weight="bold"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('dateOfBirth')}
                   </Text>
                   <Text
-                    testID="dateOfBirthValue"
                     weight="semibold"
                     size="smaller"
                     color={Theme.Colors.Details}>
                     {new Date(
                       getLocalizedField(
-                        props.vc?.verifiableCredential.credentialSubject
-                          .dateOfBirth,
+                        props.vc?.verifiableCredential.credential
+                          .credentialSubject.dateOfBirth,
                       ),
                     ).toLocaleDateString()}
                   </Text>
@@ -146,32 +128,29 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
               <Column margin="0 0 0 40">
                 <Column>
                   <Text
-                    testID="gender"
                     weight="bold"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('gender')}
                   </Text>
                   <Text
-                    testID="genderValue"
                     weight="semibold"
                     size="smaller"
                     color={Theme.Colors.Details}>
                     {getLocalizedField(
-                      props.vc?.verifiableCredential.credentialSubject.gender,
+                      props.vc?.verifiableCredential.credential
+                        .credentialSubject.gender,
                     )}
                   </Text>
                 </Column>
                 <Column margin="20 0 0 0">
                   <Text
-                    testID="generatedOnTitle"
                     weight="bold"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('generatedOn')}
                   </Text>
                   <Text
-                    testID="generatedOnValue"
                     weight="semibold"
                     size="smaller"
                     color={Theme.Colors.Details}>
@@ -180,7 +159,6 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 </Column>
                 <Column margin="20 0 0 0">
                   <Text
-                    testID="status"
                     weight="bold"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
@@ -188,7 +166,6 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                   </Text>
                   <Row>
                     <Text
-                      testID="valid"
                       weight="semibold"
                       size="smaller"
                       color={Theme.Colors.Details}>
@@ -199,19 +176,18 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 </Column>
                 <Column margin="20 0 0 0">
                   <Text
-                    testID="phoneNumber"
                     weight="bold"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
                     {t('phoneNumber')}
                   </Text>
                   <Text
-                    testID="phoneNumberValue"
                     weight="semibold"
                     size="smaller"
                     color={Theme.Colors.Details}>
                     {getLocalizedField(
-                      props.vc?.verifiableCredential.credentialSubject.phone,
+                      props.vc?.verifiableCredential.credential
+                        .credentialSubject.phone,
                     )}
                   </Text>
                 </Column>
@@ -223,7 +199,6 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
         <Column>
           <Column fill style={Theme.Styles.labelPart}>
             <Text
-              testID="emailId"
               weight="bold"
               size="smaller"
               color={Theme.Colors.DetailsLabel}>
@@ -231,10 +206,9 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
             </Text>
             <Row>
               <Text
-                testID="emailIdValue"
                 style={
-                  props.vc?.verifiableCredential.credentialSubject.email
-                    .length > 25
+                  props.vc?.verifiableCredential.credential.credentialSubject
+                    .email.length > 25
                     ? {flex: 1}
                     : {flex: 0}
                 }
@@ -242,7 +216,8 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 size="smaller"
                 color={Theme.Colors.Details}>
                 {getLocalizedField(
-                  props.vc?.verifiableCredential.credentialSubject.email,
+                  props.vc?.verifiableCredential.credential.credentialSubject
+                    .email,
                 )}
               </Text>
             </Row>
@@ -250,7 +225,6 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
 
           <Column style={Theme.Styles.labelPart}>
             <Text
-              testID="address"
               weight="bold"
               size="smaller"
               color={Theme.Colors.DetailsLabel}>
@@ -258,13 +232,12 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
             </Text>
             <Row>
               <Text
-                testID="addressValue"
                 style={{flex: 1}}
                 weight="semibold"
                 size="smaller"
                 color={Theme.Colors.Details}>
                 {getFullAddress(
-                  props.vc?.verifiableCredential.credentialSubject,
+                  props.vc?.verifiableCredential.credential.credentialSubject,
                 )}
               </Text>
             </Row>
@@ -272,14 +245,12 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
           {CREDENTIAL_REGISTRY_EDIT === 'true' && (
             <Column fill style={Theme.Styles.labelPart}>
               <Text
-                testID="credentialRegistry"
                 weight="bold"
                 size="smaller"
                 color={Theme.Colors.DetailsLabel}>
                 {t('credentialRegistry')}
               </Text>
               <Text
-                testID="credentialRegistryValue"
                 weight="semibold"
                 size="smaller"
                 color={Theme.Colors.Details}>
@@ -288,21 +259,16 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
             </Column>
           )}
         </Column>
-        <VcItemTags tag={props.vc?.tag} />
       </ImageBackground>
 
       {props.vc?.reason?.length > 0 && (
-        <Text
-          testID="reasonForSharingTitle"
-          margin="24 24 16 24"
-          weight="semibold">
+        <Text margin="24 24 16 24" weight="semibold">
           {t('reasonForSharing')}
         </Text>
       )}
 
       {props.vc?.reason?.map((reason, index) => (
         <TextItem
-          testID="reason"
           key={index}
           divider
           label={formatDistanceToNow(reason.timestamp, {
@@ -324,7 +290,6 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 type="material-community"
               />
               <Text
-                testID="offlineAuthDisabledHeader"
                 style={{flex: 1}}
                 weight="semibold"
                 size="small"
@@ -334,7 +299,6 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
               </Text>
             </Row>
             <Text
-              testID="offlineAuthDisabledMessage"
               style={{flex: 1}}
               weight="regular"
               size="small"
@@ -344,7 +308,6 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
             </Text>
 
             <Button
-              testID="enableVerification"
               title={t('enableVerification')}
               onPress={props.onBinding}
               type="radius"
@@ -360,7 +323,6 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
                 containerStyle={{marginStart: 4, bottom: 1}}
               />
               <Text
-                testID="profileAuthenticated"
                 numLines={1}
                 color={Theme.Colors.statusLabel}
                 weight="bold"
@@ -377,11 +339,30 @@ export const VcDetails: React.FC<VcDetailsProps> = props => {
   );
 };
 
-interface VcDetailsProps {
+export interface EsignetMosipVCItemDetailsProps {
   vc: VC;
   isBindingPending: boolean;
   onBinding?: () => void;
-  activeTab?: Number;
+  activeTab?: number;
+}
+
+export interface VC {
+  id: string;
+  idType: VcIdType;
+  tag: string;
+  credential: VerifiableCredential;
+  verifiablePresentation?: VerifiablePresentation;
+  generatedOn: Date;
+  requestId: string;
+  isVerified: boolean;
+  lastVerifiedOn: number;
+  locked: boolean;
+  reason?: VCSharingReason[];
+  shouldVerifyPresence?: boolean;
+  walletBindingResponse?: WalletBindingResponse;
+  credentialRegistry: string;
+  isPinned?: boolean;
+  hashedId: string;
 }
 
 function getFullAddress(credential: CredentialSubject) {

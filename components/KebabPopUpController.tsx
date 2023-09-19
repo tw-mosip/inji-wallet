@@ -1,5 +1,5 @@
-import { useSelector } from '@xstate/react';
-import { ActorRefFrom } from 'xstate';
+import {useSelector} from '@xstate/react';
+import {ActorRefFrom} from 'xstate';
 import {
   selectKebabPopUpWalletBindingInProgress,
   selectKebabPopUp,
@@ -11,31 +11,35 @@ import {
   selectOtpError,
   selectShowWalletBindingError,
   selectWalletBindingError,
-  VcItemEvents,
+  ExistingMosipVCItemEvents,
   vcItemMachine,
   selectShowActivities,
-} from '../machines/vcItem';
-import { selectActivities } from '../machines/activityLog';
-import { GlobalContext } from '../shared/GlobalContext';
-import { useContext } from 'react';
-import { VCMetadata } from '../shared/VCMetadata';
-import { VCItemEvents, VCItemMachine } from './openId4VCI/VCItemMachine';
-import { isVCFromOpenId4VCI } from '../shared/openId4VCI/Utils';
+} from './VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {selectActivities} from '../machines/activityLog';
+import {GlobalContext} from '../shared/GlobalContext';
+import {useContext} from 'react';
+import {VCMetadata} from '../shared/VCMetadata';
+import {
+  EsignetMosipVCItemEvents,
+  EsignetMosipVCItemMachine,
+} from './VC/EsignetMosipVCItem/EsignetMosipVCItemMachine';
+import {isVCFromOpenId4VCI} from '../shared/openId4VCI/Utils';
 
 export function useKebabPopUp(props) {
   const service = props.service as
     | ActorRefFrom<typeof vcItemMachine>
-    | ActorRefFrom<typeof VCItemMachine>;
+    | ActorRefFrom<typeof EsignetMosipVCItemMachine>;
   const vcEvents =
     props.vcKey !== undefined && isVCFromOpenId4VCI(props?.vcKey)
-      ? VCItemEvents
-      : VcItemEvents;
+      ? EsignetMosipVCItemEvents
+      : ExistingMosipVCItemEvents;
   const PIN_CARD = () => service.send(vcEvents.PIN_CARD());
   const KEBAB_POPUP = () => service.send(vcEvents.KEBAB_POPUP());
   const ADD_WALLET_BINDING_ID = () =>
     service.send(vcEvents.ADD_WALLET_BINDING_ID());
   const CONFIRM = () => service.send(vcEvents.CONFIRM());
-  const REMOVE = (vcMetadata: VCMetadata) => service.send(vcEvents.REMOVE(vcMetadata));
+  const REMOVE = (vcMetadata: VCMetadata) =>
+    service.send(vcEvents.REMOVE(vcMetadata));
   const DISMISS = () => service.send(vcEvents.DISMISS());
   const CANCEL = () => service.send(vcEvents.CANCEL());
   const SHOW_ACTIVITY = () => service.send(vcEvents.SHOW_ACTIVITY());
@@ -45,22 +49,22 @@ export function useKebabPopUp(props) {
   const isRemoveWalletWarning = useSelector(service, selectRemoveWalletWarning);
   const isAcceptingOtpInput = useSelector(
     service,
-    selectKebabPopUpAcceptingBindingOtp
+    selectKebabPopUpAcceptingBindingOtp,
   );
   const isWalletBindingError = useSelector(
     service,
-    selectShowWalletBindingError
+    selectShowWalletBindingError,
   );
   const otpError = useSelector(service, selectOtpError);
   const walletBindingError = useSelector(service, selectWalletBindingError);
   const WalletBindingInProgress = useSelector(
     service,
-    selectKebabPopUpWalletBindingInProgress
+    selectKebabPopUpWalletBindingInProgress,
   );
   const emptyWalletBindingId = useSelector(service, selectEmptyWalletBindingId);
   const isKebabPopUp = useSelector(service, selectKebabPopUp);
   const isShowActivities = useSelector(service, selectShowActivities);
-  const { appService } = useContext(GlobalContext);
+  const {appService} = useContext(GlobalContext);
   const activityLogService = appService.children.get('activityLog');
 
   return {

@@ -1,11 +1,19 @@
 import {isVCFromOpenId4VCI} from '../../shared/openId4VCI/Utils';
-import {VCItem} from '../openId4VCI/VCItem';
+import {
+  EsignetMosipVCItem,
+  EsignetMosipVCItemProps,
+} from './EsignetMosipVCItem/EsignetMosipVCItem';
 import React from 'react';
-import {VcItem} from '../VcItem';
+import {
+  ExistingMosipVCItem,
+  ExistingMosipVCItemProps,
+} from './ExistingMosipVCItem/ExistingMosipVCItem';
 
-export const VcItemContainer: React.FC = props => {
-  if (isVCFromOpenId4VCI(props.vcKey)) {
-    return <VCItem vcKey={''} {...props} />;
+export const VcItemContainer: React.FC<
+  ExistingMosipVCItemProps | EsignetMosipVCItemProps
+> = props => {
+  if (props.vcMetadata.isFromOpenId4VCI()) {
+    return <EsignetMosipVCItem {...props} />;
   }
-  return <VcItem vcKey={''} {...props} />;
+  return <ExistingMosipVCItem {...props} />;
 };

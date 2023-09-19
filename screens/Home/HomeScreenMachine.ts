@@ -1,21 +1,14 @@
-import {
-  ActorRefFrom,
-  assign,
-  EventFrom,
-  send,
-  spawn,
-  StateFrom,
-} from 'xstate';
-import { createModel } from 'xstate/lib/model';
-import { vcItemMachine } from '../../machines/vcItem';
-import { AppServices } from '../../shared/GlobalContext';
-import { createMyVcsTabMachine, MyVcsTabMachine } from './MyVcsTabMachine';
+import {ActorRefFrom, assign, EventFrom, send, spawn, StateFrom} from 'xstate';
+import {createModel} from 'xstate/lib/model';
+import {vcItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {AppServices} from '../../shared/GlobalContext';
+import {createMyVcsTabMachine, MyVcsTabMachine} from './MyVcsTabMachine';
 import {
   createReceivedVcsTabMachine,
   ReceivedVcsTabMachine,
 } from './ReceivedVcsTabMachine';
-import { IssuersMachine } from '../../machines/issuersMachine';
-import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
+import {IssuersMachine} from '../../machines/issuersMachine';
+import {EsignetMosipVCItemMachine} from '../../components/VC/EsignetMosipVCItem/EsignetMosipVCItemMachine';
 
 const model = createModel(
   {
@@ -26,7 +19,7 @@ const model = createModel(
     },
     selectedVc: null as
       | ActorRefFrom<typeof vcItemMachine>
-      | ActorRefFrom<typeof VCItemMachine>,
+      | ActorRefFrom<typeof EsignetMosipVCItemMachine>,
     activeTab: 0,
   },
   {
@@ -37,7 +30,7 @@ const model = createModel(
       VIEW_VC: (
         vcItemActor:
           | ActorRefFrom<typeof vcItemMachine>
-          | ActorRefFrom<typeof VCItemMachine>
+          | ActorRefFrom<typeof EsignetMosipVCItemMachine>,
       ) => ({
         vcItemActor,
       }),
@@ -45,7 +38,7 @@ const model = createModel(
       GOTO_ISSUERS: () => ({}),
       DOWNLOAD_ID: () => ({}),
     },
-  }
+  },
 );
 
 const MY_VCS_TAB_REF_ID = 'myVcsTab';
@@ -91,7 +84,7 @@ export const HomeScreenMachine = model.createMachine(
               DISMISS_MODAL: {
                 actions: [
                   send('DISMISS', {
-                    to: (context) => context.tabRefs.myVcs,
+                    to: context => context.tabRefs.myVcs,
                   }),
                 ],
               },
@@ -103,7 +96,7 @@ export const HomeScreenMachine = model.createMachine(
               DISMISS_MODAL: {
                 actions: [
                   send('DISMISS', {
-                    to: (context) => context.tabRefs.receivedVcs,
+                    to: context => context.tabRefs.receivedVcs,
                   }),
                 ],
               },
@@ -116,7 +109,7 @@ export const HomeScreenMachine = model.createMachine(
             invoke: {
               id: 'issuersMachine',
               src: IssuersMachine,
-              data: (context) => ({
+              data: context => ({
                 ...IssuersMachine.context,
                 serviceRefs: context.serviceRefs, // the value you want to pass to child machine
               }),
@@ -161,19 +154,19 @@ export const HomeScreenMachine = model.createMachine(
   {
     actions: {
       spawnTabActors: assign({
-        tabRefs: (context) => ({
+        tabRefs: context => ({
           myVcs: spawn(
             createMyVcsTabMachine(context.serviceRefs),
-            MY_VCS_TAB_REF_ID
+            MY_VCS_TAB_REF_ID,
           ),
           receivedVcs: spawn(
             createReceivedVcsTabMachine(context.serviceRefs),
-            RECEIVED_VCS_TAB_REF_ID
+            RECEIVED_VCS_TAB_REF_ID,
           ),
         }),
       }),
       sendAddEvent: send('ADD_VC', {
-        to: (context) => context.tabRefs.myVcs,
+        to: context => context.tabRefs.myVcs,
       }),
 
       setSelectedVc: model.assign({
@@ -184,11 +177,11 @@ export const HomeScreenMachine = model.createMachine(
         selectedVc: null,
       }),
     },
-  }
+  },
 );
 
 function setActiveTab(activeTab: number) {
-  return model.assign({ activeTab });
+  return model.assign({activeTab});
 }
 
 type State = StateFrom<typeof HomeScreenMachine>;

@@ -10,8 +10,8 @@ import {
 import {
   selectWalletBindingError,
   selectShowWalletBindingError,
-} from '../../machines/vcItem';
-import {vcItemMachine} from '../../machines/vcItem';
+} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {vcItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {GlobalContext} from '../../shared/GlobalContext';
 import {HomeScreenTabProps} from './HomeScreen';
 import {
@@ -27,7 +27,7 @@ import {
   selectShowHardwareKeystoreNotExistsAlert,
   SettingsEvents,
 } from '../../machines/settings';
-import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
+import {EsignetMosipVCItemMachine} from '../../components/VC/EsignetMosipVCItem/EsignetMosipVCItemMachine';
 
 export function useMyVcsTab(props: HomeScreenTabProps) {
   const service = props.service as ActorRefFrom<typeof MyVcsTabMachine>;
@@ -69,7 +69,7 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
     VIEW_VC: (
       vcRef:
         | ActorRefFrom<typeof vcItemMachine>
-        | ActorRefFrom<typeof VCItemMachine>
+        | ActorRefFrom<typeof EsignetMosipVCItemMachine>,
     ) => {
       return service.send(MyVcsTabEvents.VIEW_VC(vcRef));
     },

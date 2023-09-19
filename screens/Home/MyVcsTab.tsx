@@ -1,37 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Column, Row, Text } from '../../components/ui';
-import { Theme } from '../../components/ui/styleUtils';
-import { Image, RefreshControl, View } from 'react-native';
-import { useMyVcsTab } from './MyVcsTabController';
-import { HomeScreenTabProps } from './HomeScreen';
-import { AddVcModal } from './MyVcs/AddVcModal';
-import { GetVcModal } from './MyVcs/GetVcModal';
-import { useTranslation } from 'react-i18next';
-import { VcItem } from '../../components/VcItem';
-import { GET_INDIVIDUAL_ID } from '../../shared/constants';
+import React, {useEffect, useState} from 'react';
+import {Button, Column, Row, Text} from '../../components/ui';
+import {Theme} from '../../components/ui/styleUtils';
+import {Image, RefreshControl, View} from 'react-native';
+import {useMyVcsTab} from './MyVcsTabController';
+import {HomeScreenTabProps} from './HomeScreen';
+import {AddVcModal} from './MyVcs/AddVcModal';
+import {GetVcModal} from './MyVcs/GetVcModal';
+import {useTranslation} from 'react-i18next';
+import {ExistingMosipVCItem} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItem';
+import {GET_INDIVIDUAL_ID} from '../../shared/constants';
 import {
   ErrorMessageOverlay,
   MessageOverlay,
 } from '../../components/MessageOverlay';
-import { Icon } from 'react-native-elements';
+import {Icon} from 'react-native-elements';
 import LinearGradient from 'react-native-linear-gradient';
-import { groupBy } from '../../shared/javascript';
+import {groupBy} from '../../shared/javascript';
 
-const pinIconProps = { iconName: 'pushpin', iconType: 'antdesign' };
+const pinIconProps = {iconName: 'pushpin', iconType: 'antdesign'};
 import {
   isOpenId4VCIEnabled,
   isVCFromOpenId4VCI,
 } from '../../shared/openId4VCI/Utils';
-import { VCItem } from '../../components/openId4VCI/VCItem';
+import {EsignetMosipVCItem} from '../../components/VC/EsignetMosipVCItem/EsignetMosipVCItem';
 import testID from '../../shared/commonUtil';
+import {VcItemContainer} from '../../components/VC/VcItemContainer';
 
-export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
-  const { t } = useTranslation('MyVcsTab');
+export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
+  const {t} = useTranslation('MyVcsTab');
   const controller = useMyVcsTab(props);
   const storeErrorTranslationPath = 'errors.savingFailed';
   const [pinned, unpinned] = groupBy(
     controller.vcsMetadata,
-    (vcMetadata) => vcMetadata.isPinned
+    vcMetadata => vcMetadata.isPinned,
   );
   const vcMetadataOrderedByPinStatus = pinned.concat(unpinned);
 
@@ -66,7 +67,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
     });
   };
 
-  const DownloadFABIcon: React.FC = (props) => {
+  const DownloadFABIcon: React.FC = props => {
     const plusIcon = (
       <Icon
         name={'plus'}
@@ -93,7 +94,9 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
 
   const DownloadingIdPopUp: React.FC = () => {
     return (
-      <View  testID="downloadingVcPopup" style={{ display: controller.isRequestSuccessful ? 'flex' : 'none' }}>
+      <View
+        testID="downloadingVcPopup"
+        style={{display: controller.isRequestSuccessful ? 'flex' : 'none'}}>
         <Row style={Theme.Styles.downloadingVcPopUp}>
           <Text color={Theme.Colors.whiteText} weight="semibold" size="smaller">
             {t('downloadingYourCard')}
@@ -115,7 +118,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
 
   return (
     <React.Fragment>
-      <Column fill style={{ display: props.isVisible ? 'flex' : 'none' }}>
+      <Column fill style={{display: props.isVisible ? 'flex' : 'none'}}>
         {controller.isRequestSuccessful && <DownloadingVcPopUp />}
         <Column fill pY={18} pX={15}>
           {vcMetadataOrderedByPinStatus.length > 0 && (
@@ -132,37 +135,26 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                 }>
                 {vcMetadataOrderedByPinStatus.map((vcMetadata, index) => {
                   const iconProps = vcMetadata.isPinned ? pinIconProps : {};
-                  if(!isVCFromOpenId4VCI("")) {
-                      return (
-                          <VcItem
-                              {...iconProps}
-                              key={`${vcMetadata}-${index}`}
-                              vcMetadata={vcMetadata}
-                              margin="0 2 8 2"
-                              onPress={controller.VIEW_VC}
-                          />
-                      );
-                  } else {
-                      return (
-                          <VCItem
-                              key={`${""}-${index}`}
-                              vcKey={"vcKey"}
-                              margin="0 2 8 2"
-                              onPress={controller.VIEW_VC}
-                          />
-                      );
-                  }
+                  return (
+                    <VcItemContainer
+                      {...iconProps}
+                      key={`${vcMetadata}-${index}`}
+                      vcMetadata={vcMetadata}
+                      margin="0 2 8 2"
+                      onPress={controller.VIEW_VC}
+                    />
+                  );
                 })}
               </Column>
-                {!isOpenId4VCIEnabled() && (
-                  <Button
-                    testID="downloadCard"
-                    type="gradient"
-                    disabled={controller.isRefreshingVcs}
-                    title={t('downloadCard')}
-                    onPress={controller.DOWNLOAD_ID}
-                  />
-                )}
+              {!isOpenId4VCIEnabled() && (
+                <Button
+                  testID="downloadCard"
+                  type="gradient"
+                  disabled={controller.isRefreshingVcs}
+                  title={t('downloadCard')}
+                  onPress={controller.DOWNLOAD_ID}
+                />
+              )}
               <DownloadFABIcon {...props} />
             </React.Fragment>
           )}
@@ -186,15 +178,15 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = (props) => {
                     margin="0 12 30 12">
                     {t('generateVcDescription')}
                   </Text>
-                    {!isOpenId4VCIEnabled() && (
+                  {!isOpenId4VCIEnabled() && (
                     <Button
-                        testID="downloadCard"
-                        type="gradient"
-                        disabled={controller.isRefreshingVcs}
-                        title={t('downloadCard')}
-                        onPress={controller.DOWNLOAD_ID}
+                      testID="downloadCard"
+                      type="gradient"
+                      disabled={controller.isRefreshingVcs}
+                      title={t('downloadCard')}
+                      onPress={controller.DOWNLOAD_ID}
                     />
-                    )}
+                  )}
                 </View>
                 <DownloadFABIcon {...props} />
               </Column>

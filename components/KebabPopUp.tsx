@@ -6,14 +6,14 @@ import {WalletBinding} from '../screens/Home/MyVcs/WalletBinding';
 import {Pressable, View} from 'react-native';
 import {useKebabPopUp} from './KebabPopUpController';
 import {ActorRefFrom} from 'xstate';
-import {vcItemMachine} from '../machines/vcItem';
+import {vcItemMachine} from './VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {useTranslation} from 'react-i18next';
 import {HistoryTab} from '../screens/Home/MyVcs/HistoryTab';
 import {RemoveVcWarningOverlay} from '../screens/Home/MyVcs/RemoveVcWarningOverlay';
 import {ScrollView} from 'react-native-gesture-handler';
 import testIDProps from '../shared/commonUtil';
-import { VCMetadata } from '../shared/VCMetadata';
-import { VCItemMachine } from './openId4VCI/VCItemMachine';
+import {VCMetadata} from '../shared/VCMetadata';
+import {EsignetMosipVCItemMachine} from './VC/EsignetMosipVCItem/EsignetMosipVCItemMachine';
 
 export const KebabPopUp: React.FC<KebabPopUpProps> = props => {
   const controller = useKebabPopUp(props);
@@ -99,5 +99,5 @@ export interface KebabPopUpProps {
   onDismiss: () => void;
   service:
     | ActorRefFrom<typeof vcItemMachine>
-    | ActorRefFrom<typeof VCItemMachine>;
+    | ActorRefFrom<typeof EsignetMosipVCItemMachine>;
 }

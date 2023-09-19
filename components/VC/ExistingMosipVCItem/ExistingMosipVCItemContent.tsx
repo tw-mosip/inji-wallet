@@ -1,14 +1,14 @@
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {Image, ImageBackground, View} from 'react-native';
-import {getLocalizedField} from '../i18n';
-import {VerifiableCredential} from '../types/vc';
-import {VcItemTags} from './VcItemTags';
-import VerifiedIcon from './VerifiedIcon';
-import {Column, Row, Text} from './ui';
-import {Theme} from './ui/styleUtils';
+import {getLocalizedField} from '../../../i18n';
+import {VerifiableCredential} from '../../../types/vc';
+import {VcItemTags} from '../../VcItemTags';
+import VerifiedIcon from '../../VerifiedIcon';
+import {Column, Row, Text} from '../../ui';
+import {Theme} from '../../ui/styleUtils';
 import {CheckBox, Icon} from 'react-native-elements';
-import testIDProps from '../shared/commonUtil';
+import testIDProps from '../../../shared/commonUtil';
 
 const getDetails = (arg1, arg2, verifiableCredential) => {
   if (arg1 === 'Status') {
@@ -74,7 +74,9 @@ const getDetails = (arg1, arg2, verifiableCredential) => {
   }
 };
 
-export const VcItemContent: React.FC<VcItemContentProps> = props => {
+export const ExistingMosipVCItemContent: React.FC<
+  ExistingMosipVCItemContentProps
+> = props => {
   //Assigning the UIN and VID from the VC details to display the idtype label
   const uin = props.verifiableCredential?.credentialSubject.UIN;
   const vid = props.verifiableCredential?.credentialSubject.VID;
@@ -276,7 +278,7 @@ export const VcItemContent: React.FC<VcItemContentProps> = props => {
   );
 };
 
-interface VcItemContentProps {
+interface ExistingMosipVCItemContentProps {
   context: any;
   verifiableCredential: VerifiableCredential;
   generatedOn: string;

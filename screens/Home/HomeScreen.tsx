@@ -1,20 +1,20 @@
-import React, { useEffect } from 'react';
-import { Icon } from 'react-native-elements';
-import { Button, Column } from '../../components/ui';
-import { Theme } from '../../components/ui/styleUtils';
-import { HomeRouteProps } from '../../routes/main';
-import { MyVcsTab } from './MyVcsTab';
-import { ReceivedVcsTab } from './ReceivedVcsTab';
-import { ViewVcModal } from './ViewVcModal';
-import { useHomeScreen } from './HomeScreenController';
-import { TabRef } from './HomeScreenMachine';
-import { ActorRefFrom } from 'xstate';
-import { vcItemMachine } from '../../machines/vcItem';
+import React, {useEffect} from 'react';
+import {Icon} from 'react-native-elements';
+import {Button, Column} from '../../components/ui';
+import {Theme} from '../../components/ui/styleUtils';
+import {HomeRouteProps} from '../../routes/main';
+import {MyVcsTab} from './MyVcsTab';
+import {ReceivedVcsTab} from './ReceivedVcsTab';
+import {ViewVcModal} from './ViewVcModal';
+import {useHomeScreen} from './HomeScreenController';
+import {TabRef} from './HomeScreenMachine';
+import {ActorRefFrom} from 'xstate';
+import {vcItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import LinearGradient from 'react-native-linear-gradient';
-import { isOpenId4VCIEnabled } from '../../shared/openId4VCI/Utils';
-import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
+import {isOpenId4VCIEnabled} from '../../shared/openId4VCI/Utils';
+import {EsignetMosipVCItemMachine} from '../../components/VC/EsignetMosipVCItem/EsignetMosipVCItemMachine';
 
-export const HomeScreen: React.FC<HomeRouteProps> = (props) => {
+export const HomeScreen: React.FC<HomeRouteProps> = props => {
   const controller = useHomeScreen(props);
 
   useEffect(() => {
@@ -94,5 +94,5 @@ export interface HomeScreenTabProps {
   service: TabRef;
   vcItemActor:
     | ActorRefFrom<typeof vcItemMachine>
-    | ActorRefFrom<typeof VCItemMachine>;
+    | ActorRefFrom<typeof EsignetMosipVCItemMachine>;
 }

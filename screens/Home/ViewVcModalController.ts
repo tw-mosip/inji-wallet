@@ -1,10 +1,10 @@
-import { useMachine, useSelector } from '@xstate/react';
-import { useContext, useEffect, useState } from 'react';
-import { ActorRefFrom } from 'xstate';
-import { useTranslation } from 'react-i18next';
+import {useMachine, useSelector} from '@xstate/react';
+import {useContext, useEffect, useState} from 'react';
+import {ActorRefFrom} from 'xstate';
+import {useTranslation} from 'react-i18next';
 import NetInfo from '@react-native-community/netinfo';
-import { ModalProps } from '../../components/ui/Modal';
-import { GlobalContext } from '../../shared/GlobalContext';
+import {ModalProps} from '../../components/ui/Modal';
+import {GlobalContext} from '../../shared/GlobalContext';
 import {
   selectOtpError,
   selectIsAcceptingOtpInput,
@@ -14,7 +14,7 @@ import {
   selectIsRevokingVc,
   selectIsLoggingRevoke,
   selectVc,
-  VcItemEvents,
+  ExistingMosipVCItemEvents,
   vcItemMachine,
   selectWalletBindingError,
   selectRequestBindingOtp,
@@ -23,23 +23,23 @@ import {
   selectWalletBindingInProgress,
   selectShowWalletBindingError,
   selectBindingWarning,
-} from '../../machines/vcItem';
-import { selectPasscode } from '../../machines/auth';
-import { biometricsMachine, selectIsSuccess } from '../../machines/biometrics';
-import { VCItemMachine } from '../../components/openId4VCI/VCItemMachine';
+} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {selectPasscode} from '../../machines/auth';
+import {biometricsMachine, selectIsSuccess} from '../../machines/biometrics';
+import {EsignetMosipVCItemMachine} from '../../components/VC/EsignetMosipVCItem/EsignetMosipVCItemMachine';
 
 export function useViewVcModal({
   vcItemActor,
   isVisible,
   onRevokeDelete,
 }: ViewVcModalProps) {
-  const { t } = useTranslation('ViewVcModal');
+  const {t} = useTranslation('ViewVcModal');
   const [toastVisible, setToastVisible] = useState(false);
   const [message, setMessage] = useState('');
   const [reAuthenticating, setReAuthenticating] = useState('');
   const [isRevoking, setRevoking] = useState(false);
   const [error, setError] = useState('');
-  const { appService } = useContext(GlobalContext);
+  const {appService} = useContext(GlobalContext);
   const authService = appService.children.get('auth');
   const [, bioSend, bioService] = useMachine(biometricsMachine);
 
@@ -50,10 +50,10 @@ export function useViewVcModal({
   const vc = useSelector(vcItemActor, selectVc);
   const otError = useSelector(vcItemActor, selectOtpError);
   const onSuccess = () => {
-    bioSend({ type: 'SET_IS_AVAILABLE', data: true });
+    bioSend({type: 'SET_IS_AVAILABLE', data: true});
     setError('');
     setReAuthenticating('');
-    vcItemActor.send(VcItemEvents.LOCK_VC());
+    vcItemActor.send(ExistingMosipVCItemEvents.LOCK_VC());
   };
 
   const onError = (value: string) => {
@@ -70,11 +70,11 @@ export function useViewVcModal({
   };
 
   const netInfoFetch = (otp: string) => {
-    NetInfo.fetch().then((state) => {
+    NetInfo.fetch().then(state => {
       if (state.isConnected) {
-        vcItemActor.send(VcItemEvents.INPUT_OTP(otp));
+        vcItemActor.send(ExistingMosipVCItemEvents.INPUT_OTP(otp));
       } else {
-        vcItemActor.send(VcItemEvents.DISMISS());
+        vcItemActor.send(ExistingMosipVCItemEvents.DISMISS());
         showToast('Request network failed');
       }
     });
@@ -85,10 +85,10 @@ export function useViewVcModal({
       showToast(vc.locked ? t('success.locked') : t('success.unlocked'));
     }
     if (isRevokingVc) {
-      showToast(t('success.revoked', { vid: vc.id }));
+      showToast(t('success.revoked', {vid: vc.id}));
     }
     if (isLoggingRevoke) {
-      vcItemActor.send(VcItemEvents.DISMISS());
+      vcItemActor.send(ExistingMosipVCItemEvents.DISMISS());
       onRevokeDelete();
     }
     if (isSuccessBio && reAuthenticating != '') {
@@ -105,7 +105,7 @@ export function useViewVcModal({
   ]);
 
   useEffect(() => {
-    vcItemActor.send(VcItemEvents.REFRESH());
+    vcItemActor.send(ExistingMosipVCItemEvents.REFRESH());
   }, [isVisible]);
   return {
     error,
@@ -121,7 +121,7 @@ export function useViewVcModal({
     isAcceptingOtpInput: useSelector(vcItemActor, selectIsAcceptingOtpInput),
     isAcceptingRevokeInput: useSelector(
       vcItemActor,
-      selectIsAcceptingRevokeInput
+      selectIsAcceptingRevokeInput,
     ),
     storedPasscode: useSelector(authService, selectPasscode),
     isBindingOtp: useSelector(vcItemActor, selectRequestBindingOtp),
@@ -129,11 +129,11 @@ export function useViewVcModal({
     walletBindingError: useSelector(vcItemActor, selectWalletBindingError),
     isWalletBindingPending: useSelector(
       vcItemActor,
-      selectEmptyWalletBindingId
+      selectEmptyWalletBindingId,
     ),
     isWalletBindingInProgress: useSelector(
       vcItemActor,
-      selectWalletBindingInProgress
+      selectWalletBindingInProgress,
     ),
     isBindingError: useSelector(vcItemActor, selectShowWalletBindingError),
     isBindingWarning: useSelector(vcItemActor, selectBindingWarning),
@@ -142,17 +142,17 @@ export function useViewVcModal({
       setRevoking(true);
     },
     REVOKE_VC: () => {
-      vcItemActor.send(VcItemEvents.REVOKE_VC());
+      vcItemActor.send(ExistingMosipVCItemEvents.REVOKE_VC());
       setRevoking(false);
     },
     setReAuthenticating,
     setRevoking,
     onError,
     addtoWallet: () => {
-      vcItemActor.send(VcItemEvents.ADD_WALLET_BINDING_ID());
+      vcItemActor.send(ExistingMosipVCItemEvents.ADD_WALLET_BINDING_ID());
     },
     lockVc: () => {
-      vcItemActor.send(VcItemEvents.LOCK_VC());
+      vcItemActor.send(ExistingMosipVCItemEvents.LOCK_VC());
     },
     inputOtp: (otp: string) => {
       netInfoFetch(otp);
@@ -160,22 +160,25 @@ export function useViewVcModal({
     revokeVc: (otp: string) => {
       netInfoFetch(otp);
     },
-    ADD_WALLET: () => vcItemActor.send(VcItemEvents.ADD_WALLET_BINDING_ID()),
+    ADD_WALLET: () =>
+      vcItemActor.send(ExistingMosipVCItemEvents.ADD_WALLET_BINDING_ID()),
     onSuccess,
-    EDIT_TAG: () => vcItemActor.send(VcItemEvents.EDIT_TAG()),
-    SAVE_TAG: (tag: string) => vcItemActor.send(VcItemEvents.SAVE_TAG(tag)),
-    DISMISS: () => vcItemActor.send(VcItemEvents.DISMISS()),
-    LOCK_VC: () => vcItemActor.send(VcItemEvents.LOCK_VC()),
-    INPUT_OTP: (otp: string) => vcItemActor.send(VcItemEvents.INPUT_OTP(otp)),
-    CANCEL: () => vcItemActor.send(VcItemEvents.CANCEL()),
-    CONFIRM: () => vcItemActor.send(VcItemEvents.CONFIRM()),
+    EDIT_TAG: () => vcItemActor.send(ExistingMosipVCItemEvents.EDIT_TAG()),
+    SAVE_TAG: (tag: string) =>
+      vcItemActor.send(ExistingMosipVCItemEvents.SAVE_TAG(tag)),
+    DISMISS: () => vcItemActor.send(ExistingMosipVCItemEvents.DISMISS()),
+    LOCK_VC: () => vcItemActor.send(ExistingMosipVCItemEvents.LOCK_VC()),
+    INPUT_OTP: (otp: string) =>
+      vcItemActor.send(ExistingMosipVCItemEvents.INPUT_OTP(otp)),
+    CANCEL: () => vcItemActor.send(ExistingMosipVCItemEvents.CANCEL()),
+    CONFIRM: () => vcItemActor.send(ExistingMosipVCItemEvents.CONFIRM()),
   };
 }
 
 export interface ViewVcModalProps extends ModalProps {
   vcItemActor:
     | ActorRefFrom<typeof vcItemMachine>
-    | ActorRefFrom<typeof VCItemMachine>;
+    | ActorRefFrom<typeof EsignetMosipVCItemMachine>;
   onDismiss: () => void;
   onRevokeDelete: () => void;
   activeTab: Number;
