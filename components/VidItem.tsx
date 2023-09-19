@@ -9,7 +9,7 @@ import {
   selectVerifiableCredential,
   selectGeneratedOn,
   selectId,
-  vcItemMachine,
+  ExistingMosipVCItemMachine,
 } from './VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {Column, Row, Text} from './ui';
 import {Theme} from './ui/styleUtils';
@@ -104,5 +104,5 @@ interface VcItemProps {
   margin?: string;
   selectable?: boolean;
   selected?: boolean;
-  onPress?: (vcRef?: ActorRefFrom<typeof vcItemMachine>) => void;
+  onPress?: (vcRef?: ActorRefFrom<typeof ExistingMosipVCItemMachine>) => void;
 }

@@ -9,7 +9,7 @@ import {
 import {createModel} from 'xstate/lib/model';
 import {StoreEvents, StoreResponseEvent} from '../../machines/store';
 import {VcEvents} from '../../machines/vc';
-import {vcItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {ExistingMosipVCItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {AppServices} from '../../shared/GlobalContext';
 import {MY_VCS_STORE_KEY} from '../../shared/constants';
 import {AddVcModalMachine} from './MyVcs/AddVcModalMachine';
@@ -28,7 +28,7 @@ const model = createModel(
       REFRESH: () => ({}),
       VIEW_VC: (
         vcItemActor:
-          | ActorRefFrom<typeof vcItemMachine>
+          | ActorRefFrom<typeof ExistingMosipVCItemMachine>
           | ActorRefFrom<typeof EsignetMosipVCItemMachine>,
       ) => ({
         vcItemActor,

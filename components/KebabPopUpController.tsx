@@ -12,7 +12,7 @@ import {
   selectShowWalletBindingError,
   selectWalletBindingError,
   ExistingMosipVCItemEvents,
-  vcItemMachine,
+  ExistingMosipVCItemMachine,
   selectShowActivities,
 } from './VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {selectActivities} from '../machines/activityLog';
@@ -27,7 +27,7 @@ import {isVCFromOpenId4VCI} from '../shared/openId4VCI/Utils';
 
 export function useKebabPopUp(props) {
   const service = props.service as
-    | ActorRefFrom<typeof vcItemMachine>
+    | ActorRefFrom<typeof ExistingMosipVCItemMachine>
     | ActorRefFrom<typeof EsignetMosipVCItemMachine>;
   const vcEvents =
     props.vcKey !== undefined && isVCFromOpenId4VCI(props?.vcKey)

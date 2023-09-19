@@ -9,7 +9,7 @@ import {ViewVcModal} from './ViewVcModal';
 import {useHomeScreen} from './HomeScreenController';
 import {TabRef} from './HomeScreenMachine';
 import {ActorRefFrom} from 'xstate';
-import {vcItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {ExistingMosipVCItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import LinearGradient from 'react-native-linear-gradient';
 import {isOpenId4VCIEnabled} from '../../shared/openId4VCI/Utils';
 import {EsignetMosipVCItemMachine} from '../../components/VC/EsignetMosipVCItem/EsignetMosipVCItemMachine';
@@ -93,6 +93,6 @@ export interface HomeScreenTabProps {
   isVisible: boolean;
   service: TabRef;
   vcItemActor:
-    | ActorRefFrom<typeof vcItemMachine>
+    | ActorRefFrom<typeof ExistingMosipVCItemMachine>
     | ActorRefFrom<typeof EsignetMosipVCItemMachine>;
 }

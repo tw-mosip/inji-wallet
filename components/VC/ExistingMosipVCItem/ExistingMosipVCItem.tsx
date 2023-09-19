@@ -6,7 +6,7 @@ import {
   createVcItemMachine,
   selectVerifiableCredential,
   selectGeneratedOn,
-  vcItemMachine,
+  ExistingMosipVCItemMachine,
   selectContext,
   selectTag,
   selectEmptyWalletBindingId,
@@ -113,8 +113,8 @@ export interface ExistingMosipVCItemProps {
   selectable?: boolean;
   selected?: boolean;
   showOnlyBindedVc?: boolean;
-  onPress?: (vcRef?: ActorRefFrom<typeof vcItemMachine>) => void;
-  onShow?: (vcRef?: ActorRefFrom<typeof vcItemMachine>) => void;
+  onPress?: (vcRef?: ActorRefFrom<typeof ExistingMosipVCItemMachine>) => void;
+  onShow?: (vcRef?: ActorRefFrom<typeof ExistingMosipVCItemMachine>) => void;
   activeTab?: string;
   iconName?: string;
   iconType?: string;

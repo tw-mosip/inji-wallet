@@ -15,7 +15,7 @@ import {
   selectIsLoggingRevoke,
   selectVc,
   ExistingMosipVCItemEvents,
-  vcItemMachine,
+  ExistingMosipVCItemMachine,
   selectWalletBindingError,
   selectRequestBindingOtp,
   selectAcceptingBindingOtp,
@@ -177,7 +177,7 @@ export function useViewVcModal({
 
 export interface ViewVcModalProps extends ModalProps {
   vcItemActor:
-    | ActorRefFrom<typeof vcItemMachine>
+    | ActorRefFrom<typeof ExistingMosipVCItemMachine>
     | ActorRefFrom<typeof EsignetMosipVCItemMachine>;
   onDismiss: () => void;
   onRevokeDelete: () => void;

@@ -78,7 +78,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
   {
     predictableActionArguments: true,
     preserveActionOrder: true,
-    tsTypes: {} as import('./VCItemMachine.typegen').Typegen0,
+    tsTypes: {} as import('./EsignetMosipVCItemMachine.typegen').Typegen0,
     schema: {
       context: model.initialContext,
       events: {} as EventFrom<typeof model>,

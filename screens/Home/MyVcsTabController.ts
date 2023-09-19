@@ -11,7 +11,7 @@ import {
   selectWalletBindingError,
   selectShowWalletBindingError,
 } from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
-import {vcItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {ExistingMosipVCItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {GlobalContext} from '../../shared/GlobalContext';
 import {HomeScreenTabProps} from './HomeScreen';
 import {
@@ -68,7 +68,7 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
 
     VIEW_VC: (
       vcRef:
-        | ActorRefFrom<typeof vcItemMachine>
+        | ActorRefFrom<typeof ExistingMosipVCItemMachine>
         | ActorRefFrom<typeof EsignetMosipVCItemMachine>,
     ) => {
       return service.send(MyVcsTabEvents.VIEW_VC(vcRef));

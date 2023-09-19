@@ -99,7 +99,7 @@ export const ExistingMosipVCItemMachine =
     {
       predictableActionArguments: true,
       preserveActionOrder: true,
-      tsTypes: {} as import('./vcItem.typegen').Typegen0,
+      tsTypes: {} as import('./ExistingMosipVCItemMachine.typegen').Typegen0,
       schema: {
         context: model.initialContext,
         events: {} as EventFrom<typeof model>,

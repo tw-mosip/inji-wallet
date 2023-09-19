@@ -25,7 +25,7 @@ import {
   selectEssentialClaims,
 } from '../../machines/QrLoginMachine';
 import {selectBindedVcsMetadata} from '../../machines/vc';
-import {vcItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {ExistingMosipVCItemMachine} from '../../components/VC/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {GlobalContext} from '../../shared/GlobalContext';
 import {VC} from '../../types/vc';
 import {QrLoginProps} from './QrLogin';
@@ -45,7 +45,8 @@ export function useQrLogin({service}: QrLoginProps) {
 
   return {
     SELECT_VC_ITEM:
-      (index: number) => (vcRef: ActorRefFrom<typeof vcItemMachine>) => {
+      (index: number) =>
+      (vcRef: ActorRefFrom<typeof ExistingMosipVCItemMachine>) => {
         setSelectedIndex(index);
         const vcData = vcRef.getSnapshot().context;
         SELECT_VC(vcData);
