@@ -4,7 +4,7 @@ import {Dimensions} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {Theme} from '../../ui/styleUtils';
 import {Row, Text} from '../../ui';
-import {VerifiableCredential} from '../../../types/vc';
+import {VerifiableCredential} from './vc';
 
 const WalletUnverifiedIcon: React.FC = () => {
   return (

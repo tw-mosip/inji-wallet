@@ -2,9 +2,9 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {Dimensions} from 'react-native';
 import {Icon} from 'react-native-elements';
-import {VerifiableCredential} from '../../../types/vc';
 import {Row, Text} from '../../ui';
 import {Theme} from '../../ui/styleUtils';
+import {VerifiableCredential} from './vc';
 
 const WalletUnverifiedIcon: React.FC = () => {
   return (

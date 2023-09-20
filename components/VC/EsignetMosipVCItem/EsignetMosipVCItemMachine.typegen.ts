@@ -92,7 +92,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.updatingPrivateKey:invocation[0]';
   };
   missingImplementations: {
-    actions: 'clearTransactionId' | 'setVcKey';
+    actions: 'clearTransactionId';
     delays: never;
     guards: never;
     services: never;
@@ -121,6 +121,7 @@ export interface Typegen0 {
     requestStoredContext: 'GET_VC_RESPONSE' | 'REFRESH';
     requestVcContext: 'DISMISS' | 'xstate.init';
     sendVcUpdated: 'STORE_RESPONSE';
+    setGeneratedOn: 'GET_VC_RESPONSE' | 'STORE_RESPONSE';
     setOtp: 'INPUT_OTP';
     setPinCard: 'PIN_CARD';
     setPrivateKey:

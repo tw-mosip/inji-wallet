@@ -1,4 +1,4 @@
-import {authorize} from 'react-native-app-auth';
+import {authorize, AuthorizeResult} from 'react-native-app-auth';
 import {assign, EventFrom, send, sendParent, StateFrom} from 'xstate';
 import {createModel} from 'xstate/lib/model';
 import {Theme} from '../components/ui/styleUtils';
@@ -14,17 +14,17 @@ import SecureKeystore from 'react-native-secure-keystore';
 import {KeyPair} from 'react-native-rsa-native';
 import {ActivityLogEvents} from './activityLog';
 import {log} from 'xstate/lib/actions';
-import {VerifiableCredentialWithFormat} from '../types/vc';
 import {verifyCredential} from '../shared/vcjs/verifyCredential';
 import {getBody, getIdentifier} from '../shared/openId4VCI/Utils';
 import {VCMetadata} from '../shared/VCMetadata';
+import {VerifiableCredential} from '../components/VC/EsignetMosipVCItem/vc';
 
 const model = createModel(
   {
     issuers: [] as issuerType[],
     selectedIssuer: [] as issuerType[],
-    tokenResponse: [] as [],
-    errorMessage: null as string,
+    tokenResponse: {} as AuthorizeResult,
+    errorMessage: '' as string,
     loadingReason: 'displayIssuers' as string,
     verifiableCredential: null as VerifiableCredentialWithFormat,
     serviceRefs: {} as AppServices,
@@ -328,7 +328,7 @@ export const IssuersMachine = model.createMachine(
         loadingReason: 'settingUp',
       }),
       setVerifiableCredential: model.assign({
-        verifiableCredential: (_, event) => event.data,
+        verifiableCredential: (_, event) => event.data as VerifiableCredential,
       }),
       setPublicKey: assign({
         publicKey: (context, event) => {

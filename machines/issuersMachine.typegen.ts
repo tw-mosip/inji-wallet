@@ -2,7 +2,7 @@
 
 export interface Typegen0 {
   '@@xstate/typegen': true;
-  'internalEvents': {
+  internalEvents: {
     'done.invoke.issuersMachine.displayIssuers:invocation[0]': {
       type: 'done.invoke.issuersMachine.displayIssuers:invocation[0]';
       data: unknown;
@@ -41,9 +41,9 @@ export interface Typegen0 {
       type: 'error.platform.issuersMachine.performAuthorization:invocation[0]';
       data: unknown;
     };
-    'xstate.init': { type: 'xstate.init' };
+    'xstate.init': {type: 'xstate.init'};
   };
-  'invokeSrcNameMap': {
+  invokeSrcNameMap: {
     downloadCredential: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
     downloadIssuerConfig: 'done.invoke.issuersMachine.downloadIssuerConfig:invocation[0]';
     downloadIssuersList: 'done.invoke.issuersMachine.displayIssuers:invocation[0]';
@@ -51,18 +51,17 @@ export interface Typegen0 {
     invokeAuthorization: 'done.invoke.issuersMachine.performAuthorization:invocation[0]';
     verifyCredential: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
   };
-  'missingImplementations': {
+  missingImplementations: {
     actions: never;
     delays: never;
     guards: never;
     services: never;
   };
-  'eventsCausingActions': {
+  eventsCausingActions: {
     getKeyPairFromStore: 'done.invoke.issuersMachine.performAuthorization:invocation[0]';
     loadKeyPair: 'done.invoke.issuersMachine.performAuthorization:invocation[0]';
     logDownloaded: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
     resetError: 'RESET_ERROR' | 'TRY_AGAIN';
-    setCredential: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
     setError: 'error.platform.issuersMachine.displayIssuers:invocation[0]';
     setIssuers: 'done.invoke.issuersMachine.displayIssuers:invocation[0]';
     setPrivateKey: 'done.invoke.issuersMachine.generateKeyPair:invocation[0]';
@@ -75,12 +74,12 @@ export interface Typegen0 {
     storeVerifiableCredentialData: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
     storeVerifiableCredentialMeta: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
   };
-  'eventsCausingDelays': {};
-  'eventsCausingGuards': {
+  eventsCausingDelays: {};
+  eventsCausingGuards: {
     hasKeyPair: 'CHECK_KEY_PAIR';
     isCustomSecureKeystore: 'done.invoke.issuersMachine.generateKeyPair:invocation[0]';
   };
-  'eventsCausingServices': {
+  eventsCausingServices: {
     downloadCredential:
       | 'CHECK_KEY_PAIR'
       | 'done.invoke.issuersMachine.generateKeyPair:invocation[0]'
@@ -91,7 +90,7 @@ export interface Typegen0 {
     invokeAuthorization: 'done.invoke.issuersMachine.downloadIssuerConfig:invocation[0]';
     verifyCredential: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
   };
-  'matchesStates':
+  matchesStates:
     | 'checkKeyPair'
     | 'displayIssuers'
     | 'done'
@@ -104,5 +103,5 @@ export interface Typegen0 {
     | 'selectingIssuer'
     | 'storing'
     | 'verifyingCredential';
-  'tags': never;
+  tags: never;
 }

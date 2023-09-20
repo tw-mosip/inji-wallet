@@ -6,9 +6,9 @@ import {Column, Row, Text} from '../../ui';
 import {Theme} from '../../ui/styleUtils';
 import VerifiedIcon from '../../VerifiedIcon';
 import {getLocalizedField} from '../../../i18n';
-import {VerifiableCredential} from '../../../types/vc';
+import {Credential, VerifiableCredential} from './vc';
 
-const getDetails = (arg1, arg2, credential) => {
+const getDetails = (arg1: string, arg2: string, credential: Credential) => {
   if (arg1 === 'Status') {
     return (
       <Column>
@@ -84,13 +84,6 @@ export const EsignetMosipVCItemContent: React.FC<
       onPress={() => props.onPress()}
     />
   ) : null;
-
-  function getSource() {
-    if (!props.credential) {
-      return Theme.ProfileIcon;
-    }
-    return {uri: props.credential?.credential.credentialSubject.face};
-  }
 
   return (
     <ImageBackground

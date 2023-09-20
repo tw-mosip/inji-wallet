@@ -2,7 +2,7 @@ import {assign, ErrorPlatformEvent, EventFrom, send, StateFrom} from 'xstate';
 import {createModel} from 'xstate/lib/model';
 import {AppServices} from '../../../shared/GlobalContext';
 import {VCMetadata} from '../../../shared/VCMetadata';
-import {VC, VerifiableCredentialWithFormat} from '../../../types/vc';
+import {VC} from '../../../types/vc';
 import {
   generateKeys,
   isCustomSecureKeystore,
@@ -22,14 +22,14 @@ import {
 import {ActivityLogEvents} from '../../../machines/activityLog';
 import {request} from '../../../shared/request';
 import SecureKeystore from 'react-native-secure-keystore';
+import {VerifiableCredential} from './vc';
 
 const model = createModel(
   {
     serviceRefs: {} as AppServices,
     vcMetadata: {} as VCMetadata,
-    //TODO: set it in issuersMachine
-    generatedOn: null as Date,
-    verifiableCredential: null as VerifiableCredentialWithFormat,
+    generatedOn: new Date() as Date,
+    verifiableCredential: null as VerifiableCredential,
     isPinned: false,
     hashedId: '',
 
@@ -589,7 +589,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
             type: 'VC_DOWNLOADED',
             timestamp: Date.now(),
             deviceName: '',
-            vcLabel: data.tag || data.id,
+            vcLabel: data.id,
           });
         },
         {
@@ -603,7 +603,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
             type: 'WALLET_BINDING_SUCCESSFULL',
             timestamp: Date.now(),
             deviceName: '',
-            vcLabel: context.tag || context.id,
+            vcLabel: context.id,
           }),
         {
           to: context => context.serviceRefs.activityLog,
@@ -617,7 +617,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
             type: 'WALLET_BINDING_FAILURE',
             timestamp: Date.now(),
             deviceName: '',
-            vcLabel: context.tag || context.id,
+            vcLabel: context.id,
           }),
         {
           to: context => context.serviceRefs.activityLog,
@@ -740,7 +740,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
 
     guards: {
       hasCredential: (_, event) => {
-        const vc = event.type === 'GET_VC_RESPONSE' ? event.vc : event.response;
+        const vc = event.vc;
         return vc != null;
       },
 

@@ -5,11 +5,6 @@ import {KeyPair} from 'react-native-rsa-native';
 
 import SecureKeystore from 'react-native-secure-keystore';
 import {AppServices} from '../../../shared/GlobalContext';
-import {
-  DecodedCredential,
-  VcIdType,
-  VerifiableCredential,
-} from '../../../types/vc';
 import {VCMetadata} from '../../../shared/VCMetadata';
 import {
   generateKeys,
@@ -28,6 +23,7 @@ import getAllConfigurations, {
 import {ActivityLogEvents} from '../../../machines/activityLog';
 import {request} from '../../../shared/request';
 import {verifyCredential} from '../../../shared/vcjs/verifyCredential';
+import {DecodedCredential, VcIdType, VerifiableCredential} from './vc';
 
 const model = createModel(
   {
@@ -37,7 +33,7 @@ const model = createModel(
     tag: '',
     vcMetadata: {} as VCMetadata,
     myVcs: [] as string[],
-    generatedOn: null as Date,
+    generatedOn: new Date() as Date,
     credential: null as DecodedCredential,
     verifiableCredential: null as VerifiableCredential,
     storeVerifiableCredential: null as VerifiableCredential,

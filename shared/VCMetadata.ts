@@ -1,5 +1,6 @@
 //Regex expression to evaluate if the key is for a VC
 import {VC, VcIdType} from '../types/vc';
+import {VC as EsignetMosipVC} from '../components/VC/EsignetMosipVCItem/vc';
 
 const VC_ITEM_STORE_KEY_REGEX =
   '^vc:(UIN|VID):[a-z0-9]+:[a-z0-9-]+:[true|false]+(:[0-9-]+)?$';
@@ -33,7 +34,7 @@ export class VCMetadata {
     this.id = id;
   }
 
-  static fromVC(vc: Partial<VC>, includeId: boolean) {
+  static fromVC(vc: Partial<VC> | Partial<EsignetMosipVC>, includeId: boolean) {
     return new VCMetadata({
       idType: vc.idType,
       hashedId: vc.hashedId,

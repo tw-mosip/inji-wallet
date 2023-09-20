@@ -8,17 +8,17 @@ import {getLocalizedField} from '../../../i18n';
 import VerifiedIcon from '../../VerifiedIcon';
 import {CREDENTIAL_REGISTRY_EDIT} from 'react-native-dotenv';
 import {TextItem} from '../../ui/TextItem';
-import {formatDistanceToNow} from 'date-fns';
+import {format, formatDistanceToNow, parse} from 'date-fns';
 import DateFnsLocale from 'date-fns/locale';
 import {Icon} from 'react-native-elements';
+import {WalletBindingResponse} from '../../../shared/cryptoutil/cryptoUtil';
 import {
   CredentialSubject,
-  VcIdType,
   VCSharingReason,
+  VcIdType,
   VerifiableCredential,
   VerifiablePresentation,
-} from '../../../types/vc';
-import {WalletBindingResponse} from '../../../shared/cryptoutil/cryptoUtil';
+} from './vc';
 
 export const EsignetMosipVCItemDetails: React.FC<
   EsignetMosipVCItemDetailsProps
@@ -50,7 +50,9 @@ export const EsignetMosipVCItemDetails: React.FC<
               style={Theme.Styles.openCardImage}
             />
 
-            <QrCodeOverlay qrCodeDetailes={String(props.vc.credential)} />
+            <QrCodeOverlay
+              qrCodeDetailes={String(props.vc.verifiableCredential)}
+            />
             <Column margin="20 0 0 0">
               <Image source={Theme.MosipLogo} style={Theme.Styles.logo} />
             </Column>
@@ -116,12 +118,17 @@ export const EsignetMosipVCItemDetails: React.FC<
                     weight="semibold"
                     size="smaller"
                     color={Theme.Colors.Details}>
-                    {new Date(
-                      getLocalizedField(
-                        props.vc?.verifiableCredential.credential
-                          .credentialSubject.dateOfBirth,
+                    {format(
+                      parse(
+                        getLocalizedField(
+                          props.vc?.verifiableCredential.credential
+                            .credentialSubject.dateOfBirth,
+                        ),
+                        'yyyy/MM/dd',
+                        new Date(),
                       ),
-                    ).toLocaleDateString()}
+                      'yyy/MM/dd',
+                    )}
                   </Text>
                 </Column>
               </Column>
@@ -350,7 +357,7 @@ export interface VC {
   id: string;
   idType: VcIdType;
   tag: string;
-  credential: VerifiableCredential;
+  verifiableCredential: VerifiableCredential;
   verifiablePresentation?: VerifiablePresentation;
   generatedOn: Date;
   requestId: string;

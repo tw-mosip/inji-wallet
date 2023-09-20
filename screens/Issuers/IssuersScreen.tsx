@@ -114,7 +114,7 @@ export const IssuersScreen: React.FC<
       )}
       {controller.errorMessage && (
         <Error
-          isVisible={controller.errorMessage !== null}
+          isVisible={controller.errorMessage !== ''}
           title={t(`errors.${controller.errorMessage}.title`)}
           message={t(`errors.${controller.errorMessage}.message`)}
           goBack={goBack}
