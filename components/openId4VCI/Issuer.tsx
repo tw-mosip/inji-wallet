@@ -1,7 +1,9 @@
 import React from 'react';
-import {Image, Pressable, Text} from 'react-native';
+import {Image, Pressable} from 'react-native';
 import {Theme} from '../ui/styleUtils';
 import {useTranslation} from 'react-i18next';
+import testIDProps from '../../shared/commonUtil';
+import {Text} from '../ui/Text';
 
 function isValidURL(urlString) {
   const urlPattern = new RegExp(
@@ -25,6 +27,7 @@ export const Issuer: React.FC<IssuerProps> = (props: IssuerProps) => {
 
   return (
     <Pressable
+      {...testIDProps(props.testID)}
       onPress={props.onPress}
       style={({pressed}) =>
         pressed
@@ -38,13 +41,16 @@ export const Issuer: React.FC<IssuerProps> = (props: IssuerProps) => {
             ]
       }>
       <Image
+        {...testIDProps('issuerIcon')}
         style={Theme.issuersScreenStyles.issuerIcon}
         source={getSource()}
       />
-      <Text style={Theme.issuersScreenStyles.issuerHeading}>
+      <Text testID="heading" style={Theme.issuersScreenStyles.issuerHeading}>
         {t('itemHeading', {issuer: props.displayName})}
       </Text>
-      <Text style={Theme.issuersScreenStyles.issuerDescription}>
+      <Text
+        testID="description"
+        style={Theme.issuersScreenStyles.issuerDescription}>
         {t('itemSubHeading')}
       </Text>
     </Pressable>
@@ -56,4 +62,5 @@ interface IssuerProps {
   displayName: string;
   logoUrl: string;
   onPress: () => void;
+  testID: string;
 }

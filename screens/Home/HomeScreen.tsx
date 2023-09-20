@@ -13,6 +13,7 @@ import {ExistingMosipVCItemMachine} from '../../components/VC/ExistingMosipVCIte
 import LinearGradient from 'react-native-linear-gradient';
 import {isOpenId4VCIEnabled} from '../../shared/openId4VCI/Utils';
 import {EsignetMosipVCItemMachine} from '../../components/VC/EsignetMosipVCItem/EsignetMosipVCItemMachine';
+import testIDProps from '../../shared/commonUtil';
 
 export const HomeScreen: React.FC<HomeRouteProps> = props => {
   const controller = useHomeScreen(props);
@@ -43,6 +44,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
         colors={Theme.Colors.gradientBtn}
         style={Theme.Styles.downloadFabIcon}>
         <Button
+          testID="downloadIcon"
           icon={plusIcon}
           onPress={() => {
             controller.GOTO_ISSUERS();

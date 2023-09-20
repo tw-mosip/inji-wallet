@@ -4,6 +4,7 @@ import {Image, SafeAreaView, View} from 'react-native';
 import Spinner from 'react-native-spinkit';
 import {Button, Centered, Column, Row, Text} from '../../components/ui';
 import {Theme} from '../../components/ui/styleUtils';
+import testIDProps from '../../shared/commonUtil';
 
 export const Loader: React.FC<ProgressingProps> = props => {
   const {t} = useTranslation('ScanScreen');
@@ -17,11 +18,14 @@ export const Loader: React.FC<ProgressingProps> = props => {
             align={'flex-start'}
             style={Theme.LoaderStyles.titleContainer}>
             <View style={Theme.issuersScreenStyles.loaderHeadingText}>
-              <Text style={Theme.TextStyles.header}>{props.title}</Text>
+              <Text style={Theme.TextStyles.header} testID="loaderTitle">
+                {props.title}
+              </Text>
               {props.subTitle && (
                 <Text
                   style={Theme.TextStyles.subHeader}
-                  color={Theme.Colors.profileValue}>
+                  color={Theme.Colors.profileValue}
+                  testID="loaderSubTitle">
                   {props.subTitle}
                 </Text>
               )}
@@ -36,12 +40,15 @@ export const Loader: React.FC<ProgressingProps> = props => {
             height={2}
             width={2}
             style={{marginLeft: -6}}
+            {...testIDProps('progressingLogo')}
           />
-          <Spinner
-            type="ThreeBounce"
-            color={Theme.Colors.Loading}
-            style={{marginLeft: 6}}
-          />
+          <View {...testIDProps('threeDotsLoader')}>
+            <Spinner
+              type="ThreeBounce"
+              color={Theme.Colors.Loading}
+              style={{marginLeft: 6}}
+            />
+          </View>
         </Column>
 
         <Column style={{display: props.hint ? 'flex' : 'none'}}>

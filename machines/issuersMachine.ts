@@ -242,10 +242,11 @@ export const IssuersMachine = model.createMachine(
             ? 'noInternetConnection'
             : 'generic';
         },
+        loadingReason: null,
       }),
 
       resetError: model.assign({
-        errorMessage: null,
+        errorMessage: '',
       }),
 
       loadKeyPair: assign({

@@ -13,6 +13,7 @@ const getDetails = (arg1: string, arg2: string, credential: Credential) => {
     return (
       <Column>
         <Text
+          testID="status"
           weight="bold"
           size="smaller"
           color={
@@ -24,6 +25,7 @@ const getDetails = (arg1: string, arg2: string, credential: Credential) => {
         </Text>
         <Row>
           <Text
+            testID="valid"
             numLines={1}
             color={Theme.Colors.Details}
             weight="bold"
@@ -107,6 +109,7 @@ export const EsignetMosipVCItemContent: React.FC<
               style={Theme.Styles.closeCardImage}>
               {props.iconName && (
                 <Icon
+                  {...testIDProps('pinIcon')}
                   name={props.iconName}
                   type={props.iconType}
                   color={Theme.Colors.Icon}

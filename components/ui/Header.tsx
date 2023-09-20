@@ -1,12 +1,13 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import { Icon } from 'react-native-elements';
-import { Column, Row } from './Layout';
-import { Theme } from './styleUtils';
+import {Text, TouchableOpacity, View} from 'react-native';
+import {Icon} from 'react-native-elements';
+import {Column, Row} from './Layout';
+import {Theme} from './styleUtils';
+import testIDProps from '../../shared/commonUtil';
 
-export const Header: React.FC<HeaderProps> = ({ goBack, title }) => {
+export const Header: React.FC<HeaderProps> = ({goBack, title, testID}) => {
   return (
-    <Column safe align="center">
+    <Column safe align="center" testID={testID}>
       <Row elevation={2}>
         <View
           style={{
@@ -17,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ goBack, title }) => {
             marginBottom: 22,
             marginVertical: 16,
           }}>
-          <TouchableOpacity onPress={goBack}>
+          <TouchableOpacity onPress={goBack} {...testIDProps('goBack')}>
             <Icon
               name="arrow-left"
               type="material-community"
@@ -31,8 +32,12 @@ export const Header: React.FC<HeaderProps> = ({ goBack, title }) => {
           </TouchableOpacity>
           <Row fill align={'center'}>
             <Column>
-              <View style={{ alignItems: 'center', marginLeft: -40 }}>
-                <Text style={Theme.TextStyles.semiBoldHeader}>{title}</Text>
+              <View style={{alignItems: 'center', marginLeft: -40}}>
+                <Text
+                  style={Theme.TextStyles.semiBoldHeader}
+                  {...testIDProps('title')}>
+                  {title}
+                </Text>
               </View>
             </Column>
           </Row>
@@ -43,6 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ goBack, title }) => {
 };
 
 interface HeaderProps {
-  title: string;
+  title?: string;
   goBack: () => void;
+  testID: string;
 }

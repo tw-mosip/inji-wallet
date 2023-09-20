@@ -74,6 +74,7 @@ export const EsignetMosipVCItem: React.FC<EsignetMosipVCItemProps> = props => {
               )}
             <Pressable onPress={KEBAB_POPUP}>
               <KebabPopUp
+                testID="ellipsis"
                 vcMetadata={props.vcMetadata}
                 iconName="dots-three-horizontal"
                 iconType="entypo"

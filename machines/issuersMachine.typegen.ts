@@ -68,6 +68,7 @@ export interface Typegen0 {
     setPublicKey: 'done.invoke.issuersMachine.generateKeyPair:invocation[0]';
     setSelectedIssuers: 'done.invoke.issuersMachine.downloadIssuerConfig:invocation[0]';
     setTokenResponse: 'done.invoke.issuersMachine.performAuthorization:invocation[0]';
+    setVerifiableCredential: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
     storeKeyPair: 'done.invoke.issuersMachine.generateKeyPair:invocation[0]';
     storeVcMetaContext: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
     storeVcsContext: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';

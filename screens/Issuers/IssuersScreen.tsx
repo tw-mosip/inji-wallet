@@ -10,6 +10,7 @@ import {RootRouteProps} from '../../routes';
 import {HomeRouteProps} from '../../routes/main';
 import {useIssuerScreenController} from './IssuerScreenController';
 import {Loader} from './Loader';
+import testIDProps from '../../shared/commonUtil';
 
 export const IssuersScreen: React.FC<
   HomeRouteProps | RootRouteProps
@@ -18,25 +19,29 @@ export const IssuersScreen: React.FC<
   const {t} = useTranslation('IssuersScreen');
 
   useLayoutEffect(() => {
-    if (!controller.loadingReason) {
+    if (controller.loadingReason || controller.errorMessage) {
       props.navigation.setOptions({
-        headerShown: true,
-        header: props => (
-          <Header goBack={props.navigation.goBack} title={t('title')} />
-        ),
+        headerShown: false,
       });
     } else {
       props.navigation.setOptions({
-        headerShown: false,
+        headerShown: true,
+        header: props => (
+          <Header
+            goBack={props.navigation.goBack}
+            title={t('title')}
+            testID="issuersScreenHeader"
+          />
+        ),
       });
     }
 
     if (controller.isStoring) {
       props.navigation.goBack();
     }
-  }, [controller.loadingReason, controller.isStoring]);
+  }, [controller.loadingReason, controller.errorMessage, controller.isStoring]);
 
-  const onPressHandler = id => {
+  const onPressHandler = (id: string) => {
     if (id !== 'UIN, VID, AID') {
       controller.SELECTED_ISSUER(id);
     } else {
@@ -61,10 +66,16 @@ export const IssuersScreen: React.FC<
         <Image
           source={Theme.SomethingWentWrong}
           style={{width: 370, height: 150}}
+          {...testIDProps('somethingWentWrongImage')}
         />
       );
     }
-    return <Image source={Theme.NoInternetConnection} />;
+    return (
+      <Image
+        {...testIDProps('noInternetConnectionImage')}
+        source={Theme.NoInternetConnection}
+      />
+    );
   };
 
   if (controller.loadingReason) {
@@ -83,6 +94,7 @@ export const IssuersScreen: React.FC<
       {controller.issuers.length > 0 && (
         <Column style={Theme.issuersScreenStyles.issuerListOuterContainer}>
           <Text
+            {...testIDProps('addCardDescription')}
             style={{
               ...Theme.TextStyles.regularGrey,
               marginVertical: 14,
@@ -97,6 +109,7 @@ export const IssuersScreen: React.FC<
                 scrollEnabled={false}
                 renderItem={({item}) => (
                   <Issuer
+                    testID={`issuer-${item.id}`}
                     key={item.id}
                     id={item.id}
                     displayName={item.displayName}
@@ -114,6 +127,7 @@ export const IssuersScreen: React.FC<
       )}
       {controller.errorMessage && (
         <Error
+          testID={`${controller.errorMessage}Error`}
           isVisible={controller.errorMessage !== ''}
           title={t(`errors.${controller.errorMessage}.title`)}
           message={t(`errors.${controller.errorMessage}.message`)}
