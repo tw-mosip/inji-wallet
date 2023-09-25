@@ -172,5 +172,5 @@ platform :ios do
      skip_archive: true,
      skip_package_ipa: true
    )
-  end
+  end 
 end
