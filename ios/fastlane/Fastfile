@@ -159,18 +159,19 @@ platform :ios do
   end
 
   lane :build_app_for_simulator do
-   build_app(
-     workspace: "Inji.xcworkspace",
-     scheme: "Inji",
-     configuration: "Release",
-     clean: true,
-     sdk: "iphonesimulator",
-     build_path: "./build",
-     derived_data_path: "./DerivedData",
-     destination: "generic/platform=iOS Simulator",
-     skip_codesigning: true,
-     skip_archive: true,
-     skip_package_ipa: true
-   )
-  end 
+
+    custom_output_directory = "./Inji_app_file"
+    sh("mkdir -p '#{custom_output_directory}'")
+
+    archive_path = gym(
+    skip_package_ipa: true,
+    destination: "generic/platform=iOS Simulator",
+    configuration: "Release",
+    build_path: "./build",
+    )
+
+    find_command = "find '../build/' -type d -name 'Applications'"
+    app_path = sh(find_command, log: false).strip
+    sh("cp -R '#{app_path}' '#{custom_output_directory}/Inji'")
+   end 
 end
