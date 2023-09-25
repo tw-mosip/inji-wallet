@@ -50,7 +50,7 @@ jobs:
           pod install
           pod install
 
-     - name: Build iOS for simulator
+      - name: Build iOS for simulator
         run: |
           cd ios
           fastlane build_app_for_simulator
