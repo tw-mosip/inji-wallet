@@ -17,11 +17,13 @@ export const AboutInji: React.FC<AboutInjiProps> = ({appId}) => {
 
   const [showAboutInji, setShowAboutInji] = useState(false);
   const [aboutInjiUrl, setAboutInjiUrl] = useState('');
+  const password = 'qwertyu@123456';
 
   useEffect(() => {
     getAllConfigurations().then(response => {
       setAboutInjiUrl(response.aboutInjiUrl);
     });
+    console.log('Password ', password);
   }, []);
 
   return (
@@ -110,7 +112,6 @@ export const AboutInji: React.FC<AboutInjiProps> = ({appId}) => {
   );
 };
 
-// added a comment for tailman check
 interface AboutInjiProps {
   isVisible?: boolean;
   appId?: string;
