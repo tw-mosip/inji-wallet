@@ -110,6 +110,7 @@ export const AboutInji: React.FC<AboutInjiProps> = ({appId}) => {
   );
 };
 
+// added a comment for tailman check
 interface AboutInjiProps {
   isVisible?: boolean;
   appId?: string;
