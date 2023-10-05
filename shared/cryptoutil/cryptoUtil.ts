@@ -4,7 +4,7 @@ import getAllConfigurations from '../commonprops/commonProps';
 import {DEBUG_MODE_ENABLED, isIOS} from '../constants';
 import SecureKeystore from 'react-native-secure-keystore';
 import Storage from '../storage';
-import CryptoJS from 'crypto-js';
+import {EncryptedOutput} from './encryptedOutput';
 
 // 5min
 export const AUTH_TIMEOUT = 5 * 60;
@@ -132,7 +132,7 @@ export async function encryptJson(
   }
 
   if (!isCustomSecureKeystore()) {
-    return CryptoJS.AES.encrypt(data, encryptionKey).toString();
+    return encryptWithForge(data, encryptionKey).toString();
   }
   return await SecureKeystore.encryptData(ENCRYPTION_ID, data);
 }
@@ -148,13 +148,40 @@ export async function decryptJson(
     }
 
     if (!isCustomSecureKeystore()) {
-      return CryptoJS.AES.decrypt(encryptedData, encryptionKey).toString(
-        CryptoJS.enc.Utf8,
-      );
+      return decryptWithForge(encryptedData, encryptionKey);
     }
     return await SecureKeystore.decryptData(ENCRYPTION_ID, encryptedData);
   } catch (e) {
     console.error('error decryptJson:', e);
     throw e;
   }
+}
+
+function encryptWithForge(text: string, key: string): EncryptedOutput {
+  const iv = forge.random.getBytesSync(16);
+  const salt = forge.random.getBytesSync(128);
+  const encryptionKey = forge.pkcs5.pbkdf2(key, salt, 4, 16);
+  var cipher = forge.cipher.createCipher('AES-CBC', encryptionKey);
+  cipher.start({iv: iv});
+  cipher.update(forge.util.createBuffer(text));
+  cipher.finish();
+  var cipherText = forge.util.encode64(cipher.output.getBytes());
+  return new EncryptedOutput(
+    cipherText,
+    forge.util.encode64(iv),
+    forge.util.encode64(salt),
+  );
+}
+
+function decryptWithForge(encryptedData: string, key: string): string {
+  const encryptedOutput = EncryptedOutput.fromString(encryptedData);
+  const salt = forge.util.decode64(encryptedOutput.salt);
+  const encryptionKey = forge.pkcs5.pbkdf2(key, salt, 4, 16);
+  const decipher = forge.cipher.createDecipher('AES-CBC', encryptionKey);
+  decipher.start({iv: forge.util.decode64(encryptedOutput.iv)});
+  decipher.update(
+    forge.util.createBuffer(forge.util.decode64(encryptedOutput.encryptedData)),
+  );
+  decipher.finish();
+  return decipher.output.toString();
 }
