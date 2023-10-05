@@ -161,9 +161,9 @@ function encryptWithForge(text: string, key: string): EncryptedOutput {
   const iv = forge.random.getBytesSync(16);
   const salt = forge.random.getBytesSync(128);
   const encryptionKey = forge.pkcs5.pbkdf2(key, salt, 4, 16);
-  var cipher = forge.cipher.createCipher('AES-CBC', encryptionKey);
+  const cipher = forge.cipher.createCipher('AES-CBC', encryptionKey);
   cipher.start({iv: iv});
-  cipher.update(forge.util.createBuffer(text));
+  cipher.update(forge.util.createBuffer(text, 'utf8'));
   cipher.finish();
   var cipherText = forge.util.encode64(cipher.output.getBytes());
   return new EncryptedOutput(
