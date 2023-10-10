@@ -1,19 +1,19 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { RefreshControl } from 'react-native';
-import { Centered, Column, Text } from '../../components/ui';
-import { Icon } from 'react-native-elements';
-import { Theme } from '../../components/ui/styleUtils';
-import { Modal } from '../../components/ui/Modal';
-import { VcItem } from '../../components/VcItem';
-import { ViewVcModal } from '../Home/ViewVcModal';
+import {useTranslation} from 'react-i18next';
+import {RefreshControl} from 'react-native';
+import {Centered, Column, Text} from '../../components/ui';
+import {Icon} from 'react-native-elements';
+import {Theme} from '../../components/ui/styleUtils';
+import {Modal} from '../../components/ui/Modal';
+import {ViewVcModal} from '../Home/ViewVcModal';
+import {VcItemContainer} from '../../components/VC/VcItemContainer';
 
 export const ReceivedCardsModal: React.FC<ReceivedCardsProps> = ({
   isVisible,
   controller,
   onDismiss,
 }) => {
-  const { t } = useTranslation('ReceivedVcsTab');
+  const {t} = useTranslation('ReceivedVcsTab');
   return (
     <Modal
       isVisible={isVisible}
@@ -30,20 +30,20 @@ export const ReceivedCardsModal: React.FC<ReceivedCardsProps> = ({
             onRefresh={controller.REFRESH}
           />
         }>
-        {controller.vcKeys.map((vcKey) => (
-          <VcItem
-            key={vcKey}
-            vcKey={vcKey}
+        {controller.receivedVcsMetadata.map(vcMetadata => (
+          <VcItemContainer
+            key={vcMetadata.getVcKey()}
+            vcMetadata={vcMetadata}
             margin="0 2 8 2"
             isSharingVc
             onPress={controller.VIEW_VC}
           />
         ))}
-        {controller.vcKeys.length === 0 && (
+        {controller.receivedVcsMetadata.length === 0 && (
           <React.Fragment>
             <Centered fill>
               <Icon
-                style={{ marginBottom: 20 }}
+                style={{marginBottom: 20}}
                 size={40}
                 name="sentiment-dissatisfied"
               />

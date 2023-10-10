@@ -1,4 +1,5 @@
 package io.mosip.residentapp;
+import expo.modules.ReactActivityDelegateWrapper;
 
 import android.Manifest;
 import android.content.Context;
@@ -9,10 +10,12 @@ import android.util.Log;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
+import com.facebook.react.ReactActivityDelegate;
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
+import com.facebook.react.defaults.DefaultReactActivityDelegate;
 import expo.modules.ReactActivityDelegateWrapper;
 
 /**
@@ -79,7 +82,7 @@ public class MainActivity extends ReactActivity {
    */
   private static boolean hasPermissions(Context context, String... permissions) {
     for (String permission : permissions) {
-      if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+      if (context.checkCallingOrSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
         return false;
       }
     }
@@ -107,5 +110,21 @@ public class MainActivity extends ReactActivity {
       }
     }
     recreate();
+  }
+
+    /**
+   * Returns the instance of the {@link ReactActivityDelegate}. Here we use a util class {@link
+   * DefaultReactActivityDelegate} which allows you to easily enable Fabric and Concurrent React
+   * (aka React 18) with two boolean flags.
+   */
+  @Override
+  protected ReactActivityDelegate createReactActivityDelegate() {
+    return new ReactActivityDelegateWrapper(this, BuildConfig.IS_NEW_ARCHITECTURE_ENABLED, new DefaultReactActivityDelegate(        this,
+        getMainComponentName(),
+        // If you opted-in for the New Architecture, we enable the Fabric Renderer.
+        DefaultNewArchitectureEntryPoint.getFabricEnabled(), // fabricEnabled
+        // If you opted-in for the New Architecture, we enable Concurrent React (i.e. React 18).
+        DefaultNewArchitectureEntryPoint.getConcurrentReactEnabled() // concurrentRootEnabled
+    ));
   }
 }

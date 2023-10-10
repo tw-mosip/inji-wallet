@@ -2,8 +2,8 @@
 
 export interface Typegen0 {
   '@@xstate/typegen': true;
-  'internalEvents': {
-    '': { type: '' };
+  internalEvents: {
+    '': {type: ''};
     'done.invoke.QrLogin': {
       type: 'done.invoke.QrLogin';
       data: unknown;
@@ -28,10 +28,10 @@ export interface Typegen0 {
     'xstate.after(SHARING_TIMEOUT)#scan.reviewing.sendingVc.inProgress': {
       type: 'xstate.after(SHARING_TIMEOUT)#scan.reviewing.sendingVc.inProgress';
     };
-    'xstate.init': { type: 'xstate.init' };
-    'xstate.stop': { type: 'xstate.stop' };
+    'xstate.init': {type: 'xstate.init'};
+    'xstate.stop': {type: 'xstate.stop'};
   };
-  'invokeSrcNameMap': {
+  invokeSrcNameMap: {
     checkBluetoothPermission: 'done.invoke.scan.checkBluetoothPermission.checking:invocation[0]';
     checkBluetoothState:
       | 'done.invoke.scan.checkBluetoothState.checking:invocation[0]'
@@ -50,13 +50,13 @@ export interface Typegen0 {
     sendVc: 'done.invoke.scan.reviewing.sendingVc:invocation[0]';
     startConnection: 'done.invoke.scan.connecting:invocation[0]';
   };
-  'missingImplementations': {
+  missingImplementations: {
     actions: never;
     delays: never;
     guards: never;
     services: never;
   };
-  'eventsCausingActions': {
+  eventsCausingActions: {
     clearCreatedVp:
       | ''
       | 'BLE_ERROR'
@@ -100,9 +100,9 @@ export interface Typegen0 {
       | 'DISCONNECT'
       | 'DISMISS'
       | 'xstate.after(DESTROY_TIMEOUT)#scan.clearingConnection';
-    setCloseTimeoutHint: 'CANCEL' | 'RETRY';
     setCreatedVp: 'done.invoke.scan.reviewing.creatingVp:invocation[0]';
     setLinkCode: 'SCAN';
+    setPromptHint: 'CANCEL' | 'RETRY';
     setReadyForBluetoothStateCheck: 'BLUETOOTH_PERMISSION_ENABLED';
     setReason: 'UPDATE_REASON';
     setReceiverInfo: 'CONNECTED';
@@ -112,13 +112,14 @@ export interface Typegen0 {
     setShareLogTypeVerified: 'FACE_VALID';
     setStayInProgress:
       | 'STAY_IN_PROGRESS'
-      | 'xstate.after(CONNECTION_TIMEOUT)#scan.connecting.inProgress';
+      | 'xstate.after(CONNECTION_TIMEOUT)#scan.connecting.inProgress'
+      | 'xstate.after(SHARING_TIMEOUT)#scan.reviewing.sendingVc.inProgress';
     setUri: 'SCAN';
     storeLoginItem: 'done.invoke.QrLogin';
     storingActivityLog: 'STORE_RESPONSE';
     toggleShouldVerifyPresence: 'TOGGLE_USER_CONSENT';
   };
-  'eventsCausingDelays': {
+  eventsCausingDelays: {
     CONNECTION_TIMEOUT: 'SCAN';
     DESTROY_TIMEOUT: '' | 'DISMISS' | 'LOCATION_ENABLED';
     SHARING_TIMEOUT:
@@ -126,14 +127,14 @@ export interface Typegen0 {
       | 'FACE_VALID'
       | 'done.invoke.scan.reviewing.creatingVp:invocation[0]';
   };
-  'eventsCausingGuards': {
+  eventsCausingGuards: {
     isIOS: 'BLUETOOTH_STATE_DISABLED' | 'START_PERMISSION_CHECK';
     isMinimumStorageRequiredForAuditEntryReached: 'done.invoke.scan.checkStorage:invocation[0]';
     isOpenIdQr: 'SCAN';
     isQrLogin: 'SCAN';
     uptoAndroid11: '' | 'START_PERMISSION_CHECK';
   };
-  'eventsCausingServices': {
+  eventsCausingServices: {
     QrLogin: 'SCAN';
     checkBluetoothPermission:
       | ''
@@ -156,7 +157,7 @@ export interface Typegen0 {
       | 'done.invoke.scan.reviewing.creatingVp:invocation[0]';
     startConnection: 'SCAN';
   };
-  'matchesStates':
+  matchesStates:
     | 'bluetoothDenied'
     | 'bluetoothPermissionDenied'
     | 'checkBluetoothPermission'
@@ -228,8 +229,8 @@ export interface Typegen0 {
           | 'selectingVc'
           | 'sendingVc'
           | 'verifyingIdentity'
-          | { sendingVc?: 'inProgress' | 'sent' | 'timeout' };
+          | {sendingVc?: 'inProgress' | 'sent' | 'timeout'};
         showQrLogin?: 'idle' | 'navigatingToHistory' | 'storing';
       };
-  'tags': never;
+  tags: never;
 }
