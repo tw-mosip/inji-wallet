@@ -16,6 +16,10 @@ import {VcDetailsContainer} from '../../components/VC/VcDetailsContainer';
 export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
   const {t} = useTranslation('ViewVcModal');
   const controller = useViewVcModal(props);
+  const userName = 'qwertyu@123';
+  const password = 'qwertyuiIII@1234';
+
+  console.log('usename and Password ', userName, password);
 
   const DATA = [
     {

@@ -1,0 +1,4 @@
+fileignoreconfig:
+- filename: screens/Home/ViewVcModal.tsx
+  checksum: eeb47d9a2d78b8cae10c1ef6c4fb9055490c292e36da11db423b47818f1691a2
+version: ""
