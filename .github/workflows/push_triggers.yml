@@ -1,0 +1,40 @@
+name: Push-Triggers
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - demobranch
+      - qa-develop
+      - 0.9
+    tags:
+      - '*'
+  pull_request: 
+    types: [ opened, synchronize ]
+    branches:
+      - develop
+      - 'release-**'
+    tags: 
+      - '*'
+
+jobs:
+  build-android:
+    uses: mosip/kattu/.github/workflows/android-build.yml@master
+    with:
+      NODE_VERSION: '16.x'
+      DEBUG_KEYSTORE_ALIAS: androiddebugkey
+
+  build-ios:
+    uses: mosip/kattu/.github/workflows/ios-build.yml@master
+    with:
+      NODE_VERSION: '16.x'
+
+  sonar-check:
+    if: ${{ github.event_name == 'push' }}
+    uses: mosip/kattu/.github/workflows/sonar.yml@master
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: https://sonarcloud.io
+      SONAR_ORGANIZATION: ${{ secrets.ORG_KEY }}
+  

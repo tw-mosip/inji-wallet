@@ -1,0 +1,51 @@
+name: Android Build
+
+on:
+  workflow_call:
+    inputs:
+      NODE_VERSION:
+        default: '16.x'
+        type: string
+      DEBUG_KEYSTORE_ALIAS:
+        default: androiddebugkey
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Create .env.local file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env.local > android/local.properties
+          echo "BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_ENV
+
+      - name: Generate keystore for build
+        run: |
+          keytool \
+          -genkey -v \
+          -storetype PKCS12 \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -storepass $DEBUG_KEYSTORE_PASSWORD \
+          -keypass $DEBUG_KEYSTORE_PASSWORD \
+          -alias androiddebugkey \
+          -keystore android/app/debug.keystore \
+          -dname "CN=io.mosip.residentapp,OU=,O=,L=,S=,C=US"
+        env:
+          DEBUG_KEYSTORE_PASSWORD: 'dummypassword'
+
+      - name: Create Build
+        run: |
+          cd android/scripts
+          ./verify-build.sh
+        env:
+          DEBUG_KEYSTORE_ALIAS: androiddebugkey
+          DEBUG_KEYSTORE_PASSWORD: 'dummypassword'
