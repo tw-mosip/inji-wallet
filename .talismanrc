@@ -1,3 +1,6 @@
+scopeconfig:
+  - scope: node
+
 fileignoreconfig:
 - filename: package.json
   checksum: 30e3a548809705ba38385a1c286b312629ac5dd7dea0d6e26ffb9daf8def312d
@@ -52,4 +55,4 @@ fileignoreconfig:
 - filename: machines/store.ts
   checksum: 0695d833df9ec1e1f6ae2bd81631630bb1039dec387718acb153bcb843c952cd
 - filename: shared/cryptoutil/cryptoUtil.ts
-  checksum: b785ff3f01ab9530119072c4d38195048bfeee6155c54ea7dd031559acb722f3
+  checksum: 9cfd1b0a32cb82872f43306a2e42f4a1db182633500060f49983fd58bbc1f942
