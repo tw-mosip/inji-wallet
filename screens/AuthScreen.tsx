@@ -11,6 +11,7 @@ import {
   getInteractEventData,
   sendInteractEvent,
   sendStartEvent,
+  TelemetryConstants,
 } from '../shared/telemetry/TelemetryUtils';
 
 export const AuthScreen: React.FC<RootRouteProps> = props => {
@@ -18,9 +19,15 @@ export const AuthScreen: React.FC<RootRouteProps> = props => {
   const controller = useAuthScreen(props);
 
   const handleUsePasscodeButtonPress = () => {
-    sendStartEvent(getStartEventData('App Onboarding'));
+    sendStartEvent(
+      getStartEventData(TelemetryConstants.FlowType.appOnboarding),
+    );
     sendInteractEvent(
-      getInteractEventData('App Onboarding', 'TOUCH', 'Use Passcode Button'),
+      getInteractEventData(
+        TelemetryConstants.FlowType.appOnboarding,
+        TelemetryConstants.InteractEventSubtype.click,
+        'Use Passcode Button',
+      ),
     );
     controller.usePasscode();
   };
@@ -40,12 +47,14 @@ export const AuthScreen: React.FC<RootRouteProps> = props => {
         <Column margin="30 0 0 0">
           <Text
             testID="selectAppUnlockMethod"
+            style={{paddingTop: 3}}
             align="center"
             style={Theme.TextStyles.header}>
             {t('header')}
           </Text>
           <Text
             align="center"
+            style={{paddingTop: 3}}
             weight="semibold"
             color={Theme.Colors.GrayText}
             margin="6 0">

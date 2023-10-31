@@ -15,7 +15,7 @@ import {
 import {
   selectWalletBindingError,
   selectShowWalletBindingError,
-} from '../../machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+} from '../../machines/VCItemMachine/commonSelectors';
 import {ExistingMosipVCItemMachine} from '../../machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {GlobalContext} from '../../shared/GlobalContext';
 import {HomeScreenTabProps} from './HomeScreen';
@@ -26,7 +26,6 @@ import {
   selectIsRequestSuccessful,
   selectGetVcModal,
   selectIsSavingFailedInIdle,
-  selectIsMinimumStorageLimitReached,
   selectIsNetworkOff,
 } from './MyVcsTabMachine';
 import {
@@ -54,10 +53,6 @@ export function useMyVcsTab(props: HomeScreenTabProps) {
     walletBindingError: useSelector(service, selectWalletBindingError),
     isBindingError: useSelector(service, selectShowWalletBindingError),
     isBindingSuccess: useSelector(vcService, selectWalletBindingSuccess),
-    isMinimumStorageLimitReached: useSelector(
-      service,
-      selectIsMinimumStorageLimitReached,
-    ),
     isNetworkOff: useSelector(service, selectIsNetworkOff),
     showHardwareKeystoreNotExistsAlert: useSelector(
       settingsService,

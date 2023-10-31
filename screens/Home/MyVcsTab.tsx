@@ -13,20 +13,14 @@ import {
   MessageOverlay,
 } from '../../components/MessageOverlay';
 import {groupBy} from '../../shared/javascript';
-import {isOpenId4VCIEnabled} from '../../shared/openId4VCI/Utils';
 import {VcItemContainer} from '../../components/VC/VcItemContainer';
 import {BannerNotification} from '../../components/BannerNotification';
 import {
+  TelemetryConstants,
   getErrorEventData,
   sendErrorEvent,
 } from '../../shared/telemetry/TelemetryUtils';
 import {Error} from '../../components/ui/Error';
-import {
-  getInteractEventData,
-  getStartEventData,
-  sendInteractEvent,
-  sendStartEvent,
-} from '../../shared/telemetry/TelemetryUtils';
 
 const pinIconProps = {iconName: 'pushpin', iconType: 'antdesign'};
 
@@ -49,14 +43,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
     GET_INDIVIDUAL_ID({id: '', idType: 'UIN'});
   };
 
-  const onPressHandler = () => {
-    sendStartEvent(getStartEventData('VC Download', {id: 'UIN, VID, AID'}));
-    sendInteractEvent(
-      getInteractEventData('VC Download', 'CLICK', `Download VC Button`),
-    );
-    controller.DOWNLOAD_ID();
-  };
-
   useEffect(() => {
     if (controller.areAllVcsLoaded) {
       controller.RESET_STORE_VC_ITEM_STATUS();
@@ -69,9 +55,9 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
     if (controller.showHardwareKeystoreNotExistsAlert) {
       sendErrorEvent(
         getErrorEventData(
-          'App Onboarding',
-          'does_not_exist',
-          'Some security features will be unavailable as hardware key store is not available',
+          TelemetryConstants.FlowType.appOnboarding,
+          TelemetryConstants.ErrorId.doesNotExist,
+          TelemetryConstants.ErrorMessage.hardwareKeyStore,
         ),
       );
     }
@@ -111,6 +97,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
               <Column
                 scroll
                 margin="0 0 20 0"
+                padding="0 0 100 0"
                 backgroundColor={Theme.Colors.lightGreyBackgroundColor}
                 refreshControl={
                   <RefreshControl
@@ -134,15 +121,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
                   );
                 })}
               </Column>
-              {!isOpenId4VCIEnabled() && (
-                <Button
-                  testID="downloadCard"
-                  type="gradient"
-                  disabled={controller.isRefreshingVcs}
-                  title={t('downloadCard')}
-                  onPress={onPressHandler}
-                />
-              )}
             </React.Fragment>
           )}
           {controller.vcMetadatas.length === 0 && (
@@ -151,40 +129,23 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
                 <Image source={Theme.DigitalIdentityLogo} />
                 <Text
                   testID="bringYourDigitalID"
+                  style={{paddingTop: 3}}
                   align="center"
                   weight="bold"
                   margin="33 0 6 0"
                   lineHeight={1}>
                   {t('bringYourDigitalID')}
                 </Text>
-
-                {isOpenId4VCIEnabled() && (
-                  <Text
-                    style={Theme.TextStyles.bold}
-                    color={Theme.Colors.textLabel}
-                    align="center"
-                    margin="0 12 30 12">
-                    {t('generateVcFABDescription')}
-                  </Text>
-                )}
-                {!isOpenId4VCIEnabled() && (
-                  <React.Fragment>
-                    <Text
-                      style={Theme.TextStyles.bold}
-                      color={Theme.Colors.textLabel}
-                      align="center"
-                      margin="0 12 30 12">
-                      {t('generateVcDescription')}
-                    </Text>
-                    <Button
-                      testID="downloadCard"
-                      type="gradient"
-                      disabled={controller.isRefreshingVcs}
-                      title={t('downloadCard')}
-                      onPress={onPressHandler}
-                    />
-                  </React.Fragment>
-                )}
+                <Text
+                  style={{
+                    ...Theme.TextStyles.bold,
+                    paddingTop: 3,
+                  }}
+                  color={Theme.Colors.textLabel}
+                  align="center"
+                  margin="0 12 30 12">
+                  {t('generateVcFABDescription')}
+                </Text>
               </Column>
             </React.Fragment>
           )}
@@ -226,12 +187,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
         isVisible={controller.isBindingError}
         title={controller.walletBindingError}
         onButtonPress={controller.DISMISS}
-      />
-      <ErrorMessageOverlay
-        translationPath={'MyVcsTab'}
-        isVisible={controller.isMinimumStorageLimitReached}
-        error={'errors.storageLimitReached'}
-        onDismiss={controller.DISMISS}
       />
       <MessageOverlay
         isVisible={controller.isTampered}
