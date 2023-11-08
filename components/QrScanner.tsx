@@ -4,7 +4,7 @@ import {Camera} from 'expo-camera';
 import {BarCodeEvent, BarCodeScanner} from 'expo-barcode-scanner';
 import {Linking, TouchableOpacity, View, Image, Pressable} from 'react-native';
 import {Theme} from './ui/styleUtils';
-import {Column, Button, Text, Centered, Row} from './ui';
+import {Column, Text, Row} from './ui';
 import {GlobalContext} from '../shared/GlobalContext';
 import {useSelector} from '@xstate/react';
 import {selectIsActive} from '../machines/app';
@@ -83,6 +83,7 @@ export const QrScanner: React.FC<QrScannerProps> = props => {
           }}
           onBarCodeScanned={scanned ? undefined : onBarcodeScanned}
           type={cameraType}
+          ratio="16:9"
         />
       </View>
       {props.title && (
