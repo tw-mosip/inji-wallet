@@ -1,13 +1,9 @@
-plugins { 
+plugins {
     id 'com.gladed.androidgitversion' version '0.4.14'
 }
 
 apply plugin: "com.android.application"
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: "com.facebook.react"
-
-import com.android.build.OutputFile
 
 react {
     /* Folders */
@@ -106,9 +102,6 @@ android {
 
     namespace 'io.mosip.residentapp'
 
-    
-    namespace 'io.mosip.residentapp'
-
     defaultConfig {
         applicationId 'io.mosip.residentapp'
         minSdkVersion rootProject.ext.minSdkVersion
@@ -121,7 +114,6 @@ android {
 
         manifestPlaceholders = [
             APP_NAME: APP_NAME_RELEASE,
-            GOOGLE_NEARBY_MESSAGES_API_KEY: "${properties.getProperty('GOOGLE_NEARBY_MESSAGES_API_KEY')}",
             appAuthRedirectScheme: 'io.mosip.residentapp.inji'
         ]
     }
@@ -133,7 +125,7 @@ android {
             include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
     }
-    
+
     signingConfigs {
         release {
             def keystore = file('release.keystore')
@@ -219,6 +211,7 @@ dependencies {
     if (isGifEnabled || isWebpEnabled) {
         implementation 'com.facebook.fresco:fresco:2.0.0'
         implementation 'com.facebook.fresco:imagepipeline-okhttp3:2.0.0'
+        implementation 'com.squareup.okhttp3:okhttp-urlconnection:4.4.1'
     }
 
     if (isGifEnabled) {
@@ -234,7 +227,7 @@ dependencies {
             implementation 'com.facebook.fresco:animated-webp:2.0.0'
         }
     }
-
+    compileOnly project(':react-native-android-location-services-dialog-box')
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
@@ -250,20 +243,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-    // Firebase
-    implementation 'com.google.firebase:firebase-crashlytics:17.3.1'
-    implementation 'com.google.firebase:firebase-analytics:18.0.2'
     implementation 'com.jakewharton.timber:timber:4.7.1'
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
 apply from: "./eas-build.gradle"
-
-try {
-    def servicesJSON = file('google-services.json')
-    if (servicesJSON.text) {
-        apply plugin: 'com.google.gms.google-services'
-    }
-} catch(Exception e) {
-    logger.warn("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
-}

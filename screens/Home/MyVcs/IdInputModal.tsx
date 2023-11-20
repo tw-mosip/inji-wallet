@@ -14,7 +14,7 @@ import {
   TextInput,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native';
-import {individualId} from '../../../shared/constants';
+import {individualId, isIOS} from '../../../shared/constants';
 import {GET_INDIVIDUAL_ID} from '../../../shared/constants';
 import {MessageOverlay} from '../../../components/MessageOverlay';
 import testIDProps from '../../../shared/commonUtil';
@@ -47,7 +47,7 @@ export const IdInputModal: React.FC<IdInputModalProps> = props => {
       headerElevation={2}>
       <KeyboardAvoidingView
         style={{flex: 1}}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        behavior={isIOS() ? 'padding' : 'height'}>
         <Column fill align="space-between" pY={32} pX={24}>
           <Column>
             <Text
@@ -92,7 +92,7 @@ export const IdInputModal: React.FC<IdInputModalProps> = props => {
               type="gradient"
               title={t('generateVc')}
               disabled={!controller.id}
-              margin="24 0 0 0"
+              margin="24 0 6 0"
               onPress={controller.VALIDATE_INPUT}
               loading={controller.isRequestingOtp}
             />
@@ -108,7 +108,7 @@ export const IdInputModal: React.FC<IdInputModalProps> = props => {
                   <Text
                     testID="getItHere"
                     color={Theme.Colors.AddIdBtnBg}
-                    weight="semibold"
+                    weight="bold"
                     size="small"
                     margin="0 0 0 5">
                     {t('getItHere')}

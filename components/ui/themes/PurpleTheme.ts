@@ -1,6 +1,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import {Dimensions, Platform, StyleSheet, ViewStyle} from 'react-native';
+import {Dimensions, StyleSheet, ViewStyle} from 'react-native';
 import {Spacing} from '../styleUtils';
+import {isIOS} from '../../../shared/constants';
 
 const Colors = {
   Black: '#231F20',
@@ -34,9 +35,10 @@ const Colors = {
   DisabledColors: ['#C7C7C7', '#C7C7C7'],
   captureIconBorder: '#F59B4B',
   Purple: '#70308C',
-  LightPurple: '#AEA7FF',
-  TimeoutHintBoxColor: '#FFF7E5',
-  TimoutHintText: '#8B6105',
+  LightPurple: '#F3E2FF',
+  TimeoutHintBoxColor: '#FBF5FF',
+  TimeoutHintBoxBorder: '#FFF7E5',
+  TimoutHintText: '#1C1C1C',
   resendCodeTimer: '#555555',
   uncheckedIcon: '#DBDBDB',
 };
@@ -64,11 +66,7 @@ export const PurpleTheme = {
     whiteBackgroundColor: Colors.White,
     lightGreyBackgroundColor: Colors.LightGrey,
     errorGrayText: Colors.mediumDarkGrey,
-    profileLanguageValue: Colors.Grey,
     aboutVersion: Colors.Gray40,
-    profileAuthFactorUnlock: Colors.Grey,
-    profileLabel: Colors.Black,
-    profileValue: Colors.Grey,
     switchHead: Colors.Purple,
     switchTrackTrue: Colors.LightPurple,
     switchTrackFalse: Colors.Grey,
@@ -92,7 +90,6 @@ export const PurpleTheme = {
     OnboardingCloseIcon: Colors.White,
     WarningIcon: Colors.Warning,
     DefaultToggle: Colors.LightPurple,
-    ProfileIconBg: Colors.LightPurple,
     GrayText: Colors.GrayText,
     gradientBtn: Colors.GradientColors,
     dotColor: Colors.dorColor,
@@ -110,6 +107,8 @@ export const PurpleTheme = {
     statusMessage: Colors.Gray40,
     blackIcon: Colors.Black,
     uncheckedIcon: Colors.uncheckedIcon,
+    settingsLabel: Colors.Black,
+    chevronRightColor: Colors.Grey,
   },
   Styles: StyleSheet.create({
     title: {
@@ -136,17 +135,28 @@ export const PurpleTheme = {
     statusLabel: {
       color: Colors.Gray30,
       fontSize: 12,
+      flexWrap: 'wrap',
+      flexShrink: 1,
     },
     activationTab: {
-      justifyContent: 'space-evenly',
+      justifyContent: 'space-between',
+      display: 'flex',
       alignItems: 'center',
-      marginRight: 20,
-      marginStart: 10,
+      overflow: 'hidden',
+      borderBottomLeftRadius: 10,
+      borderBottomRightRadius: 10,
     },
     kebabIcon: {
+      flex: 3,
+      height: '100%',
+    },
+    kebabPressableContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      width: '100%',
+      height: '100%',
       justifyContent: 'center',
       alignItems: 'center',
-      flex: 1,
     },
     verifiedIconContainer: {
       marginRight: 3,
@@ -224,11 +234,26 @@ export const PurpleTheme = {
     },
     verticalLine: {
       width: 1,
-      height: 30,
       backgroundColor: Colors.Grey,
       marginVertical: 8,
-      marginLeft: -25,
-      marginRight: 12,
+    },
+    verticalLineWrapper: {
+      display: 'flex',
+      flex: 0.1,
+      height: '100%',
+      justifyContent: 'center',
+    },
+    vcActivationStatusContainer: {
+      display: 'flex',
+      flex: 7,
+      alignItems: 'center',
+      width: '100%',
+      height: '100%',
+      padding: 5,
+    },
+    vcActivationDetailsWrapper: {
+      display: 'flex',
+      alignItems: 'flex-start',
     },
     closeCardBgContainer: {
       borderRadius: 10,
@@ -501,12 +526,12 @@ export const PurpleTheme = {
       width: Dimensions.get('window').width * 0.32,
       borderBottomWidth: 1,
       marginBottom: 2,
-      borderColor: Platform.OS === 'ios' ? 'transparent' : Colors.Grey,
-      bottom: Platform.OS === 'ios' ? 50 : 24,
-      height: Platform.OS === 'ios' ? 100 : 'auto',
+      borderColor: isIOS() ? 'transparent' : Colors.Grey,
+      bottom: isIOS() ? 50 : 24,
+      height: isIOS() ? 100 : 'auto',
     },
     idInputBottom: {
-      borderBottomColor: Colors.Orange,
+      borderBottomColor: Colors.Purple,
       borderBottomWidth: 1,
     },
     getId: {
@@ -528,18 +553,32 @@ export const PurpleTheme = {
       borderBottomColor: Colors.platinumGrey,
       borderBottomWidth: 1.3,
     },
-    downloadFabIcon: {
+    downloadFabIconContainer: {
       height: 70,
       width: 70,
       borderRadius: 200,
       padding: 10,
-      backgroundColor: Colors.Purple,
       shadowColor: '#000',
       shadowOpacity: 0.4,
       elevation: 5,
       position: 'absolute',
       bottom: Dimensions.get('window').width * 0.1,
       right: Dimensions.get('window').width * 0.1,
+    },
+    downloadFabIconNormal: {
+      borderRadius: 200,
+      height: 70,
+      width: 70,
+      justifyContent: 'center',
+      position: 'absolute',
+    },
+    downloadFabIconPressed: {
+      borderRadius: 200,
+      height: 70,
+      width: 70,
+      backgroundColor: Colors.Purple,
+      justifyContent: 'center',
+      position: 'absolute',
     },
     boxShadow: generateBoxShadowStyle(),
   }),
@@ -615,14 +654,14 @@ export const PurpleTheme = {
       fontFamily: 'Inter_700Bold',
       fontSize: 18,
       lineHeight: 19,
-      paddingTop: 4,
+      paddingTop: 5,
     },
     subHeader: {
       color: Colors.mediumLightGrayText,
       fontFamily: 'Inter_600SemiBold',
       lineHeight: 19,
       fontSize: 13,
-      paddingTop: 3,
+      paddingTop: 4,
     },
     semiBoldHeader: {
       color: Colors.Black,
@@ -734,6 +773,10 @@ export const PurpleTheme = {
       marginBottom: 17,
       marginTop: 22,
     },
+    heading: {
+      flex: 1,
+      flexDirection: 'column',
+    },
   }),
   ButtonStyles: StyleSheet.create({
     fill: {
@@ -814,6 +857,8 @@ export const PurpleTheme = {
       margin: 21,
       paddingHorizontal: 14,
       paddingVertical: 12,
+      borderWidth: 2,
+      borderColor: Colors.TimeoutHintBoxBorder,
       borderRadius: 12,
     },
     sharedSuccessfully: {
@@ -1142,13 +1187,38 @@ export const PurpleTheme = {
       backgroundColor: Colors.Transparent,
     },
   }),
-  issuersScreenStyles: StyleSheet.create({
+  IssuersScreenStyles: StyleSheet.create({
+    issuersSearchBar: {
+      borderWidth: 1,
+      borderColor: Colors.Gray50,
+      height: Dimensions.get('window').height * 0.055,
+      width: Dimensions.get('window').width * 0.84,
+      paddingLeft: 12,
+      borderLeftWidth: 0,
+      borderTopRightRadius: 9,
+      borderBottomRightRadius: 9,
+    },
+    searchIcon: {
+      justifyContent: 'center',
+      backgroundColor: Colors.Gray50,
+      height: Dimensions.get('window').height * 0.055,
+      width: Dimensions.get('window').width * 0.1,
+      borderColor: Colors.Gray50,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderLeftWidth: 1,
+      borderTopLeftRadius: 9,
+      borderBottomLeftRadius: 9,
+    },
     issuerListOuterContainer: {
       padding: 10,
       flex: 1,
       backgroundColor: Colors.White,
     },
-    issuersContainer: {marginHorizontal: 3},
+    issuersContainer: {
+      marginHorizontal: 3,
+      marginVertical: 5,
+    },
     issuerBoxContainer: {
       margin: 5,
       flex: 1,
@@ -1177,11 +1247,13 @@ export const PurpleTheme = {
       fontFamily: 'Inter_600SemiBold',
       fontSize: 14,
       lineHeight: 17,
+      paddingTop: 1.7,
     },
     issuerDescription: {
       fontSize: 11,
       lineHeight: 14,
       color: Colors.ShadeOfGrey,
+      paddingTop: 1.4,
     },
     issuerIcon: {
       resizeMode: 'contain',
@@ -1190,10 +1262,6 @@ export const PurpleTheme = {
       marginBottom: 9,
       marginTop: 8,
       marginLeft: 2.5,
-    },
-    loaderHeadingText: {
-      flex: 1,
-      flexDirection: 'column',
     },
   }),
   ErrorStyles: StyleSheet.create({
@@ -1226,32 +1294,49 @@ export const PurpleTheme = {
       maxHeight: Dimensions.get('window').height,
     },
   }),
+  BottomTabBarStyle: StyleSheet.create({
+    headerRightContainerStyle: {paddingEnd: 13},
+    headerLeftContainerStyle: {paddingEnd: 13},
+    tabBarLabelStyle: {
+      fontSize: 12,
+      fontFamily: 'Inter_600SemiBold',
+    },
+    tabBarStyle: {
+      display: 'flex',
+      height: 75,
+      paddingHorizontal: 10,
+    },
+    tabBarItemStyle: {
+      height: 83,
+      padding: 11,
+    },
+  }),
 
   ICON_SMALL_SIZE: 16,
   ICON_MID_SIZE: 22,
+  ICON_LARGE_SIZE: 33,
   PinIcon: require('../../../assets/pin_icon.png'),
   CloseCard: require('../../../assets/card_bg.png'),
   CardBackground: require('../../../assets/card_bg.png'),
   OpenCard: require('../../../assets/card_bg.png'),
-  activationPending: require('../../../assets/pending_activation.png'),
-  ProfileIcon: require('../../../purpleAssets/profile_icon.png'),
+  cardFaceIcon: require('../../../purpleAssets/profile_icon.png'),
   MosipSplashLogo: require('../../../assets/icon.png'),
   MosipLogo: require('../../../assets/mosip-logo.png'),
-  CameraFlipIcon: require('../../../assets/camera-flip-icon.png'),
-  ImageCaptureButton: require('../../../assets/capture-button.png'),
+  CameraFlipIcon: require('../../../purpleAssets/camera-flip-icon.png'),
+  ImageCaptureButton: require('../../../purpleAssets/capture-button.png'),
   DomainWarningLogo: require('../../../assets/domain-warning.png'),
   WarningLogo: require('../../../assets/warningLogo.png'),
   OtpLogo: require('../../../purpleAssets/otp-mobile-logo.png'),
   SuccessLogo: require('../../../assets/success-logo.png'),
-  ReceiveCardIcon: require('../../../assets/receive-card-icon.png'),
-  ReceivedCardsIcon: require('../../../assets/received-cards-icon.png'),
-  DigitalIdentityLogo: require('../../../assets/digital-identity-icon.png'),
+  ReceiveCardIcon: require('../../../purpleAssets/receive-card-icon.png'),
+  ReceivedCardsIcon: require('../../../purpleAssets/received-cards-icon.png'),
+  DigitalIdentityLogo: require('../../../purpleAssets/digital-identity-icon.png'),
   InjiLogoWhite: require('../../../assets/inji-logo-white.png'),
-  InjiProgressingLogo: require('../../../assets/progressing-logo.png'),
-  LockIcon: require('../../../assets/lock-icon.png'),
-  InjiHomeLogo: require('../../../assets/inji-home-logo.png'),
+  InjiProgressingLogo: require('../../../purpleAssets/progressing-logo.png'),
+  LockIcon: require('../../../purpleAssets/lock-icon.png'),
+  InjiHomeLogo: require('../../../purpleAssets/inji-home-logo.png'),
   MagnifierZoom: require('../../../assets/magnifier-zoom.png'),
-  HelpIcon: require('../../../assets/help-icon.png'),
+  HelpIcon: require('../../../purpleAssets/help-icon.png'),
   sharingIntro: require('../../../assets/intro-secure-sharing.png'),
   walletIntro: require('../../../assets/intro-wallet-binding.png'),
   IntroScanner: require('../../../assets/intro-scanner.png'),
@@ -1259,7 +1344,6 @@ export const PurpleTheme = {
   protectPrivacy: require('../../../assets/intro-unlock-method.png'),
   NoInternetConnection: require('../../../assets/no-internet-connection.png'),
   SomethingWentWrong: require('../../../assets/something-went-wrong.png'),
-
   elevation(level: ElevationLevel): ViewStyle {
     // https://ethercreative.github.io/react-native-shadow-generator/
 
@@ -1304,17 +1388,16 @@ export const PurpleTheme = {
 };
 
 function generateBoxShadowStyle() {
-  if (Platform.OS === 'ios') {
+  if (isIOS()) {
     return {
       shadowColor: '#000',
       shadowOffset: {width: 1, height: 1.2},
       shadowOpacity: 0.3,
       shadowRadius: 2.5,
     };
-  } else if (Platform.OS === 'android') {
-    return {
-      elevation: 4,
-      shadowColor: '#000',
-    };
   }
+  return {
+    elevation: 4,
+    shadowColor: '#000',
+  };
 }

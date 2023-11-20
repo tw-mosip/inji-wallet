@@ -49,7 +49,7 @@ const getProfileImage = (
       return {uri: props.vc?.credential.biometrics.face};
     }
   }
-  return Theme.ProfileIcon;
+  return Theme.cardFaceIcon;
 };
 
 export const MosipVCItemDetails: React.FC<
@@ -368,7 +368,16 @@ export const MosipVCItemDetails: React.FC<
         props.isBindingPending ? (
           <Column style={Theme.Styles.openCardBgContainer} padding="10">
             <Column margin={'0 0 4 0'} crossAlign={'flex-start'}>
-              <Image source={Theme.activationPending}></Image>
+              <Icon
+                name="shield-alert"
+                color={Theme.Colors.Icon}
+                size={Theme.ICON_LARGE_SIZE}
+                type="material-community"
+                containerStyle={{
+                  marginEnd: 5,
+                  bottom: 1,
+                }}
+              />
               <Text
                 testID="offlineAuthDisabledHeader"
                 style={{flex: 1}}

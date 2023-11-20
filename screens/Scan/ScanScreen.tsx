@@ -1,19 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {
-  ErrorMessageOverlay,
-  MessageOverlay,
-} from '../../components/MessageOverlay';
+import {MessageOverlay} from '../../components/MessageOverlay';
 import {QrScanner} from '../../components/QrScanner';
-import {Button, Centered, Column, Text} from '../../components/ui';
+import {Button, Centered, Column, Text, Row} from '../../components/ui';
 import {Theme} from '../../components/ui/styleUtils';
 import {QrLogin} from '../QrLogin/QrLogin';
 import {useScanScreen} from './ScanScreenController';
 import BluetoothStateManager from 'react-native-bluetooth-state-manager';
-import {Linking, Platform} from 'react-native';
+import {Linking} from 'react-native';
 import {useNavigation, NavigationProp} from '@react-navigation/native';
 import {MainBottomTabParamList} from '../../routes/main';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
+import {isIOS} from '../../shared/constants';
 
 export const ScanScreen: React.FC = () => {
   type ScanScreenNavigation = NavigationProp<MainBottomTabParamList>;
@@ -47,7 +45,11 @@ export const ScanScreen: React.FC = () => {
 
   function noShareableVcText() {
     return (
-      <Text align="center" color={Theme.Colors.errorMessage} margin="0 10">
+      <Text
+        align="center"
+        style={{paddingTop: 3}}
+        color={Theme.Colors.errorMessage}
+        margin="0 10">
         {t('noShareableVcs')}
       </Text>
     );
@@ -56,9 +58,7 @@ export const ScanScreen: React.FC = () => {
   function bluetoothIsOffText() {
     return (
       <Text align="center" color={Theme.Colors.errorMessage} margin="0 10">
-        {t(
-          Platform.OS === 'ios' ? 'bluetoothStateIos' : 'bluetoothStateAndroid',
-        )}
+        {t(isIOS() ? 'bluetoothStateIos' : 'bluetoothStateAndroid')}
       </Text>
     );
   }
@@ -124,6 +124,9 @@ export const ScanScreen: React.FC = () => {
     if (controller.isEmpty) {
       return noShareableVcText();
     }
+    if (controller.selectIsInvalid) {
+      return displayInvalidQRpopup();
+    }
     if (controller.isNearByDevicesPermissionDenied) {
       return allowNearbyDevicesPermissionComponent();
     }
@@ -148,14 +151,42 @@ export const ScanScreen: React.FC = () => {
   function displayStorageLimitReachedError(): React.ReactNode {
     return (
       !controller.isEmpty && (
-        <ErrorMessageOverlay
+        <MessageOverlay
           isVisible={
             controller.isMinimumStorageRequiredForAuditEntryLimitReached
           }
           translationPath={'ScanScreen'}
           error="errors.storageLimitReached"
-          onDismiss={() => navigation.navigate(BOTTOM_TAB_ROUTES.home)}
+          onBackdropPress={() => navigation.navigate(BOTTOM_TAB_ROUTES.home)}
         />
+      )
+    );
+  }
+
+  function displayInvalidQRpopup(): React.ReactNode {
+    return (
+      !controller.isEmpty && (
+        <MessageOverlay
+          isVisible={controller.selectIsInvalid}
+          customHeight={'auto'}
+          title={t('invalidQR')}
+          message
+          onBackdropPress={controller.DISMISS}>
+          <Row>
+            <Button
+              fill
+              type="clear"
+              title={t('common:cancel')}
+              onPress={() => navigation.navigate(BOTTOM_TAB_ROUTES.home)}
+              margin={[0, 8, 0, 0]}
+            />
+            <Button
+              fill
+              title={t('common:tryAgain')}
+              onPress={controller.DISMISS}
+            />
+          </Row>
+        </MessageOverlay>
       )
     );
   }

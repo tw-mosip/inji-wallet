@@ -19,13 +19,10 @@ import {
   getErrorEventData,
   sendErrorEvent,
 } from '../../shared/telemetry/TelemetryUtils';
+import {TelemetryConstants} from '../../shared/telemetry/TelemetryConstants';
+
 import {Error} from '../../components/ui/Error';
-import {
-  getInteractEventData,
-  getStartEventData,
-  sendInteractEvent,
-  sendStartEvent,
-} from '../../shared/telemetry/TelemetryUtils';
+import {useIsFocused} from '@react-navigation/native';
 
 const pinIconProps = {iconName: 'pushpin', iconType: 'antdesign'};
 
@@ -60,21 +57,41 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
     if (controller.showHardwareKeystoreNotExistsAlert) {
       sendErrorEvent(
         getErrorEventData(
-          'App Onboarding',
-          'does_not_exist',
-          'Some security features will be unavailable as hardware key store is not available',
+          TelemetryConstants.FlowType.appOnboarding,
+          TelemetryConstants.ErrorId.doesNotExist,
+          TelemetryConstants.ErrorMessage.hardwareKeyStore,
         ),
       );
     }
-  }, [controller.areAllVcsLoaded, controller.inProgressVcDownloads]);
+
+    if (controller.isTampered) {
+      sendErrorEvent(
+        getErrorEventData(
+          TelemetryConstants.FlowType.appLogin,
+          TelemetryConstants.ErrorId.vcsAreTampered,
+          TelemetryConstants.ErrorMessage.vcsAreTampered,
+        ),
+      );
+    }
+  }, [
+    controller.areAllVcsLoaded,
+    controller.inProgressVcDownloads,
+    controller.isTampered,
+  ]);
 
   let failedVCsList = [];
   controller.downloadFailedVcs.forEach(vc => {
-    failedVCsList.push(`${vc.idType}:${vc.id}\n`);
+    failedVCsList.push(`\n${vc.idType}:${vc.id}`);
   });
   const downloadFailedVcsErrorMessage = `${t(
     'errors.downloadLimitExpires.message',
-  )}\n${failedVCsList}`;
+  )}${failedVCsList}`;
+
+  const isDownloadFailedVcs =
+    useIsFocused() &&
+    controller.downloadFailedVcs.length >= 1 &&
+    !controller.AddVcModalService &&
+    !controller.GetVcModalService;
 
   return (
     <React.Fragment>
@@ -102,6 +119,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
               <Column
                 scroll
                 margin="0 0 20 0"
+                padding="0 0 100 0"
                 backgroundColor={Theme.Colors.lightGreyBackgroundColor}
                 refreshControl={
                   <RefreshControl
@@ -133,6 +151,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
                 <Image source={Theme.DigitalIdentityLogo} />
                 <Text
                   testID="bringYourDigitalID"
+                  style={{paddingTop: 3}}
                   align="center"
                   weight="bold"
                   margin="33 0 6 0"
@@ -140,7 +159,10 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
                   {t('bringYourDigitalID')}
                 </Text>
                 <Text
-                  style={Theme.TextStyles.bold}
+                  style={{
+                    ...Theme.TextStyles.bold,
+                    paddingTop: 3,
+                  }}
                   color={Theme.Colors.textLabel}
                   align="center"
                   margin="0 12 30 12">
@@ -198,7 +220,7 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
       />
 
       <MessageOverlay
-        isVisible={controller.isDownloadLimitExpires}
+        isVisible={isDownloadFailedVcs}
         title={t('errors.downloadLimitExpires.title')}
         message={downloadFailedVcsErrorMessage}
         onButtonPress={controller.DELETE_VC}
