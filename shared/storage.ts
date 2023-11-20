@@ -23,6 +23,7 @@ import {
 } from './constants';
 import FileStorage, {getFilePath, vcDirectoryPath} from './fileStorage';
 import {__AppId} from './GlobalVariables';
+import Realm from 'realm';
 
 export const MMKV = new MMKVLoader().initialize();
 
@@ -31,6 +32,48 @@ export const API_CACHED_STORAGE_KEYS = {
   fetchIssuerConfig: (issuerId: string) =>
     `CACHE_FETCH_ISSUER_CONFIG_${issuerId}`,
 };
+
+const InjiKeyValueSchema: Realm.ObjectSchema = {
+  name: 'KeyValue',
+  properties: {
+    key: 'string',
+    value: 'string',
+  },
+};
+
+const realmConfig = {
+  schema: [InjiKeyValueSchema],
+};
+
+const realm = new Realm(realmConfig);
+
+function storeDataIntoRealm(key: string, data: string) {
+  realm.write(() => {
+    const existingObject = realm
+      .objects('KeyValue')
+      .filtered(`key = "${key}"`)[0];
+    if (existingObject) {
+      existingObject.value = data;
+    } else {
+      realm.create('KeyValue', {
+        key: key,
+        value: data,
+      });
+      console.log(realm.objects('KeyValue').filtered(`key = "${key}"`)[0]);
+    }
+  });
+}
+
+function getDataFromRealm(key: string) {
+  const keyValueObject = realm
+    .objects('KeyValue')
+    .filtered(`key = "${key}"`)[0];
+  if (keyValueObject !== undefined) {
+    return keyValueObject.value;
+  } else {
+    return null;
+  }
+}
 
 async function generateHmac(
   encryptionKey: string,
@@ -64,7 +107,7 @@ class Storage {
         return await this.storeVcHmac(encryptionKey, data, key);
       }
 
-      await MMKV.setItem(key, data);
+      storeDataIntoRealm(key, data);
     } catch (error) {
       console.log('Error Occurred while saving in Storage.', error);
       throw error;
@@ -99,7 +142,7 @@ class Storage {
         return isCorrupted ? null : data;
       }
 
-      return await MMKV.getItem(key);
+      return getDataFromRealm(key);
     } catch (error) {
       const isVCKey = VCMetadata.isVCKey(key);
 
@@ -145,7 +188,7 @@ class Storage {
   }
 
   private static async readHmacForVC(key: string, encryptionKey: string) {
-    const encryptedHMACofCurrentVC = await MMKV.getItem(key);
+    const encryptedHMACofCurrentVC = getDataFromRealm(key);
     if (encryptedHMACofCurrentVC) {
       return decryptJson(encryptionKey, encryptedHMACofCurrentVC);
     }
@@ -170,7 +213,7 @@ class Storage {
     const HMACofVC = await generateHmac(encryptionKey, data);
     console.log('[Inji-406]: Updating hmac of the vc: ', HMACofVC);
     const encryptedHMACofVC = await encryptJson(encryptionKey, HMACofVC);
-    await MMKV.setItem(key, encryptedHMACofVC);
+    storeDataIntoRealm(key, encryptedHMACofVC);
   }
 
   static removeItem = async (key: string) => {
@@ -190,11 +233,11 @@ class Storage {
     try {
       (await FileStorage.exists(`${vcDirectoryPath}`)) &&
         (await FileStorage.removeItem(`${vcDirectoryPath}`));
-      const settings = await MMKV.getItem(SETTINGS_STORE_KEY);
+      const settings = getDataFromRealm(SETTINGS_STORE_KEY);
       const appId = JSON.parse(settings).appId;
       __AppId.setValue(appId);
       MMKV.clearStore();
-      await MMKV.setItem(SETTINGS_STORE_KEY, JSON.stringify({appId: appId}));
+      storeDataIntoRealm(SETTINGS_STORE_KEY, JSON.stringify({appId: appId}));
     } catch (e) {
       console.log('Error Occurred while Clearing Storage.', e);
     }
