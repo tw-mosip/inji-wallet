@@ -82,7 +82,7 @@ export const MosipVCItemDetails: React.FC<
         resizeMode="stretch"
         style={Theme.Styles.openCardBgContainer}
         source={Theme.OpenCard}>
-        <Row align="space-between" padding="10" margin="0 10 0 8">
+        <Row padding="3" margin="0 10 0 8">
           <Column align="space-evenly" crossAlign="center">
             <Image
               source={getProfileImage(
@@ -96,7 +96,7 @@ export const MosipVCItemDetails: React.FC<
             <QrCodeOverlay qrCodeDetailes={String(verifiableCredential)} />
             <Column margin="20 0 0 0">{issuerLogo}</Column>
           </Column>
-          <Column align="space-evenly" padding="10">
+          <Column padding="10" margin="0 15">
             <Column>
               <Text
                 testID="fullNameTitle"
@@ -116,8 +116,9 @@ export const MosipVCItemDetails: React.FC<
                 )}
               </Text>
             </Column>
-            <Row>
-              <Column>
+            <Column>
+              <Row>
+                {/* Gender */}
                 <Column margin="20 0 0 0">
                   <Text
                     testID="gender"
@@ -136,6 +137,26 @@ export const MosipVCItemDetails: React.FC<
                     )}
                   </Text>
                 </Column>
+                {/* Date of Borth */}
+                <Column margin="20 0 0 56">
+                  <Text
+                    testID="dateOfBirth"
+                    weight="regular"
+                    size="smaller"
+                    color={Theme.Colors.DetailsLabel}>
+                    {t('dateOfBirth')}
+                  </Text>
+                  <Text
+                    testID="dateOfBirthValue"
+                    weight="semibold"
+                    size="smaller"
+                    color={Theme.Colors.Details}>
+                    {formattedDateOfBirth()}
+                  </Text>
+                </Column>
+              </Row>
+              <Row>
+                {/* ID Type */}
                 <Column margin="25 0 0 0">
                   <Text
                     testID="idType"
@@ -153,80 +174,8 @@ export const MosipVCItemDetails: React.FC<
                     {t('nationalCard')}
                   </Text>
                 </Column>
-                {uin ? (
-                  <Column margin="25 0 0 0">
-                    <Text
-                      testID="uin"
-                      weight="regular"
-                      size="smaller"
-                      color={Theme.Colors.DetailsLabel}>
-                      {t('uin')}
-                    </Text>
-                    <Text
-                      testID="uinNumber"
-                      weight="semibold"
-                      size="smaller"
-                      color={Theme.Colors.Details}>
-                      {uin}
-                    </Text>
-                  </Column>
-                ) : null}
-
-                {vid ? (
-                  <Column margin="25 0 0 0">
-                    <Text
-                      testID="vid"
-                      weight="regular"
-                      size="smaller"
-                      color={Theme.Colors.DetailsLabel}>
-                      {t('vid')}
-                    </Text>
-                    <Text
-                      testID="vidNumber"
-                      weight="semibold"
-                      size="smaller"
-                      color={Theme.Colors.Details}>
-                      {vid}
-                    </Text>
-                  </Column>
-                ) : null}
-                <Column margin="30 0 0 0">
-                  <Text
-                    testID="generatedOnTitle"
-                    weight="regular"
-                    size="smaller"
-                    color={Theme.Colors.DetailsLabel}>
-                    {t('generatedOn')}
-                  </Text>
-                  <Text
-                    testID="generatedOnValue"
-                    weight="semibold"
-                    size="smaller"
-                    color={Theme.Colors.Details}>
-                    {new Date(props.vc?.generatedOn).toLocaleDateString()}
-                  </Text>
-                </Column>
-              </Column>
-              <Column margin="0 0 0 38">
-                <Column margin="20 0 0 0">
-                  <Text
-                    testID="dateOfBirth"
-                    style={{maxWidth: 121}}
-                    weight="regular"
-                    size="smaller"
-                    color={Theme.Colors.DetailsLabel}>
-                    {t('dateOfBirth')}
-                  </Text>
-                  <Text
-                    testID="dateOfBirthValue"
-                    weight="semibold"
-                    size="smaller"
-                    color={Theme.Colors.Details}>
-                    {formattedDateOfBirth()}
-                  </Text>
-                </Column>
-                <Column
-                  style={{marginTop: Dimensions.get('window').height * 0.04}}>
+                {/* Status */}
+                <Column margin="25 0 0 20">
                   <Text
                     testID="status"
                     weight="regular"
@@ -242,7 +191,6 @@ export const MosipVCItemDetails: React.FC<
                     {props.vc?.isVerified && <VerifiedIcon />}
                     <Text
                       testID="valid"
-                      style={{maxWidth: 63}}
                       weight="semibold"
                       size="smaller"
                       color={Theme.Colors.Details}>
@@ -250,11 +198,67 @@ export const MosipVCItemDetails: React.FC<
                     </Text>
                   </Row>
                 </Column>
-                <Column
-                  style={{marginTop: Dimensions.get('window').height * 0.1}}>
+              </Row>
+
+              {/* UIN or VID */}
+              {uin ? (
+                <Column margin="20 0 0 0">
+                  <Text
+                    testID="uin"
+                    weight="regular"
+                    size="smaller"
+                    color={Theme.Colors.DetailsLabel}>
+                    {t('uin')}
+                  </Text>
+                  <Text
+                    testID="uinNumber"
+                    weight="semibold"
+                    size="smaller"
+                    color={Theme.Colors.Details}>
+                    {uin}
+                  </Text>
+                </Column>
+              ) : null}
+              {vid ? (
+                <Column margin="20 0 0 0">
+                  <Text
+                    testID="vid"
+                    weight="regular"
+                    size="smaller"
+                    color={Theme.Colors.DetailsLabel}>
+                    {t('vid')}
+                  </Text>
+                  <Text
+                    testID="vidNumber"
+                    weight="semibold"
+                    size="smaller"
+                    color={Theme.Colors.Details}>
+                    {vid}
+                  </Text>
+                </Column>
+              ) : null}
+              <Row>
+                {/* Generated On */}
+                <Column margin="20 0 0 0">
+                  <Text
+                    testID="generatedOnTitle"
+                    weight="regular"
+                    size="smaller"
+                    color={Theme.Colors.DetailsLabel}>
+                    {t('generatedOn')}
+                  </Text>
+                  <Text
+                    testID="generatedOnValue"
+                    weight="semibold"
+                    size="smaller"
+                    color={Theme.Colors.Details}>
+                    {new Date(props.vc?.generatedOn).toLocaleDateString()}
+                  </Text>
+                </Column>
+                {/* Phone Number */}
+                <Column margin="20 0 0 8">
                   <Text
                     testID="phoneNumber"
-                    style={{maxWidth: 80}}
                     weight="regular"
                     size="smaller"
                     color={Theme.Colors.DetailsLabel}>
@@ -270,8 +274,8 @@ export const MosipVCItemDetails: React.FC<
                     )}
                   </Text>
                 </Column>
-              </Column>
-            </Row>
+              </Row>
+            </Column>
           </Column>
         </Row>
         <View style={Theme.Styles.hrLine}></View>
