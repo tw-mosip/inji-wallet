@@ -4,7 +4,7 @@ import {Linking} from 'react-native';
 import {assign, EventFrom, StateFrom} from 'xstate';
 import {createModel} from 'xstate/lib/model';
 
-import {faceAuth} from 'mosip-mobileid-sdk';
+import {faceCompare, faceScore} from '@iriscan/biometric-sdk-react-native';
 
 const model = createModel(
   {
@@ -215,12 +215,14 @@ export const createFaceScannerMachine = (vcImage: string) =>
           });
         },
 
-        verifyImage: context => {
+        verifyImage: async context => {
           context.cameraRef.pausePreview();
           const rxDataURI =
             /data:(?<mime>[\w/\-.]+);(?<encoding>\w+),(?<data>.*)/;
           const matches = rxDataURI.exec(vcImage).groups;
-          return faceAuth(context.capturedImage.base64, matches.data);
+          const score = faceScore(context.capturedImage.base64, matches.data);
+          console.log("Face score = ", score);
+          return faceCompare(context.capturedImage.base64, matches.data);
         },
       },
 
