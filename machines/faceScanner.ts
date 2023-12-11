@@ -4,7 +4,11 @@ import {Linking} from 'react-native';
 import {assign, EventFrom, StateFrom} from 'xstate';
 import {createModel} from 'xstate/lib/model';
 
-import {faceCompare, faceScore} from '@iriscan/biometric-sdk-react-native';
+import {
+  faceCompare,
+  faceScore,
+  livenessScore,
+} from '@iriscan/biometric-sdk-react-native';
 
 const model = createModel(
   {
@@ -216,12 +220,14 @@ export const createFaceScannerMachine = (vcImage: string) =>
         },
 
         verifyImage: async context => {
+          const livScore = livenessScore(context.capturedImage.base64);
+          console.log('livScore:::', livScore);
           context.cameraRef.pausePreview();
           const rxDataURI =
             /data:(?<mime>[\w/\-.]+);(?<encoding>\w+),(?<data>.*)/;
           const matches = rxDataURI.exec(vcImage).groups;
           const score = faceScore(context.capturedImage.base64, matches.data);
-          console.log("Face score = ", score);
+          console.log('Face score = ', score);
           return faceCompare(context.capturedImage.base64, matches.data);
         },
       },
