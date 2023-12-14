@@ -19,14 +19,14 @@ import {ActivityLogEvents} from './activityLog';
 import {log} from 'xstate/lib/actions';
 import {verifyCredential} from '../shared/vcjs/verifyCredential';
 import {
-  getBody,
-  vcDownloadTimeout,
-  OIDCErrors,
-  ErrorMessage,
-  updateCredentialInformation,
   constructAuthorizationConfiguration,
+  ErrorMessage,
+  getBody,
   getVCMetadata,
   Issuers_Key_Ref,
+  OIDCErrors,
+  updateCredentialInformation,
+  vcDownloadTimeout,
 } from '../shared/openId4VCI/Utils';
 import {
   getEndEventData,
@@ -576,7 +576,16 @@ export const IssuersMachine = model.createMachine(
       },
       checkInternet: async () => await NetInfo.fetch(),
       downloadIssuerConfig: async (context, _) => {
-        return await CACHED_API.fetchIssuerConfig(context.selectedIssuerId);
+        let issuersConfig = await CACHED_API.fetchIssuerConfig(
+          context.selectedIssuerId,
+        );
+        if (context.selectedIssuer['.well-known']) {
+          await CACHED_API.fetchIssuerWellknownConfig(
+            context.selectedIssuerId,
+            context.selectedIssuer['.well-known'],
+          );
+        }
+        return issuersConfig;
       },
       downloadCredential: async context => {
         const body = await getBody(context);

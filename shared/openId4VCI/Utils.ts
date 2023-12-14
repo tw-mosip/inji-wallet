@@ -8,6 +8,7 @@ import {CredentialWrapper} from '../../types/VC/EsignetMosipVC/vc';
 import {VCMetadata} from '../VCMetadata';
 import i18next from 'i18next';
 import {getJWT} from '../cryptoutil/cryptoUtil';
+import {CACHED_API} from '../api';
 
 export const Protocols = {
   OpenId4VCI: 'OpenId4VCI',
@@ -68,6 +69,11 @@ export const updateCredentialInformation = (context, credential) => {
   credentialWrapper.generatedOn = new Date();
   credentialWrapper.verifiableCredential.issuerLogo =
     getDisplayObjectForCurrentLanguage(context.selectedIssuer.display)?.logo;
+  credentialWrapper.verifiableCredential.wellKnown =
+    context.selectedIssuer['.well-known'];
+  // credentialWrapper.verifiableCredential.wellKnown =
+  //   'https://esignet.collab.mosip.net/.well-known/openid-credential-issuer';
+
   return credentialWrapper;
 };
 
@@ -134,6 +140,23 @@ export const getJWK = async publicKey => {
       e,
     );
   }
+};
+export const getCredentialIssuersWellKnownConfig = async (
+  issuer: string,
+  wellknown: string,
+  defaultFields: string[],
+) => {
+  let response = defaultFields;
+  if (wellknown) {
+    response = await CACHED_API.fetchIssuerWellknownConfig(issuer, wellknown);
+    response = !response
+      ? []
+      : Object.keys(
+          response?.credentials_supported[0].credential_definition
+            .credentialSubject,
+        );
+  }
+  return response;
 };
 
 export const vcDownloadTimeout = async (): Promise<number> => {
