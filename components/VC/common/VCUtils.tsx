@@ -32,6 +32,38 @@ export const getFieldValue = (
   }
 };
 
+export const getFieldName = (field: string, wellknown: any) => {
+  if (wellknown && wellknown.credentials_supported) {
+    const fieldObj =
+      wellknown.credentials_supported[0].credential_definition
+        .credentialSubject[field];
+    if (fieldObj) {
+      const newFieldObj = fieldObj.display.map(obj => {
+        return {language: obj.locale, value: obj.name};
+      });
+      return getLocalizedField(newFieldObj);
+    }
+  }
+  return i18n.t(`VcDetails:${field}`);
+};
+
+export const setBackgroundColour = (wellknown: any) => {
+  if (wellknown && wellknown.credentials_supported[0]?.display) {
+    return {
+      backgroundColor:
+        wellknown.credentials_supported[0].display[0].background_color,
+    };
+  }
+};
+
+export const setTextColor = (wellknown: any) => {
+  if (wellknown && wellknown.credentials_supported[0]?.display) {
+    return {
+      color: wellknown.credentials_supported[0].display[0].text_color,
+    };
+  }
+};
+
 function getFullAddress(credential: CredentialSubject) {
   if (!credential) {
     return '';
@@ -64,8 +96,13 @@ function formattedDateOfBirth(verifiableCredential: any) {
   return dateOfBirth;
 }
 
-export const fieldItemIterator = (fields: any[], verifiableCredential: any) => {
+export const fieldItemIterator = (
+  fields: any[],
+  verifiableCredential: any,
+  wellknown: any,
+) => {
   return fields.map(field => {
+    const fieldName = getFieldName(field, wellknown);
     const fieldValue = getFieldValue(verifiableCredential, field);
     if (!fieldValue) return;
     return (
@@ -76,20 +113,25 @@ export const fieldItemIterator = (fields: any[], verifiableCredential: any) => {
         margin="0 8 5 8">
         <VCItemField
           key={field}
-          fieldName={i18n.t(`VcDetails:${field}`)}
+          fieldName={fieldName}
           fieldValue={fieldValue}
           verifiableCredential={verifiableCredential}
+          wellknown={wellknown}
         />
       </Row>
     );
   });
 };
 
+export const isVCLoaded = (verifiableCredential: any, fields: string[]) => {
+  return verifiableCredential != null && fields.length > 0;
+};
+
 export const getIssuerLogo = (isOpenId4VCI: boolean, issuerLogo: logoType) => {
   if (isOpenId4VCI) {
     return (
       <Image
-        src={issuerLogo?.url}
+        source={{uri: issuerLogo?.url}}
         alt={issuerLogo?.alt_text}
         style={Theme.Styles.issuerLogo}
         resizeMethod="scale"

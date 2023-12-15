@@ -1,8 +1,14 @@
 import {Column, Text} from '../../ui';
 import {Theme} from '../../ui/styleUtils';
 import React from 'react';
+import {setTextColor} from './VCUtils';
 
-export const VCItemField = ({verifiableCredential, fieldName, fieldValue}) => {
+export const VCItemField = ({
+  verifiableCredential,
+  fieldName,
+  fieldValue,
+  wellknown,
+}) => {
   return (
     <Column margin="9 0 0 0">
       <Text
@@ -19,11 +25,12 @@ export const VCItemField = ({verifiableCredential, fieldName, fieldValue}) => {
       <Text
         testID={`${fieldName}Title`}
         weight="semibold"
-        style={
+        style={[
           !verifiableCredential
             ? Theme.Styles.loadingTitle
-            : Theme.Styles.subtitle
-        }>
+            : Theme.Styles.subtitle,
+          setTextColor(wellknown),
+        ]}>
         {fieldValue}
       </Text>
     </Column>

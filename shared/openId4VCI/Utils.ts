@@ -146,17 +146,21 @@ export const getCredentialIssuersWellKnownConfig = async (
   wellknown: string,
   defaultFields: string[],
 ) => {
-  let response = defaultFields;
+  let fields: string[] = defaultFields;
+  let response = null;
   if (wellknown) {
     response = await CACHED_API.fetchIssuerWellknownConfig(issuer, wellknown);
-    response = !response
+    fields = !response
       ? []
       : Object.keys(
           response?.credentials_supported[0].credential_definition
             .credentialSubject,
         );
   }
-  return response;
+  return {
+    wellknown: response,
+    fields: fields,
+  };
 };
 
 export const vcDownloadTimeout = async (): Promise<number> => {

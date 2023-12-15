@@ -2,7 +2,7 @@ import {formatDistanceToNow} from 'date-fns';
 import React, {useEffect, useState} from 'react';
 import * as DateFnsLocale from 'date-fns/locale';
 import {useTranslation} from 'react-i18next';
-import {Image, ImageBackground} from 'react-native';
+import {ActivityIndicator, Image, ImageBackground} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {VC} from '../../../types/VC/ExistingMosipVC/vc';
 import {Button, Column, Row, Text} from '../../ui';
@@ -22,14 +22,18 @@ import {
   DETAIL_VIEW_ADD_ON_FIELDS,
   DETAIL_VIEW_DEFAULT_FIELDS,
 } from '../../../shared/constants';
-import {fieldItemIterator} from '../common/VCUtils';
+import {
+  fieldItemIterator,
+  isVCLoaded,
+  setBackgroundColour,
+} from '../common/VCUtils';
 import {logoType} from '../../../machines/issuersMachine';
 
 const getIssuerLogo = (isOpenId4VCI: boolean, issuerLogo: logoType) => {
   if (isOpenId4VCI) {
     return (
       <Image
-        src={issuerLogo?.url}
+        source={{uri: issuerLogo?.url}}
         alt={issuerLogo?.alt_text}
         style={Theme.Styles.issuerLogo}
       />
@@ -69,20 +73,22 @@ export const MosipVCItemDetails: React.FC<
     ? props.vc?.verifiableCredential.credential
     : props.vc?.verifiableCredential;
 
-  if (verifiableCredential == null) {
-    return <Text align="center">Loading details...</Text>;
-  }
-
   let [fields, setFields] = useState([]);
+  const [wellknown, setWellknown] = useState(null);
   useEffect(() => {
     getCredentialIssuersWellKnownConfig(
       VCMetadata.fromVC(props.vc.vcMetadata).issuer,
       props.vc?.verifiableCredential?.wellKnown,
       DETAIL_VIEW_DEFAULT_FIELDS,
     ).then(response => {
-      setFields(response.concat(DETAIL_VIEW_ADD_ON_FIELDS));
+      setWellknown(response.wellknown);
+      setFields(response.fields.concat(DETAIL_VIEW_ADD_ON_FIELDS));
     });
   }, [props.verifiableCredential?.wellKnown]);
+
+  if (!isVCLoaded(verifiableCredential, fields)) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <Column margin="10 4 10 4">
@@ -90,8 +96,11 @@ export const MosipVCItemDetails: React.FC<
         imageStyle={{width: '100%'}}
         resizeMethod="scale"
         resizeMode="stretch"
-        style={Theme.Styles.openCardBgContainer}
-        source={Theme.OpenCard}>
+        source={Theme.OpenCard}
+        style={[
+          Theme.Styles.openCardBgContainer,
+          setBackgroundColour(wellknown),
+        ]}>
         <Row padding="10" margin="0 10 0 8">
           <Column crossAlign="center">
             <Image
@@ -107,7 +116,7 @@ export const MosipVCItemDetails: React.FC<
             <Column margin="20 0 0 0">{issuerLogo}</Column>
           </Column>
           <Column align="space-evenly" margin={'0 0 0 10'} style={{flex: 1}}>
-            {fieldItemIterator(fields, verifiableCredential)}
+            {fieldItemIterator(fields, verifiableCredential, wellknown)}
           </Column>
         </Row>
       </ImageBackground>

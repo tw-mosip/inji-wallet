@@ -329,6 +329,7 @@ export const DefaultTheme = {
       flex: 1,
       padding: 10,
       overflow: 'hidden',
+      borderRadius: 10,
     },
     successTag: {
       backgroundColor: Colors.Green,

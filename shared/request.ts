@@ -35,7 +35,7 @@ export async function request(
       body: body ? JSON.stringify(body) : undefined,
     });
   } else {
-    console.log(`making a web request to ${host + path}`);
+    console.log(`making a web request to ${requestUrl}`);
     let controller = new AbortController();
     setTimeout(() => {
       controller.abort();
