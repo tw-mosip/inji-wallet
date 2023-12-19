@@ -161,7 +161,7 @@
   "IssuersScreen": {
     "title": "Add new card",
     "description": "Please choose your preferred issuer from the options below to add a new card.",
-    "searchByIssuersName": "Search by Issuer’s name",
+    "searchByIssuersName": "Search here",
     "loaders": {
       "loading": "Loading...",
       "subTitle": {

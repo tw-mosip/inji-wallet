@@ -179,16 +179,6 @@ export const IssuersScreen: React.FC<
     <React.Fragment>
       {controller.issuers.length > 0 && (
         <Column style={Theme.IssuersScreenStyles.issuerListOuterContainer}>
-          <Text
-            {...testIDProps('issuersScreenDescription')}
-            style={{
-              ...Theme.TextStyles.regularGrey,
-              paddingTop: 0.5,
-              marginVertical: 14,
-              marginHorizontal: 9,
-            }}>
-            {t('description')}
-          </Text>
           <SearchBar
             searchIconTestID="searchIssuerIcon"
             searchBarTestID="issuerSearchBar"
@@ -197,6 +187,11 @@ export const IssuersScreen: React.FC<
             onChangeText={filterIssuers}
             onLayout={() => filterIssuers('')}
           />
+          <Text
+            {...testIDProps('issuersScreenDescription')}
+            style={Theme.IssuersScreenStyles.issuersScreenSearchDescription}>
+            {t('description')}
+          </Text>
 
           <View style={Theme.IssuersScreenStyles.issuersContainer}>
             {controller.issuers.length > 0 && (

@@ -10,7 +10,7 @@ export const SearchBar = (props: SearchBarProps) => {
       <Icon
         testID={props.searchIconTestID}
         name="search"
-        color={Theme.Colors.GrayIcon}
+        color={Theme.SearchBarStyles.searchIcon.color}
         size={27}
         style={Theme.SearchBarStyles.searchIcon}
       />

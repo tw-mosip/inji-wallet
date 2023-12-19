@@ -160,7 +160,7 @@
   "IssuersScreen": {
     "title": "أضف بطاقة جديدة",
     "description": "يرجى اختيار جهة الإصدار المفضلة لديك من الخيارات أدناه لإضافة بطاقة جديدة.",
-    "searchByIssuersName": "البحث حسب اسم المصدر",
+    "searchByIssuersName": "ابحث هنا",
     "loaders": {
       "loading": "جار التحميل...",
       "subTitle": {
