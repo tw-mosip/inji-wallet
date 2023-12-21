@@ -106,7 +106,7 @@ export const IssuersScreen: React.FC<
     const filteredData = issuers.filter(item => {
       if (
         getDisplayObjectForCurrentLanguage(item.display)
-          ?.name.toLowerCase()
+          ?.title.toLowerCase()
           .includes(searchText.toLowerCase())
       ) {
         return getDisplayObjectForCurrentLanguage(item.display);
@@ -133,6 +133,7 @@ export const IssuersScreen: React.FC<
             margin={[0, 8, 0, 0]}
           />
           <Button
+            testID="tryAgain"
             fill
             title={t('common:tryAgain')}
             onPress={controller.TRY_AGAIN}
