@@ -38,6 +38,15 @@ jobs:
       IOS_SERVICE_LOCATION: 'ios'
       SCRIPT_NAME: "fastlane ios_app_build"
 
+  free-disk-space:
+    run:
+      df -h
+      sudo swapoff -a
+      sudo rm -f /swapfile
+      sudo apt clean
+      docker rmi $(docker image ls -aq)
+      df -h
+
   sonar-check:
     if: ${{ github.event_name != 'pull_request' }}
     uses: mosip/kattu/.github/workflows/gradlew-sonar-analysis.yml@master
