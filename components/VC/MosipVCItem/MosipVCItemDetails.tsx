@@ -2,7 +2,7 @@ import {formatDistanceToNow} from 'date-fns';
 import React, {useEffect, useState} from 'react';
 import * as DateFnsLocale from 'date-fns/locale';
 import {useTranslation} from 'react-i18next';
-import {ActivityIndicator, Image, ImageBackground} from 'react-native';
+import {Image, ImageBackground} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {VC} from '../../../types/VC/ExistingMosipVC/vc';
 import {Button, Column, Row, Text} from '../../ui';
@@ -24,23 +24,24 @@ import {
 } from '../../../shared/constants';
 import {
   fieldItemIterator,
+  getIssuerLogo,
   isVCLoaded,
   setBackgroundColour,
 } from '../common/VCUtils';
-import {logoType} from '../../../machines/issuersMachine';
+import {ActivityIndicator} from '../../ui/ActivityIndicator';
 
-const getIssuerLogo = (isOpenId4VCI: boolean, issuerLogo: logoType) => {
-  if (isOpenId4VCI) {
-    return (
-      <Image
-        source={{uri: issuerLogo?.url}}
-        alt={issuerLogo?.alt_text}
-        style={Theme.Styles.issuerLogo}
-      />
-    );
-  }
-  return <Image source={Theme.MosipLogo} style={Theme.Styles.vcDetailsLogo} />;
-};
+// const getIssuerLogo = (isOpenId4VCI: boolean, issuerLogo: logoType) => {
+//   if (isOpenId4VCI) {
+//     return (
+//       <Image
+//         source={{uri: issuerLogo?.url}}
+//         alt={issuerLogo?.alt_text}
+//         style={Theme.Styles.issuerLogo}
+//       />
+//     );
+//   }
+//   return <Image source={Theme.MosipLogo} style={Theme.Styles.vcDetailsLogo} />;
+// };
 
 const getProfileImage = (
   props: ExistingMosipVCItemDetailsProps | EsignetMosipVCItemDetailsProps,

@@ -18,6 +18,7 @@ import {
   isVCLoaded,
   setBackgroundColour,
 } from '../common/VCUtils';
+import {VCCardInnerSkeleton} from '../common/VCCardInnerSkeleton';
 
 export const MosipVCItemContent: React.FC<
   ExistingMosipVCItemContentProps | EsignetMosipVCItemContentProps
@@ -40,6 +41,10 @@ export const MosipVCItemContent: React.FC<
       setFields(response.fields.slice(0, 1).concat(CARD_VIEW_ADD_ON_FIELDS));
     });
   }, [props.verifiableCredential?.wellKnown]);
+
+  if (!isVCLoaded(verifiableCredential, fields)) {
+    return <VCCardInnerSkeleton />;
+  }
 
   return (
     <ImageBackground
@@ -89,6 +94,7 @@ export const MosipVCItemContent: React.FC<
                 <VerifiedIcon />
               )
             }
+            wellknown={wellknown}
             verifiableCredential={verifiableCredential}
           />
           <Column>

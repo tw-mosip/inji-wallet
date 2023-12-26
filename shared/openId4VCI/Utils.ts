@@ -71,8 +71,8 @@ export const updateCredentialInformation = (context, credential) => {
     getDisplayObjectForCurrentLanguage(context.selectedIssuer.display)?.logo;
   credentialWrapper.verifiableCredential.wellKnown =
     context.selectedIssuer['.well-known'];
-  // credentialWrapper.verifiableCredential.wellKnown =
-  //   'https://esignet.collab.mosip.net/.well-known/openid-credential-issuer';
+  credentialWrapper.verifiableCredential.wellKnown =
+    'https://esignet.collab.mosip.net/.well-known/openid-credential-issuer';
 
   return credentialWrapper;
 };

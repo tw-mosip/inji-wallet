@@ -117,6 +117,7 @@ export const DefaultTheme = {
       color: Colors.Transparent,
       backgroundColor: Colors.Grey,
       borderRadius: 4,
+      marginBottom: 2,
     },
     subtitle: {
       backgroundColor: Colors.Transparent,

@@ -15,17 +15,20 @@ export const VCItemField = ({
         testID={`${fieldName}Title`}
         weight="regular"
         size="smaller"
-        color={
+        {...setTextColor(wellknown)}
+        style={[
+          {width: 100},
           !verifiableCredential
-            ? Theme.Colors.LoadingDetailsLabel
-            : Theme.Colors.DetailsLabel
-        }>
+            ? Theme.Styles.loadingTitle
+            : Theme.Styles.subtitle,
+        ]}>
         {fieldName}
       </Text>
       <Text
-        testID={`${fieldName}Title`}
+        testID={`${fieldName}Value`}
         weight="semibold"
         style={[
+          {width: 200},
           !verifiableCredential
             ? Theme.Styles.loadingTitle
             : Theme.Styles.subtitle,
