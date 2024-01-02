@@ -14,13 +14,7 @@ import {
 } from './cryptoutil/cryptoUtil';
 import {VCMetadata} from './VCMetadata';
 import {ENOENT, getItem} from '../machines/store';
-import {
-  androidVersion,
-  isAndroid,
-  MY_VCS_STORE_KEY,
-  RECEIVED_VCS_STORE_KEY,
-  SETTINGS_STORE_KEY,
-} from './constants';
+import {androidVersion, isAndroid, SETTINGS_STORE_KEY} from './constants';
 import FileStorage, {
   getFilePath,
   getFilePathOfEncryptedHmac,
@@ -162,6 +156,7 @@ class Storage {
       encryptionKey,
     );
     const HMACofVC = await generateHmac(encryptionKey, data);
+    const encryptedHMACofVC = await encryptJson(encryptionKey, HMACofVC);
     const hmacStoredinFile = await this.readHmacForVCFromFile(key);
 
     if (HMACofVC !== storedHMACofCurrentVC) {
@@ -193,7 +188,7 @@ class Storage {
       );
     }
 
-    return HMACofVC !== storedHMACofCurrentVC;
+    return encryptedHMACofVC !== storedHMACofCurrentVC;
   }
 
   private static async readHmacForVC(key: string, encryptionKey: string) {
@@ -249,10 +244,11 @@ class Storage {
       );
     }
 
-    if (encryptedHMACofCurrentVC) {
+    return encryptedHMACofCurrentVC;
+    /* if (encryptedHMACofCurrentVC) {
       return decryptJson(encryptionKey, encryptedHMACofCurrentVC);
     }
-    return null;
+    return null; */
   }
 
   private static async readVCFromFile(key: string) {
