@@ -1,7 +1,13 @@
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: ['babel-preset-expo'],
+    presets: [
+      ['@babel/preset-env', {targets: {node: 'current'}}],
+      '@babel/preset-typescript',
+      '@babel/preset-react',
+      'module:metro-react-native-babel-preset',
+    ],
+    sourceType: 'module',
     plugins: [
       [
         'module:react-native-dotenv',
@@ -28,7 +34,7 @@ module.exports = function (api) {
           alias: {
             'isomorphic-webcrypto': 'isomorphic-webcrypto/src/react-native',
             'fast-text-encoding': 'fast-text-encoding/text',
-            'jsonld': '@digitalcredentials/jsonld',
+            jsonld: '@digitalcredentials/jsonld',
             'jsonld-signatures': '@digitalcredentials/jsonld-signatures',
           },
         },

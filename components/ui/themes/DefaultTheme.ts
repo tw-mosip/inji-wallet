@@ -1014,6 +1014,9 @@ export const DefaultTheme = {
       borderRadius: 10,
       backgroundColor: Colors.Orange,
     },
+    plain: {
+      backgroundColor: Colors.Transparent,
+    },
   }),
   OIDCAuthStyles: StyleSheet.create({
     viewContainer: {
@@ -1553,7 +1556,7 @@ export const DefaultTheme = {
     // https://ethercreative.github.io/react-native-shadow-generator/
 
     if (level === 0) {
-      return null;
+      return {};
     }
 
     const index = level - 1;

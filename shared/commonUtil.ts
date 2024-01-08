@@ -37,7 +37,7 @@ export interface Argon2iConfig {
   mode: string;
 }
 
-export default function testIDProps(id) {
+export default function testIDProps(id: string | undefined) {
   return isAndroid()
     ? {accessible: true, accessibilityLabel: id}
     : {testID: id};
@@ -60,7 +60,7 @@ export function logState(state: AnyState) {
     2,
   );
   console.log(
-    `[${getDeviceNameSync()}] ${state.machine.id}: ${
+    `[${getDeviceNameSync()}] ${state?.machine?.id}: ${
       state.event.type
     } -> ${state.toStrings().pop()}\n${
       data.length > 300 ? data.slice(0, 300) + '...' : data
