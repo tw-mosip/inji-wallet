@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Switch} from 'react-native-elements';
-import {Text} from '../../components/ui';
+import {Button, Text} from '../../components/ui';
 import {Modal} from '../../components/ui/Modal';
 import {Theme} from '../../components/ui/styleUtils';
 import {useBackupScreen} from './BackupController';
@@ -27,18 +27,21 @@ export const BackupToggle: React.FC<BackupToggleProps> = props => {
         headerElevation={2}
         arrowLeft={true}
         onDismiss={props.onDismiss}>
-        <Text> Enable Data backup</Text>
-        <Switch
-          value={dataBackup}
-          onValueChange={toggleSwitch}
-          trackColor={{
-            false: Theme.Colors.switchTrackFalse,
-            true:
-              Platform.OS == 'ios'
-                ? Theme.Colors.switchHead
-                : Theme.Colors.switchTrackTrue,
-          }}
-          color={Theme.Colors.switchHead}
+        <Text> You’re just a few steps away from backing up your data</Text>
+
+        <Button
+          testID="cancel"
+          type="gradient"
+          title={'proceed'}
+          onPress={() => {}}
+          styles={Theme.MessageOverlayStyles.button}
+        />
+        <Button
+          testID="cancel"
+          type="solid"
+          title={'go back'}
+          onPress={() => {}}
+          styles={Theme.MessageOverlayStyles.button}
         />
       </Modal>
       <MessageOverlay
