@@ -78,6 +78,31 @@ export const getBackupFilePath = (
   return `${backupDirectoryPath}/${key}${extension}`;
 };
 
+/**
+ * given a directory find the most recent backup file in the directory
+ * @param path the fully qualified path of the directory where ZIP files need
+ *  to be found
+ */
+export async function findMostRecentBackupFile(
+  path: string = backupDirectoryPath,
+  extension: string = 'zip',
+): Promise<string> {
+  try {
+    const extSuffix = '.' + extension;
+    let files = await readDir(backupDirectoryPath);
+    const zipFiles = files
+      .filter(f => f.name.endsWith(extSuffix))
+      // TODO: explicit compareFn might not be required as ASCII order & numeric order is same
+      // TODO: check if .injibackup files have the same naming convention as .zip
+      .sort(
+        (a, b) => Number(a.name.split('_')[1]) - Number(b.name.split('_')[1]),
+      );
+    return zipFilePath[zipFilePath.length - 1].name;
+  } catch (_) {
+    return '';
+  }
+}
+
 export async function compressAndRemoveFile(
   fileNameSansExtension: string,
 ): Promise<StatResult> {
