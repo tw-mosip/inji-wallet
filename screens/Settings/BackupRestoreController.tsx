@@ -6,6 +6,7 @@ import {
   selectIsBackUpRestoreFailure,
   selectIsBackUpRestoreSuccess,
   selectErrorReason,
+  selectDownloadBackupFileFromCloud,
 } from '../../machines/backupRestore';
 import {GlobalContext} from '../../shared/GlobalContext';
 import {VcEvents} from '../../machines/VCItemMachine/vc';
@@ -24,6 +25,10 @@ export function useBackupRestoreScreen() {
     isBackUpRestoreSuccess: useSelector(
       backupRestoreService,
       selectIsBackUpRestoreSuccess,
+    ),
+    isDownloadBackupFileFromCloud: useSelector(
+      backupRestoreService,
+      selectDownloadBackupFileFromCloud,
     ),
     isBackUpRestoreFailure: useSelector(
       backupRestoreService,

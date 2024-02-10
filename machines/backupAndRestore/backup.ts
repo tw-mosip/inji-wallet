@@ -409,6 +409,9 @@ export function selectIsBackupInprogress(state: State) {
 export function selectIsBackingUp(state: State) {
   return state.matches('backingUp');
 }
+export function selectFetchDataFromDB(state: State) {
+  return state.matches('backingUp.fetchDataFromDB');
+}
 export function selectIsLoading(state: State) {
   return state.context.isLoading;
 }

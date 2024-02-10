@@ -9,6 +9,7 @@ import {
   selectBackupErrorReason,
   lastBackupDetails,
   selectIsLoading,
+  selectFetchDataFromDB,
 } from '../../machines/backupAndRestore/backup';
 import {GlobalContext} from '../../shared/GlobalContext';
 
@@ -21,6 +22,7 @@ export function useBackupScreen() {
     isLoading: useSelector(backupService, selectIsLoading),
     backupErrorReason: useSelector(backupService, selectBackupErrorReason),
     isBackingUp: useSelector(backupService, selectIsBackingUp),
+    fetchDataFromDB: useSelector(backupService, selectFetchDataFromDB),
     isBackingUpSuccess: useSelector(backupService, selectIsBackingUpSuccess),
     isBackingUpFailure: useSelector(backupService, selectIsBackingUpFailure),
     isBackupInProgress: useSelector(backupService, selectIsBackupInprogress),
