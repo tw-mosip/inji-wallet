@@ -11,7 +11,7 @@ import {
   writeFile,
 } from 'react-native-fs';
 import * as RNZipArchive from 'react-native-zip-archive';
-import {getBackupFileName} from './commonUtil';
+import { getBackupFileName } from './commonUtil';
 
 interface CacheData {
   data?: any;
@@ -47,6 +47,11 @@ class FileStorage {
 
   async removeItem(path: string) {
     return await unlink(path);
+  }
+
+  async removeItemIfExist(path: string) {
+    const res = await exists(path);
+    return res && await unlink(path);
   }
 
   async getInfo(path: string) {

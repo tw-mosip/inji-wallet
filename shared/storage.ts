@@ -24,11 +24,14 @@ import FileStorage, {
   getFilePath,
   getDirectorySize,
   vcDirectoryPath,
+  backupDirectoryPath,
 } from './fileStorage';
 import {__AppId} from './GlobalVariables';
 import {getErrorEventData, sendErrorEvent} from './telemetry/TelemetryUtils';
 import {TelemetryConstants} from './telemetry/TelemetryConstants';
 import {BYTES_IN_MEGABYTE} from './commonUtil';
+import fileStorage from './fileStorage';
+import {DocumentDirectoryPath} from 'react-native-fs';
 
 export const MMKV = new MMKVLoader().initialize();
 
@@ -60,7 +63,7 @@ class Storage {
       const keysToBeExported = allKeysInDB.filter(key =>
         key.includes('CACHE_FETCH_ISSUER_WELLKNOWN_CONFIG_'),
       );
-      keysToBeExported.push(MY_VCS_STORE_KEY);
+      keysToBeExported?.push(MY_VCS_STORE_KEY);
 
       const encryptedDataPromises = keysToBeExported.map(key =>
         MMKV.getItem(key),
@@ -106,12 +109,21 @@ class Storage {
 
   static loadBackupData = async (data, encryptionKey) => {
     try {
+      // 0. check for previous backup states
+      const prevBkpState = `${DocumentDirectoryPath}/.prev`;
+      const previousBackupExists = await fileStorage.exists(prevBkpState);
+      let backupFileVCs: Set<string> = new Set();
+      if (previousBackupExists) {
+        const previousRestore = await fileStorage.readFile(prevBkpState);
+        backupFileVCs = new Set(JSON.parse(previousRestore));
+      }
       // 1. opening the file
       const completeBackupData = JSON.parse(data);
       // 2. Load and store VC_records & MMKV things
       const dataFromDB = await Storage.loadVCs(
         completeBackupData,
         encryptionKey,
+        backupFileVCs,
       );
       // 3. Update the Well Known configs of the VCs
       const allKeysFromDB = Object.keys(dataFromDB);
@@ -219,40 +231,83 @@ class Storage {
     }
   };
 
-  private static async loadVCs(completeBackupData: any, encryptionKey: any) {
+  private static async loadVCs(
+    completeBackupData: {},
+    encryptionKey: any,
+    skipList: Set<string>,
+  ) {
     const allVCs = completeBackupData['VC_Records'];
-    const allVCKeys = Object.keys(allVCs);
+    const allVCKeys = Object.keys(allVCs); // VC_KEY with and/or without timestamp
     const dataFromDB = completeBackupData['dataFromDB'];
-
-    allVCKeys.forEach(async key => {
-      let vc = allVCs[key];
-      const currentUnixTimeStamp = Date.now();
-      const prevUnixTimeStamp = vc.vcMetadata.timestamp;
-      vc.vcMetadata.timestamp = currentUnixTimeStamp;
-      dataFromDB.myVCs.forEach(myVcMetadata => {
+    let backedUpKeys: string[] = [];
+    // 0. Check for VC presense in the store
+    // 1. store the VCs and the HMAC
+    allVCKeys
+      // TODO: Skip all items which have the same VC_KEY but different timestamp
+      .forEach(async key => {
+        let vc = allVCs[key];
+        const currentUnixTimeStamp = Date.now();
+        const prevUnixTimeStamp = vc.vcMetadata.timestamp;
+        vc.vcMetadata.timestamp = currentUnixTimeStamp;
+        dataFromDB.myVCs.forEach(myVcMetadata => {
+          if (
+            myVcMetadata.requestId === vc.vcMetadata.requestId &&
+            // TBD: is below cond always true?
+            myVcMetadata.timestamp === prevUnixTimeStamp
+          ) {
+            myVcMetadata.timestamp = currentUnixTimeStamp;
+          }
+        });
+        const updatedVcKey = new VCMetadata(vc.vcMetadata).getVcKey();
+        const encryptedVC = await encryptJson(
+          encryptionKey,
+          JSON.stringify(vc),
+        );
+        const tmp = VCMetadata.fromVC(key);
         if (
-          myVcMetadata.requestId === vc.vcMetadata.requestId &&
-          myVcMetadata.timestamp === prevUnixTimeStamp
+          !(skipList.has(tmp.getLegacyVcKey()) || skipList.has(tmp.getVcKey()))
         ) {
-          myVcMetadata.timestamp = currentUnixTimeStamp;
+          // Save the VC to disk
+          await this.setItem(updatedVcKey, encryptedVC, encryptionKey);
+          backedUpKeys.push(updatedVcKey);
+          console.log(
+            `>>> ${Date.now().toString()} wrote log file with key ${key}`,
+          );
+          await this.writeLogFile(backedUpKeys);
         }
       });
-      const updatedVcKey = new VCMetadata(vc.vcMetadata).getVcKey();
-      const encryptedVC = await encryptJson(encryptionKey, JSON.stringify(vc));
-      await this.setItem(updatedVcKey, encryptedVC, encryptionKey);
-    });
+    // 2.0 Conditionally update the myVCsKey
+    // 2. Update myVCsKey
     const dataFromMyVCKey = dataFromDB[MY_VCS_STORE_KEY];
     const encryptedMyVCKeyFromMMKV = await MMKV.getItem(MY_VCS_STORE_KEY);
-    let newDataForMyVCKey;
-    if (encryptedMyVCKeyFromMMKV != null) {
+    let newDataForMyVCKey: {
+      idType: string;
+      requestId: string;
+      isPinned: boolean;
+      id: string;
+      issuer: string;
+      protocol: string;
+    }[] = [];
+    if (encryptedMyVCKeyFromMMKV !== null) {
       const myVCKeyFromMMKV = await decryptJson(
         encryptionKey,
         encryptedMyVCKeyFromMMKV,
       );
-      newDataForMyVCKey = [...JSON.parse(myVCKeyFromMMKV), ...dataFromMyVCKey];
+      dataFromMyVCKey.forEach(d => {
+        const tmp = VCMetadata.fromVC(d);
+        if (
+          !(skipList.has(tmp.getLegacyVcKey()) || skipList.has(tmp.getVcKey()))
+        )
+          newDataForMyVCKey.push(d);
+      });
+      newDataForMyVCKey = [
+        ...JSON.parse(myVCKeyFromMMKV),
+        ...newDataForMyVCKey,
+      ];
     } else {
       newDataForMyVCKey = dataFromMyVCKey;
     }
+    console.log(`Saving ${newDataForMyVCKey.length} items to myVCsKey`);
     const encryptedDataForMyVCKey = await encryptJson(
       encryptionKey,
       JSON.stringify(newDataForMyVCKey),
@@ -262,7 +317,15 @@ class Storage {
       encryptedDataForMyVCKey,
       encryptionKey,
     );
+    await fileStorage.removeItemIfExist(`${DocumentDirectoryPath}/.prev`);
     return dataFromDB;
+  }
+
+  static async writeLogFile(keys: string[]) {
+    await fileStorage.writeFile(
+      `${DocumentDirectoryPath}/.prev`,
+      JSON.stringify(keys),
+    );
   }
 
   private static async isVCAlreadyDownloaded(
