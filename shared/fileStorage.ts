@@ -49,6 +49,11 @@ class FileStorage {
     return await unlink(path);
   }
 
+  async removeItemIfExist(path: string) {
+    const res = await exists(path);
+    return res && (await unlink(path));
+  }
+
   async getInfo(path: string) {
     return await stat(path);
   }

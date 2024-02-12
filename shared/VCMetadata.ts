@@ -67,14 +67,35 @@ export class VCMetadata {
 
   // Used for mmkv storage purposes and as a key for components and vc maps
   // Update VC_ITEM_STORE_KEY_REGEX in case of changes in vckey
+  /**
+   * the VC_KEY which should be used from now on
+   * reason for adding timestamp: https://react.dev/learn/rendering-lists
+   * @returns the VC_KEY one should be using to display the VCs in list
+   */
   getVcKey(): string {
     return this.timestamp !== ''
       ? `${VC_KEY_PREFIX}_${this.timestamp}_${this.requestId}`
       : `${VC_KEY_PREFIX}_${this.requestId}`;
   }
 
+  /**
+   * (deprecated): use this strictly for backwards compatibility to get the older VC_KEY
+   * ref: INJIMOB-799
+   * @returns the older known VC_KEY
+   */
+  getLegacyVcKey(): string {
+    return `${VC_KEY_PREFIX}_${this.requestId}`;
+  }
+
   equals(other: VCMetadata): boolean {
     return this.getVcKey() === other.getVcKey();
+  }
+
+  equalsIgnoreTimestamp(other: VCMetadata): boolean {
+    return (
+      `${VC_KEY_PREFIX}_${this.requestId}` ===
+      `${VC_KEY_PREFIX}_${other.requestId}`
+    );
   }
 }
 
