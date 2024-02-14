@@ -257,21 +257,13 @@ class Storage {
     const file: ReadDirItem[] = await fileStorage.getAllFilesInDirectory(
       `${DocumentDirectoryPath}/inji/VC/`,
     );
-    console.log(file);
-    let count: number = 0;
     for (let i = 0; i < file.length; i++) {
       const f = file[i];
       if (f.name.includes(timestamp.toString())) {
-        console.log('>> found a file to remove');
-        console.log(`>> removing item f ${f.name}`);
-        // 2. Delete them
-        count++;
         await fileStorage.removeItem(f.path);
       }
     }
     // TODO: should this be done via the Store state machine to avoid popups?
-    console.log(`>>> removed ${count} VC files`);
-    count = 0;
     // 3. Remove the keys from MMKV which have the same timestamp
     let myVCsEnc = await MMKV.getItem(MY_VCS_STORE_KEY, encryptionKey);
     if (myVCsEnc !== null) {
@@ -282,14 +274,8 @@ class Storage {
       vcList.forEach(d => {
         if (d.timestamp && parseInt(d.timestamp) !== timestamp) {
           newVCList.push(d);
-        } else {
-          count++;
-          console.log(
-            `>> found ${d.timestamp}_${d.requestId} VC index to remove`,
-          );
         }
       });
-      console.log(`>>> removing ${count} VCs from myVCs`);
       const finalVC = await encryptJson(
         encryptionKey,
         JSON.stringify(newVCList),
@@ -326,9 +312,6 @@ class Storage {
       const tmp = VCMetadata.fromVC(key);
       // Save the VC to disk
       await this.setItem(updatedVcKey, encryptedVC, encryptionKey);
-      console.log(
-        `>>> ${Date.now().toString()} wrote log file with key ${key}`,
-      );
     });
     // 2. Update myVCsKey
     const dataFromMyVCKey = dataFromDB[MY_VCS_STORE_KEY];
