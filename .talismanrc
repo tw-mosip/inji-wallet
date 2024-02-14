@@ -142,7 +142,7 @@ fileignoreconfig:
   - filename: ios/fastlane/Fastfile
     checksum: a4e3772dc67a07ecbcfc58be0d6d4f7fa799cec7ac25bd269ac29459c8669ca4
   - filename: shared/storage.ts
-    checksum: 1ba74959b53ab8d05daa5b08133c3bdc9811361b5fa9ec9a932e91b46e752256
+    checksum: 136fad1b39dd7178bec7c2e5f0981b6ba48408efde45da8c3b882aab295f693f
   - filename: injitest/src/test/java/iosTestCases/CredentialRegistryTest.java
     checksum: b0808e0c511412cde21fd169a9bbeaf3b77cb48f25418e12d341cc3ce1df5898
   - filename: machines/backupAndRestore/backupAndRestore.ts
