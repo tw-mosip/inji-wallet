@@ -271,9 +271,8 @@ export const backupRestoreMachine = model.createMachine(
         }
         // 3. Check for .zip files
         const ZIPfile = await findMostRecentBackupFile();
-        if (ZIPfile !== '') {
-          // TODO: trim the extension later
-          context.fileName = getFileNameFromZIPfile(bkpFile);
+        if (ZIPfile === '') {
+          return '';
         }
         // go to loadBackupFile
         // 4. Check for corrupted ZIP
@@ -281,7 +280,7 @@ export const backupRestoreMachine = model.createMachine(
         try {
           (filePath = await unZipAndRemoveFile(ZIPfile.split('.zip')[0])),
             (context.fileName = filePath.split('/inji/backup/')[1]);
-          return context.fileName;
+          return getFileNameFromZIPfile(context.fileName);
         } catch (_) {
           console.log('got error during unzip deleting the zip');
           await fileStorage.removeItem(backupDirectoryPath);

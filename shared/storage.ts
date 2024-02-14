@@ -123,21 +123,23 @@ class Storage {
       // 0. check for previous backup states
       const prevBkpState = `${DocumentDirectoryPath}/.prev`;
       const previousBackupExists = await fileStorage.exists(prevBkpState);
-      let previousRestoreTS: string = '';
+      let previousRestoreTimestamp: string = '';
       if (previousBackupExists) {
         // 0. Remove partial restored files
-        previousRestoreTS = await fileStorage.readFile(prevBkpState);
-        previousRestoreTS = previousRestoreTS.trim();
-        this.unloadVCs(encryptionKey, parseInt(previousRestoreTS));
+        previousRestoreTimestamp = await fileStorage.readFile(prevBkpState);
+        previousRestoreTimestamp = previousRestoreTimestamp.trim();
+        this.unloadVCs(encryptionKey, parseInt(previousRestoreTimestamp));
       }
       // 1. opening the file
       const completeBackupData = JSON.parse(data);
       // 2. Load and store VC_records & MMKV things
-      previousRestoreTS = Date.now().toString();
+      const backupStartState = Date.now().toString();
+      // record the state to help with cleanup activities post partial backup
+      await fileStorage.writeFile(prevBkpState, backupStartState);
       const dataFromDB = await Storage.loadVCs(
         completeBackupData,
         encryptionKey,
-        previousRestoreTS,
+        backupStartState,
       );
       // 3. Update the Well Known configs of the VCs
       const allKeysFromDB = Object.keys(dataFromDB);
@@ -275,24 +277,8 @@ class Storage {
     if (myVCsEnc !== null) {
       let mmkvVCs = await decryptJson(encryptionKey, myVCsEnc);
       // TODO: Define the MMKV's myVCsKey type in VCMetadata
-      let vcList: {
-        idType: string;
-        requestId: string;
-        isPinned: boolean;
-        id: string;
-        issuer?: string;
-        timestamp?: string;
-        protocol?: string;
-      }[] = JSON.parse(mmkvVCs);
-      let newVCList: {
-        idType: string;
-        requestId: string;
-        isPinned: boolean;
-        id: string;
-        issuer?: string;
-        timestamp?: string;
-        protocol?: string;
-      }[] = [];
+      let vcList: VCMetadata[] = JSON.parse(mmkvVCs);
+      let newVCList: VCMetadata[] = [];
       vcList.forEach(d => {
         if (d.timestamp && parseInt(d.timestamp) !== timestamp) {
           newVCList.push(d);
@@ -347,14 +333,7 @@ class Storage {
     // 2. Update myVCsKey
     const dataFromMyVCKey = dataFromDB[MY_VCS_STORE_KEY];
     const encryptedMyVCKeyFromMMKV = await MMKV.getItem(MY_VCS_STORE_KEY);
-    let newDataForMyVCKey: {
-      idType: string;
-      requestId: string;
-      isPinned: boolean;
-      id: string;
-      issuer: string;
-      protocol: string;
-    }[] = [];
+    let newDataForMyVCKey: VCMetadata[] = [];
     if (encryptedMyVCKeyFromMMKV != null) {
       const myVCKeyFromMMKV = await decryptJson(
         encryptionKey,
