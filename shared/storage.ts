@@ -31,7 +31,7 @@ import {getErrorEventData, sendErrorEvent} from './telemetry/TelemetryUtils';
 import {TelemetryConstants} from './telemetry/TelemetryConstants';
 import {BYTES_IN_MEGABYTE} from './commonUtil';
 import fileStorage from './fileStorage';
-import {DocumentDirectoryPath} from 'react-native-fs';
+import {DocumentDirectoryPath, ReadDirItem} from 'react-native-fs';
 
 export const MMKV = new MMKVLoader().initialize();
 
@@ -123,18 +123,21 @@ class Storage {
       // 0. check for previous backup states
       const prevBkpState = `${DocumentDirectoryPath}/.prev`;
       const previousBackupExists = await fileStorage.exists(prevBkpState);
-      let backupFileVCs: Set<string> = new Set();
+      let previousRestoreTS: string = '';
       if (previousBackupExists) {
-        const previousRestore = await fileStorage.readFile(prevBkpState);
-        backupFileVCs = new Set(JSON.parse(previousRestore));
+        // 0. Remove partial restored files
+        previousRestoreTS = await fileStorage.readFile(prevBkpState);
+        previousRestoreTS = previousRestoreTS.trim();
+        this.unloadVCs(encryptionKey, parseInt(previousRestoreTS));
       }
       // 1. opening the file
       const completeBackupData = JSON.parse(data);
       // 2. Load and store VC_records & MMKV things
+      previousRestoreTS = Date.now().toString();
       const dataFromDB = await Storage.loadVCs(
         completeBackupData,
         encryptionKey,
-        backupFileVCs,
+        previousRestoreTS,
       );
       // 3. Update the Well Known configs of the VCs
       const allKeysFromDB = Object.keys(dataFromDB);
@@ -242,52 +245,105 @@ class Storage {
     }
   };
 
+  /**
+   * unloadVCs will remove a set of VCs against a particular timestamp
+   *
+   * @param timestamp the timestamp of the VCs
+   */
+  private static async unloadVCs(encryptionKey: any, timestamp: number) {
+    // 1. Find the VCs in the inji directory which have the said timestamp
+    const file: ReadDirItem[] = await fileStorage.getAllFilesInDirectory(
+      `${DocumentDirectoryPath}/inji/VC/`,
+    );
+    console.log(file);
+    let count: number = 0;
+    for (let i = 0; i < file.length; i++) {
+      const f = file[i];
+      if (f.name.includes(timestamp.toString())) {
+        console.log('>> found a file to remove');
+        console.log(`>> removing item f ${f.name}`);
+        // 2. Delete them
+        count++;
+        await fileStorage.removeItem(f.path);
+      }
+    }
+    // TODO: should this be done via the Store state machine to avoid popups?
+    console.log(`>>> removed ${count} VC files`);
+    count = 0;
+    // 3. Remove the keys from MMKV which have the same timestamp
+    let myVCsEnc = await MMKV.getItem(MY_VCS_STORE_KEY, encryptionKey);
+    if (myVCsEnc !== null) {
+      let mmkvVCs = await decryptJson(encryptionKey, myVCsEnc);
+      // TODO: Define the MMKV's myVCsKey type in VCMetadata
+      let vcList: {
+        idType: string;
+        requestId: string;
+        isPinned: boolean;
+        id: string;
+        issuer?: string;
+        timestamp?: string;
+        protocol?: string;
+      }[] = JSON.parse(mmkvVCs);
+      let newVCList: {
+        idType: string;
+        requestId: string;
+        isPinned: boolean;
+        id: string;
+        issuer?: string;
+        timestamp?: string;
+        protocol?: string;
+      }[] = [];
+      vcList.forEach(d => {
+        if (d.timestamp && parseInt(d.timestamp) !== timestamp) {
+          newVCList.push(d);
+        } else {
+          count++;
+          console.log(
+            `>> found ${d.timestamp}_${d.requestId} VC index to remove`,
+          );
+        }
+      });
+      console.log(`>>> removing ${count} VCs from myVCs`);
+      const finalVC = await encryptJson(
+        encryptionKey,
+        JSON.stringify(newVCList),
+      );
+      await MMKV.setItem(MY_VCS_STORE_KEY, finalVC);
+    }
+  }
+
   private static async loadVCs(
     completeBackupData: {},
     encryptionKey: any,
-    skipList: Set<string>,
+    timestamp: string,
   ) {
     const allVCs = completeBackupData['VC_Records'];
     const allVCKeys = Object.keys(allVCs); // VC_KEY with and/or without timestamp
     const dataFromDB = completeBackupData['dataFromDB'];
-    let backedUpKeys: string[] = [];
     // 0. Check for VC presense in the store
     // 1. store the VCs and the HMAC
-    allVCKeys
-      // TODO: Skip all items which have the same VC_KEY but different timestamp
-      .forEach(async key => {
-        let vc = allVCs[key];
-        const currentUnixTimeStamp = Date.now();
-        const prevUnixTimeStamp = vc.vcMetadata.timestamp;
-        vc.vcMetadata.timestamp = currentUnixTimeStamp;
-        dataFromDB.myVCs.forEach(myVcMetadata => {
-          if (
-            myVcMetadata.requestId === vc.vcMetadata.requestId &&
-            // TBD: is below cond always true?
-            myVcMetadata.timestamp === prevUnixTimeStamp
-          ) {
-            myVcMetadata.timestamp = currentUnixTimeStamp;
-          }
-        });
-        const updatedVcKey = new VCMetadata(vc.vcMetadata).getVcKey();
-        const encryptedVC = await encryptJson(
-          encryptionKey,
-          JSON.stringify(vc),
-        );
-        const tmp = VCMetadata.fromVC(key);
+    allVCKeys.forEach(async key => {
+      let vc = allVCs[key];
+      const ts = parseInt(timestamp);
+      const prevUnixTimeStamp = vc.vcMetadata.timestamp;
+      vc.vcMetadata.timestamp = ts;
+      dataFromDB.myVCs.forEach(myVcMetadata => {
         if (
-          !(skipList.has(tmp.getLegacyVcKey()) || skipList.has(tmp.getVcKey()))
+          myVcMetadata.requestId === vc.vcMetadata.requestId &&
+          myVcMetadata.timestamp === prevUnixTimeStamp
         ) {
-          // Save the VC to disk
-          await this.setItem(updatedVcKey, encryptedVC, encryptionKey);
-          backedUpKeys.push(updatedVcKey);
-          console.log(
-            `>>> ${Date.now().toString()} wrote log file with key ${key}`,
-          );
-          await this.writeLogFile(backedUpKeys);
+          myVcMetadata.timestamp = ts;
         }
       });
-    // 2.0 Conditionally update the myVCsKey
+      const updatedVcKey = new VCMetadata(vc.vcMetadata).getVcKey();
+      const encryptedVC = await encryptJson(encryptionKey, JSON.stringify(vc));
+      const tmp = VCMetadata.fromVC(key);
+      // Save the VC to disk
+      await this.setItem(updatedVcKey, encryptedVC, encryptionKey);
+      console.log(
+        `>>> ${Date.now().toString()} wrote log file with key ${key}`,
+      );
+    });
     // 2. Update myVCsKey
     const dataFromMyVCKey = dataFromDB[MY_VCS_STORE_KEY];
     const encryptedMyVCKeyFromMMKV = await MMKV.getItem(MY_VCS_STORE_KEY);
@@ -299,26 +355,15 @@ class Storage {
       issuer: string;
       protocol: string;
     }[] = [];
-    if (encryptedMyVCKeyFromMMKV !== null) {
+    if (encryptedMyVCKeyFromMMKV != null) {
       const myVCKeyFromMMKV = await decryptJson(
         encryptionKey,
         encryptedMyVCKeyFromMMKV,
       );
-      dataFromMyVCKey.forEach(d => {
-        const tmp = VCMetadata.fromVC(d);
-        if (
-          !(skipList.has(tmp.getLegacyVcKey()) || skipList.has(tmp.getVcKey()))
-        )
-          newDataForMyVCKey.push(d);
-      });
-      newDataForMyVCKey = [
-        ...JSON.parse(myVCKeyFromMMKV),
-        ...newDataForMyVCKey,
-      ];
+      newDataForMyVCKey = [...JSON.parse(myVCKeyFromMMKV), ...dataFromMyVCKey];
     } else {
       newDataForMyVCKey = dataFromMyVCKey;
     }
-    console.log(`Saving ${newDataForMyVCKey.length} items to myVCsKey`);
     const encryptedDataForMyVCKey = await encryptJson(
       encryptionKey,
       JSON.stringify(newDataForMyVCKey),
@@ -330,13 +375,6 @@ class Storage {
     );
     await fileStorage.removeItemIfExist(`${DocumentDirectoryPath}/.prev`);
     return dataFromDB;
-  }
-
-  static async writeLogFile(keys: string[]) {
-    await fileStorage.writeFile(
-      `${DocumentDirectoryPath}/.prev`,
-      JSON.stringify(keys),
-    );
   }
 
   private static async isVCAlreadyDownloaded(

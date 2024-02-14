@@ -36,7 +36,7 @@ fileignoreconfig:
   - filename: shared/telemetry/TelemetryUtils.js
     checksum: ffe9aac2dcc590b98b0d588885c088eff189504ade653a77f74b67312bfd27ad
   - filename: shared/fileStorage.ts
-    checksum: 451e8873a635d955fe426d9a5fcf191f2d4fd74984a1a4518760e2d10e9e1817
+    checksum: 2ba2721d9722cd9420ae26762316230f7dab1a0be45820cbda4d0ecae0edf957
   - filename: screens/Issuers/IssuersScreen.tsx
     checksum: 9c53e3770dbefe26e0de67ee4b7d5cc9c52d9823cbb136a1a5104dcb0a101071
   - filename: ios/Podfile.lock
@@ -142,7 +142,7 @@ fileignoreconfig:
   - filename: ios/fastlane/Fastfile
     checksum: a4e3772dc67a07ecbcfc58be0d6d4f7fa799cec7ac25bd269ac29459c8669ca4
   - filename: shared/storage.ts
-    checksum: 7189495e4a183793b2d9bdf0e1c3ecb7253ca1cecd6cc02617dd5260f57f4081
+    checksum: 2ba2721d9722cd9420ae26762316230f7dab1a0be45820cbda4d0ecae0edf957
   - filename: injitest/src/test/java/iosTestCases/CredentialRegistryTest.java
     checksum: b0808e0c511412cde21fd169a9bbeaf3b77cb48f25418e12d341cc3ce1df5898
   - filename: machines/backupAndRestore/backupAndRestore.typegen.ts
