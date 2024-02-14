@@ -11,7 +11,7 @@ import {
   writeFile,
 } from 'react-native-fs';
 import * as RNZipArchive from 'react-native-zip-archive';
-import { getBackupFileName } from './commonUtil';
+import {getBackupFileName} from './commonUtil';
 
 interface CacheData {
   data?: any;
@@ -51,7 +51,7 @@ class FileStorage {
 
   async removeItemIfExist(path: string) {
     const res = await exists(path);
-    return res && await unlink(path);
+    return res && (await unlink(path));
   }
 
   async getInfo(path: string) {
@@ -95,14 +95,9 @@ export async function findMostRecentBackupFile(
   try {
     const extSuffix = '.' + extension;
     let files = await readDir(backupDirectoryPath);
-    const zipFiles = files
-      .filter(f => f.name.endsWith(extSuffix))
-      // TODO: explicit compareFn might not be required as ASCII order & numeric order is same
-      // TODO: check if .injibackup files have the same naming convention as .zip
-      .sort(
-        (a, b) => Number(a.name.split('_')[1]) - Number(b.name.split('_')[1]),
-      );
-    return zipFilePath[zipFilePath.length - 1].name;
+    const zipFiles = files.filter(f => f.name.endsWith(extSuffix));
+    // sort() and return the latest one
+    return zipFiles[0].name;
   } catch (_) {
     return '';
   }
