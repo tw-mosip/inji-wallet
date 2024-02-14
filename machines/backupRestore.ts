@@ -266,7 +266,6 @@ export const backupRestoreMachine = model.createMachine(
         );
         if (bkpFile !== '') {
           context.fileName = bkpFile;
-          // TODO: trim the extension later
           return context.fileName;
         }
         // 3. Check for .zip files

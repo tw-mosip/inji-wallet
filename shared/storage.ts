@@ -268,7 +268,6 @@ class Storage {
     let myVCsEnc = await MMKV.getItem(MY_VCS_STORE_KEY, encryptionKey);
     if (myVCsEnc !== null) {
       let mmkvVCs = await decryptJson(encryptionKey, myVCsEnc);
-      // TODO: Define the MMKV's myVCsKey type in VCMetadata
       let vcList: VCMetadata[] = JSON.parse(mmkvVCs);
       let newVCList: VCMetadata[] = [];
       vcList.forEach(d => {
@@ -290,7 +289,7 @@ class Storage {
     timestamp: string,
   ) {
     const allVCs = completeBackupData['VC_Records'];
-    const allVCKeys = Object.keys(allVCs); // VC_KEY with and/or without timestamp
+    const allVCKeys = Object.keys(allVCs);
     const dataFromDB = completeBackupData['dataFromDB'];
     // 0. Check for VC presense in the store
     // 1. store the VCs and the HMAC
