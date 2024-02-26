@@ -88,7 +88,7 @@ function handleResponse(result: any) {
   return verificationResult;
 }
 
-const VerificationErrorType = {
+export const VerificationErrorType = {
   NO_ERROR: '',
   TECHNICAL_ERROR: 'technicalError',
   NETWORK_ERROR: 'networkError',

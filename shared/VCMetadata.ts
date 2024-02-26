@@ -13,6 +13,7 @@ export class VCMetadata {
   issuer?: string = '';
   protocol?: string = '';
   timestamp?: string = '';
+  isPendingVerification = false;
   static vcKeyRegExp = new RegExp(VC_ITEM_STORE_KEY_REGEX);
 
   constructor({
@@ -23,6 +24,7 @@ export class VCMetadata {
     issuer = '',
     protocol = '',
     timestamp = '',
+    isPendingVerification = false,
   } = {}) {
     this.idType = idType;
     this.requestId = requestId;
@@ -31,6 +33,7 @@ export class VCMetadata {
     this.protocol = protocol;
     this.issuer = issuer;
     this.timestamp = timestamp;
+    this.isPendingVerification = isPendingVerification;
   }
 
   //TODO: Remove any typing and use appropriate typing
@@ -43,6 +46,7 @@ export class VCMetadata {
       protocol: vc.protocol,
       issuer: vc.issuer,
       timestamp: vc.vcMetadata ? vc.vcMetadata.timestamp : vc.timestamp,
+      isPendingVerification: vc.isPendingVerification,
     });
   }
 

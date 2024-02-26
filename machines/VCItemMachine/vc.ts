@@ -458,8 +458,10 @@ export function selectMyVcsMetadata(state: State): VCMetadata[] {
 export function selectShareableVcsMetadata(state: State): VCMetadata[] {
   return state.context.myVcs.filter(
     vcMetadata =>
-      state.context.vcs[vcMetadata.getVcKey()]?.credential != null ||
-      state.context.vcs[vcMetadata.getVcKey()]?.verifiableCredential != null,
+      (state.context.vcs[vcMetadata.getVcKey()]?.credential != null ||
+        state.context.vcs[vcMetadata.getVcKey()]?.verifiableCredential !=
+          null) &&
+      !vcMetadata.isPendingVerification,
   );
 }
 

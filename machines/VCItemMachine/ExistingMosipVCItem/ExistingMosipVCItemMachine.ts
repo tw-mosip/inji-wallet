@@ -11,7 +11,10 @@ import {
 } from '../../../types/VC/ExistingMosipVC/vc';
 import {StoreEvents} from '../../store';
 import {ActivityLogEvents} from '../../activityLog';
-import {verifyCredential} from '../../../shared/vcjs/verifyCredential';
+import {
+  VerificationErrorType,
+  verifyCredential,
+} from '../../../shared/vcjs/verifyCredential';
 import {log} from 'xstate/lib/actions';
 import {
   generateKeys,
@@ -389,7 +392,15 @@ export const ExistingMosipVCItemMachine =
             ],
             onError: [
               {
-                //To-Do Handle Error Scenarios
+                cond: 'isPendingVerificationError',
+                actions: [
+                  'setPendingVerificationStatus',
+                  'setVerifiableCredential',
+                  'storeContext',
+                  'sendVcUpdated',
+                ],
+              },
+              {
                 actions: ['updateVerificationErrorMessage'],
                 target: 'handleVCVerificationFailure',
               },
@@ -993,6 +1004,14 @@ export const ExistingMosipVCItemMachine =
             }),
         }),
 
+        setPendingVerificationStatus: assign({
+          vcMetadata: context =>
+            new VCMetadata({
+              ...context.vcMetadata,
+              isPendingVerification: true,
+            }),
+        }),
+
         setVcMetadata: assign({
           vcMetadata: (_, event) => event.vcMetadata,
         }),
@@ -1558,6 +1577,13 @@ export const ExistingMosipVCItemMachine =
         },
 
         isCustomSecureKeystore: () => isHardwareKeystoreExists,
+
+        isPendingVerificationError: (_context, event) => {
+          return (
+            (event.data as Error).message ==
+            VerificationErrorType.TECHNICAL_ERROR
+          );
+        },
       },
     },
   );

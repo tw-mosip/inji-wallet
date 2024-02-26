@@ -212,7 +212,9 @@ export interface Typegen0 {
       | 'error.platform.vc-item.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
     sendTamperedVc: 'TAMPERED_VC';
     sendTelemetryEvents: 'STORE_RESPONSE';
-    sendVcUpdated: 'PIN_CARD';
+    sendVcUpdated:
+      | 'PIN_CARD'
+      | 'error.platform.vc-item.verifyingCredential:invocation[0]';
     sendVerificationError: 'STORE_RESPONSE';
     sendWalletBindingSuccess: 'SHOW_BINDING_STATUS';
     setCredential: 'GET_VC_RESPONSE' | 'STORE_RESPONSE';
@@ -223,6 +225,7 @@ export interface Typegen0 {
     setOtpError:
       | 'error.platform.vc-item.requestingLock:invocation[0]'
       | 'error.platform.vc-item.requestingRevoke:invocation[0]';
+    setPendingVerificationStatus: 'error.platform.vc-item.verifyingCredential:invocation[0]';
     setPinCard: 'PIN_CARD';
     setPrivateKey: 'done.invoke.vc-item.addKeyPair:invocation[0]';
     setPublicKey: 'done.invoke.vc-item.addKeyPair:invocation[0]';
@@ -243,7 +246,9 @@ export interface Typegen0 {
       | 'error.platform.vc-item.requestingRevoke:invocation[0]';
     setVcKey: 'REMOVE';
     setVcMetadata: 'UPDATE_VC_METADATA';
-    setVerifiableCredential: 'done.invoke.vc-item.verifyingCredential:invocation[0]';
+    setVerifiableCredential:
+      | 'done.invoke.vc-item.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyingCredential:invocation[0]';
     setWalletBindingError:
       | 'error.platform.vc-item.acceptingBindingOtp.resendOTP:invocation[0]'
       | 'error.platform.vc-item.addKeyPair:invocation[0]'
@@ -260,7 +265,8 @@ export interface Typegen0 {
     storeContext:
       | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]'
-      | 'done.invoke.vc-item.verifyingCredential:invocation[0]';
+      | 'done.invoke.vc-item.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyingCredential:invocation[0]';
     storeLock: 'done.invoke.vc-item.requestingLock:invocation[0]';
     updatePrivateKey:
       | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
@@ -278,6 +284,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item.addKeyPair:invocation[0]'
       | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]';
     isDownloadAllowed: 'POLL';
+    isPendingVerificationError: 'error.platform.vc-item.verifyingCredential:invocation[0]';
     isSignedIn:
       | 'done.invoke.vc-item.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]'
       | 'done.invoke.vc-item.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
