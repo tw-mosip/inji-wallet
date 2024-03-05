@@ -58,13 +58,15 @@ export const KebabPopUp: React.FC<KebabPopUpProps> = props => {
             onPress={controller.PIN_CARD}
             testID="pinOrUnPinCard"
           />
-          <ShareVc
-            testID="shareVcFromKebab"
-            label={t('share')}
-            service={props.service}
-            flowType={FlowType.MINI_VIEW_SHARE}
-          />
-          {props.vcHasImage ? (
+          {!props.vcMetadata.isPendingVerification && (
+            <ShareVc
+              testID="shareVcFromKebab"
+              label={t('share')}
+              service={props.service}
+              flowType={FlowType.MINI_VIEW_SHARE}
+            />
+          )}
+          {props.vcHasImage && !props.vcMetadata.isPendingVerification && (
             <>
               <ShareVc
                 testID="shareVcWithSelfieFromKebab"
@@ -79,8 +81,6 @@ export const KebabPopUp: React.FC<KebabPopUpProps> = props => {
                 ADD_WALLET_BINDING_ID={controller.ADD_WALLET_BINDING_ID}
               />
             </>
-          ) : (
-            <React.Fragment />
           )}
           <HistoryTab
             testID="viewActivityLog"

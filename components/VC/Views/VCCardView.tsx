@@ -99,7 +99,7 @@ export const VCCardView: React.FC<
           isKebabPopUp={isKebabPopUp}
           DISMISS={DISMISS}
           KEBAB_POPUP={KEBAB_POPUP}
-          isVerified={verifiableCredential !== null}
+          isVerified={!props.vcMetadata.isPendingVerification}
         />
       </Pressable>
       <ErrorMessageOverlay

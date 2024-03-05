@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableOpacity,
   Dimensions,
+  View,
 } from 'react-native';
 import {
   individualId,
@@ -92,8 +93,6 @@ export const IdInputModal: React.FC<IdInputModalProps> = props => {
                 rightIcon={
                   <CustomTooltip
                     testID="IdInputToolTip"
-                    title={t('toolTipTitle', {idType: controller.idType})}
-                    description={t(`toolTip${controller.idType}Description`)}
                     width={Dimensions.get('screen').width * 0.85}
                     height={Dimensions.get('screen').height * 0.18}
                     triggerComponent={
@@ -103,6 +102,19 @@ export const IdInputModal: React.FC<IdInputModalProps> = props => {
                         type="antdesign"
                         color={Theme.Colors.tooltipIcon}
                       />
+                    }
+                    toolTipContent={
+                      <Column>
+                        <Text weight="semibold">
+                          {t('toolTipTitle', {idType: controller.idType})}
+                        </Text>
+                        <View style={Theme.Styles.tooltipHrLine}></View>
+                        <Text
+                          weight="regular"
+                          style={Theme.Styles.tooltipContentDescription}>
+                          {t(`toolTip${controller.idType}Description`)}
+                        </Text>
+                      </Column>
                     }
                   />
                 }

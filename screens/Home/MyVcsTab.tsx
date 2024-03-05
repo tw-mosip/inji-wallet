@@ -231,7 +231,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
                           vcMetadata.getVcKey(),
                         )}
                         isPinned={vcMetadata.isPinned}
-                        isPendingVerification={vcMetadata.isPendingVerification}
                       />
                     );
                   })}

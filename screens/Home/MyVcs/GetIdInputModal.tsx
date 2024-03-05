@@ -1,5 +1,10 @@
 import React from 'react';
-import {I18nManager, KeyboardAvoidingView, Dimensions} from 'react-native';
+import {
+  I18nManager,
+  KeyboardAvoidingView,
+  Dimensions,
+  View,
+} from 'react-native';
 import {Icon, Input} from 'react-native-elements';
 import {Button, Column, Row, Text} from '../../../components/ui';
 import {Modal} from '../../../components/ui/Modal';
@@ -58,8 +63,6 @@ export const GetIdInputModal: React.FC<GetIdInputModalProps> = props => {
               rightIcon={
                 <CustomTooltip
                   testID="GetIdInputToolTip"
-                  title={t('toolTipTitle')}
-                  description={t(`toolTipDescription`)}
                   width={Dimensions.get('screen').width * 0.87}
                   height={Dimensions.get('screen').height * 0.25}
                   triggerComponent={
@@ -69,6 +72,17 @@ export const GetIdInputModal: React.FC<GetIdInputModalProps> = props => {
                       type="antdesign"
                       color={Theme.Colors.tooltipIcon}
                     />
+                  }
+                  toolTipContent={
+                    <Column>
+                      <Text weight="semibold">{t('toolTipTitle')}</Text>
+                      <View style={Theme.Styles.tooltipHrLine}></View>
+                      <Text
+                        weight="regular"
+                        style={Theme.Styles.tooltipContentDescription}>
+                        {t(`toolTipDescription`)}
+                      </Text>
+                    </Column>
                   }
                 />
               }

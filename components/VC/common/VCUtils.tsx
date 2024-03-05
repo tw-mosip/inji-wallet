@@ -52,10 +52,7 @@ export const getFieldValue = (
       return (
         <VCVerification
           wellknown={wellknown}
-          isVerified={
-            props.vc ||
-            VCMetadata.fromVC(props.vc?.vcMetadata).isFromOpenId4VCI()
-          }
+          isVerified={!props.vc.vcMetadata.isPendingVerification}
         />
       );
     case 'idType':

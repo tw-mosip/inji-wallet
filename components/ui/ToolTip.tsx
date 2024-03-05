@@ -7,19 +7,10 @@ import {Theme} from './styleUtils';
 import testIDProps from '../../shared/commonUtil';
 
 export const CustomTooltip: React.FC<CustomTooltipProps> = props => {
-  const tooltipContent = (
-    <Column>
-      <Text weight="semibold">{props.title}</Text>
-      <View style={Theme.Styles.tooltipHrLine}></View>
-      <Text weight="regular" style={Theme.Styles.tooltipContentDescription}>
-        {props.description}
-      </Text>
-    </Column>
-  );
   return (
     <Tooltip
       {...testIDProps(props.testID)}
-      popover={tooltipContent}
+      popover={props.toolTipContent}
       width={props.width}
       height={props.height}
       withPointer={true}
@@ -35,10 +26,9 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = props => {
 };
 
 interface CustomTooltipProps {
-  title: string;
-  description: string;
   width: number;
   height: number;
   triggerComponent: React.ReactElement;
   testID?: string;
+  toolTipContent?: React.ReactElement;
 }

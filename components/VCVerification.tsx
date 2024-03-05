@@ -4,30 +4,32 @@ import {Theme} from './ui/styleUtils';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {setTextColor} from './VC/common/VCUtils';
+import {SvgImage} from './ui/svg';
+import PendingIcon from './PendingIcon';
 
 export const VCVerification: React.FC = ({wellknown, isVerified}: any) => {
   const {t} = useTranslation('VcDetails');
+  const statusText = isVerified ? t('valid') : t('pending');
+  const statusIcon = isVerified ? <VerifiedIcon /> : <PendingIcon />;
   return (
     <Row
       style={{
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-      {isVerified && (
-        <React.Fragment>
-          <VerifiedIcon />
-          <Text
-            testID="verificationStatus"
-            color={Theme.Colors.Details}
-            style={[
-              Theme.Styles.detailsValue,
-              setTextColor(wellknown),
-              {fontFamily: 'Inter_600SemiBold'},
-            ]}>
-            {t('valid')}
-          </Text>
-        </React.Fragment>
-      )}
+      <React.Fragment>
+        {statusIcon}
+        <Text
+          testID="verificationStatus"
+          color={Theme.Colors.Details}
+          style={[
+            Theme.Styles.detailsValue,
+            setTextColor(wellknown),
+            {fontFamily: 'Inter_600SemiBold'},
+          ]}>
+          {statusText}
+        </Text>
+      </React.Fragment>
     </Row>
   );
 };
