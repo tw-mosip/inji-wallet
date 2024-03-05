@@ -18,8 +18,13 @@ import {
   sendImpressionEvent,
 } from '../../shared/telemetry/TelemetryUtils';
 import {TelemetryConstants} from '../../shared/telemetry/TelemetryConstants';
-import {getVCsOrderedByPinStatus} from '../../shared/Utils';
+import {
+  VCItemContainerFlowType,
+  getVCsOrderedByPinStatus,
+} from '../../shared/Utils';
 import {Issuers} from '../../shared/openId4VCI/Utils';
+import {Error} from '../../components/ui/Error';
+import {SvgImage} from '../../components/ui/svg';
 
 export const SendVcScreen: React.FC = () => {
   const {t} = useTranslation('SendVcScreen');
@@ -95,7 +100,7 @@ export const SendVcScreen: React.FC = () => {
               onPress={controller.SELECT_VC_ITEM(index)}
               selectable
               selected={index === controller.selectedIndex}
-              flow="Vc Share"
+              flow={VCItemContainerFlowType.VC_SHARE}
               isPinned={vcMetadata.isPinned}
             />
           ))}
@@ -105,8 +110,10 @@ export const SendVcScreen: React.FC = () => {
           backgroundColor={Theme.Colors.whiteBackgroundColor}>
           {!controller.selectedVc.shouldVerifyPresence &&
             controller.selectedVc?.vcMetadata &&
-            VCMetadata.fromVcMetadataString(controller.selectedVc.vcMetadata)
-              .issuer != Issuers.Sunbird && (
+            [Issuers.Mosip, Issuers.ESignet].indexOf(
+              VCMetadata.fromVcMetadataString(controller.selectedVc.vcMetadata)
+                .issuer,
+            ) !== -1 && (
               <Button
                 type="gradient"
                 title={t('acceptRequestAndVerify')}
@@ -134,35 +141,34 @@ export const SendVcScreen: React.FC = () => {
       </Column>
 
       <VerifyIdentityOverlay
-        isVisible={controller.isVerifyingIdentity}
         vc={controller.selectedVc}
+        isVerifyingIdentity={controller.isVerifyingIdentity}
         onCancel={controller.CANCEL}
         onFaceValid={controller.FACE_VALID}
         onFaceInvalid={controller.FACE_INVALID}
+        isInvalidIdentity={controller.isInvalidIdentity}
+        onDismiss={controller.DISMISS}
+        onRetryVerification={controller.RETRY_VERIFICATION}
       />
 
-      <MessageOverlay
+      <Error
+        isModal
+        alignActionsOnEnd
+        showClose={false}
         isVisible={controller.isInvalidIdentity}
-        title={t('VerifyIdentityOverlay:errors.invalidIdentity.title')}
-        message={t('VerifyIdentityOverlay:errors.invalidIdentity.message')}
-        onBackdropPress={controller.DISMISS}>
-        <Row>
-          <Button
-            testID="cancel"
-            fill
-            type="clear"
-            title={t('common:cancel')}
-            onPress={controller.DISMISS}
-            margin={[0, 8, 0, 0]}
-          />
-          <Button
-            testID="tryAgain"
-            fill
-            title={t('common:tryAgain')}
-            onPress={controller.RETRY_VERIFICATION}
-          />
-        </Row>
-      </MessageOverlay>
+        title={t('ScanScreen:postFaceCapture.captureFailureTitle')}
+        message={t('ScanScreen:postFaceCapture.captureFailureMessage')}
+        image={SvgImage.PermissionDenied()}
+        primaryButtonTestID={'retry'}
+        primaryButtonText={t('ScanScreen:status.retry')}
+        primaryButtonEvent={controller.RETRY_VERIFICATION}
+        textButtonTestID={'home'}
+        textButtonText={t('ScanScreen:status.accepted.home')}
+        textButtonEvent={controller.GO_TO_HOME}
+        customImageStyles={{paddingBottom: 0, marginBottom: -6}}
+        customStyles={{marginTop: '20%'}}
+        testID={'shareWithSelfieError'}
+      />
     </React.Fragment>
   );
 };

@@ -12,6 +12,10 @@ import {CACHED_API} from '../api';
 import i18n from '../../i18n';
 import {VerifiableCredential} from '../../types/VC/ExistingMosipVC/vc';
 import {CredentialWrapper} from '../../types/VC/EsignetMosipVC/vc';
+import {
+  BOTTOM_SECTION_FIELDS_WITH_DETAILED_ADDRESS_FIELDS,
+  DETAIL_VIEW_ADD_ON_FIELDS,
+} from '../../components/VC/common/VCUtils';
 
 export const Protocols = {
   OpenId4VCI: 'OpenId4VCI',
@@ -19,23 +23,39 @@ export const Protocols = {
 };
 
 export const Issuers = {
+  Mosip: '',
   Sunbird: 'Sunbird',
   ESignet: 'ESignet',
 };
 
+/**
+ * @param issuer of the VC as per the VC metadata in MMKV
+ * @returns the ID-type to be used for further translation
+ *
+ * NOTE: This might be replaced by a more standards compliant way later.
+ */
+export function getIdType(issuer: string | undefined): string {
+  if (issuer === '' || issuer === Issuers.ESignet) {
+    return 'nationalCard';
+  }
+  return 'insuranceCard';
+}
+
 export const ID_TYPE = {
   MOSIPVerifiableCredential: i18n.t('VcDetails:nationalCard'),
   InsuranceCredential: i18n.t('VcDetails:insuranceCard'),
+  OpenG2PBeneficiaryVerifiableCredential: i18n.t('VcDetails:beneficiaryCard'),
+  OpenG2PRegistryVerifiableCredential: i18n.t('VcDetails:socialRegistryCard'),
 };
 
 export const getIDType = (verifiableCredential: VerifiableCredential) => {
   return ID_TYPE[verifiableCredential.type[1]];
 };
 
-export const ACTIVATION_NOT_NEEDED = [Issuers.Sunbird];
+export const ACTIVATION_NEEDED = [Issuers.ESignet, Issuers.Mosip];
 
 export const isActivationNeeded = (issuer: string) => {
-  return ACTIVATION_NOT_NEEDED.indexOf(issuer) === -1;
+  return ACTIVATION_NEEDED.indexOf(issuer) !== -1;
 };
 
 export const Issuers_Key_Ref = 'OpenId4VCI_KeyPair';
@@ -97,6 +117,8 @@ export const updateCredentialInformation = (context, credential) => {
   credentialWrapper.generatedOn = new Date();
   credentialWrapper.verifiableCredential.wellKnown =
     context.selectedIssuer['.well-known'];
+  credentialWrapper.verifiableCredential.credentialTypes =
+    context.selectedIssuer['credential_type'];
   // credentialWrapper.verifiableCredential.wellKnown =
   //   'https://esignet.collab.mosip.net/.well-known/openid-credential-issuer';
   credentialWrapper.verifiableCredential.issuerLogo =
@@ -118,6 +140,18 @@ export const getDisplayObjectForCurrentLanguage = (
 export const getVCMetadata = context => {
   const [issuer, protocol, requestId] =
     context.credentialWrapper?.identifier.split(':');
+  // TODO(temp-solution): This is a temporary solution and will not work for every issuer
+  // This should be re-written in a more standards compliant way later.
+  if (issuer === Issuers.Sunbird) {
+    return VCMetadata.fromVC({
+      requestId: requestId ? requestId : null,
+      issuer: issuer,
+      protocol: protocol,
+      id: context.verifiableCredential?.credential.credentialSubject
+        .policyNumber,
+      timestamp: context.timestamp ?? '',
+    });
+  }
   return VCMetadata.fromVC({
     requestId: requestId ? requestId : null,
     issuer: issuer,
@@ -172,6 +206,7 @@ export const getJWK = async publicKey => {
 export const getCredentialIssuersWellKnownConfig = async (
   issuer: string,
   wellknown: string,
+  credentialTypes: Object[],
   defaultFields: string[],
 ) => {
   let fields: string[] = defaultFields;
@@ -183,17 +218,55 @@ export const getCredentialIssuersWellKnownConfig = async (
     } else if (response?.credentials_supported[0].order) {
       fields = response?.credentials_supported[0].order;
     } else {
-      fields = Object.keys(
-        response?.credentials_supported[0].credential_definition
-          .credentialSubject,
+      const supportedCredentialTypes = credentialTypes.filter(
+        type => type !== 'VerifiableCredential',
       );
-      console.log('fields => ', fields);
+      const selectedCredentialType = supportedCredentialTypes[0];
+
+      response?.credentials_supported.filter(credential => {
+        if (credential.id === selectedCredentialType) {
+          fields = Object.keys(
+            credential.credential_definition.credentialSubject,
+          );
+        }
+      });
     }
   }
   return {
     wellknown: response,
     fields: fields,
   };
+};
+
+export const getDetailedViewFields = async (
+  issuer: string,
+  wellknown: string,
+  credentialTypes: Object[],
+  defaultFields: string[],
+) => {
+  let response = await getCredentialIssuersWellKnownConfig(
+    issuer,
+    wellknown,
+    credentialTypes,
+    defaultFields,
+  );
+
+  let updatedFieldsList = response.fields.concat(DETAIL_VIEW_ADD_ON_FIELDS);
+
+  updatedFieldsList = removeBottomSectionFields(updatedFieldsList);
+
+  return {
+    wellknown: response.wellknown,
+    fields: updatedFieldsList,
+  };
+};
+
+export const removeBottomSectionFields = fields => {
+  return fields.filter(
+    fieldName =>
+      !BOTTOM_SECTION_FIELDS_WITH_DETAILED_ADDRESS_FIELDS.includes(fieldName) ||
+      fieldName !== 'address',
+  );
 };
 
 export const vcDownloadTimeout = async (): Promise<number> => {

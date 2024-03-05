@@ -67,6 +67,8 @@ export interface VerifiableCredential {
     verificationMethod: string;
   };
   type: VerifiableCredentialType[];
+  wellKnown: string;
+  credentialTypes: Object[];
 }
 
 export interface VerifiablePresentation {

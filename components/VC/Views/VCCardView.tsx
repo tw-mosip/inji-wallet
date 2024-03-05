@@ -29,7 +29,6 @@ export const VCCardView: React.FC<
     isSavingFailedInIdle,
     storeErrorTranslationPath,
     generatedOn,
-    isVerified,
     DISMISS,
     KEBAB_POPUP,
   } = useVcItemController(props);
@@ -55,6 +54,7 @@ export const VCCardView: React.FC<
     getCredentialIssuersWellKnownConfig(
       props?.vcMetadata.issuer,
       verifiableCredential?.wellKnown,
+      verifiableCredential?.credentialTypes,
       CARD_VIEW_DEFAULT_FIELDS,
     ).then(response => {
       setWellknown(response.wellknown);
@@ -69,6 +69,7 @@ export const VCCardView: React.FC<
       </View>
     );
   }
+  console.log('balag-->', props.vcMetadata);
 
   return (
     <React.Fragment>

@@ -8,8 +8,7 @@ import {
   isHardwareKeystoreExists,
   WalletBindingResponse,
 } from '../../../shared/cryptoutil/cryptoUtil';
-import {log} from 'xstate/lib/actions';
-import {Protocols} from '../../../shared/openId4VCI/Utils';
+import {getIdType, Protocols} from '../../../shared/openId4VCI/Utils';
 import {StoreEvents} from '../../../machines/store';
 import {MIMOTO_BASE_URL, MY_VCS_STORE_KEY} from '../../../shared/constants';
 import {VcEvents} from '../vc';
@@ -71,7 +70,6 @@ const model = createModel(
       POLL: () => ({}),
       DOWNLOAD_READY: () => ({}),
       GET_VC_RESPONSE: (vc: VC) => ({vc}),
-      VERIFY: () => ({}),
       LOCK_VC: () => ({}),
       RESEND_OTP: () => ({}),
       INPUT_OTP: (otp: string) => ({otp}),
@@ -680,6 +678,8 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: VCMetadata.fromVC(context.vcMetadata).getVcKey(),
             type: 'WALLET_BINDING_SUCCESSFULL',
+            idType: getIdType(context.vcMetadata.issuer),
+            id: context.vcMetadata.id,
             timestamp: Date.now(),
             deviceName: '',
             vcLabel: VCMetadata.fromVC(context.vcMetadata).id,
@@ -694,6 +694,8 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: VCMetadata.fromVC(context.vcMetadata).getVcKey(),
             type: 'WALLET_BINDING_FAILURE',
+            id: context.vcMetadata.id,
+            idType: getIdType(context.vcMetadata.issuer),
             timestamp: Date.now(),
             deviceName: '',
             vcLabel: VCMetadata.fromVC(context.vcMetadata).id,
@@ -732,6 +734,8 @@ export const EsignetMosipVCItemMachine = model.createMachine(
       logVCremoved: send(
         (context, _) =>
           ActivityLogEvents.LOG_ACTIVITY({
+            idType: getIdType(context.vcMetadata.issuer),
+            id: context.vcMetadata.id,
             _vcKey: VCMetadata.fromVC(context.vcMetadata).getVcKey(),
             type: 'VC_REMOVED',
             timestamp: Date.now(),

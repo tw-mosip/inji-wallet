@@ -16,12 +16,18 @@ import {
   selectIsVerifyingIdentity,
 } from '../../machines/bleShare/commonSelectors';
 import {ScanEvents} from '../../machines/bleShare/scan/scanMachine';
-import {FlowType} from '../../shared/Utils';
+import {VCShareFlowType} from '../../shared/Utils';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {RootRouteProps} from '../../routes';
+import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
+
+type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
 
 export function useSendVcScreen() {
   const {appService} = useContext(GlobalContext);
   const scanService = appService.children.get('scan');
   const vcService = appService.children.get('vc');
+  const navigation = useNavigation<MyVcsTabNavigation>();
 
   const CANCEL = () => scanService.send(ScanEvents.CANCEL());
 
@@ -36,7 +42,9 @@ export function useSendVcScreen() {
       (vcRef: ActorRefFrom<typeof ExistingMosipVCItemMachine>) => {
         setSelectedIndex(index);
         const {serviceRefs, ...vcData} = vcRef.getSnapshot().context;
-        scanService.send(ScanEvents.SELECT_VC(vcData, FlowType.SIMPLE_SHARE));
+        scanService.send(
+          ScanEvents.SELECT_VC(vcData, VCShareFlowType.SIMPLE_SHARE),
+        );
       },
 
     receiverInfo: useSelector(scanService, selectReceiverInfo),
@@ -59,5 +67,8 @@ export function useSendVcScreen() {
     FACE_VALID: () => scanService.send(ScanEvents.FACE_VALID()),
     FACE_INVALID: () => scanService.send(ScanEvents.FACE_INVALID()),
     RETRY_VERIFICATION: () => scanService.send(ScanEvents.RETRY_VERIFICATION()),
+    GO_TO_HOME: () => {
+      navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
+    },
   };
 }

@@ -16,11 +16,12 @@ import {WalletBindingResponse} from '../../../shared/cryptoutil/cryptoUtil';
 import {logoType} from '../../../machines/issuersMachine';
 import {SvgImage} from '../../ui/svg';
 import {
-  getCredentialIssuersWellKnownConfig,
+  getDetailedViewFields,
   isActivationNeeded,
 } from '../../../shared/openId4VCI/Utils';
 import {
-  DETAIL_VIEW_ADD_ON_FIELDS,
+  BOTTOM_SECTION_FIELDS_WITH_DETAILED_ADDRESS_FIELDS,
+  DETAIL_VIEW_BOTTOM_SECTION_FIELDS,
   DETAIL_VIEW_DEFAULT_FIELDS,
   fieldItemIterator,
   isVCLoaded,
@@ -29,7 +30,6 @@ import {
 } from '../common/VCUtils';
 import {ActivityIndicator} from '../../ui/ActivityIndicator';
 import {ProfileIcon} from '../../ProfileIcon';
-import {color} from 'react-native-elements/dist/helpers';
 
 const getIssuerLogo = (isOpenId4VCI: boolean, issuerLogo: logoType) => {
   if (isOpenId4VCI) {
@@ -55,7 +55,7 @@ const getProfileImage = (
       return (
         <Image
           source={{uri: verifiableCredential?.credentialSubject.face}}
-          style={Theme.Styles.detialedViewImage}
+          style={Theme.Styles.detailedViewImage}
         />
       );
     }
@@ -63,7 +63,7 @@ const getProfileImage = (
     return (
       <Image
         source={{uri: props?.vc?.credential.biometrics.face}}
-        style={Theme.Styles.detialedViewImage}
+        style={Theme.Styles.detailedViewImage}
       />
     );
   }
@@ -92,15 +92,32 @@ export const VCDetailView: React.FC<
   let [fields, setFields] = useState([]);
   const [wellknown, setWellknown] = useState(null);
   useEffect(() => {
-    getCredentialIssuersWellKnownConfig(
+    getDetailedViewFields(
       VCMetadata.fromVC(props.vc.vcMetadata).issuer,
       props.vc?.verifiableCredential?.wellKnown,
+      props.vc?.verifiableCredential?.credentialTypes,
       DETAIL_VIEW_DEFAULT_FIELDS,
     ).then(response => {
       setWellknown(response.wellknown);
-      setFields(response.fields.concat(DETAIL_VIEW_ADD_ON_FIELDS));
+      setFields(response.fields);
     });
   }, [props.verifiableCredential?.wellKnown]);
+
+  const shouldShowHrLine = verifiableCredential => {
+    const availableFieldNames = Object.keys(
+      verifiableCredential?.credentialSubject,
+    );
+
+    for (const fieldName of availableFieldNames) {
+      if (
+        BOTTOM_SECTION_FIELDS_WITH_DETAILED_ADDRESS_FIELDS.includes(fieldName)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  };
 
   if (!isVCLoaded(verifiableCredential, fields)) {
     return <ActivityIndicator />;
@@ -139,26 +156,30 @@ export const VCDetailView: React.FC<
                   margin={'0 0 0 24'}
                   style={{flex: 1}}>
                   {fieldItemIterator(
-                    fields.slice(0, fields.length - 2),
+                    fields,
                     verifiableCredential,
                     wellknown,
                     props,
                   )}
                 </Column>
               </Row>
-              <View
-                style={[
-                  Theme.Styles.hrLine,
-                  {borderBottomColor: setTextColor(wellknown)?.color},
-                ]}></View>
-              <Column padding="14">
-                {fieldItemIterator(
-                  fields.slice(fields.length - 2, fields.length),
-                  verifiableCredential,
-                  wellknown,
-                  props,
-                )}
-              </Column>
+              {shouldShowHrLine(verifiableCredential) && (
+                <>
+                  <View
+                    style={[
+                      Theme.Styles.hrLine,
+                      {borderBottomColor: setTextColor(wellknown)?.color},
+                    ]}></View>
+                  <Column padding="14">
+                    {fieldItemIterator(
+                      DETAIL_VIEW_BOTTOM_SECTION_FIELDS,
+                      verifiableCredential,
+                      wellknown,
+                      props,
+                    )}
+                  </Column>
+                </>
+              )}
             </ImageBackground>
           </Column>
         </Column>

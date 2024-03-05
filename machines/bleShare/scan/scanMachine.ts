@@ -56,9 +56,9 @@ import {
   sendStartEvent,
 } from '../../../shared/telemetry/TelemetryUtils';
 import {TelemetryConstants} from '../../../shared/telemetry/TelemetryConstants';
-
 import {logState} from '../../../shared/commonUtil';
-import {FlowType} from '../../../shared/Utils';
+import {VCShareFlowType} from '../../../shared/Utils';
+import {getIdType} from '../../../shared/openId4VCI/Utils';
 
 const {wallet, EventTypes, VerificationStatus} = tuvali;
 
@@ -72,13 +72,14 @@ const model = createModel(
     createdVp: null as VC,
     loggers: [] as EmitterSubscription[],
     vcName: '',
-    flowType: FlowType.SIMPLE_SHARE,
+    flowType: VCShareFlowType.SIMPLE_SHARE,
     verificationImage: {} as CameraCapturedPicture,
     openId4VpUri: '',
     shareLogType: '' as ActivityLogType,
     QrLoginRef: {} as ActorRefFrom<typeof qrLoginMachine>,
     linkCode: '',
     readyForBluetoothStateCheck: false,
+    showFaceCaptureSuccessBanner: false,
   },
   {
     events: {
@@ -90,6 +91,7 @@ const model = createModel(
       VC_REJECTED: () => ({}),
       VC_SENT: () => ({}),
       CANCEL: () => ({}),
+      CLOSE_BANNER: () => ({}),
       STAY_IN_PROGRESS: () => ({}),
       RETRY: () => ({}),
       DISMISS: () => ({}),
@@ -175,11 +177,13 @@ export const scanMachine =
           entry: ['removeLoggers', 'resetFlowType', 'resetSelectedVc'],
         },
         disconnectDevice: {
+          entry: ['resetFlowType', 'resetSelectedVc'],
           invoke: {
             src: 'disconnect',
           },
           on: {
             DISCONNECT: {
+              actions: ['resetFlowType', 'resetSelectedVc'],
               target: '#scan.inactive',
             },
           },
@@ -389,7 +393,7 @@ export const scanMachine =
           on: {
             DISCONNECT: {
               target: '#scan.findingConnection',
-              actions: [],
+              actions: ['resetFlowType', 'resetSelectedVc'],
               internal: false,
             },
           },
@@ -417,12 +421,7 @@ export const scanMachine =
               },
               {
                 target: 'showQrLogin',
-                cond: 'isQrLoginViaSimpleShare',
-                actions: ['sendVcSharingStartEvent', 'setLinkCode'],
-              },
-              {
-                target: 'showQrLogin',
-                cond: 'isQrLoginViaMiniView',
+                cond: 'isQrLogin',
                 actions: ['sendVcSharingStartEvent', 'setLinkCode'],
               },
               {
@@ -538,7 +537,10 @@ export const scanMachine =
                 },
                 ACCEPT_REQUEST: {
                   target: 'sendingVc',
-                  actions: 'setShareLogTypeUnverified',
+                  actions: [
+                    'setShareLogTypeUnverified',
+                    'resetFaceCaptureBannerStatus',
+                  ],
                 },
                 CANCEL: {
                   target: 'cancelling',
@@ -572,6 +574,9 @@ export const scanMachine =
                     CANCEL: {
                       target: '#scan.reviewing.cancelling',
                       actions: ['sendVCShareFlowCancelEndEvent'],
+                    },
+                    CLOSE_BANNER: {
+                      actions: ['resetFaceCaptureBannerStatus'],
                     },
                   },
                 },
@@ -631,7 +636,7 @@ export const scanMachine =
             },
             rejected: {
               on: {
-                DISMISS: {
+                RETRY: {
                   target: '#scan.clearingConnection',
                 },
               },
@@ -651,7 +656,10 @@ export const scanMachine =
               on: {
                 FACE_VALID: {
                   target: 'sendingVc',
-                  actions: 'setShareLogTypeVerified',
+                  actions: [
+                    'setShareLogTypeVerified',
+                    'updateFaceCaptureBannerStatus',
+                  ],
                 },
                 FACE_INVALID: {
                   target: 'invalidIdentity',
@@ -704,6 +712,7 @@ export const scanMachine =
           },
         },
         disconnected: {
+          entry: ['resetSelectedVc', 'resetFlowType'],
           on: {
             RETRY: {
               target: '#scan.reviewing.cancelling',
@@ -867,7 +876,7 @@ export const scanMachine =
         }),
 
         resetFlowType: assign({
-          flowType: FlowType.SIMPLE_SHARE,
+          flowType: VCShareFlowType.SIMPLE_SHARE,
         }),
 
         setCreatedVp: assign({
@@ -911,6 +920,14 @@ export const scanMachine =
           shareLogType: 'PRESENCE_VERIFIED_AND_VC_SHARED',
         }),
 
+        updateFaceCaptureBannerStatus: model.assign({
+          showFaceCaptureSuccessBanner: true,
+        }),
+
+        resetFaceCaptureBannerStatus: model.assign({
+          showFaceCaptureSuccessBanner: false,
+        }),
+
         logShared: send(
           context => {
             const vcMetadata = context.selectedVc?.vcMetadata;
@@ -919,6 +936,8 @@ export const scanMachine =
               type: context.selectedVc.shouldVerifyPresence
                 ? 'VC_SHARED_WITH_VERIFICATION_CONSENT'
                 : context.shareLogType,
+              id: vcMetadata.id,
+              idType: getIdType(vcMetadata.issuer),
               timestamp: Date.now(),
               deviceName:
                 context.receiverInfo.name || context.receiverInfo.deviceName,
@@ -934,6 +953,8 @@ export const scanMachine =
               _vcKey: VCMetadata.fromVC(context.selectedVc).getVcKey(),
               type: 'PRESENCE_VERIFICATION_FAILED',
               timestamp: Date.now(),
+              idType: getIdType(context.selectedVc.issuer),
+              id: context.selectedVc.id,
               deviceName:
                 context.receiverInfo.name || context.receiverInfo.deviceName,
               vcLabel: context.selectedVc.id,
@@ -974,6 +995,8 @@ export const scanMachine =
           (_, event) =>
             ActivityLogEvents.LOG_ACTIVITY({
               _vcKey: '',
+              id: event.response.selectedVc.vcMetadata.id,
+              idType: getIdType(event.response.selectedVc.vcMetadata.issuer),
               type: 'QRLOGIN_SUCCESFULL',
               timestamp: Date.now(),
               deviceName: '',
@@ -1250,27 +1273,11 @@ export const scanMachine =
         isOpenIdQr: (_context, event) =>
           event.params.startsWith('OPENID4VP://'),
 
-        isQrLoginViaSimpleShare: (context, event) => {
+        isQrLogin: (context, event) => {
           try {
             let linkCode = new URL(event.params);
             // sample: 'inji://landing-page-name?linkCode=sTjp0XVH3t3dGCU&linkExpireDateTime=2023-11-09T06:56:18.482Z'
-            return (
-              linkCode.searchParams.get('linkCode') !== null &&
-              context.flowType === FlowType.SIMPLE_SHARE
-            );
-          } catch (e) {
-            return false;
-          }
-        },
-
-        isQrLoginViaMiniView: (context, event) => {
-          try {
-            let linkCode = new URL(event.params);
-            // sample: 'inji://landing-page-name?linkCode=sTjp0XVH3t3dGCU&linkExpireDateTime=2023-11-09T06:56:18.482Z'
-            return (
-              linkCode.searchParams.get('linkCode') !== null &&
-              context.flowType === FlowType.MINI_VIEW_QR_LOGIN
-            );
+            return linkCode.searchParams.get('linkCode') !== null;
           } catch (e) {
             return false;
           }
@@ -1284,13 +1291,13 @@ export const scanMachine =
           Boolean(event.data),
 
         isFlowTypeMiniViewShareWithSelfie: context =>
-          context.flowType === FlowType.MINI_VIEW_SHARE_WITH_SELFIE,
+          context.flowType === VCShareFlowType.MINI_VIEW_SHARE_WITH_SELFIE,
 
         isFlowTypeMiniViewShare: context =>
-          context.flowType === FlowType.MINI_VIEW_SHARE,
+          context.flowType === VCShareFlowType.MINI_VIEW_SHARE,
 
         isFlowTypeSimpleShare: context =>
-          context.flowType === FlowType.SIMPLE_SHARE,
+          context.flowType === VCShareFlowType.SIMPLE_SHARE,
       },
 
       delays: {

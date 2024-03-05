@@ -21,6 +21,8 @@ export const DETAIL_VIEW_DEFAULT_FIELDS = [
   'gender',
   'phone',
   'dateOfBirth',
+  'email',
+  'address',
 ];
 
 //todo UIN & VID to be removed once we get the fields in the wellknown endpoint
@@ -31,8 +33,18 @@ export const DETAIL_VIEW_ADD_ON_FIELDS = [
   'status',
   'credentialRegistry',
   'idType',
+];
+
+export const DETAIL_VIEW_BOTTOM_SECTION_FIELDS = [
   'email',
   'address',
+  'credentialRegistry',
+];
+
+export const BOTTOM_SECTION_FIELDS_WITH_DETAILED_ADDRESS_FIELDS = [
+  ...getAddressFields(),
+  'email',
+  'credentialRegistry',
 ];
 
 export const getFieldValue = (
@@ -109,23 +121,27 @@ export const setTextColor = (wellknown: any) => {
   }
 };
 
-function getFullAddress(credential: CredentialSubject) {
-  if (!credential) {
-    return '';
-  }
-
-  const fields = [
+export function getAddressFields() {
+  return [
     'addressLine1',
     'addressLine2',
     'addressLine3',
     'city',
     'province',
     'region',
+    'postalCode',
   ];
+}
+
+function getFullAddress(credential: CredentialSubject) {
+  if (!credential) {
+    return '';
+  }
+
+  const fields = getAddressFields();
 
   return fields
     .map(field => getLocalizedField(credential[field]))
-    .concat(credential.postalCode)
     .filter(Boolean)
     .join(', ');
 }
