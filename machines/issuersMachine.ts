@@ -17,8 +17,11 @@ import {
 import SecureKeystore from '@mosip/secure-keystore';
 import {KeyPair} from 'react-native-rsa-native';
 import {ActivityLogEvents} from './activityLog';
-import {log} from 'xstate/lib/actions';
-import {verifyCredential} from '../shared/vcjs/verifyCredential';
+import {log, respond} from 'xstate/lib/actions';
+import {
+  VerificationErrorType,
+  verifyCredential,
+} from '../shared/vcjs/verifyCredential';
 import {
   constructAuthorizationConfiguration,
   ErrorMessage,
@@ -48,7 +51,7 @@ import {request} from '../shared/request';
 import {BiometricCancellationError} from '../shared/error/BiometricCancellationError';
 import {VCMetadata} from '../shared/VCMetadata';
 import Cloud, {isSignedInResult} from '../shared/CloudBackupAndRestoreUtils';
-
+import {VcEvents} from './VCItemMachine/vc';
 const model = createModel(
   {
     issuers: [] as issuerType[],
@@ -63,6 +66,7 @@ const model = createModel(
     verificationErrorMessage: '',
     publicKey: ``,
     privateKey: ``,
+    isVerified: false,
   },
   {
     events: {
@@ -356,19 +360,26 @@ export const IssuersMachine = model.createMachine(
           src: 'verifyCredential',
           onDone: [
             {
-              actions: ['sendSuccessEndEvent'],
+              actions: [
+                'setIsVerified',
+                'sendSuccessEndEvent',
+                'sendVcUpdated',
+              ],
               target: 'storing',
             },
           ],
           onError: [
             {
+              cond: 'isPendingVerificationError',
+              actions: ['resetIsVerified', 'sendVcUpdated'],
+              target: 'storing',
+            },
+            {
               actions: [
-                log('Verification Error.'),
                 'resetLoadingReason',
                 'updateVerificationErrorMessage',
                 'sendErrorEndEvent',
               ],
-              //TODO: Move to state according to the required flow when verification of VC fails
               target: 'handleVCVerificationFailure',
             },
           ],
@@ -590,6 +601,22 @@ export const IssuersMachine = model.createMachine(
           ),
         );
       },
+
+      setIsVerified: assign({
+        isVerified: true,
+      }),
+
+      resetIsVerified: assign({
+        isVerified: false,
+      }),
+
+      sendVcUpdated: send(
+        context => VcEvents.VC_METADATA_UPDATED(getVCMetadata(context)),
+        {
+          to: context => context.serviceRefs.vc,
+        },
+      ),
+
       sendImpressionEvent: () => {
         sendImpressionEvent(
           getImpressionEventData(
@@ -721,6 +748,14 @@ export const IssuersMachine = model.createMachine(
       isCustomSecureKeystore: () => isHardwareKeystoreExists,
       hasUserCancelledBiometric: (_, event) =>
         event.data instanceof BiometricCancellationError,
+      isPendingVerificationError: (_context, event) => {
+        const condition =
+          (event.data as Error).message ==
+          VerificationErrorType.TECHNICAL_ERROR;
+        return (
+          (event.data as Error).message == VerificationErrorType.TECHNICAL_ERROR
+        );
+      },
     },
   },
 );
@@ -799,3 +834,10 @@ export interface issuerType {
   credential_audience: string;
   display: [displayType];
 }
+
+export const createIssuersMachine = (serviceRefs: AppServices) => {
+  return IssuersMachine.withContext({
+    ...IssuersMachine.context,
+    serviceRefs,
+  });
+};

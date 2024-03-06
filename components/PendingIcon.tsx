@@ -1,6 +1,6 @@
 import React from 'react';
 import {View} from 'react-native';
-import {Icon} from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {Theme} from './ui/styleUtils';
 
 const PendingIcon: React.FC = () => {

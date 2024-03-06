@@ -390,7 +390,17 @@
       "unlocked": "Tarjeta desbloqueada exitosamente",
       "locked": "Tarjeta bloqueada exitosamente",
       "revoked": "VID {{vid}} ha sido revocado. "
+    },
+    "bannerInfo": {
+      "verificationRetrigger": "Estamos validando tu credencial, esto puede tardar algún tiempo. Una vez verificado, podrá activar su credencial."
+    },
+    "statusToolTipContent": {
+      "valid_title": "Estado válido:",
+      "valid_desciption": "La credencial ha sido verificada exitosamente.",
+      "pending_title": "Estatus pendiente:",
+      "pending_descirption": "Actualmente la verificación está pendiente debido a problemas técnicos."
     }
+
   },
   "MainLayout": {
     "home": "Hogar",

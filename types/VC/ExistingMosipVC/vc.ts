@@ -16,7 +16,6 @@ export interface VC {
   walletBindingResponse?: WalletBindingResponse;
   credentialRegistry?: string;
   isPinned?: boolean;
-  isPendingVerification?: boolean;
 }
 
 export type VcIdType = 'UIN' | 'VID';

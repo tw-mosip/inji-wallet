@@ -69,7 +69,10 @@ export const VCCardView: React.FC<
       </View>
     );
   }
-  console.log('balag-->', props.vcMetadata);
+  console.log(
+    'props.vcMetadata in card view',
+    JSON.stringify(props.vcMetadata, null, 4),
+  );
 
   return (
     <React.Fragment>
@@ -100,7 +103,7 @@ export const VCCardView: React.FC<
           isKebabPopUp={isKebabPopUp}
           DISMISS={DISMISS}
           KEBAB_POPUP={KEBAB_POPUP}
-          isVerified={!props.vcMetadata.isPendingVerification}
+          isVerified={props.vcMetadata.isVerified}
         />
       </Pressable>
       <ErrorMessageOverlay

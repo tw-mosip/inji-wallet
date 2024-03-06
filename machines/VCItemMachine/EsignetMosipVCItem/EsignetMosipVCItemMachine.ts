@@ -8,7 +8,7 @@ import {
   isHardwareKeystoreExists,
   WalletBindingResponse,
 } from '../../../shared/cryptoutil/cryptoUtil';
-import {getIdType, Protocols} from '../../../shared/openId4VCI/Utils';
+import {getIdType, Issuers, Protocols} from '../../../shared/openId4VCI/Utils';
 import {StoreEvents} from '../../../machines/store';
 import {MIMOTO_BASE_URL, MY_VCS_STORE_KEY} from '../../../shared/constants';
 import {VcEvents} from '../vc';
@@ -21,7 +21,7 @@ import {
 import {ActivityLogEvents} from '../../../machines/activityLog';
 import {request} from '../../../shared/request';
 import SecureKeystore from '@mosip/secure-keystore';
-import {VerifiableCredential} from './vc';
+import {VerifiableCredential} from '../../../types/VC/EsignetMosipVC/vc';
 import {
   getEndEventData,
   getInteractEventData,
@@ -38,6 +38,7 @@ import {BackupEvents} from '../../backupAndRestore/backup';
 import Cloud, {
   isSignedInResult,
 } from '../../../shared/CloudBackupAndRestoreUtils';
+import {verifyCredential} from '../../../shared/vcjs/verifyCredential';
 
 const model = createModel(
   {
@@ -58,6 +59,7 @@ const model = createModel(
     walletBindingError: '',
     isMachineInKebabPopupState: false,
     bindingAuthFailedMessage: '' as string,
+    showVerificationInProgressBanner: false,
   },
   {
     events: {
@@ -86,6 +88,8 @@ const model = createModel(
       REMOVE: (vcMetadata: VCMetadata) => ({vcMetadata}),
       UPDATE_VC_METADATA: (vcMetadata: VCMetadata) => ({vcMetadata}),
       SHOW_BINDING_STATUS: () => ({}),
+      VERIFY: () => ({}),
+      DISMISS_VERIFICATION_IN_PROGRESS_BANNER: () => ({}),
     },
   },
 );
@@ -101,325 +105,380 @@ export const EsignetMosipVCItemMachine = model.createMachine(
       context: model.initialContext,
       events: {} as EventFrom<typeof model>,
     },
-    on: {
-      REFRESH: {
-        target: '.checkingStore',
-      },
-      UPDATE_VC_METADATA: {
-        actions: 'setVcMetadata',
-      },
-    },
     description: 'VC',
     id: 'vc-item-openid4vci',
-    initial: 'checkingVc',
+    type: 'parallel',
     states: {
-      checkingVc: {
-        entry: ['requestVcContext'],
-        description: 'Fetch the VC data from the Memory.',
+      existingState: {
         on: {
-          GET_VC_RESPONSE: [
-            {
-              actions: [
-                'setVerifiableCredential',
-                'setContext',
-                'setGeneratedOn',
-              ],
-              cond: 'hasCredential',
-              target: 'idle',
-            },
-            {
-              target: 'checkingStore',
-            },
-          ],
-        },
-      },
-      checkingStore: {
-        entry: 'requestStoredContext',
-        description: 'Check if VC data is in secured local storage.',
-        on: {
-          STORE_RESPONSE: {
-            actions: ['setVerifiableCredential', 'setContext', 'updateVc'],
-            target: 'idle',
+          REFRESH: {
+            target: '.checkingStore',
+          },
+          UPDATE_VC_METADATA: {
+            actions: 'setVcMetadata',
           },
         },
-      },
-      showBindingWarning: {
-        on: {
-          CONFIRM: {
-            actions: 'sendActivationStartEvent',
-            target: 'requestingBindingOtp',
-          },
-          CANCEL: [
-            {
-              cond: context => context.isMachineInKebabPopupState,
-              target: '#vc-item-openid4vci.kebabPopUp',
-            },
-            {
-              target: 'idle',
-            },
-          ],
-        },
-      },
-      requestingBindingOtp: {
-        invoke: {
-          src: 'requestBindingOtp',
-          onDone: [
-            {
-              target: 'acceptingBindingOtp',
-            },
-          ],
-          onError: [
-            {
-              actions: ['setWalletBindingError', 'logWalletBindingFailure'],
-              target: 'showingWalletBindingError',
-            },
-          ],
-        },
-      },
-      showingWalletBindingError: {
-        on: {
-          CANCEL: [
-            {
-              cond: context => context.isMachineInKebabPopupState,
-              actions: ['setWalletBindingErrorEmpty'],
-              target: '#vc-item-openid4vci.kebabPopUp',
-            },
-            {
-              actions: ['setWalletBindingErrorEmpty'],
-              target: 'idle',
-            },
-          ],
-        },
-      },
-      acceptingBindingOtp: {
-        entry: ['clearOtp'],
-        on: {
-          INPUT_OTP: {
-            target: 'addKeyPair',
-            actions: ['setOtp'],
-          },
-          DISMISS: [
-            {
-              cond: context => context.isMachineInKebabPopupState,
-              target: '#vc-item-openid4vci.kebabPopUp',
-              actions: [
-                'sendActivationFailedEndEvent',
-                'clearOtp',
-                'clearTransactionId',
-              ],
-            },
-            {
-              target: 'idle',
-              actions: [
-                'sendActivationFailedEndEvent',
-                'clearOtp',
-                'clearTransactionId',
-              ],
-            },
-          ],
-          RESEND_OTP: {
-            target: '.resendOTP',
-          },
-        },
-        initial: 'idle',
+        initial: 'checkingVc',
         states: {
-          idle: {},
-          resendOTP: {
-            invoke: {
-              src: 'requestBindingOtp',
-              onDone: {
+          checkingVc: {
+            entry: ['requestVcContext'],
+            description: 'Fetch the VC data from the Memory.',
+            on: {
+              GET_VC_RESPONSE: [
+                {
+                  actions: [
+                    'setVerifiableCredential',
+                    'setContext',
+                    'setGeneratedOn',
+                  ],
+                  cond: 'hasCredential',
+                  target: 'idle',
+                },
+                {
+                  target: 'checkingStore',
+                },
+              ],
+            },
+          },
+          checkingStore: {
+            entry: 'requestStoredContext',
+            description: 'Check if VC data is in secured local storage.',
+            on: {
+              STORE_RESPONSE: {
+                actions: ['setVerifiableCredential', 'setContext', 'updateVc'],
                 target: 'idle',
               },
-              onError: {
-                actions: 'setWalletBindingError',
-                target: '#vc-item-openid4vci.showingWalletBindingError',
+            },
+          },
+          idle: {
+            on: {
+              DISMISS: {
+                target: 'checkingVc',
+              },
+              KEBAB_POPUP: {
+                target: 'kebabPopUp',
+              },
+              ADD_WALLET_BINDING_ID: {
+                target: 'showBindingWarning',
+              },
+              PIN_CARD: {
+                target: 'pinCard',
+                actions: 'setPinCard',
               },
             },
           },
-        },
-      },
-      addKeyPair: {
-        invoke: {
-          src: 'generateKeyPair',
-          onDone: [
-            {
-              cond: 'isCustomSecureKeystore',
-              target: 'addingWalletBindingId',
-              actions: ['setPublicKey'],
-            },
-            {
-              target: 'addingWalletBindingId',
-              actions: ['setPublicKey', 'setPrivateKey'],
-            },
-          ],
-          onError: [
-            {
-              actions: ['setWalletBindingError', 'logWalletBindingFailure'],
-              target: 'showingWalletBindingError',
-            },
-          ],
-        },
-      },
-      addingWalletBindingId: {
-        invoke: {
-          src: 'addWalletBindnigId',
-          onDone: [
-            {
-              cond: 'isCustomSecureKeystore',
-              target: 'updatingContextVariables',
-            },
-            {
-              target: 'updatingPrivateKey',
-              /*The walletBindingResponse is used for conditional rendering in wallet binding. 
-                However, it wrongly considers activation as successful even when there's an error 
-                in updatingPrivateKey state. So created a temporary context variable to store the binding 
-                response and use it in updatingPrivateKey state*/
-              actions: 'setTempWalletBindingResponse',
-            },
-          ],
-          onError: [
-            {
-              actions: ['setWalletBindingError', 'logWalletBindingFailure'],
-              target: 'showingWalletBindingError',
-            },
-          ],
-        },
-      },
-
-      updatingPrivateKey: {
-        invoke: {
-          src: 'updatePrivateKey',
-          onDone: {
-            target: 'updatingContextVariables',
-          },
-          onError: {
-            actions: [
-              'setWalletBindingError',
-              'logWalletBindingFailure',
-              'sendActivationFailedEndEvent',
-            ],
-            target: 'showingWalletBindingError',
-          },
-        },
-      },
-
-      updatingContextVariables: {
-        entry: [
-          'setWalletBindingId',
-          'setThumbprintForWalletBindingId',
-          'storeContext',
-          'updatePrivateKey',
-          'updateVc',
-          'setWalletBindingErrorEmpty',
-          'sendActivationSuccessEvent',
-          'logWalletBindingSuccess',
-          send('SHOW_BINDING_STATUS'),
-        ],
-        on: {
-          SHOW_BINDING_STATUS: [
-            {
-              cond: context => context.isMachineInKebabPopupState,
-              actions: 'sendWalletBindingSuccess',
-              target: '#vc-item-openid4vci.kebabPopUp',
-            },
-            {
-              actions: 'sendWalletBindingSuccess',
-              target: 'idle',
-            },
-          ],
-        },
-      },
-      idle: {
-        on: {
-          DISMISS: {
-            target: 'checkingVc',
-          },
-          KEBAB_POPUP: {
-            target: 'kebabPopUp',
-          },
-          ADD_WALLET_BINDING_ID: {
-            target: 'showBindingWarning',
-          },
-          PIN_CARD: {
-            target: 'pinCard',
-            actions: 'setPinCard',
-          },
-        },
-      },
-      pinCard: {
-        entry: 'sendVcUpdated',
-        always: {
-          target: 'idle',
-        },
-      },
-      kebabPopUp: {
-        entry: assign({isMachineInKebabPopupState: () => true}),
-        exit: assign({isMachineInKebabPopupState: () => false}),
-        on: {
-          DISMISS: {
-            actions: assign({
-              isMachineInKebabPopupState: () => false,
-            }),
-            target: 'idle',
-          },
-          ADD_WALLET_BINDING_ID: {
-            target: '#vc-item-openid4vci.showBindingWarning',
-          },
-          PIN_CARD: {
-            target: '#vc-item-openid4vci.pinCard',
-            actions: 'setPinCard',
-          },
-          SHOW_ACTIVITY: {
-            target: '#vc-item-openid4vci.kebabPopUp.showActivities',
-          },
-          REMOVE: {
-            actions: 'setVcKey',
-            target: '#vc-item-openid4vci.kebabPopUp.removeWallet',
-          },
-          CLOSE_VC_MODAL: {
-            actions: ['closeViewVcModal'],
-            target: '#vc-item-openid4vci',
-          },
-        },
-        initial: 'idle',
-        states: {
-          idle: {},
-          showActivities: {
+          kebabPopUp: {
+            entry: assign({isMachineInKebabPopupState: () => true}),
+            exit: assign({isMachineInKebabPopupState: () => false}),
             on: {
-              DISMISS: '#vc-item-openid4vci',
-            },
-          },
-          removeWallet: {
-            on: {
-              CONFIRM: {
-                target: 'removingVc',
+              DISMISS: {
+                actions: assign({
+                  isMachineInKebabPopupState: () => false,
+                }),
+                target: 'idle',
               },
-              CANCEL: {
+              ADD_WALLET_BINDING_ID: {
+                target: '#vc-item-openid4vci.existingState.showBindingWarning',
+              },
+              PIN_CARD: {
+                target: '#vc-item-openid4vci.existingState.pinCard',
+                actions: 'setPinCard',
+              },
+              SHOW_ACTIVITY: {
+                target:
+                  '#vc-item-openid4vci.existingState.kebabPopUp.showActivities',
+              },
+              REMOVE: {
+                actions: 'setVcKey',
+                target:
+                  '#vc-item-openid4vci.existingState.kebabPopUp.removeWallet',
+              },
+              CLOSE_VC_MODAL: {
+                actions: ['closeViewVcModal'],
                 target: '#vc-item-openid4vci',
               },
             },
-          },
-          removingVc: {
-            entry: 'removeVcItem',
-            on: {
-              STORE_RESPONSE: {
-                actions: ['closeViewVcModal', 'removedVc', 'logVCremoved'],
-                target: 'triggerAutoBackup',
+            initial: 'idle',
+            states: {
+              idle: {},
+              showActivities: {
+                on: {
+                  DISMISS: '#vc-item-openid4vci',
+                },
+              },
+              removeWallet: {
+                on: {
+                  CONFIRM: {
+                    target: 'removingVc',
+                  },
+                  CANCEL: {
+                    target: '#vc-item-openid4vci',
+                  },
+                },
+              },
+              removingVc: {
+                entry: 'removeVcItem',
+                on: {
+                  STORE_RESPONSE: {
+                    actions: ['closeViewVcModal', 'removedVc', 'logVCremoved'],
+                    target: 'triggerAutoBackup',
+                  },
+                },
+              },
+              triggerAutoBackup: {
+                invoke: {
+                  src: 'isUserSignedAlready',
+                  onDone: [
+                    {
+                      cond: 'isSignedIn',
+                      actions: ['sendBackupEvent', 'removedVc', 'logVCremoved'],
+                      target: '#vc-item-openid4vci',
+                    },
+                    {
+                      actions: ['removedVc', 'logVCremoved'],
+                      target: '#vc-item-openid4vci',
+                    },
+                  ],
+                },
               },
             },
           },
-          triggerAutoBackup: {
-            invoke: {
-              src: 'isUserSignedAlready',
-              onDone: [
+          showBindingWarning: {
+            on: {
+              CONFIRM: {
+                actions: 'sendActivationStartEvent',
+                target: 'requestingBindingOtp',
+              },
+              CANCEL: [
                 {
-                  cond: 'isSignedIn',
-                  actions: ['sendBackupEvent', 'removedVc', 'logVCremoved'],
-                  target: '#vc-item-openid4vci',
+                  cond: context => context.isMachineInKebabPopupState,
+                  target: '#vc-item-openid4vci.existingState.kebabPopUp',
                 },
                 {
-                  actions: ['removedVc', 'logVCremoved'],
-                  target: '#vc-item-openid4vci',
+                  target: 'idle',
+                },
+              ],
+            },
+          },
+          pinCard: {
+            entry: 'sendVcUpdated',
+            always: {
+              target: 'idle',
+            },
+          },
+          requestingBindingOtp: {
+            invoke: {
+              src: 'requestBindingOtp',
+              onDone: [
+                {
+                  target: 'acceptingBindingOtp',
+                },
+              ],
+              onError: [
+                {
+                  actions: ['setWalletBindingError', 'logWalletBindingFailure'],
+                  target: 'showingWalletBindingError',
+                },
+              ],
+            },
+          },
+          acceptingBindingOtp: {
+            entry: ['clearOtp'],
+            on: {
+              INPUT_OTP: {
+                target: 'addKeyPair',
+                actions: ['setOtp'],
+              },
+              DISMISS: [
+                {
+                  cond: context => context.isMachineInKebabPopupState,
+                  target: '#vc-item-openid4vci.existingState.kebabPopUp',
+                  actions: [
+                    'sendActivationFailedEndEvent',
+                    'clearOtp',
+                    'clearTransactionId',
+                  ],
+                },
+                {
+                  target: 'idle',
+                  actions: [
+                    'sendActivationFailedEndEvent',
+                    'clearOtp',
+                    'clearTransactionId',
+                  ],
+                },
+              ],
+              RESEND_OTP: {
+                target: '.resendOTP',
+              },
+            },
+            initial: 'idle',
+            states: {
+              idle: {},
+              resendOTP: {
+                invoke: {
+                  src: 'requestBindingOtp',
+                  onDone: {
+                    target: 'idle',
+                  },
+                  onError: {
+                    actions: 'setWalletBindingError',
+                    target:
+                      '#vc-item-openid4vci.existingState.showingWalletBindingError',
+                  },
+                },
+              },
+            },
+          },
+          showingWalletBindingError: {
+            on: {
+              CANCEL: [
+                {
+                  cond: context => context.isMachineInKebabPopupState,
+                  actions: ['setWalletBindingErrorEmpty'],
+                  target: '#vc-item-openid4vci.existingState.kebabPopUp',
+                },
+                {
+                  actions: ['setWalletBindingErrorEmpty'],
+                  target: 'idle',
+                },
+              ],
+            },
+          },
+          addKeyPair: {
+            invoke: {
+              src: 'generateKeyPair',
+              onDone: [
+                {
+                  cond: 'isCustomSecureKeystore',
+                  target: 'addingWalletBindingId',
+                  actions: ['setPublicKey'],
+                },
+                {
+                  target: 'addingWalletBindingId',
+                  actions: ['setPublicKey', 'setPrivateKey'],
+                },
+              ],
+              onError: [
+                {
+                  actions: ['setWalletBindingError', 'logWalletBindingFailure'],
+                  target: 'showingWalletBindingError',
+                },
+              ],
+            },
+          },
+          addingWalletBindingId: {
+            invoke: {
+              src: 'addWalletBindnigId',
+              onDone: [
+                {
+                  cond: 'isCustomSecureKeystore',
+                  target: 'updatingContextVariables',
+                },
+                {
+                  target: 'updatingPrivateKey',
+                  /*The walletBindingResponse is used for conditional rendering in wallet binding. 
+                    However, it wrongly considers activation as successful even when there's an error 
+                    in updatingPrivateKey state. So created a temporary context variable to store the binding 
+                    response and use it in updatingPrivateKey state*/
+                  actions: 'setTempWalletBindingResponse',
+                },
+              ],
+              onError: [
+                {
+                  actions: ['setWalletBindingError', 'logWalletBindingFailure'],
+                  target: 'showingWalletBindingError',
+                },
+              ],
+            },
+          },
+          updatingPrivateKey: {
+            invoke: {
+              src: 'updatePrivateKey',
+              onDone: {
+                target: 'updatingContextVariables',
+              },
+              onError: {
+                actions: [
+                  'setWalletBindingError',
+                  'logWalletBindingFailure',
+                  'sendActivationFailedEndEvent',
+                ],
+                target: 'showingWalletBindingError',
+              },
+            },
+          },
+
+          updatingContextVariables: {
+            entry: [
+              'setWalletBindingId',
+              'setThumbprintForWalletBindingId',
+              'storeContext',
+              'updatePrivateKey',
+              'updateVc',
+              'setWalletBindingErrorEmpty',
+              'sendActivationSuccessEvent',
+              'logWalletBindingSuccess',
+              send('SHOW_BINDING_STATUS'),
+            ],
+            on: {
+              SHOW_BINDING_STATUS: [
+                {
+                  cond: context => context.isMachineInKebabPopupState,
+                  actions: 'sendWalletBindingSuccess',
+                  target: '#vc-item-openid4vci.existingState.kebabPopUp',
+                },
+                {
+                  actions: 'sendWalletBindingSuccess',
+                  target: 'idle',
+                },
+              ],
+            },
+          },
+        },
+      },
+      verifyState: {
+        on: {
+          VERIFY: {
+            actions: [
+              () => console.log('::::VERIFY TRiggerred'),
+              'setVerificationInProgressBannerStatus',
+            ],
+            target: '.verifyingCredential',
+          },
+        },
+        initial: 'idle',
+        states: {
+          idle: {},
+          verifyingCredential: {
+            on: {
+              DISMISS_VERIFICATION_IN_PROGRESS_BANNER: {
+                actions: ['resetVerificationInProgressBannerStatus'],
+              },
+            },
+            description:
+              'once the credential is downloaded, it is verified before saving',
+            invoke: {
+              src: 'verifyCredential',
+              onDone: [
+                {
+                  actions: [
+                    'resetVerificationInProgressBannerStatus',
+                    'setIsVerified',
+                    'sendVcUpdated',
+                    'storeContext',
+                  ],
+                  target: 'idle',
+                },
+              ],
+              onError: [
+                {
+                  actions: [
+                    'resetVerificationInProgressBannerStatus',
+                    'resetIsVerified',
+                    'sendVcUpdated',
+                  ],
+                  target: 'idle',
                 },
               ],
             },
@@ -430,6 +489,22 @@ export const EsignetMosipVCItemMachine = model.createMachine(
   },
   {
     actions: {
+      setIsVerified: assign({
+        vcMetadata: context =>
+          new VCMetadata({
+            ...context.vcMetadata,
+            isVerified: true,
+          }),
+      }),
+
+      resetIsVerified: assign({
+        vcMetadata: context =>
+          new VCMetadata({
+            ...context.vcMetadata,
+            isVerified: false,
+          }),
+      }),
+
       setVcMetadata: assign({
         vcMetadata: (_, event) => event.vcMetadata,
       }),
@@ -567,6 +642,12 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           to: context => context.serviceRefs.vc,
         },
       ),
+      setVerificationInProgressBannerStatus: assign({
+        showVerificationInProgressBanner: true,
+      }),
+      resetVerificationInProgressBannerStatus: assign({
+        showVerificationInProgressBanner: false,
+      }),
 
       sendActivationStartEvent: context => {
         sendStartEvent(
@@ -829,6 +910,22 @@ export const EsignetMosipVCItemMachine = model.createMachine(
         );
         if (response.response == null) {
           throw new Error('Could not process request');
+        }
+      },
+      verifyCredential: async context => {
+        console.log('::::verifyCredential');
+        //this issuer specific check has to be removed once vc validation is done.
+        if (
+          VCMetadata.fromVcMetadataString(context.vcMetadata).issuer ===
+          Issuers.Sunbird
+        ) {
+          return true;
+        }
+        const verificationResult = await verifyCredential(
+          context.verifiableCredential?.credential,
+        );
+        if (!verificationResult.isVerified) {
+          throw new Error(verificationResult.errorMessage);
         }
       },
     },

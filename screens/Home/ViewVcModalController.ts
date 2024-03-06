@@ -1,5 +1,5 @@
-import {useMachine, useSelector} from '@xstate/react';
-import {useContext, useEffect, useState} from 'react';
+import {useInterpret, useMachine, useSelector} from '@xstate/react';
+import {useContext, useEffect, useRef, useState} from 'react';
 import {ActorRefFrom} from 'xstate';
 import {useTranslation} from 'react-i18next';
 import NetInfo from '@react-native-community/netinfo';
@@ -15,6 +15,7 @@ import {
   selectAcceptingBindingOtp,
   selectWalletBindingInProgress,
   selectBindingWarning,
+  selectShowVerificationInProgressBanner,
 } from '../../machines/VCItemMachine/commonSelectors';
 import {
   selectIsAcceptingOtpInput,
@@ -29,6 +30,7 @@ import {
 } from '../../machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {selectPasscode} from '../../machines/auth';
 import {biometricsMachine, selectIsSuccess} from '../../machines/biometrics';
+import {createIssuersMachine} from '../../machines/issuersMachine';
 
 export function useViewVcModal({
   vcItemActor,
@@ -82,6 +84,12 @@ export function useViewVcModal({
     });
   };
 
+  const issuersMachine = useRef(
+    createIssuersMachine(appService.getSnapshot().context.serviceRefs),
+  );
+
+  const issuerService = useInterpret(issuersMachine.current);
+
   useEffect(() => {
     if (isLockingVc) {
       showToast(vc.locked ? t('success.locked') : t('success.unlocked'));
@@ -104,6 +112,7 @@ export function useViewVcModal({
     isRevokingVc,
     isLoggingRevoke,
     vc,
+    issuersMachine,
   ]);
 
   useEffect(() => {
@@ -114,6 +123,7 @@ export function useViewVcModal({
     message,
     toastVisible,
     vc,
+    issuersMachine,
     otpError: useSelector(vcItemActor, selectOtpError),
     bindingAuthFailedError: useSelector(
       vcItemActor,
@@ -143,6 +153,11 @@ export function useViewVcModal({
     isBindingError: useSelector(vcItemActor, selectShowWalletBindingError),
     isBindingSuccess: useSelector(vcItemActor, selectWalletBindingSuccess),
     isBindingWarning: useSelector(vcItemActor, selectBindingWarning),
+
+    showVerificationInProgressBanner: useSelector(
+      vcItemActor,
+      selectShowVerificationInProgressBanner,
+    ),
 
     CONFIRM_REVOKE_VC: () => {
       setRevoking(true);

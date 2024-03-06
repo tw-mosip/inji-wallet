@@ -1,4 +1,4 @@
-import {useSelector} from '@xstate/react';
+import {useInterpret, useSelector} from '@xstate/react';
 import {
   IssuerScreenTabEvents,
   IssuersMachine,
@@ -16,6 +16,24 @@ import {ActorRefFrom} from 'xstate';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
 import {logState} from '../../shared/commonUtil';
 import {isAndroid} from '../../shared/constants';
+import {useContext, useRef} from 'react';
+import {GlobalContext} from '../../shared/GlobalContext';
+
+let issuerMachineService;
+function useCreateIssuerMachineService() {
+  const {appService} = useContext(GlobalContext);
+  const machine = useRef(
+    IssuersMachine.withContext({
+      ...IssuersMachine.context,
+      serviceRefs: appService.getSnapshot().context.serviceRefs,
+    }),
+  );
+  return (issuerMachineService = useInterpret(machine.current));
+}
+
+export function getIssuersMachineService() {
+  return issuerMachineService;
+}
 
 export function useIssuerScreenController({route, navigation}) {
   const service = route.params.service;

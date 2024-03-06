@@ -81,3 +81,7 @@ export function selectShowActivities(state: State) {
 export function selectShowWalletBindingError(state: State) {
   return state.matches('showingWalletBindingError');
 }
+
+export function selectShowVerificationInProgressBanner(state: State) {
+  return state.context.showVerificationInProgressBanner;
+}

@@ -90,11 +90,14 @@ export interface Typegen0 {
       | 'TRY_AGAIN'
       | 'done.invoke.issuersMachine.performAuthorization:invocation[0]';
     loadKeyPair: 'STORE_RESPONSE';
-    logDownloaded: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
+    logDownloaded:
+      | 'done.invoke.issuersMachine.verifyingCredential:invocation[0]'
+      | 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
     resetError:
       | 'RESET_ERROR'
       | 'TRY_AGAIN'
       | 'error.platform.issuersMachine.performAuthorization:invocation[0]';
+    resetIsVerified: 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
     resetLoadingReason:
       | 'RESET_ERROR'
       | 'done.invoke.checkInternet'
@@ -108,12 +111,16 @@ export interface Typegen0 {
     sendErrorEndEvent: 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
     sendImpressionEvent: 'done.invoke.issuersMachine.displayIssuers:invocation[0]';
     sendSuccessEndEvent: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
+    sendVcUpdated:
+      | 'done.invoke.issuersMachine.verifyingCredential:invocation[0]'
+      | 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
     setCredentialWrapper: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
     setError:
       | 'error.platform.issuersMachine.displayIssuers:invocation[0]'
       | 'error.platform.issuersMachine.downloadCredentials:invocation[0]'
       | 'error.platform.issuersMachine.downloadIssuerConfig:invocation[0]'
       | 'error.platform.issuersMachine.performAuthorization:invocation[0]';
+    setIsVerified: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
     setIssuers: 'done.invoke.issuersMachine.displayIssuers:invocation[0]';
     setLoadingReasonAsDisplayIssuers: 'TRY_AGAIN';
     setLoadingReasonAsDownloadingCredentials:
@@ -134,10 +141,18 @@ export interface Typegen0 {
     setTokenResponse: 'done.invoke.issuersMachine.performAuthorization:invocation[0]';
     setVerifiableCredential: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
     storeKeyPair: 'done.invoke.issuersMachine.generateKeyPair:invocation[0]';
-    storeVcMetaContext: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
-    storeVcsContext: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
-    storeVerifiableCredentialData: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
-    storeVerifiableCredentialMeta: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
+    storeVcMetaContext:
+      | 'done.invoke.issuersMachine.verifyingCredential:invocation[0]'
+      | 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
+    storeVcsContext:
+      | 'done.invoke.issuersMachine.verifyingCredential:invocation[0]'
+      | 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
+    storeVerifiableCredentialData:
+      | 'done.invoke.issuersMachine.verifyingCredential:invocation[0]'
+      | 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
+    storeVerifiableCredentialMeta:
+      | 'done.invoke.issuersMachine.verifyingCredential:invocation[0]'
+      | 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
     updateVerificationErrorMessage: 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
   };
   eventsCausingDelays: {};
@@ -149,6 +164,7 @@ export interface Typegen0 {
     isInternetConnected: 'done.invoke.checkInternet';
     isOIDCConfigError: 'error.platform.issuersMachine.performAuthorization:invocation[0]';
     isOIDCflowCancelled: 'error.platform.issuersMachine.performAuthorization:invocation[0]';
+    isPendingVerificationError: 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
     isSignedIn: 'done.invoke.issuersMachine.storing:invocation[0]';
     shouldFetchIssuersAgain: 'TRY_AGAIN';
   };
@@ -161,7 +177,9 @@ export interface Typegen0 {
     downloadIssuersList: 'TRY_AGAIN' | 'xstate.init';
     generateKeyPair: 'CHECK_KEY_PAIR';
     invokeAuthorization: 'done.invoke.checkInternet';
-    isUserSignedAlready: 'done.invoke.issuersMachine.verifyingCredential:invocation[0]';
+    isUserSignedAlready:
+      | 'done.invoke.issuersMachine.verifyingCredential:invocation[0]'
+      | 'error.platform.issuersMachine.verifyingCredential:invocation[0]';
     verifyCredential: 'done.invoke.issuersMachine.downloadCredentials:invocation[0]';
   };
   matchesStates:

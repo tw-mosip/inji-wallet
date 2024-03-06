@@ -58,7 +58,7 @@ export const KebabPopUp: React.FC<KebabPopUpProps> = props => {
             onPress={controller.PIN_CARD}
             testID="pinOrUnPinCard"
           />
-          {!props.vcMetadata.isPendingVerification && (
+          {props.vcMetadata.isVerified && (
             <ShareVc
               testID="shareVcFromKebab"
               label={t('share')}
@@ -66,7 +66,7 @@ export const KebabPopUp: React.FC<KebabPopUpProps> = props => {
               flowType={VCShareFlowType.MINI_VIEW_SHARE}
             />
           )}
-          {props.vcHasImage && !props.vcMetadata.isPendingVerification && (
+          {props.vcHasImage && props.vcMetadata.isVerified && (
             <>
               <ShareVc
                 testID="shareVcWithSelfieFromKebab"

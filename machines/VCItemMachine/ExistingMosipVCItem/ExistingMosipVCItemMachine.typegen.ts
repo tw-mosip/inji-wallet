@@ -14,63 +14,68 @@ export interface Typegen0 {
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.addKeyPair:invocation[0]': {
-      type: 'done.invoke.vc-item.addKeyPair:invocation[0]';
+    'done.invoke.vc-item.existingState.addKeyPair:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.addKeyPair:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.addingWalletBindingId:invocation[0]': {
-      type: 'done.invoke.vc-item.addingWalletBindingId:invocation[0]';
+    'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.checkingServerData.loadDownloadLimitConfig:invocation[0]': {
-      type: 'done.invoke.vc-item.checkingServerData.loadDownloadLimitConfig:invocation[0]';
+    'done.invoke.vc-item.existingState.checkingServerData.loadDownloadLimitConfig:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.checkingServerData.loadDownloadLimitConfig:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]': {
-      type: 'done.invoke.vc-item.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
+    'done.invoke.vc-item.existingState.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]': {
-      type: 'done.invoke.vc-item.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]';
+    'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.requestingBindingOtp:invocation[0]': {
-      type: 'done.invoke.vc-item.requestingBindingOtp:invocation[0]';
+    'done.invoke.vc-item.existingState.requestingBindingOtp:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.requestingBindingOtp:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.requestingLock:invocation[0]': {
-      type: 'done.invoke.vc-item.requestingLock:invocation[0]';
+    'done.invoke.vc-item.existingState.requestingLock:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.requestingLock:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.requestingOtp:invocation[0]': {
-      type: 'done.invoke.vc-item.requestingOtp:invocation[0]';
+    'done.invoke.vc-item.existingState.requestingOtp:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.requestingOtp:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.requestingRevoke:invocation[0]': {
-      type: 'done.invoke.vc-item.requestingRevoke:invocation[0]';
+    'done.invoke.vc-item.existingState.requestingRevoke:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.requestingRevoke:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.updatingPrivateKey:invocation[0]': {
-      type: 'done.invoke.vc-item.updatingPrivateKey:invocation[0]';
+    'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]': {
-      type: 'done.invoke.vc-item.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
+    'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
-    'done.invoke.vc-item.verifyingCredential:invocation[0]': {
-      type: 'done.invoke.vc-item.verifyingCredential:invocation[0]';
+    'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]': {
+      type: 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]';
+      data: unknown;
+      __tip: 'See the XState TS docs to learn how to strongly type this.';
+    };
+    'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]': {
+      type: 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]';
       data: unknown;
       __tip: 'See the XState TS docs to learn how to strongly type this.';
     };
@@ -82,64 +87,70 @@ export interface Typegen0 {
       type: 'error.platform.downloadCredential';
       data: unknown;
     };
-    'error.platform.vc-item.acceptingBindingOtp.resendOTP:invocation[0]': {
-      type: 'error.platform.vc-item.acceptingBindingOtp.resendOTP:invocation[0]';
+    'error.platform.vc-item.existingState.acceptingBindingOtp.resendOTP:invocation[0]': {
+      type: 'error.platform.vc-item.existingState.acceptingBindingOtp.resendOTP:invocation[0]';
       data: unknown;
     };
-    'error.platform.vc-item.addKeyPair:invocation[0]': {
-      type: 'error.platform.vc-item.addKeyPair:invocation[0]';
+    'error.platform.vc-item.existingState.addKeyPair:invocation[0]': {
+      type: 'error.platform.vc-item.existingState.addKeyPair:invocation[0]';
       data: unknown;
     };
-    'error.platform.vc-item.addingWalletBindingId:invocation[0]': {
-      type: 'error.platform.vc-item.addingWalletBindingId:invocation[0]';
+    'error.platform.vc-item.existingState.addingWalletBindingId:invocation[0]': {
+      type: 'error.platform.vc-item.existingState.addingWalletBindingId:invocation[0]';
       data: unknown;
     };
-    'error.platform.vc-item.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]': {
-      type: 'error.platform.vc-item.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
+    'error.platform.vc-item.existingState.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]': {
+      type: 'error.platform.vc-item.existingState.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
       data: unknown;
     };
-    'error.platform.vc-item.requestingBindingOtp:invocation[0]': {
-      type: 'error.platform.vc-item.requestingBindingOtp:invocation[0]';
+    'error.platform.vc-item.existingState.requestingBindingOtp:invocation[0]': {
+      type: 'error.platform.vc-item.existingState.requestingBindingOtp:invocation[0]';
       data: unknown;
     };
-    'error.platform.vc-item.requestingLock:invocation[0]': {
-      type: 'error.platform.vc-item.requestingLock:invocation[0]';
+    'error.platform.vc-item.existingState.requestingLock:invocation[0]': {
+      type: 'error.platform.vc-item.existingState.requestingLock:invocation[0]';
       data: unknown;
     };
-    'error.platform.vc-item.requestingRevoke:invocation[0]': {
-      type: 'error.platform.vc-item.requestingRevoke:invocation[0]';
+    'error.platform.vc-item.existingState.requestingRevoke:invocation[0]': {
+      type: 'error.platform.vc-item.existingState.requestingRevoke:invocation[0]';
       data: unknown;
     };
-    'error.platform.vc-item.updatingPrivateKey:invocation[0]': {
-      type: 'error.platform.vc-item.updatingPrivateKey:invocation[0]';
+    'error.platform.vc-item.existingState.updatingPrivateKey:invocation[0]': {
+      type: 'error.platform.vc-item.existingState.updatingPrivateKey:invocation[0]';
       data: unknown;
     };
-    'error.platform.vc-item.verifyingCredential:invocation[0]': {
-      type: 'error.platform.vc-item.verifyingCredential:invocation[0]';
+    'error.platform.vc-item.existingState.verifyingCredential:invocation[0]': {
+      type: 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
+      data: unknown;
+    };
+    'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]': {
+      type: 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
       data: unknown;
     };
     'xstate.init': {type: 'xstate.init'};
   };
   invokeSrcNameMap: {
-    addWalletBindnigId: 'done.invoke.vc-item.addingWalletBindingId:invocation[0]';
-    checkDownloadExpiryLimit: 'done.invoke.vc-item.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
+    addWalletBindnigId: 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]';
+    checkDownloadExpiryLimit: 'done.invoke.vc-item.existingState.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
     checkStatus: 'done.invoke.checkStatus';
     downloadCredential: 'done.invoke.downloadCredential';
-    generateKeyPair: 'done.invoke.vc-item.addKeyPair:invocation[0]';
+    generateKeyPair: 'done.invoke.vc-item.existingState.addKeyPair:invocation[0]';
     isUserSignedAlready:
-      | 'done.invoke.vc-item.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]'
-      | 'done.invoke.vc-item.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
-    loadDownloadLimitConfig: 'done.invoke.vc-item.checkingServerData.loadDownloadLimitConfig:invocation[0]';
+      | 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]'
+      | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
+    loadDownloadLimitConfig: 'done.invoke.vc-item.existingState.checkingServerData.loadDownloadLimitConfig:invocation[0]';
     requestBindingOtp:
-      | 'done.invoke.vc-item.acceptingBindingOtp.resendOTP:invocation[0]'
-      | 'done.invoke.vc-item.requestingBindingOtp:invocation[0]';
-    requestLock: 'done.invoke.vc-item.requestingLock:invocation[0]';
+      | 'done.invoke.vc-item.existingState.acceptingBindingOtp.resendOTP:invocation[0]'
+      | 'done.invoke.vc-item.existingState.requestingBindingOtp:invocation[0]';
+    requestLock: 'done.invoke.vc-item.existingState.requestingLock:invocation[0]';
     requestOtp:
-      | 'done.invoke.vc-item.acceptingOtpInput.resendOTP:invocation[0]'
-      | 'done.invoke.vc-item.requestingOtp:invocation[0]';
-    requestRevoke: 'done.invoke.vc-item.requestingRevoke:invocation[0]';
-    updatePrivateKey: 'done.invoke.vc-item.updatingPrivateKey:invocation[0]';
-    verifyCredential: 'done.invoke.vc-item.verifyingCredential:invocation[0]';
+      | 'done.invoke.vc-item.existingState.acceptingOtpInput.resendOTP:invocation[0]'
+      | 'done.invoke.vc-item.existingState.requestingOtp:invocation[0]';
+    requestRevoke: 'done.invoke.vc-item.existingState.requestingRevoke:invocation[0]';
+    updatePrivateKey: 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
+    verifyCredential:
+      | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]';
   };
   missingImplementations: {
     actions: never;
@@ -157,11 +168,15 @@ export interface Typegen0 {
       | 'REVOKE_VC'
       | 'SHOW_BINDING_STATUS'
       | 'STORE_RESPONSE'
-      | 'done.invoke.vc-item.requestingBindingOtp:invocation[0]'
-      | 'done.invoke.vc-item.requestingOtp:invocation[0]'
-      | 'done.invoke.vc-item.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]'
-      | 'error.platform.vc-item.requestingLock:invocation[0]'
-      | 'error.platform.vc-item.requestingRevoke:invocation[0]';
+      | 'done.invoke.vc-item.existingState.requestingBindingOtp:invocation[0]'
+      | 'done.invoke.vc-item.existingState.requestingOtp:invocation[0]'
+      | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]'
+      | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.existingState.requestingLock:invocation[0]'
+      | 'error.platform.vc-item.existingState.requestingRevoke:invocation[0]'
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
     clearTransactionId:
       | ''
       | 'CANCEL'
@@ -169,120 +184,157 @@ export interface Typegen0 {
       | 'GET_VC_RESPONSE'
       | 'SHOW_BINDING_STATUS'
       | 'STORE_RESPONSE'
-      | 'done.invoke.vc-item.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
+      | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]'
+      | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+    closeViewVcModal: 'CLOSE_VC_MODAL' | 'STORE_RESPONSE';
     incrementDownloadCounter:
       | 'POLL'
-      | 'done.invoke.vc-item.checkingServerData.loadDownloadLimitConfig:invocation[0]';
+      | 'done.invoke.vc-item.existingState.checkingServerData.loadDownloadLimitConfig:invocation[0]';
     logDownloaded: 'STORE_RESPONSE';
     logRevoked: 'STORE_RESPONSE';
-    logVCremoved: 'done.invoke.vc-item.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]';
+    logVCremoved:
+      | 'STORE_RESPONSE'
+      | 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]';
     logWalletBindingFailure:
-      | 'error.platform.vc-item.addKeyPair:invocation[0]'
-      | 'error.platform.vc-item.addingWalletBindingId:invocation[0]'
-      | 'error.platform.vc-item.requestingBindingOtp:invocation[0]'
-      | 'error.platform.vc-item.updatingPrivateKey:invocation[0]';
+      | 'error.platform.vc-item.existingState.addKeyPair:invocation[0]'
+      | 'error.platform.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'error.platform.vc-item.existingState.requestingBindingOtp:invocation[0]'
+      | 'error.platform.vc-item.existingState.updatingPrivateKey:invocation[0]';
     logWalletBindingSuccess:
-      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
-      | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]';
-    refreshMyVcs: 'done.invoke.vc-item.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]';
+      | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
+    refreshMyVcs:
+      | 'STORE_RESPONSE'
+      | 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]';
     removeVcFromInProgressDownloads: 'STORE_RESPONSE';
     removeVcItem: 'CONFIRM';
     removeVcMetaDataFromStorage:
       | 'STORE_ERROR'
-      | 'error.platform.vc-item.verifyingCredential:invocation[0]';
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
     removeVcMetaDataFromVcMachine: 'DISMISS';
     requestStoredContext: 'GET_VC_RESPONSE' | 'REFRESH';
-    requestVcContext: 'DISMISS' | 'xstate.init';
-    revokeVID: 'done.invoke.vc-item.requestingRevoke:invocation[0]';
+    requestVcContext:
+      | 'DISMISS'
+      | 'STORE_ERROR'
+      | 'STORE_RESPONSE'
+      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]'
+      | 'xstate.init';
+    resetIsVerified:
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+    resetVerificationInProgressBannerStatus:
+      | 'DISMISS_VERIFICATION_IN_PROGRESS_BANNER'
+      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+    revokeVID: 'done.invoke.vc-item.existingState.requestingRevoke:invocation[0]';
     sendActivationFailedEndEvent:
       | 'DISMISS'
-      | 'error.platform.vc-item.updatingPrivateKey:invocation[0]';
+      | 'error.platform.vc-item.existingState.updatingPrivateKey:invocation[0]';
     sendActivationStartEvent: 'CONFIRM';
     sendActivationSuccessEvent:
-      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
-      | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]';
+      | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
     sendBackupEvent:
-      | 'done.invoke.vc-item.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]'
-      | 'done.invoke.vc-item.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
+      | 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]'
+      | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
     sendDownloadLimitExpire:
       | 'FAILED'
-      | 'error.platform.vc-item.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
+      | 'error.platform.vc-item.existingState.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
     sendTamperedVc: 'TAMPERED_VC';
     sendTelemetryEvents: 'STORE_RESPONSE';
-    sendVcUpdated: 'PIN_CARD';
+    sendVcUpdated:
+      | 'PIN_CARD'
+      | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
     sendVerificationError: 'STORE_RESPONSE';
     sendWalletBindingSuccess: 'SHOW_BINDING_STATUS';
     setCredential:
       | 'CREDENTIAL_DOWNLOADED'
       | 'GET_VC_RESPONSE'
       | 'STORE_RESPONSE';
-    setDownloadInterval: 'done.invoke.vc-item.checkingServerData.loadDownloadLimitConfig:invocation[0]';
-    setLock: 'done.invoke.vc-item.requestingLock:invocation[0]';
-    setMaxDownloadCount: 'done.invoke.vc-item.checkingServerData.loadDownloadLimitConfig:invocation[0]';
+    setDownloadInterval: 'done.invoke.vc-item.existingState.checkingServerData.loadDownloadLimitConfig:invocation[0]';
+    setIsVerified:
+      | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]';
+    setLock: 'done.invoke.vc-item.existingState.requestingLock:invocation[0]';
+    setMaxDownloadCount: 'done.invoke.vc-item.existingState.checkingServerData.loadDownloadLimitConfig:invocation[0]';
     setOtp: 'INPUT_OTP';
     setOtpError:
-      | 'error.platform.vc-item.requestingLock:invocation[0]'
-      | 'error.platform.vc-item.requestingRevoke:invocation[0]';
+      | 'error.platform.vc-item.existingState.requestingLock:invocation[0]'
+      | 'error.platform.vc-item.existingState.requestingRevoke:invocation[0]';
     setPinCard: 'PIN_CARD';
-    setPrivateKey: 'done.invoke.vc-item.addKeyPair:invocation[0]';
-    setPublicKey: 'done.invoke.vc-item.addKeyPair:invocation[0]';
-    setRevoke: 'done.invoke.vc-item.requestingRevoke:invocation[0]';
-    setTempWalletBindingResponse: 'done.invoke.vc-item.addingWalletBindingId:invocation[0]';
+    setPrivateKey: 'done.invoke.vc-item.existingState.addKeyPair:invocation[0]';
+    setPublicKey: 'done.invoke.vc-item.existingState.addKeyPair:invocation[0]';
+    setRevoke: 'done.invoke.vc-item.existingState.requestingRevoke:invocation[0]';
+    setTempWalletBindingResponse: 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]';
     setThumbprintForWalletBindingId:
-      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
-      | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]';
+      | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
     setTransactionId:
       | 'INPUT_OTP'
       | 'REVOKE_VC'
-      | 'done.invoke.vc-item.requestingOtp:invocation[0]'
-      | 'error.platform.vc-item.requestingLock:invocation[0]'
-      | 'error.platform.vc-item.requestingRevoke:invocation[0]';
+      | 'done.invoke.vc-item.existingState.requestingOtp:invocation[0]'
+      | 'error.platform.vc-item.existingState.requestingLock:invocation[0]'
+      | 'error.platform.vc-item.existingState.requestingRevoke:invocation[0]';
     setVcKey: 'REMOVE';
     setVcMetadata: 'UPDATE_VC_METADATA';
+    setVerificationInProgressBannerStatus: 'VERIFY';
     setWalletBindingError:
-      | 'error.platform.vc-item.acceptingBindingOtp.resendOTP:invocation[0]'
-      | 'error.platform.vc-item.addKeyPair:invocation[0]'
-      | 'error.platform.vc-item.addingWalletBindingId:invocation[0]'
-      | 'error.platform.vc-item.requestingBindingOtp:invocation[0]'
-      | 'error.platform.vc-item.updatingPrivateKey:invocation[0]';
+      | 'error.platform.vc-item.existingState.acceptingBindingOtp.resendOTP:invocation[0]'
+      | 'error.platform.vc-item.existingState.addKeyPair:invocation[0]'
+      | 'error.platform.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'error.platform.vc-item.existingState.requestingBindingOtp:invocation[0]'
+      | 'error.platform.vc-item.existingState.updatingPrivateKey:invocation[0]';
     setWalletBindingErrorEmpty:
       | 'CANCEL'
-      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
-      | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]';
+      | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
     setWalletBindingId:
-      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
-      | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]';
+      | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
     storeContext:
-      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
-      | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]'
-      | 'done.invoke.vc-item.verifyingCredential:invocation[0]';
-    storeLock: 'done.invoke.vc-item.requestingLock:invocation[0]';
+      | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]'
+      | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+    storeLock: 'done.invoke.vc-item.existingState.requestingLock:invocation[0]';
     updatePrivateKey:
-      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
-      | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]';
+      | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
     updateVc:
       | 'STORE_RESPONSE'
-      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]'
-      | 'done.invoke.vc-item.updatingPrivateKey:invocation[0]';
-    updateVerificationErrorMessage: 'error.platform.vc-item.verifyingCredential:invocation[0]';
+      | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]'
+      | 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
+    updateVerificationErrorMessage: 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
   };
   eventsCausingDelays: {};
   eventsCausingGuards: {
     hasCredential: 'GET_VC_RESPONSE' | 'STORE_RESPONSE';
     isCustomSecureKeystore:
-      | 'done.invoke.vc-item.addKeyPair:invocation[0]'
-      | 'done.invoke.vc-item.addingWalletBindingId:invocation[0]';
+      | 'done.invoke.vc-item.existingState.addKeyPair:invocation[0]'
+      | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]';
     isDownloadAllowed: 'POLL';
+    isPendingVerificationError:
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
     isSignedIn:
-      | 'done.invoke.vc-item.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]'
-      | 'done.invoke.vc-item.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
+      | 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]'
+      | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
   };
   eventsCausingServices: {
-    addWalletBindnigId: 'done.invoke.vc-item.addKeyPair:invocation[0]';
+    addWalletBindnigId: 'done.invoke.vc-item.existingState.addKeyPair:invocation[0]';
     checkDownloadExpiryLimit:
       | 'POLL'
-      | 'done.invoke.vc-item.checkingServerData.loadDownloadLimitConfig:invocation[0]';
-    checkStatus: 'done.invoke.vc-item.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
+      | 'done.invoke.vc-item.existingState.checkingServerData.loadDownloadLimitConfig:invocation[0]';
+    checkStatus: 'done.invoke.vc-item.existingState.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
     downloadCredential: 'DOWNLOAD_READY';
     generateKeyPair: 'INPUT_OTP';
     isUserSignedAlready: 'STORE_RESPONSE';
@@ -291,73 +343,106 @@ export interface Typegen0 {
     requestLock: 'INPUT_OTP';
     requestOtp: 'LOCK_VC' | 'RESEND_OTP';
     requestRevoke: 'INPUT_OTP';
-    updatePrivateKey: 'done.invoke.vc-item.addingWalletBindingId:invocation[0]';
-    verifyCredential: 'CREDENTIAL_DOWNLOADED';
+    updatePrivateKey: 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]';
+    verifyCredential: 'CREDENTIAL_DOWNLOADED' | 'VERIFY';
   };
   matchesStates:
-    | 'acceptingBindingOtp'
-    | 'acceptingBindingOtp.idle'
-    | 'acceptingBindingOtp.resendOTP'
-    | 'acceptingOtpInput'
-    | 'acceptingOtpInput.idle'
-    | 'acceptingOtpInput.resendOTP'
-    | 'acceptingRevokeInput'
-    | 'addKeyPair'
-    | 'addingWalletBindingId'
-    | 'checkingServerData'
-    | 'checkingServerData.checkingStatus'
-    | 'checkingServerData.downloadingCredential'
-    | 'checkingServerData.loadDownloadLimitConfig'
-    | 'checkingServerData.savingFailed'
-    | 'checkingServerData.savingFailed.idle'
-    | 'checkingServerData.savingFailed.viewingVc'
-    | 'checkingServerData.verifyingDownloadLimitExpiry'
-    | 'checkingStore'
-    | 'checkingVc'
-    | 'handleVCVerificationFailure'
-    | 'idle'
-    | 'invalid'
-    | 'invalid.backend'
-    | 'invalid.otp'
-    | 'kebabPopUp'
-    | 'kebabPopUp.idle'
-    | 'kebabPopUp.removeWallet'
-    | 'kebabPopUp.removingVc'
-    | 'kebabPopUp.removingVc.triggerAutoBackup'
-    | 'kebabPopUp.showActivities'
-    | 'lockingVc'
-    | 'loggingRevoke'
-    | 'pinCard'
-    | 'requestingBindingOtp'
-    | 'requestingLock'
-    | 'requestingOtp'
-    | 'requestingRevoke'
-    | 'revokingVc'
-    | 'showBindingWarning'
-    | 'showingWalletBindingError'
-    | 'updatingContextVariables'
-    | 'updatingPrivateKey'
-    | 'verifyingCredential'
-    | 'verifyingCredential.idle'
-    | 'verifyingCredential.triggerAutoBackupForVcDownload'
+    | 'existingState'
+    | 'existingState.acceptingBindingOtp'
+    | 'existingState.acceptingBindingOtp.idle'
+    | 'existingState.acceptingBindingOtp.resendOTP'
+    | 'existingState.acceptingOtpInput'
+    | 'existingState.acceptingOtpInput.idle'
+    | 'existingState.acceptingOtpInput.resendOTP'
+    | 'existingState.acceptingRevokeInput'
+    | 'existingState.addKeyPair'
+    | 'existingState.addingWalletBindingId'
+    | 'existingState.checkingServerData'
+    | 'existingState.checkingServerData.checkingStatus'
+    | 'existingState.checkingServerData.downloadingCredential'
+    | 'existingState.checkingServerData.loadDownloadLimitConfig'
+    | 'existingState.checkingServerData.savingFailed'
+    | 'existingState.checkingServerData.savingFailed.idle'
+    | 'existingState.checkingServerData.savingFailed.viewingVc'
+    | 'existingState.checkingServerData.verifyingDownloadLimitExpiry'
+    | 'existingState.checkingStore'
+    | 'existingState.checkingVc'
+    | 'existingState.handleVCVerificationFailure'
+    | 'existingState.idle'
+    | 'existingState.invalid'
+    | 'existingState.invalid.backend'
+    | 'existingState.invalid.otp'
+    | 'existingState.kebabPopUp'
+    | 'existingState.kebabPopUp.idle'
+    | 'existingState.kebabPopUp.removeWallet'
+    | 'existingState.kebabPopUp.removingVc'
+    | 'existingState.kebabPopUp.removingVc.triggerAutoBackup'
+    | 'existingState.kebabPopUp.showActivities'
+    | 'existingState.lockingVc'
+    | 'existingState.loggingRevoke'
+    | 'existingState.pinCard'
+    | 'existingState.requestingBindingOtp'
+    | 'existingState.requestingLock'
+    | 'existingState.requestingOtp'
+    | 'existingState.requestingRevoke'
+    | 'existingState.revokingVc'
+    | 'existingState.showBindingWarning'
+    | 'existingState.showingWalletBindingError'
+    | 'existingState.updatingContextVariables'
+    | 'existingState.updatingPrivateKey'
+    | 'existingState.verifyingCredential'
+    | 'existingState.verifyingCredential.idle'
+    | 'existingState.verifyingCredential.triggerAutoBackupForVcDownload'
+    | 'verifyState'
+    | 'verifyState.idle'
+    | 'verifyState.verifyingCredential'
     | {
-        acceptingBindingOtp?: 'idle' | 'resendOTP';
-        acceptingOtpInput?: 'idle' | 'resendOTP';
-        checkingServerData?:
-          | 'checkingStatus'
-          | 'downloadingCredential'
-          | 'loadDownloadLimitConfig'
-          | 'savingFailed'
-          | 'verifyingDownloadLimitExpiry'
-          | {savingFailed?: 'idle' | 'viewingVc'};
-        invalid?: 'backend' | 'otp';
-        kebabPopUp?:
+        existingState?:
+          | 'acceptingBindingOtp'
+          | 'acceptingOtpInput'
+          | 'acceptingRevokeInput'
+          | 'addKeyPair'
+          | 'addingWalletBindingId'
+          | 'checkingServerData'
+          | 'checkingStore'
+          | 'checkingVc'
+          | 'handleVCVerificationFailure'
           | 'idle'
-          | 'removeWallet'
-          | 'removingVc'
-          | 'showActivities'
-          | {removingVc?: 'triggerAutoBackup'};
-        verifyingCredential?: 'idle' | 'triggerAutoBackupForVcDownload';
+          | 'invalid'
+          | 'kebabPopUp'
+          | 'lockingVc'
+          | 'loggingRevoke'
+          | 'pinCard'
+          | 'requestingBindingOtp'
+          | 'requestingLock'
+          | 'requestingOtp'
+          | 'requestingRevoke'
+          | 'revokingVc'
+          | 'showBindingWarning'
+          | 'showingWalletBindingError'
+          | 'updatingContextVariables'
+          | 'updatingPrivateKey'
+          | 'verifyingCredential'
+          | {
+              acceptingBindingOtp?: 'idle' | 'resendOTP';
+              acceptingOtpInput?: 'idle' | 'resendOTP';
+              checkingServerData?:
+                | 'checkingStatus'
+                | 'downloadingCredential'
+                | 'loadDownloadLimitConfig'
+                | 'savingFailed'
+                | 'verifyingDownloadLimitExpiry'
+                | {savingFailed?: 'idle' | 'viewingVc'};
+              invalid?: 'backend' | 'otp';
+              kebabPopUp?:
+                | 'idle'
+                | 'removeWallet'
+                | 'removingVc'
+                | 'showActivities'
+                | {removingVc?: 'triggerAutoBackup'};
+              verifyingCredential?: 'idle' | 'triggerAutoBackupForVcDownload';
+            };
+        verifyState?: 'idle' | 'verifyingCredential';
       };
   tags: never;
 }

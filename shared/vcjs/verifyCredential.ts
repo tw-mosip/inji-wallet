@@ -6,6 +6,7 @@ import {AssertionProofPurpose} from '../../lib/jsonld-signatures/purposes/Assert
 import {PublicKeyProofPurpose} from '../../lib/jsonld-signatures/purposes/PublicKeyProofPurpose';
 import {VerifiableCredential} from '../../types/VC/ExistingMosipVC/vc';
 import {Credential} from '../../types/VC/EsignetMosipVC/vc';
+import {sleep} from '../commonUtil';
 
 // FIXME: Ed25519Signature2018 not fully supported yet.
 // Ed25519Signature2018 proof type check is not tested with its real credential
@@ -22,6 +23,7 @@ const ProofPurpose = {
 export async function verifyCredential(
   verifiableCredential: VerifiableCredential | Credential,
 ): Promise<VerificationResult> {
+  console.log('::::verifyCredential.ts');
   try {
     let purpose: PublicKeyProofPurpose | AssertionProofPurpose;
     switch (verifiableCredential.proof.proofPurpose) {
@@ -48,6 +50,14 @@ export async function verifyCredential(
         break;
       }
     }
+    // console.log(":::Initial call", initialCall)
+
+    // //  const temp = verifiableCredential
+    //  if (initialCall) {
+
+    //    //await sleep(10000);
+    //   delete temp.proof
+    //  }
 
     const vcjsOptions = {
       purpose,
@@ -55,10 +65,24 @@ export async function verifyCredential(
       credential: verifiableCredential,
       documentLoader: jsonld.documentLoaders.xhr(),
     };
-
+    // await sleep(60000);
     //ToDo - Have to remove once range error is fixed during verification
     const result = await vcjs.verifyCredential(vcjsOptions);
+
     //const result = {verified: true};
+    console.log(
+      '::verifyCredential->result->',
+      JSON.stringify(result, null, 4),
+    );
+    // if(flag){
+    //   return {
+    //     isVerified: true,
+    //     errorMessage: ''
+    //   }
+    // } else {
+    //   return handleResponse(result);
+    // }
+
     return handleResponse(result);
 
     //ToDo Handle Expiration error message
@@ -73,13 +97,9 @@ export async function verifyCredential(
 function handleResponse(result: any) {
   var errorMessage = VerificationErrorType.NO_ERROR;
   var isVerifiedFlag = true;
-
   if (!result?.verified) {
-    if (result['results'][0].error.name == 'jsonld.InvalidUrl') {
-      errorMessage = VerificationErrorType.NETWORK_ERROR;
-    } else {
-      errorMessage = VerificationErrorType.TECHNICAL_ERROR;
-    }
+    errorMessage = VerificationErrorType.TECHNICAL_ERROR;
+
     isVerifiedFlag = false;
   }
 

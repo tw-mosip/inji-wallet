@@ -190,8 +190,7 @@ export const VCDetailView: React.FC<
             position: 'relative',
             backgroundColor: Theme.Colors.DetailedViewBackground,
           }}>
-          {props.activeTab !== 1 &&
-          !props.vc.vcMetadata.isPendingVerification ? (
+          {props.activeTab !== 1 && props.vc.vcMetadata.isVerified ? (
             props.isBindingPending &&
             isActivationNeeded(props.vc.vcMetadata.issuer) ? (
               <Column

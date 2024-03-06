@@ -28,7 +28,7 @@ fileignoreconfig:
   - filename: machines/issuersMachine.ts
     checksum: 742b8ff561dca61be08ab0b9aef3997ad5d043df298a84c17349dc0206ddcee6
   - filename: machines/issuersMachine.typegen.ts
-    checksum: 55c5f7cf6dab7cd299ae44c5fc749178747fc893715dcaf12f97d86be7fe3ff4
+    checksum: 7c2bbf42537d57100563026dffb666b6b6b638d9f1cda39854578c6a3e51595b
   - filename: screens/Home/MyVcs/IdInputModal.tsx
     checksum: a95e7e8857bf6c1e80125901cfd3fc1d228da87703b140eeeb2dd1cfd394d716
   - filename: screens/WelcomeScreenController.ts
@@ -50,13 +50,13 @@ fileignoreconfig:
   - filename: shared/telemetry/TelemetryConstants.js
     checksum: fd8dc3a69cdef68855dc5f0531d8e634bfa2621bb4dc22f85b8247512a349c4c
   - filename: machines/VCItemMachine/EsignetMosipVCItem/EsignetMosipVCItemMachine.ts
-    checksum: cca7657da3a1a91b63e0a10605545d1e0d3d152b083a55f9dbb9eed893646e4b
+    checksum: 1a011fadba09209001b4a93ee1416bd31369d7c97d123ced833084edeb07d67b
   - filename: machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine.ts
-    checksum: 1d06c737c0a59cdda6604eb2a6f384bcaf361a682c19f43ef9e8537e38c53db4
+    checksum: 2e636e1ec47396d3d373f4d938d33bb5d91d2dc5497bcd1b1ed4e18c1d4b200e
   - filename: machines/VCItemMachine/EsignetMosipVCItem/EsignetMosipVCItemMachine.typegen.ts
-    checksum: 0de47337ba60b29c8e4d4231439c77028197d3d8d3139eb367c471138c40f93d
+    checksum: 980d73e71f3b1ad77ecb52dbd69bb26a5bdbe902a013f732e5bfc32143bfa532
   - filename: machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine.typegen.ts
-    checksum: 2f21247cba29ac991526cb57814785ce2af1712a734460f69cfd071c7185cafa
+    checksum: 9b7ce33fb456c6f70e6d5649ae57940d0418ac4fb018aa2c87eed18a5ad2248a
   - filename: shared/telemetry/TelemetryUtils.js
     checksum: a0686e9a5c006176fd720b84bc36ca947db1422caf65c90cd0c2d1102a9e96df
   - filename: ios/fastlane/Fastfile
