@@ -1,12 +1,22 @@
-class MockRsaVerificationKey2018 {
+class RsaVerificationKey2018 {
   constructor(options) {
     // Your mock implementation for the constructor
   }
 
   // Add any other methods or properties you need to mock
-  someMethod() {
-    // Mock implementation for a method
+  async sign() {
+    return '';
+  }
+  async verifySignature(verifyData, verificationMethod, proof) {
+    return true;
+  }
+  async assertVerificationMethod() {}
+  async getVerificationMethod() {
+    return 'mockVerificationMethod';
+  }
+  async matchProof() {
+    return true;
   }
 }
 
-export {MockRsaVerificationKey2018 as RsaVerificationKey2018};
+export default RsaVerificationKey2018;

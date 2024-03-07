@@ -1,6 +1,8 @@
 // Mocked values for expo-constants
 const mockedConstants = {
   appOwnership: 'standalone',
+  statusBarHeight: 10,
+  // TODO: add global ENVs to run tests from PoV of an Android & an iOS device
   platform: {
     ios: {
       model: 'iPhone',
