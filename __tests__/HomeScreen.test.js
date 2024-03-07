@@ -1,6 +1,6 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
-import {HomeScreen} from '../screens/Home/HomeScreen.js';
+import {HomeScreen} from '../screens/Home/HomeScreen';
 
 jest.mock('react-native', () => require('../__mocks__/react-native.mock'));
 
