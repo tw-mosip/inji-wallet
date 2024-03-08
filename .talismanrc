@@ -2,7 +2,7 @@ fileignoreconfig:
   - filename: package.json
     checksum: 730263252adbe53cde58fb0b6988e519e766fe0f89a7b8cd261a1e5e5e598328
   - filename: package-lock.json
-    checksum: 4e09116d21aa8def35ffe234dabec6abc668f15183e172764df2216adb0d2ca1
+    checksum: 19bcc7fce489f4cd4b2c3636e183ee74dd71a74af685f8aa7ea1812461a106f1
   - filename: lib/jsonld-signatures/suites/ed255192018/ed25519.ts
     checksum: 493b6e31144116cb612c24d98b97d8adcad5609c0a52c865a6847ced0a0ddc3a
   - filename: components/PasscodeVerify.tsx
@@ -226,4 +226,4 @@ fileignoreconfig:
     checksum: f5a4254f4d172107231a51ce0968ef1ad7ab0b8f0b5a4db72d1d5bc4e9ce179a  
   - filename: __mocks__/react-native-secure-key-store.mock.js
     checksum: 249eeeb9f8cf083f8d008882a5aeab194e9e6344f68732a2a8c78a69ff5f2ee8  
-  version: ""
+    version: ""
