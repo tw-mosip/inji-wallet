@@ -58,11 +58,11 @@ jest.mock('react-native-zip-archive', () =>
   require('../__mocks__/react-native-zip-archive.mock'),
 );
 
-jest.mock(
-  '@digitalbazaar/rsa-verification-key-2018/lib/RsaVerificationKey2018',
-  () =>
-    require('../__mocks__/@digitalbazaar/rsa-verification-key-2018/lib/RsaVerificationKey2018'),
-);
+jest.mock('@react-native-community/netinfo');
+
+jest.mock('@mosip/tuvali');
+
+jest.mock('react-native-permissions');
 
 describe('<HomeScreen />', () => {
   it('Testing the HomeScreen component', () => {

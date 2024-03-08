@@ -62,6 +62,14 @@ jest.mock('react-native-biometrics-changed');
 
 jest.mock('@react-navigation/native');
 
+jest.mock('@react-native-google-signin/google-signin');
+
+jest.mock('@mosip/tuvali');
+
+jest.mock('react-native-bluetooth-state-manager');
+
+jest.mock('react-native-permissions');
+
 describe('<App />', () => {
   it('Testing the App component', () => {
     // Render the component
