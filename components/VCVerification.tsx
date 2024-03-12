@@ -4,7 +4,6 @@ import {Theme} from './ui/styleUtils';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {setTextColor} from './VC/common/VCUtils';
-import {SvgImage} from './ui/svg';
 import PendingIcon from './PendingIcon';
 
 export const VCVerification: React.FC = ({wellknown, isVerified}: any) => {

@@ -69,33 +69,66 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
     const searchTextLower = searchText.toLowerCase();
     const filteredData: Array<Record<string, VCMetadata>> = [];
 
-    for (const [key, value] of Object.entries(vcData)) {
-      const searchTextFound = searchNestedObject(searchTextLower, value);
-      if (searchTextFound) {
-        filteredData.push({[key]: value['vcMetadata']});
+    for (const [vcKey, vc] of Object.entries(vcData)) {
+      let isVcFound = false;
+      const credentialSubject =
+        vc.verifiableCredential.credentialSubject ||
+        vc.verifiableCredential.credential.credentialSubject;
+
+      if (credentialSubject) {
+        isVcFound = searchNestedCredentialFields(
+          searchTextLower,
+          credentialSubject,
+        );
+      }
+
+      if (isVcFound) {
+        filteredData.push({[vcKey]: vc['vcMetadata']});
       }
     }
+
     setFilteredSearchData(filteredData);
 
-    if (searchText !== '') {
-      setClearSearchIcon(true);
-      setShowPinVc(false);
-    } else {
-      setClearSearchIcon(false);
-    }
+    const isSearchNotEmpty = searchText !== '';
+    setClearSearchIcon(isSearchNotEmpty);
+    setShowPinVc(!isSearchNotEmpty);
   };
 
-  const searchNestedObject = (searchText: string, obj: any): boolean => {
-    for (const val of Object.values(obj)) {
-      if (typeof val === 'string' && val.toLowerCase().includes(searchText)) {
+  const searchNestedCredentialFields = (
+    searchText: string,
+    credentialSubjectData: any,
+  ): boolean => {
+    for (const [credentialKey, credentialValue] of Object.entries(
+      credentialSubjectData,
+    )) {
+      if (shouldSkip(credentialKey)) {
+        continue;
+      }
+      if (isStringAndContains(searchText, credentialValue)) {
         return true;
-      } else if (typeof val === 'object' && val !== null) {
-        if (searchNestedObject(searchText, val)) {
-          return true;
-        }
+      }
+      if (
+        isObjectAndNotNull(credentialValue) &&
+        searchNestedCredentialFields(searchText, credentialValue)
+      ) {
+        return true;
       }
     }
     return false;
+  };
+
+  const shouldSkip = (key: string): boolean => {
+    return key === 'biometrics' || key === 'id' || key === 'vcVer';
+  };
+
+  const isStringAndContains = (searchText: string, value: any): boolean => {
+    return (
+      typeof value === 'string' && value.toLowerCase().includes(searchText)
+    );
+  };
+
+  const isObjectAndNotNull = (value: any): boolean => {
+    return typeof value === 'object' && value !== null;
   };
 
   useEffect(() => {
@@ -152,10 +185,9 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
     controller.downloadFailedVcs.length >= 1 &&
     !controller.AddVcModalService &&
     !controller.GetVcModalService;
-  const numberOfCardsAvailable =
-    filteredSearchData.length > 1
-      ? filteredSearchData.length
-      : controller.vcMetadatas.length;
+  const numberOfCardsAvailable = !showPinVc
+    ? filteredSearchData.length
+    : controller.vcMetadatas.length;
 
   const cardsAvailableText =
     numberOfCardsAvailable > 1
@@ -249,7 +281,6 @@ export const MyVcsTab: React.FC<HomeScreenTabProps> = props => {
                           isDownloading={controller.inProgressVcDownloads?.has(
                             vcKey,
                           )}
-                          isPinned={vcMetadata.isPinned}
                         />
                       );
                     })

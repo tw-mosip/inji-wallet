@@ -27,14 +27,13 @@ import {KebabPopUp} from '../../components/KebabPopUp';
 import {SvgImage, faceImageSource} from '../../components/ui/svg';
 import {VCMetadata} from '../../shared/VCMetadata';
 import {WalletBinding} from './MyVcs/WalletBinding';
-import {ExistingMosipVCItemEvents} from '../../machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {BANNER_TYPE_INFO} from '../../shared/constants';
 import {BannerNotification} from '../../components/BannerNotification';
+import {RemoveVcWarningOverlay} from './MyVcs/RemoveVcWarningOverlay';
 
 export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
   const {t} = useTranslation('ViewVcModal');
   const controller = useViewVcModal(props);
-  const service = props.vcItemActor;
 
   useEffect(() => {
     let error = controller.walletBindingError;
@@ -61,7 +60,7 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
   useEffect(() => {
     if (!controller.vc.vcMetadata.isVerified) {
       console.log('::::::VERIFY-triggerred-inviewvcmodal');
-      service.send({type: 'VERIFY'});
+      props.vcItemActor.send({type: 'VERIFY'});
     }
   }, [controller.vc.vcMetadata.isVerified]);
 
@@ -213,6 +212,12 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
       {controller.toastVisible && <ToastItem message={controller.message} />}
 
       <WalletBinding
+        service={props.vcItemActor}
+        vcMetadata={controller.vc.vcMetadata}
+      />
+
+      <RemoveVcWarningOverlay
+        testID="removeVcWarningOverlay"
         service={props.vcItemActor}
         vcMetadata={controller.vc.vcMetadata}
       />

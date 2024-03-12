@@ -17,7 +17,7 @@ import {
 import SecureKeystore from '@mosip/secure-keystore';
 import {KeyPair} from 'react-native-rsa-native';
 import {ActivityLogEvents} from './activityLog';
-import {log, respond} from 'xstate/lib/actions';
+import {log} from 'xstate/lib/actions';
 import {
   VerificationErrorType,
   verifyCredential,
@@ -32,6 +32,7 @@ import {
   Issuers_Key_Ref,
   OIDCErrors,
   updateCredentialInformation,
+  updateVCmetadataOfCredentialWrapper,
   vcDownloadTimeout,
 } from '../shared/openId4VCI/Utils';
 import {
@@ -67,6 +68,7 @@ const model = createModel(
     publicKey: ``,
     privateKey: ``,
     isVerified: false,
+    vcMetadata: {} as VCMetadata,
   },
   {
     events: {
@@ -376,6 +378,7 @@ export const IssuersMachine = model.createMachine(
             },
             {
               actions: [
+                log('Verification Error.'),
                 'resetLoadingReason',
                 'updateVerificationErrorMessage',
                 'sendErrorEndEvent',
@@ -397,6 +400,8 @@ export const IssuersMachine = model.createMachine(
       storing: {
         description: 'all the verified credential is stored.',
         entry: [
+          'setVCMetadata',
+          'setMetadataInCredentialData',
           'storeVerifiableCredentialMeta',
           'storeVerifiableCredentialData',
           'storeVcsContext',
@@ -499,6 +504,21 @@ export const IssuersMachine = model.createMachine(
           to: context => context.serviceRefs.store,
         },
       ),
+
+      setMetadataInCredentialData: (context, event) => {
+        const updatedCredentialWrapper = updateVCmetadataOfCredentialWrapper(
+          context,
+          context.credentialWrapper,
+        );
+        return updatedCredentialWrapper;
+      },
+
+      setVCMetadata: assign({
+        vcMetadata: (context, event) => {
+          const metadata = getVCMetadata(context);
+          return metadata;
+        },
+      }),
 
       storeVerifiableCredentialData: send(
         context =>
@@ -834,10 +854,3 @@ export interface issuerType {
   credential_audience: string;
   display: [displayType];
 }
-
-export const createIssuersMachine = (serviceRefs: AppServices) => {
-  return IssuersMachine.withContext({
-    ...IssuersMachine.context,
-    serviceRefs,
-  });
-};
