@@ -1,11 +1,11 @@
-const LocalAuthentication = require('expo-local-authentication');
+const mockLocalAuthentication = jest.fn();
 
-LocalAuthentication.hasHardwareAsync = jest.fn(() => Promise.resolve(true));
-LocalAuthentication.supportedAuthenticationTypesAsync = jest.fn(() =>
+mockLocalAuthentication.hasHardwareAsync = jest.fn(() => Promise.resolve(true));
+mockLocalAuthentication.supportedAuthenticationTypesAsync = jest.fn(() =>
   Promise.resolve(['fingerprint']),
 );
-LocalAuthentication.authenticateAsync = jest.fn(() =>
+mockLocalAuthentication.authenticateAsync = jest.fn(() =>
   Promise.resolve({success: true}),
 );
 
-export default LocalAuthentication;
+export default mockLocalAuthentication;

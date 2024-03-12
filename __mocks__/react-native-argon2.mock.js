@@ -1,6 +1,6 @@
-const argon2 = jest.fn();
+const mockArgon2 = jest.fn();
 
-argon2.hash = jest.fn();
-argon2.verify = jest.fn();
+mockArgon2.hash = jest.fn();
+mockArgon2.verify = jest.fn();
 
-export default argon2;
+export default mockArgon2;

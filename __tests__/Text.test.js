@@ -18,10 +18,6 @@ jest.mock('expo-local-authentication', () =>
   require('../__mocks__/expo-local-authentication.mock'),
 );
 
-jest.mock('react-native-mmkv-storage', () =>
-  require('../__mocks__/react-native-mmkv-storage.mock.js'),
-);
-
 jest.mock('react-native-rsa-native', () =>
   require('../__mocks__/react-native-rsa-native.mock'),
 );

@@ -1,7 +1,7 @@
 const mockedLocales = ['en-US', 'fr-FR', 'es-ES'];
 
-const RNLocalize = {
+const mockRNLocalize = {
   locales: mockedLocales,
 };
 
-export default RNLocalize;
+export default mockRNLocalize;
