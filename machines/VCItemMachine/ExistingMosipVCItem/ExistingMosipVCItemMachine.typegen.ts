@@ -226,10 +226,7 @@ export interface Typegen0 {
     resetIsVerified:
       | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
       | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
-    resetVerificationInProgressBannerStatus:
-      | 'DISMISS_VERIFICATION_IN_PROGRESS_BANNER'
-      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+    resetVerificationBannerStatus: 'DISMISS_VERIFICATION_IN_PROGRESS_BANNER';
     revokeVID: 'done.invoke.vc-item.existingState.requestingRevoke:invocation[0]';
     sendActivationFailedEndEvent:
       | 'DISMISS'
@@ -284,7 +281,8 @@ export interface Typegen0 {
       | 'error.platform.vc-item.existingState.requestingRevoke:invocation[0]';
     setVcKey: 'REMOVE';
     setVcMetadata: 'UPDATE_VC_METADATA';
-    setVerificationInProgressBannerStatus: 'VERIFY';
+    setVerificationErrorBanner: 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+    setVerificationSuccessBanner: 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]';
     setWalletBindingError:
       | 'error.platform.vc-item.existingState.acceptingBindingOtp.resendOTP:invocation[0]'
       | 'error.platform.vc-item.existingState.addKeyPair:invocation[0]'

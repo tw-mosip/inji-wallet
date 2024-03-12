@@ -99,10 +99,7 @@ export interface Typegen0 {
     requestStoredContext: 'GET_VC_RESPONSE' | 'REFRESH';
     requestVcContext: 'DISMISS' | 'xstate.init';
     resetIsVerified: 'error.platform.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
-    resetVerificationInProgressBannerStatus:
-      | 'DISMISS_VERIFICATION_IN_PROGRESS_BANNER'
-      | 'done.invoke.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
+    resetVerificationBannerStatus: 'DISMISS_VERIFICATION_IN_PROGRESS_BANNER';
     sendActivationFailedEndEvent:
       | 'DISMISS'
       | 'error.platform.vc-item-openid4vci.existingState.updatingPrivateKey:invocation[0]';
@@ -130,7 +127,8 @@ export interface Typegen0 {
     setVcKey: 'REMOVE';
     setVcMetadata: 'UPDATE_VC_METADATA';
     setVerifiableCredential: 'GET_VC_RESPONSE' | 'STORE_RESPONSE';
-    setVerificationInProgressBannerStatus: 'VERIFY';
+    setVerificationErrorBanner: 'error.platform.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
+    setVerificationSuccessBanner: 'done.invoke.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
     setWalletBindingError:
       | 'error.platform.vc-item-openid4vci.existingState.acceptingBindingOtp.resendOTP:invocation[0]'
       | 'error.platform.vc-item-openid4vci.existingState.addKeyPair:invocation[0]'

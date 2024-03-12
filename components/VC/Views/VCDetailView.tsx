@@ -190,7 +190,7 @@ export const VCDetailView: React.FC<
             position: 'relative',
             backgroundColor: Theme.Colors.DetailedViewBackground,
           }}>
-          {props.activeTab !== 1 && props.vc.vcMetadata.isVerified ? (
+          {props.activeTab !== 1 ? (
             props.isBindingPending &&
             isActivationNeeded(props.vc.vcMetadata.issuer) ? (
               <Column
@@ -230,6 +230,7 @@ export const VCDetailView: React.FC<
                   onPress={props.onBinding}
                   type="gradient"
                   size="Large"
+                  disabled={!props.vc.vcMetadata.isVerified}
                 />
               </Column>
             ) : (

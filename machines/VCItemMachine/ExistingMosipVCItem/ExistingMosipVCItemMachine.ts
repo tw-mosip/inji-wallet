@@ -1,6 +1,11 @@
 import {assign, ErrorPlatformEvent, EventFrom, send, StateFrom} from 'xstate';
 import {createModel} from 'xstate/lib/model';
-import {MIMOTO_BASE_URL, MY_VCS_STORE_KEY} from '../../../shared/constants';
+import {
+  BANNER_TYPE_ERROR,
+  BANNER_TYPE_SUCCESS,
+  MIMOTO_BASE_URL,
+  MY_VCS_STORE_KEY,
+} from '../../../shared/constants';
 import {AppServices} from '../../../shared/GlobalContext';
 import {CredentialDownloadResponse, request} from '../../../shared/request';
 import {
@@ -82,7 +87,7 @@ const model = createModel(
     isMachineInKebabPopupState: false,
     bindingAuthFailedMessage: '' as string,
     verificationErrorMessage: '',
-    showVerificationInProgressBanner: false,
+    verificationBannerStatus: '',
   },
   {
     events: {
@@ -381,7 +386,11 @@ export const ExistingMosipVCItemMachine =
                   target: '#vc-item.existingState.kebabPopUp.showActivities',
                 },
                 REMOVE: {
-                  actions: 'setVcKey',
+                  actions: [
+                    (_, event) =>
+                      console.log('balagggg-->REMOVE-->', event.vcMetadata),
+                    'setVcKey',
+                  ],
                   target: '#vc-item.existingState.kebabPopUp.removeWallet',
                 },
                 CLOSE_VC_MODAL: {
@@ -803,6 +812,7 @@ export const ExistingMosipVCItemMachine =
               on: {
                 STORE_RESPONSE: {
                   actions: [
+                    () => console.log('balaggg->STORE_RESPONSE'),
                     'updateVc',
                     'logDownloaded',
                     'sendTelemetryEvents',
@@ -849,7 +859,6 @@ export const ExistingMosipVCItemMachine =
             VERIFY: {
               actions: [
                 () => console.log('::::::VERIFY-triggerred-existing11'),
-                'setVerificationInProgressBannerStatus',
                 () => console.log('::::::VERIFY-triggerred-existing->after'),
               ],
               target: '#vc-item.verifyState.verifyingCredential',
@@ -864,7 +873,7 @@ export const ExistingMosipVCItemMachine =
                 onDone: [
                   {
                     actions: [
-                      'resetVerificationInProgressBannerStatus',
+                      'setVerificationSuccessBanner',
                       'setIsVerified',
                       'storeContext',
                       'sendVcUpdated',
@@ -876,7 +885,7 @@ export const ExistingMosipVCItemMachine =
                   {
                     cond: 'isPendingVerificationError',
                     actions: [
-                      'resetVerificationInProgressBannerStatus',
+                      'setVerificationErrorBanner',
                       'resetIsVerified',
                       'storeContext',
                       'sendVcUpdated',
@@ -887,12 +896,7 @@ export const ExistingMosipVCItemMachine =
               },
               on: {
                 STORE_RESPONSE: {
-                  actions: [
-                    'updateVc',
-                    'logDownloaded',
-                    'sendTelemetryEvents',
-                    'removeVcFromInProgressDownloads',
-                  ],
+                  actions: ['updateVc', 'removeVcFromInProgressDownloads'],
                   target: '#vc-item.existingState.idle',
                 },
                 STORE_ERROR: {
@@ -900,7 +904,7 @@ export const ExistingMosipVCItemMachine =
                     '#vc-item.existingState.checkingServerData.savingFailed',
                 },
                 DISMISS_VERIFICATION_IN_PROGRESS_BANNER: {
-                  actions: ['resetVerificationInProgressBannerStatus'],
+                  actions: ['resetVerificationBannerStatus'],
                 },
               },
             },
@@ -1251,6 +1255,7 @@ export const ExistingMosipVCItemMachine =
 
         logDownloaded: send(
           context => {
+            console.log('balaggg->logDownloaded');
             const {serviceRefs, ...data} = context;
             return ActivityLogEvents.LOG_ACTIVITY({
               _vcKey: context.vcMetadata.getVcKey(),
@@ -1399,11 +1404,15 @@ export const ExistingMosipVCItemMachine =
             to: context => context.serviceRefs.activityLog,
           },
         ),
-        setVerificationInProgressBannerStatus: assign({
-          showVerificationInProgressBanner: true,
+        setVerificationSuccessBanner: assign({
+          verificationBannerStatus: BANNER_TYPE_SUCCESS,
         }),
-        resetVerificationInProgressBannerStatus: assign({
-          showVerificationInProgressBanner: false,
+        setVerificationErrorBanner: assign({
+          verificationBannerStatus: BANNER_TYPE_ERROR,
+        }),
+
+        resetVerificationBannerStatus: assign({
+          verificationBannerStatus: '',
         }),
       },
 

@@ -22,7 +22,7 @@ export const VCItemFieldName = ({fieldName, wellknown}) => {
         </Text>
       )}
 
-      {fieldName == 'Status' && (
+      {fieldName == t('VcDetails:status') && (
         <CustomTooltip
           testID="statusToolTip"
           width={Dimensions.get('screen').width * 0.8}

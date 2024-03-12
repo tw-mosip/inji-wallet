@@ -10,7 +10,12 @@ import {
 } from '../../../shared/cryptoutil/cryptoUtil';
 import {getIdType, Issuers, Protocols} from '../../../shared/openId4VCI/Utils';
 import {StoreEvents} from '../../../machines/store';
-import {MIMOTO_BASE_URL, MY_VCS_STORE_KEY} from '../../../shared/constants';
+import {
+  BANNER_TYPE_ERROR,
+  BANNER_TYPE_SUCCESS,
+  MIMOTO_BASE_URL,
+  MY_VCS_STORE_KEY,
+} from '../../../shared/constants';
 import {VcEvents} from '../vc';
 import i18n from '../../../i18n';
 import {KeyPair} from 'react-native-rsa-native';
@@ -59,7 +64,7 @@ const model = createModel(
     walletBindingError: '',
     isMachineInKebabPopupState: false,
     bindingAuthFailedMessage: '' as string,
-    showVerificationInProgressBanner: false,
+    verificationBannerStatus: '',
   },
   {
     events: {
@@ -440,10 +445,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
       verifyState: {
         on: {
           VERIFY: {
-            actions: [
-              () => console.log('::::VERIFY TRiggerred'),
-              'setVerificationInProgressBannerStatus',
-            ],
+            actions: [() => console.log('::::VERIFY TRiggerred')],
             target: '.verifyingCredential',
           },
         },
@@ -453,7 +455,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           verifyingCredential: {
             on: {
               DISMISS_VERIFICATION_IN_PROGRESS_BANNER: {
-                actions: ['resetVerificationInProgressBannerStatus'],
+                actions: ['resetVerificationBannerStatus'],
               },
             },
             description:
@@ -463,7 +465,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
               onDone: [
                 {
                   actions: [
-                    'resetVerificationInProgressBannerStatus',
+                    'setVerificationSuccessBanner',
                     'setIsVerified',
                     'sendVcUpdated',
                     'storeContext',
@@ -474,7 +476,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
               onError: [
                 {
                   actions: [
-                    'resetVerificationInProgressBannerStatus',
+                    'setVerificationErrorBanner',
                     'resetIsVerified',
                     'sendVcUpdated',
                   ],
@@ -642,11 +644,15 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           to: context => context.serviceRefs.vc,
         },
       ),
-      setVerificationInProgressBannerStatus: assign({
-        showVerificationInProgressBanner: true,
+      setVerificationSuccessBanner: assign({
+        verificationBannerStatus: BANNER_TYPE_SUCCESS,
       }),
-      resetVerificationInProgressBannerStatus: assign({
-        showVerificationInProgressBanner: false,
+      setVerificationErrorBanner: assign({
+        verificationBannerStatus: BANNER_TYPE_ERROR,
+      }),
+
+      resetVerificationBannerStatus: assign({
+        verificationBannerStatus: '',
       }),
 
       sendActivationStartEvent: context => {
