@@ -1,46 +1,45 @@
-const RNFS = require('react-native-fs');
-
-const mockDocumentDirectoryPath = '/mocked/document/directory/path';
-const mockReadDirItem: ReadDirItem = {
-  name: 'mockedFile.txt',
-  path: '/mocked/document/directory/path/mockedFile.txt',
-  size: 1024, // Mocked file size in bytes
-  isFile: jest.fn(),
-  isDirectory: jest.fn(),
-};
-const mockStatResult: StatResult = {
-  size: 1024, // Mocked file size in bytes
-  mode: '0644',
-};
-
-const mockReadFile = jest.fn();
-const mockWriteFile = jest.fn();
-const mockUnlink = jest.fn();
-const mockExists = jest.fn();
-const mockMkdir = jest.fn();
-const mockReadDir = jest.fn();
-const mockStat = jest.fn();
-
-RNFS.DocumentDirectoryPath = mockDocumentDirectoryPath;
-RNFS.readFile = mockReadFile;
-RNFS.writeFile = mockWriteFile;
-RNFS.unlink = mockUnlink;
-RNFS.exists = mockExists;
-RNFS.mkdir = mockMkdir;
-RNFS.readDir = mockReadDir;
-RNFS.stat = mockStat;
-
-export {
-  mockDocumentDirectoryPath,
-  mockReadDirItem,
-  mockStatResult,
-  mockReadFile,
-  mockWriteFile,
-  mockUnlink,
-  mockExists,
-  mockMkdir,
-  mockReadDir,
-  mockStat,
-};
-
-export default RNFS;
+jest.mock('react-native-fs', () => {
+  return {
+    mkdir: jest.fn(),
+    moveFile: jest.fn(),
+    copyFile: jest.fn(),
+    pathForBundle: jest.fn(),
+    pathForGroup: jest.fn(),
+    getFSInfo: jest.fn(),
+    getAllExternalFilesDirs: jest.fn(),
+    unlink: jest.fn(),
+    exists: jest.fn(),
+    stopDownload: jest.fn(),
+    resumeDownload: jest.fn(),
+    isResumable: jest.fn(),
+    stopUpload: jest.fn(),
+    completeHandlerIOS: jest.fn(),
+    readDir: jest.fn(),
+    readDirAssets: jest.fn(),
+    existsAssets: jest.fn(),
+    readdir: jest.fn(),
+    setReadable: jest.fn(),
+    stat: jest.fn(),
+    readFile: jest.fn(),
+    read: jest.fn(),
+    readFileAssets: jest.fn(),
+    hash: jest.fn(),
+    copyFileAssets: jest.fn(),
+    copyFileAssetsIOS: jest.fn(),
+    copyAssetsVideoIOS: jest.fn(),
+    writeFile: jest.fn(),
+    appendFile: jest.fn(),
+    write: jest.fn(),
+    downloadFile: jest.fn(),
+    uploadFiles: jest.fn(),
+    touch: jest.fn(),
+    MainBundlePath: jest.fn(),
+    CachesDirectoryPath: jest.fn(),
+    DocumentDirectoryPath: jest.fn(),
+    ExternalDirectoryPath: jest.fn(),
+    ExternalStorageDirectoryPath: jest.fn(),
+    TemporaryDirectoryPath: jest.fn(),
+    LibraryDirectoryPath: jest.fn(),
+    PicturesDirectoryPath: jest.fn(),
+  };
+});
