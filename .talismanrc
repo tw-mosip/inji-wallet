@@ -171,7 +171,7 @@ fileignoreconfig:
   - filename: components/BannerNotificationContainer.tsx
     checksum: a98ff1a0dd96d3ead4b8191320be8b0c7a558cda6b0de39f1c62aaa8efef9fb8
   - filename: components/HelpScreen.tsx
-    checksum: bbc69143bd37d065bba3800396301db5a0318e8b7ba51ecd49142dda68783a01  
+    checksum: bbc69143bd37d065bba3800396301db5a0318e8b7ba51ecd49142dda68783a01
   - filename: machines/backupRestore.ts
     checksum: bbc69143bd37d065bba3800396301db5a0318e8b7ba51ecd49142dda68783a01
   - filename: injitest/README.md
@@ -210,7 +210,7 @@ fileignoreconfig:
     checksum: 86afecb1f8eb02b4446f94a092eca7f6e65310cc4ec5ccf89cd01ccb13a0749e
   - filename: injitest/src/test/java/iosTestCases/ChangeLanguageTest.java
     checksum: d94cbf47726c3650b4b623e6aa76e113edf553616319450d01f05294163572e9
-    - filename: screens/Home/MyVcs/IdInputModal.tsx
+  - filename: screens/Home/MyVcs/IdInputModal.tsx
     checksum: c18e8bbcf1c8de3327c0920fddcf1b6df54b74d894e3f04677f498712c680fe9  
   - filename: screens/Home/MyVcs/OtpVerificationModal.tsx
     checksum: c42e2387dfc2cc637033ae849d8b2c2fc30cabaeb77e074661cf466a8476e947  
@@ -228,4 +228,6 @@ fileignoreconfig:
     checksum: 32d0296b665e6381bd254cee4aa8729ae0abe0830e4618a349192ccd88d78bb2
   - filename: __mocks__/jest-init.js
     checksum: b6daac27bcde26196d596601b32b6b560823172f0b5d35a456457e0d5c733438
+  - filename: components/ActivityLogEvent.test.ts
+    checksum: 5f9bf6d499106863fee65476adcec9253638d093bf0b58f1a11225915e9b0560
     version: ""
