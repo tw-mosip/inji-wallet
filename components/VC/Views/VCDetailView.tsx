@@ -233,6 +233,7 @@ export const VCDetailView: React.FC<
                   onPress={props.onBinding}
                   type="gradient"
                   size="Large"
+                  disabled={!props.vc.vcMetadata.isVerified}
                 />
               </Column>
             ) : (

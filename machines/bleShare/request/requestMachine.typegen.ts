@@ -74,6 +74,7 @@ export interface Typegen0 {
       | 'xstate.after(DESTROY_TIMEOUT)#request.clearingConnection';
     removeLoggers:
       | 'DISCONNECT'
+      | 'GOTO_HOME'
       | 'RESET'
       | 'SCREEN_BLUR'
       | 'xstate.after(DESTROY_TIMEOUT)#request.clearingConnection'
@@ -118,8 +119,8 @@ export interface Typegen0 {
       | 'RESET'
       | 'done.invoke.request.checkStorage:invocation[0]';
     checkStorageAvailability: 'SCREEN_FOCUS';
-    disconnect: '' | 'DISMISS' | 'GO_TO_RECEIVED_VC_TAB';
-    monitorConnection: 'xstate.init';
+    disconnect: '' | 'DISMISS' | 'GOTO_HOME' | 'GO_TO_RECEIVED_VC_TAB';
+    monitorConnection: 'GOTO_HOME' | 'xstate.init';
     receiveVc: 'CONNECTED';
     requestBluetooth: 'BLUETOOTH_STATE_DISABLED';
     requestNearByDevicesPermission: 'NEARBY_DISABLED';

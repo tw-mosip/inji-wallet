@@ -1,3 +1,5 @@
+// This file was automatically generated. Edits will be overwritten
+
 export interface Typegen0 {
   '@@xstate/typegen': true;
   internalEvents: {
@@ -73,6 +75,7 @@ export interface Typegen0 {
     | 'ready.receivedVcs.idle'
     | 'ready.receivedVcs.refreshing'
     | 'tamperedVCs'
+    | 'tamperedVCs.idle'
     | 'tamperedVCs.refreshVcsMetadata'
     | 'tamperedVCs.triggerAutoBackupForTamperedVcDeletion'
     | {
@@ -85,6 +88,7 @@ export interface Typegen0 {
               receivedVcs?: 'idle' | 'refreshing';
             };
         tamperedVCs?:
+          | 'idle'
           | 'refreshVcsMetadata'
           | 'triggerAutoBackupForTamperedVcDeletion';
       };

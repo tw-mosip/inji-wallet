@@ -69,7 +69,7 @@ export const getKebabMenuOptions = props => {
     testID: 'pinOrUnPinCard',
   };
 
-  if (props.vcHasImage) {
+  if (props.vcHasImage && props.vcMetadata.isVerified) {
     vcActionsList.splice(2, 0, shareWithSelfieOption, VCActivationOption);
   }
 

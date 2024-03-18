@@ -18,7 +18,10 @@ import SecureKeystore from '@mosip/secure-keystore';
 import {KeyPair} from 'react-native-rsa-native';
 import {ActivityLogEvents} from './activityLog';
 import {log} from 'xstate/lib/actions';
-import {verifyCredential} from '../shared/vcjs/verifyCredential';
+import {
+  verifyCredential,
+  VerificationErrorType,
+} from '../shared/vcjs/verifyCredential';
 import {
   constructAuthorizationConfiguration,
   ErrorMessage,
@@ -48,7 +51,7 @@ import {request} from '../shared/request';
 import {BiometricCancellationError} from '../shared/error/BiometricCancellationError';
 import {VCMetadata, getVCMetadata} from '../shared/VCMetadata';
 import Cloud, {isSignedInResult} from '../shared/CloudBackupAndRestoreUtils';
-
+import {VcEvents} from './VCItemMachine/vc';
 const model = createModel(
   {
     issuers: [] as issuerType[],
@@ -63,6 +66,7 @@ const model = createModel(
     verificationErrorMessage: '',
     publicKey: ``,
     privateKey: ``,
+    isVerified: false,
     vcMetadata: {} as VCMetadata,
   },
   {
@@ -357,11 +361,20 @@ export const IssuersMachine = model.createMachine(
           src: 'verifyCredential',
           onDone: [
             {
-              actions: ['sendSuccessEndEvent'],
+              actions: [
+                'setIsVerified',
+                'sendSuccessEndEvent',
+                'sendVcUpdated',
+              ],
               target: 'storing',
             },
           ],
           onError: [
+            {
+              cond: 'isPendingVerificationError',
+              actions: ['resetIsVerified', 'sendVcUpdated'],
+              target: 'storing',
+            },
             {
               actions: [
                 log('Verification Error.'),
@@ -608,6 +621,22 @@ export const IssuersMachine = model.createMachine(
           ),
         );
       },
+
+      setIsVerified: assign({
+        isVerified: true,
+      }),
+
+      resetIsVerified: assign({
+        isVerified: false,
+      }),
+
+      sendVcUpdated: send(
+        context => VcEvents.VC_METADATA_UPDATED(getVCMetadata(context)),
+        {
+          to: context => context.serviceRefs.vc,
+        },
+      ),
+
       sendImpressionEvent: () => {
         sendImpressionEvent(
           getImpressionEventData(
@@ -739,6 +768,12 @@ export const IssuersMachine = model.createMachine(
       isCustomSecureKeystore: () => isHardwareKeystoreExists,
       hasUserCancelledBiometric: (_, event) =>
         event.data instanceof BiometricCancellationError,
+      isPendingVerificationError: (_context, event) => {
+        const isVerificationPending =
+          (event.data as Error).message ==
+          VerificationErrorType.LIBRARY_DOWN_ERROR;
+        return isVerificationPending;
+      },
     },
   },
 );

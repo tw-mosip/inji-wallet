@@ -432,6 +432,15 @@
       "unlocked": "Card successfully unlocked",
       "locked": "Card successfully locked",
       "revoked": "VID {{vid}} has been revoked. Any credential containing the same will be removed automatically from the wallet"
+    },
+    "bannerInfo": {
+      "verificationRetrigger": "We are validating your credential, this may take sometime. Once verified, you’ll be able to activate your credential."
+    },
+    "statusToolTipContent": {
+      "valid_title": "Valid Status:",
+      "valid_desciption": "The credential has been successfully verified.",
+      "pending_title": "Pending Status:",
+      "pending_descirption": "Verification is currently pending due to technical issues."
     }
   },
   "MainLayout": {

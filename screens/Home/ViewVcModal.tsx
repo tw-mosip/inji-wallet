@@ -30,6 +30,8 @@ import {VCMetadata} from '../../shared/VCMetadata';
 import {WalletBinding} from './MyVcs/WalletBinding';
 import {RemoveVcWarningOverlay} from './MyVcs/RemoveVcWarningOverlay';
 import {HistoryTab} from './MyVcs/HistoryTab';
+import {BANNER_TYPE_INFO} from '../../shared/constants';
+import {BannerNotification} from '../../components/BannerNotification';
 
 export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
   const {t} = useTranslation('ViewVcModal');
@@ -56,6 +58,12 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
       );
     }
   }, [controller.walletBindingError]);
+
+  useEffect(() => {
+    if (!controller.vc.vcMetadata.isVerified) {
+      props.vcItemActor.send({type: 'VERIFY'});
+    }
+  }, [controller.vc.vcMetadata.isVerified]);
 
   let selectedVcContext = props.vcItemActor.getSnapshot()?.context;
 
@@ -118,6 +126,18 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
       onDismiss={props.onDismiss}
       headerElevation={2}>
       <BannerNotificationContainer />
+      {controller.verificationBannerStatus != '' && (
+        <BannerNotification
+          type={controller.verificationBannerStatus}
+          message={t('bannerInfo.verificationRetrigger')}
+          onClosePress={() =>
+            props.vcItemActor.send('DISMISS_VERIFICATION_IN_PROGRESS_BANNER')
+          }
+          key={'reVerificationInProgress'}
+          testId={'reVerificationInProgress'}
+        />
+      )}
+
       <VcDetailsContainer
         vc={controller.vc}
         onBinding={controller.addtoWallet}
