@@ -91,6 +91,20 @@ export const faceMatchConfig = (resp: string) => {
       matcher: {
         threshold: 1,
       },
+      liveness: {
+        photo: {
+          path: 'https://github.com/biometric-technologies/liveness-detection-model/releases/download/v0.2.0/deePix.tflite',
+          inputWidth: 224,
+          inputHeight: 224,
+          // 0.0 - real, 1.0 - spoof
+          threshold: 0.5,
+          // optional
+          // modelChecksum: "797b4d99794965749635352d55da38d4748c28c659ee1502338badee4614ed06",
+        },
+        direction: {
+          threshold: 10.0
+        }
+      },
     },
   };
 };

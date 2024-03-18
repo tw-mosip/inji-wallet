@@ -171,7 +171,7 @@ export function useScanLayout() {
       onButtonPress: CANCEL,
       progress: true,
     };
-  } else if (isSendingVc) {
+  } else if (isSendingVc && isFaceIdentityVerified) {
     statusOverlay = {
       title: t('status.sharing.title'),
       hint: t('status.sharing.hint'),

@@ -1338,6 +1338,7 @@ export const DefaultTheme = {
       width: Dimensions.get('screen').width,
       height: Dimensions.get('screen').height,
       backgroundColor: Colors.White,
+      marginTop: 20,
     },
   }),
   RevokeConfirmStyles: StyleSheet.create({

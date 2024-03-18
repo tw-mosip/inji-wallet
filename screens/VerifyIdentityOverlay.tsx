@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import {FaceScanner} from '../components/FaceScanner';
 import {Column, Row, Button} from '../components/ui';
@@ -8,6 +8,8 @@ import {Modal} from '../components/ui/Modal';
 import {useTranslation} from 'react-i18next';
 import {VCMetadata} from '../shared/VCMetadata';
 import {MessageOverlay} from '../components/MessageOverlay';
+import LivenessDialog from '../components/LivenessDialog';
+import { requestPermission } from 'react-native-location';
 
 export const VerifyIdentityOverlay: React.FC<
   VerifyIdentityOverlayProps
@@ -26,20 +28,16 @@ export const VerifyIdentityOverlay: React.FC<
   return (
     <>
       <Modal
-        isVisible={props.isVerifyingIdentity}
+        isVisible={props.isVerifyingIdentity && !props.isSendingVc}
         arrowLeft={true}
         headerTitle={t('faceAuth')}
         onDismiss={props.onCancel}>
         <Column
           fill
           style={Theme.VerifyIdentityOverlayStyles.content}
-          align="center">
+          align="space-between">
           {credential != null && (
-            <FaceScanner
-              vcImage={vcImage}
-              onValid={props.onFaceValid}
-              onInvalid={props.onFaceInvalid}
-            />
+            <LivenessDialog vcImage={vcImage} onValid={props.onFaceValid} onInvalid={props.onFaceInvalid}/>
           )}
         </Column>
       </Modal>
@@ -80,4 +78,5 @@ export interface VerifyIdentityOverlayProps {
   isInvalidIdentity: boolean;
   onDismiss: () => void;
   onRetryVerification: () => void;
+  isSendingVc: boolean;
 }

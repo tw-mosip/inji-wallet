@@ -53,6 +53,7 @@ export const ScanLayout: React.FC = () => {
       <VerifyIdentityOverlay
         vc={controller.selectedVc}
         isVerifyingIdentity={controller.isVerifyingIdentity}
+        isSendingVc={controller.isSendingVc}
         onCancel={controller.CANCEL}
         onFaceValid={controller.FACE_VALID}
         onFaceInvalid={controller.FACE_INVALID}
