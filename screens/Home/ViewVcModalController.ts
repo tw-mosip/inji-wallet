@@ -186,6 +186,9 @@ export function useViewVcModal({
     RESEND_OTP: () => vcItemActor.send(ExistingMosipVCItemEvents.RESEND_OTP()),
     CANCEL: () => vcItemActor.send(ExistingMosipVCItemEvents.CANCEL()),
     CONFIRM: () => vcItemActor.send(ExistingMosipVCItemEvents.CONFIRM()),
+    DISMISS_VERIFICATION_IN_PROGRESS_BANNER: () => {
+     vcItemActor.send(ExistingMosipVCItemEvents.DISMISS_VERIFICATION_IN_PROGRESS_BANNER())
+    },
   };
 }
 

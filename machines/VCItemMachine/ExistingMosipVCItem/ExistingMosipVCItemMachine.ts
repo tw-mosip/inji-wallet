@@ -88,7 +88,7 @@ const model = createModel(
     phoneNumber: '' as string,
     email: '' as string,
     verificationBannerStatus: '',
-  },
+      },
   {
     events: {
       KEY_RECEIVED: (key: string) => ({key}),
@@ -300,6 +300,9 @@ export const ExistingMosipVCItemMachine =
                 DISMISS: {
                   target: 'checkingVc',
                 },
+                DISMISS_VERIFICATION_IN_PROGRESS_BANNER:{
+                  actions: 'resetVerificationBannerStatus',
+                }
               },
             },
             pinCard: {
@@ -797,6 +800,7 @@ export const ExistingMosipVCItemMachine =
                       'resetIsVerified',
                       'storeContext',
                       'sendVcUpdated',
+                      'removeVcFromInProgressDownloads',
                     ],
                     target: 'idle',
                   },
@@ -1606,10 +1610,10 @@ export const ExistingMosipVCItemMachine =
             const verificationResult = await verifyCredential(
               context.verifiableCredential,
             );
-            if (!verificationResult.isVerified) {
-              throw new Error(verificationResult.errorMessage);
-            }
-          }
+                          if (!verificationResult.isVerified) {
+                throw new Error(verificationResult.errorMessage);
+              }
+                      }
         },
 
         requestOtp: async context => {

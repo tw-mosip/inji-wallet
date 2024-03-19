@@ -48,6 +48,7 @@
     "generatedOn": "Generated On",
     "status": "Status",
     "valid": "Valid",
+    "pendingVerification": "Pending",
     "photo": "Photo",
     "fullName": "Full Name",
     "gender": "Gender",

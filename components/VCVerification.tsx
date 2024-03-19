@@ -8,7 +8,7 @@ import PendingIcon from './PendingIcon';
 
 export const VCVerification: React.FC = ({wellknown, isVerified}: any) => {
   const {t} = useTranslation('VcDetails');
-  const statusText = isVerified ? t('valid') : t('pending');
+  const statusText = isVerified ? t('valid') : t('pendingVerification');
   const statusIcon = isVerified ? <VerifiedIcon /> : <PendingIcon />;
   return (
     <Row

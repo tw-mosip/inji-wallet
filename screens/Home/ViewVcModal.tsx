@@ -130,8 +130,8 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
         <BannerNotification
           type={controller.verificationBannerStatus}
           message={t('bannerInfo.verificationRetrigger')}
-          onClosePress={() =>
-            props.vcItemActor.send('DISMISS_VERIFICATION_IN_PROGRESS_BANNER')
+          onClosePress={() => 
+            controller.DISMISS_VERIFICATION_IN_PROGRESS_BANNER()
           }
           key={'reVerificationInProgress'}
           testId={'reVerificationInProgress'}
