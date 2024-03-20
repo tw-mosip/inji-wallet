@@ -1,13 +1,9 @@
-const telemetryMock = jest.fn();
-
-// Customize the mock implementation as needed
-telemetryMock.mockImplementation(() => {
-  return {
-    // Mocked telemetry methods or properties
+jest.mock('telemetry-sdk', () => {
+  const TelemetrySDK = {
     trackEvent: jest.fn(),
     trackPageView: jest.fn(),
-    // Add other mock methods or properties as needed
+    error: (data, {}) => jest.fn(data),
   };
-});
 
-export default telemetryMock;
+  return TelemetrySDK;
+});
