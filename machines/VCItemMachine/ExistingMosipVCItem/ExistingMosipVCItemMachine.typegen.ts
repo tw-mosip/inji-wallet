@@ -209,7 +209,9 @@ export interface Typegen0 {
     refreshMyVcs:
       | 'STORE_RESPONSE'
       | 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]';
-    removeVcFromInProgressDownloads: 'STORE_RESPONSE';
+    removeVcFromInProgressDownloads:
+      | 'STORE_RESPONSE'
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
     removeVcItem: 'CONFIRM';
     removeVcMetaDataFromStorage:
       | 'STORE_ERROR'

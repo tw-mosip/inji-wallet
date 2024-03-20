@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {I18nManager, Pressable, Modal as RNModal, View} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {Column, Row, Text} from '.';
@@ -6,9 +6,16 @@ import {useSendVcScreen} from '../../screens/Scan/SendVcScreenController';
 import {DeviceInfoList} from '../DeviceInfoList';
 import {ElevationLevel, Theme} from './styleUtils';
 import testIDProps from '../../shared/commonUtil';
+import {GlobalContext} from '../../shared/GlobalContext';
+import {realReactStuff} from '../../shared/wrappers/RealReactStuff';
 
 export const Modal: React.FC<ModalProps> = props => {
-  const controller = useSendVcScreen();
+  const {appService} = useContext(GlobalContext);
+  const controller = useSendVcScreen(
+    appService.children.get('scan'),
+    appService.children.get('vc'),
+    realReactStuff,
+  );
 
   return (
     <RNModal

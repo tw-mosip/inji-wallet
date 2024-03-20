@@ -1,8 +1,7 @@
 import React, {useContext, useEffect, useRef} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Button, Column, Row, Text} from '../../components/ui';
+import {Button, Column, Text} from '../../components/ui';
 import {Theme} from '../../components/ui/styleUtils';
-import {MessageOverlay} from '../../components/MessageOverlay';
 import {useSendVcScreen} from './SendVcScreenController';
 import {VerifyIdentityOverlay} from '../VerifyIdentityOverlay';
 import {BackHandler} from 'react-native';
@@ -19,18 +18,27 @@ import {
 } from '../../shared/telemetry/TelemetryUtils';
 import {TelemetryConstants} from '../../shared/telemetry/TelemetryConstants';
 import {
-  VCItemContainerFlowType,
   getVCsOrderedByPinStatus,
+  VCItemContainerFlowType,
 } from '../../shared/Utils';
 import {Issuers} from '../../shared/openId4VCI/Utils';
 import {FaceVerificationAlertOverlay} from './FaceVerificationAlertOverlay';
 import {Error} from '../../components/ui/Error';
 import {SvgImage} from '../../components/ui/svg';
+import {realReactStuff} from '../../shared/wrappers/RealReactStuff';
+import {ActorRef} from 'xstate';
 
-export const SendVcScreen: React.FC = () => {
+export const SendVcScreen: React.FC = (
+  scanService: ActorRef<any, any>,
+  vcService: ActorRef<any, any>,
+) => {
   const {t} = useTranslation('SendVcScreen');
   const {appService} = useContext(GlobalContext);
-  const controller = useSendVcScreen();
+  const controller = useSendVcScreen(
+    appService.children.get('scan')!!,
+    appService.children.get('vc')!!,
+    realReactStuff,
+  );
   const shareableVcsMetadataOrderedByPinStatus = getVCsOrderedByPinStatus(
     controller.shareableVcsMetadata,
   );

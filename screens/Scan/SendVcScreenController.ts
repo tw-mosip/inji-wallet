@@ -1,9 +1,6 @@
-import {useSelector} from '@xstate/react';
-import {useContext, useState} from 'react';
-import {ActorRefFrom} from 'xstate';
+import {ActorRef, ActorRefFrom} from 'xstate';
 import {selectShareableVcsMetadata} from '../../machines/VCItemMachine/vc';
 import {ExistingMosipVCItemMachine} from '../../machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine';
-import {GlobalContext} from '../../shared/GlobalContext';
 import {
   selectIsSelectingVc,
   selectReceiverInfo,
@@ -17,24 +14,28 @@ import {
 } from '../../machines/bleShare/commonSelectors';
 import {
   ScanEvents,
+  scanMachine,
   selectIsFaceVerificationConsent,
 } from '../../machines/bleShare/scan/scanMachine';
 import {VCShareFlowType} from '../../shared/Utils';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {RootRouteProps} from '../../routes';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
+import {IReactStuff} from '../../shared/interfaces/IReactStuff';
 
 type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
 
-export function useSendVcScreen() {
-  const {appService} = useContext(GlobalContext);
-  const scanService = appService.children.get('scan');
-  const vcService = appService.children.get('vc');
+export function useSendVcScreen(
+  scanService: ActorRef<any, any>,
+  vcService: ActorRef<any, any>,
+  reactStuff: IReactStuff,
+) {
   const navigation = useNavigation<MyVcsTabNavigation>();
 
   const CANCEL = () => scanService.send(ScanEvents.CANCEL());
 
-  const [selectedIndex, setSelectedIndex] = useState<number>(null);
+  // const [selectedIndex, setSelectedIndex] = useState<number>(null);
+  const [selectedIndex, setSelectedIndex] = reactStuff.useState<number>(null);
 
   return {
     selectedIndex,
@@ -50,16 +51,25 @@ export function useSendVcScreen() {
         );
       },
 
-    receiverInfo: useSelector(scanService, selectReceiverInfo),
-    vcName: useSelector(scanService, selectVcName),
-    shareableVcsMetadata: useSelector(vcService, selectShareableVcsMetadata),
-    selectedVc: useSelector(scanService, selectSelectedVc),
+    receiverInfo: reactStuff.useSelector(scanService, selectReceiverInfo),
+    vcName: reactStuff.useSelector(scanService, selectVcName),
+    shareableVcsMetadata: reactStuff.useSelector(
+      vcService,
+      selectShareableVcsMetadata,
+    ),
+    selectedVc: reactStuff.useSelector(scanService, selectSelectedVc),
 
-    isSelectingVc: useSelector(scanService, selectIsSelectingVc),
-    isVerifyingIdentity: useSelector(scanService, selectIsVerifyingIdentity),
-    isInvalidIdentity: useSelector(scanService, selectIsInvalidIdentity),
-    isCancelling: useSelector(scanService, selectIsCancelling),
-    isFaceVerificationConsent: useSelector(
+    isSelectingVc: reactStuff.useSelector(scanService, selectIsSelectingVc),
+    isVerifyingIdentity: reactStuff.useSelector(
+      scanService,
+      selectIsVerifyingIdentity,
+    ),
+    isInvalidIdentity: reactStuff.useSelector(
+      scanService,
+      selectIsInvalidIdentity,
+    ),
+    isCancelling: reactStuff.useSelector(scanService, selectIsCancelling),
+    isFaceVerificationConsent: reactStuff.useSelector(
       scanService,
       selectIsFaceVerificationConsent,
     ),
