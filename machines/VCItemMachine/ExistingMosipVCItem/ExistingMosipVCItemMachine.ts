@@ -746,24 +746,17 @@ export const ExistingMosipVCItemMachine =
                 onDone: [
                   {
                     actions: ['setIsVerified', 'storeContext', 'sendVcUpdated'],
-                    target: 'idle',
                   },
                 ],
                 onError: [
                   {
                     cond: 'isPendingVerificationError',
                     actions: [
-                      (context, event) =>
-                        console.log(
-                          '::::-> onError->Error Message',
-                          (event.data as Error).message,
-                        ),
                       'resetIsVerified',
                       'storeContext',
                       'sendVcUpdated',
                       'removeVcFromInProgressDownloads',
                     ],
-                    target: 'idle',
                   },
                   {
                     actions: ['updateVerificationErrorMessage'],
@@ -1517,9 +1510,7 @@ export const ExistingMosipVCItemMachine =
         },
 
         verifyCredential: async context => {
-          console.log(':::verifyCredential->called');
           if (context.verifiableCredential) {
-            console.log(':::verifyCredential->called and inside if');
             const verificationResult = await verifyCredential(
               context.verifiableCredential,
             );

@@ -1,6 +1,6 @@
 import React from 'react';
 import {View} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import {Icon} from 'react-native-elements';
 import {Theme} from './ui/styleUtils';
 
 const PendingIcon: React.FC = () => {
@@ -8,9 +8,10 @@ const PendingIcon: React.FC = () => {
     <View style={Theme.Styles.verifiedIconContainer}>
       <View style={Theme.Styles.verifiedIconInner}>
         <Icon
-          name="exclamation-circle"
+          name="alert-circle"
+          type="material-community"
           color={Theme.Colors.PendingIcon}
-          size={12}
+          size={14}
         />
       </View>
     </View>

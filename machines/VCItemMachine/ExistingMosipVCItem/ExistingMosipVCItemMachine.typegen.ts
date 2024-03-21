@@ -171,11 +171,9 @@ export interface Typegen0 {
       | 'done.invoke.vc-item.existingState.requestingBindingOtp:invocation[0]'
       | 'done.invoke.vc-item.existingState.requestingOtp:invocation[0]'
       | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]'
-      | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
       | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
       | 'error.platform.vc-item.existingState.requestingLock:invocation[0]'
       | 'error.platform.vc-item.existingState.requestingRevoke:invocation[0]'
-      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
       | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
     clearTransactionId:
       | ''
@@ -185,9 +183,7 @@ export interface Typegen0 {
       | 'SHOW_BINDING_STATUS'
       | 'STORE_RESPONSE'
       | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]'
-      | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
       | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
       | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
     closeViewVcModal: 'CLOSE_VC_MODAL' | 'STORE_RESPONSE';
     incrementDownloadCounter:
