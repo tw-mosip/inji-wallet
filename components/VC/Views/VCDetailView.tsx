@@ -297,7 +297,6 @@ export interface EsignetVC {
   requestId: string;
   isVerified: boolean;
   lastVerifiedOn: number;
-  locked: boolean;
   shouldVerifyPresence?: boolean;
   walletBindingResponse?: WalletBindingResponse;
   credentialRegistry: string;

@@ -56,8 +56,8 @@ public class HomePage extends BasePage {
     @iOSXCUITFindBy(accessibility = "bringYourDigitalID")
     private WebElement bringYourDigitalIdentity;
 
-    @AndroidFindBy(accessibility = "errorTitle")
-    @iOSXCUITFindBy(accessibility = "errorTitle")
+    @AndroidFindBy(accessibility = "noInternetConnectionErrorTitle")
+    @iOSXCUITFindBy(accessibility = "noInternetConnectionErrorTitle")
     private WebElement noInternetConnection;
 
     @AndroidFindBy(accessibility = "share")
@@ -72,8 +72,8 @@ public class HomePage extends BasePage {
     @iOSXCUITFindBy(accessibility = "nationalCard")
     private WebElement idTypeValue;
     
-    @AndroidFindBy(accessibility = "tryAgain")
-    @iOSXCUITFindBy(accessibility = "errorTitle")
+    @AndroidFindBy(xpath = "//android.widget.TextView[@text=\"Try again\"]")
+    @iOSXCUITFindBy(accessibility = "tryAgain")
     private WebElement tryAgainButton;
 
     @AndroidFindBy(uiAutomator = "new UiSelector().textContains(\"Subukan muli\")")
@@ -230,6 +230,10 @@ public class HomePage extends BasePage {
         return this.isElementInvisibleYet(tryAgainButtonInFillpino);
     }
 
+    public boolean isTryAgainButtonDisplayedInFlillpino() {
+        return this.isElementDisplayed(tryAgainButtonInFillpino);
+    }
+
     public boolean isTryAgainButtonNotDisplayed() {
         return this.isElementInvisibleYet(tryAgainButton);
     }
@@ -237,7 +241,11 @@ public class HomePage extends BasePage {
     public void clickOnTryAgainButton() {
         clickOnElement(tryAgainButton);
     }
-    
+
+    public void clickOnTryAgainFillpinoButton() {
+        clickOnElement(tryAgainButtonInFillpino);
+    }
+
     public boolean isDownloadingVcPopupDisplayed() {
         return this.retrieIsElementVisible(downloadingVcPopup);
     }
@@ -265,7 +273,7 @@ public class HomePage extends BasePage {
     }
 
     public boolean isActivatedVcPopupTextDisplayed() {
-        return this.isElementDisplayed(activatedVcPopupText);
+        return this.retrieIsElementVisible(activatedVcPopupText);
     }
 
     public void clickPopupCloseButtonButton() {

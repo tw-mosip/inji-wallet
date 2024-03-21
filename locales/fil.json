@@ -5,7 +5,6 @@
     "VC_RECEIVED_NOT_SAVED": "Hindi ma-save ang {{idType}} {{id}}.",
     "VC_DELETED": "Matagumpay na natanggal ang {{idType}} {{id}}.",
     "VC_DOWNLOADED": "Na-download ang {{idType}} {{id}}.",
-    "VC_REVOKED": "Ang {{idType}} {{id}} ay binawi ng nagbigay.",
     "VC_SHARED_WITH_VERIFICATION_CONSENT": "Ibinahagi ang {{idType}} {{id}} na may pahintulot para sa pag-verify ng presensya.",
     "VC_RECEIVED_WITH_PRESENCE_VERIFIED": "Natanggap ang {{idType}} {{id}} at matagumpay ang pag-verify ng presensya.",
     "VC_RECEIVED_BUT_PRESENCE_VERIFICATION_FAILED": "Natanggap ang {{idType}} {{id}} at nabigo ang pag-verify ng presensya.",
@@ -81,10 +80,6 @@
       "savingFailed": {
         "title": "Nabigong i-save ang Card",
         "message": "Nagkaproblema habang sine-save ang Card sa tindahan."
-      },
-      "diskFullError": {
-        "title": "Nabigong i-save ang Card",
-        "message": "Wala nang mga Card na matatanggap o mai-save dahil puno na ang Data ng App."
       }
     }
   },
@@ -96,9 +91,7 @@
     "shareWithSelfie": "Ibahagi sa Selfie",
     "offlineAuthDisabledMessage": "Mag-click dito upang paganahin ang mga kredensyal na ito na magamit para sa online na pagpapatotoo.",
     "viewActivityLog": "Tingnan ang log ng aktibidad",
-    "removeFromWallet": "Alisin sa wallet",
-    "revokeId": "Bawiin ang ID",
-    "revokeMessage": "Bawiin ang virtual ID para sa profile na ito"
+    "removeFromWallet": "Alisin sa wallet"
   },
   "WalletBinding": {
     "offlineAuthenticationDisabled": "I-activate para sa online na pag-login",
@@ -485,19 +478,14 @@
   "ReceiveVcScreen": {
     "header": "Card mga detalye",
     "save": "I-save ang card",
-    "verifyAndSave": "I-verify at i-save",
     "reject": "Tanggihan",
     "discard": "Itapon",
-    "goToReceivedVCTab": "Natanggap na View card",
+    "goToReceivedVCTab": "Tingnan ang Natanggap na card",
     "saving": "Sine-save ang card",
     "errors": {
       "savingFailed": {
         "title": "Nabigong i-save ang card!",
         "message": "Dahil sa teknikal na error, hindi namin na-save ang card. Mangyaring hilingin ang nagpadala na maglipat muli."
-      },
-      "diskFullError": {
-        "title": "Nabigong i-save ang cards",
-        "message": "Wala nang cards ang matatanggap o mai-save dahil puno na ang Data ng App."
       }
     }
   },

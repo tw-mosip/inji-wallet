@@ -3,8 +3,6 @@ import {Column, Row} from '../../components/ui';
 import {Modal} from '../../components/ui/Modal';
 import {MessageOverlay} from '../../components/MessageOverlay';
 import {ToastItem} from '../../components/ui/ToastItem';
-import {RevokeConfirmModal} from '../../components/RevokeConfirm';
-import {OIDcAuthenticationModal} from '../../components/OIDcAuth';
 import {useViewVcModal, ViewVcModalProps} from './ViewVcModalController';
 import {useTranslation} from 'react-i18next';
 import {OtpVerificationModal} from './MyVcs/OtpVerificationModal';
@@ -130,7 +128,7 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
         <BannerNotification
           type={controller.verificationBannerStatus}
           message={t('bannerInfo.verificationRetrigger')}
-          onClosePress={() => 
+          onClosePress={() =>
             controller.DISMISS_VERIFICATION_IN_PROGRESS_BANNER()
           }
           key={'reVerificationInProgress'}
@@ -203,14 +201,6 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
         title={t('inProgress')}
         progress
       />
-
-      {controller.isRevoking && (
-        <RevokeConfirmModal
-          id={controller.vc.id}
-          onCancel={() => controller.setRevoking(false)}
-          onRevoke={controller.REVOKE_VC}
-        />
-      )}
 
       {controller.toastVisible && <ToastItem message={controller.message} />}
 

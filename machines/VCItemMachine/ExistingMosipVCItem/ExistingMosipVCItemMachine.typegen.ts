@@ -153,10 +153,10 @@ export interface Typegen0 {
       | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]';
   };
   missingImplementations: {
-    actions: never;
+    actions: 'logRevoked' | 'revokeVID' | 'setLock' | 'setRevoke' | 'storeLock';
     delays: never;
     guards: never;
-    services: never;
+    services: 'requestLock' | 'requestRevoke';
   };
   eventsCausingActions: {
     addVcToInProgressDownloads: 'STORE_RESPONSE';
@@ -209,7 +209,9 @@ export interface Typegen0 {
     refreshMyVcs:
       | 'STORE_RESPONSE'
       | 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]';
-    removeVcFromInProgressDownloads: 'STORE_RESPONSE';
+    removeVcFromInProgressDownloads:
+      | 'STORE_RESPONSE'
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
     removeVcItem: 'CONFIRM';
     removeVcMetaDataFromStorage:
       | 'STORE_ERROR'

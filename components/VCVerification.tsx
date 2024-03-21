@@ -1,3 +1,4 @@
+import testIDProps from '../shared/commonUtil';
 import {setTextColor} from './VC/common/VCItemField';
 import VerifiedIcon from './VerifiedIcon';
 import {Row, Text} from './ui';
@@ -12,6 +13,7 @@ export const VCVerification: React.FC = ({wellknown, isVerified}: any) => {
   const statusIcon = isVerified ? <VerifiedIcon /> : <PendingIcon />;
   return (
     <Row
+      {...testIDProps('verified')}
       style={{
         justifyContent: 'space-between',
         alignItems: 'center',

@@ -497,7 +497,7 @@ export const storeMachine =
                 'Could not get keychain credentials',
               ),
             );
-            console.log('Credentials failed to load for user');
+            console.error('Credentials failed to load for user');
             callback(
               model.events.ERROR(
                 new Error('Could not get keychain credentials.'),
@@ -613,7 +613,7 @@ export async function getItem(
       }
       decryptedData = await decryptJson(encryptionKey, data);
       return JSON.parse(decryptedData);
-    } 
+    }
     if (data === null && VCMetadata.isVCKey(key)) {
       await removeItem(key, data, encryptionKey);
       sendErrorEvent(

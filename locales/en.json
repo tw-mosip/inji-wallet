@@ -5,7 +5,6 @@
     "VC_RECEIVED_NOT_SAVED": "Couldn't save {{idType}} {{id}}.",
     "VC_DELETED": "{{idType}} {{id}} is deleted successfully.",
     "VC_DOWNLOADED": "{{idType}} {{id}} is downloaded.",
-    "VC_REVOKED": "{{idType}} {{id}} is revoked by the issuer.",
     "VC_SHARED_WITH_VERIFICATION_CONSENT": "Shared {{idType}} {{id}} with consent for presence verification.",
     "VC_RECEIVED_WITH_PRESENCE_VERIFIED": "Received {{idType}} {{id}} and presence verification is successful.",
     "VC_RECEIVED_BUT_PRESENCE_VERIFICATION_FAILED": "Received {{idType}} {{id}} and presence verification failed.",
@@ -83,10 +82,6 @@
       "savingFailed": {
         "title": "Failed to save the Card",
         "message": "Something went wrong while saving Card to the store."
-      },
-      "diskFullError": {
-        "title": "Failed to save the Card",
-        "message": "No more Cards can be received or saved as App Data is full."
       }
     }
   },
@@ -98,9 +93,7 @@
     "shareWithSelfie": "Share with Selfie",
     "offlineAuthDisabledMessage": "Click here to enable this credentials to be used for online authentication.",
     "viewActivityLog": "View Activity Log",
-    "removeFromWallet": "Remove from Wallet",
-    "revokeId": "Revoke ID",
-    "revokeMessage": "Revoke the virtual ID for this profile"
+    "removeFromWallet": "Remove from Wallet"
   },
   "WalletBinding": {
     "offlineAuthenticationDisabled": "Activate for online login",

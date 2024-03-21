@@ -174,12 +174,12 @@ export const scanMachine =
         },
         SELECT_VC: {
           actions: ['setSelectedVc', 'setFlowType'],
-          target: 'disconnectDevice',
+          target: '.checkStorage',
         },
       },
       states: {
         inactive: {
-          entry: ['removeLoggers', 'resetFlowType', 'resetSelectedVc'],
+          entry: ['removeLoggers'],
         },
         disconnectDevice: {
           entry: ['resetFlowType', 'resetSelectedVc'],
@@ -398,7 +398,6 @@ export const scanMachine =
           on: {
             DISCONNECT: {
               target: '#scan.checkFaceAuthConsent',
-              actions: ['resetFlowType', 'resetSelectedVc'],
               internal: false,
             },
           },
@@ -671,7 +670,6 @@ export const scanMachine =
               },
             },
             navigateToHistory: {
-              entry: ['resetFlowType', 'resetSelectedVc'],
               always: '#scan.disconnected',
             },
             faceVerificationConsent: {
@@ -1193,7 +1191,7 @@ export const scanMachine =
                 type: 'BLE_ERROR',
                 bleError: {message: event.message, code: event.code},
               });
-              console.log('BLE Exception: ' + event.message);
+              console.error('BLE Exception: ' + event.message);
             }
           });
 
