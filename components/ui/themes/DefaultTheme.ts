@@ -487,8 +487,6 @@ export const DefaultTheme = {
     infoIcon: {
       height: 39,
       width: 39,
-      marginLeft: -13,
-      marginTop: -9,
     },
     faceImage: {
       borderRadius: 10,
@@ -1255,11 +1253,12 @@ export const DefaultTheme = {
   }),
   KebabPopUpStyles: StyleSheet.create({
     kebabPopUp: {
-      flex: 1,
       borderTopLeftRadius: 15,
       borderTopRightRadius: 15,
       width: Dimensions.get('screen').width,
-      marginTop: Dimensions.get('screen').height * 0.55,
+      maxHeight: 300,
+      position: 'absolute',
+      bottom: 0,
     },
     kebabHeaderStyle: {
       justifyContent: 'space-between',
@@ -1521,25 +1520,22 @@ export const DefaultTheme = {
     },
   }),
   HelpScreenStyle: StyleSheet.create({
-    viewStyle: {
-      width: 100,
-      padding: 7,
+    rowStyle: {
+      display: 'flex',
       borderRadius: 8,
       backgroundColor: Colors.LightOrange,
-    },
-    rowStyle: {
-      justifyContent: 'space-between',
+      justifyContent: 'center',
       alignItems: 'center',
-      width: 45,
-      display: 'flex',
+      paddingLeft: 16,
+      paddingRight: 16,
+      paddingBottom: 10,
+      paddingTop: 10,
     },
     iconStyle: {
-      paddingTop: 7,
-      paddingLeft: 20,
       paddingRight: 5,
     },
     labelStyle: {
-      width: 70,
+      marginBottom: -2,
       fontWeight: 'bold',
     },
   }),
