@@ -1,9 +1,9 @@
-import {IReactStuff, SelectOperator} from '../interfaces/IReactStuff';
+import {IReactXStateBridge, SelectOperator} from '../interfaces/IReactXStateBridge';
 import {ActorRef} from 'xstate';
 import {useSelector} from '@xstate/react';
 import {useState} from 'react';
 
-export const realReactStuff: IReactStuff = {
+export const realReactXstateBridge: IReactXStateBridge = {
   useSelector: function (
     scanService: ActorRef<any, any>,
     operator: SelectOperator,

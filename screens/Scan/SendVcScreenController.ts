@@ -14,35 +14,35 @@ import {
 } from '../../machines/bleShare/commonSelectors';
 // import {VCShareFlowType} from '../../shared/Utils';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
-import {IReactStuff} from '../../shared/interfaces/IReactStuff';
+import {IReactXStateBridge} from '../../shared/interfaces/IReactXStateBridge';
 import {ScanMachineEvents} from "../../shared/interfaces/StateMachineEvents";
 import {IPlatformDependentActions} from "../../shared/interfaces/IPlatformDependentActions";
 
 export function useSendVcScreen(
   scanService: ActorRef<any, any>,
   vcService: ActorRef<any, any>,
-  reactStuff: IReactStuff,
+  bridge: IReactXStateBridge,
   platformDependentActions: IPlatformDependentActions
 ) {
 
   const CANCEL = () => scanService.send(ScanMachineEvents.CANCEL());
 
   // const [selectedIndex, setSelectedIndex] = useState<number>(null);
-  const [selectedIndex, setSelectedIndex] = reactStuff.useState<number>(null);
+  const [selectedIndex, setSelectedIndex] = bridge.useState<number>(null);
 
   return {
     selectedIndex,
     TOGGLE_USER_CONSENT: () =>
       scanService.send(ScanMachineEvents.TOGGLE_USER_CONSENT()),
 
-    receiverInfo: reactStuff.useSelector(scanService, selectReceiverInfo),
-    vcName: reactStuff.useSelector(scanService, selectVcName),
-    selectedVc: reactStuff.useSelector(scanService, selectSelectedVc),
+    receiverInfo: bridge.useSelector(scanService, selectReceiverInfo),
+    vcName: bridge.useSelector(scanService, selectVcName),
+    selectedVc: bridge.useSelector(scanService, selectSelectedVc),
 
-    isSelectingVc: reactStuff.useSelector(scanService, selectIsSelectingVc),
-    isVerifyingIdentity: reactStuff.useSelector(scanService, selectIsVerifyingIdentity),
-    isInvalidIdentity: reactStuff.useSelector(scanService, selectIsInvalidIdentity),
-    isCancelling: reactStuff.useSelector(scanService, selectIsCancelling),
+    isSelectingVc: bridge.useSelector(scanService, selectIsSelectingVc),
+    isVerifyingIdentity: bridge.useSelector(scanService, selectIsVerifyingIdentity),
+    isInvalidIdentity: bridge.useSelector(scanService, selectIsInvalidIdentity),
+    isCancelling: bridge.useSelector(scanService, selectIsCancelling),
     isFaceVerificationConsent: platformDependentActions.isFaceVerificationConsent,
 
     CANCEL,

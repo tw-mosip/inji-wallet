@@ -2,7 +2,7 @@ import {ActorRef, ActorRefFrom} from "xstate";
 import {ExistingMosipVCItemMachine} from "../../machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine";
 import {ScanMachineEvents} from "./StateMachineEvents";
 import {VCShareFlowType} from "../Utils";
-import {IReactStuff} from "./IReactStuff";
+import {IReactXStateBridge} from "./IReactXStateBridge";
 import {selectIsFaceVerificationConsent} from "../../machines/bleShare/scan/scanMachine";
 import {BOTTOM_TAB_ROUTES} from "../../routes/routesConstants";
 import {NavigationProp, useNavigation} from "@react-navigation/native";
@@ -12,26 +12,22 @@ import {selectShareableVcsMetadata} from "../../machines/VCItemMachine/vc";
 
 type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
 
-// export const createPlatformDependentActions(reactStuff: IReactStuff, scanService: ActorRef<any, any>) {
-//
-// }
-
 export class PlatformDependentActions implements IPlatformDependentActions {
-    private reactStuff: IReactStuff
+    private bridge: IReactXStateBridge
     private scanService: ActorRef<any, any>
     isFaceVerificationConsent: ActorRef<any, any>
     private navigation: MyVcsTabNavigation;
 
-    constructor(reactStuff: IReactStuff, scanService: ActorRef<any, any>) {
-        this.reactStuff = reactStuff;
+    constructor(bridge: IReactXStateBridge, scanService: ActorRef<any, any>) {
+        this.bridge = bridge;
         this.scanService = scanService;
-        this.isFaceVerificationConsent = reactStuff.useSelector(scanService, selectIsFaceVerificationConsent)
+        this.isFaceVerificationConsent = bridge.useSelector(scanService, selectIsFaceVerificationConsent)
         this.navigation = useNavigation<MyVcsTabNavigation>();
 
     }
 
     shareableVcsMetadata = (vcService: ActorRef<any, any>) => {
-        return this.reactStuff.useSelector(
+        return this.bridge.useSelector(
             vcService,
             selectShareableVcsMetadata,
         )
@@ -41,7 +37,7 @@ export class PlatformDependentActions implements IPlatformDependentActions {
         this.navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
     };
     SELECT_VC_ITEM = (index: number) => (vcRef: ActorRefFrom<typeof ExistingMosipVCItemMachine>) => {
-        const [selectedIndex, setSelectedIndex] = this.reactStuff.useState<number>(null);
+        const [selectedIndex, setSelectedIndex] = this.bridge.useState<number>(null);
         setSelectedIndex(index);
         const {serviceRefs, ...vcData} = vcRef.getSnapshot().context;
         this.scanService.send(

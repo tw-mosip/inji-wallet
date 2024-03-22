@@ -25,7 +25,7 @@ import {Issuers} from '../../shared/openId4VCI/Utils';
 import {FaceVerificationAlertOverlay} from './FaceVerificationAlertOverlay';
 import {Error} from '../../components/ui/Error';
 import {SvgImage} from '../../components/ui/svg';
-import {realReactStuff} from '../../shared/wrappers/RealReactStuff';
+import {realReactXstateBridge} from '../../shared/wrappers/RealReactXstateBridge';
 import {ActorRef} from 'xstate';
 import {PlatformDependentActions} from "../../shared/interfaces/PlatformDependentActions";
 
@@ -38,7 +38,7 @@ export const SendVcScreen: React.FC = (
   const controller = useSendVcScreen(
     appService.children.get('scan')!!,
     appService.children.get('vc')!!,
-    realReactStuff, PlatformDependentActions
+    realReactXstateBridge, PlatformDependentActions
   );
   const shareableVcsMetadataOrderedByPinStatus = getVCsOrderedByPinStatus(
     controller.shareableVcsMetadata,

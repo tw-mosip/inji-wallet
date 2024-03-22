@@ -7,7 +7,7 @@ import {DeviceInfoList} from '../DeviceInfoList';
 import {ElevationLevel, Theme} from './styleUtils';
 import testIDProps from '../../shared/commonUtil';
 import {GlobalContext} from '../../shared/GlobalContext';
-import {realReactStuff} from '../../shared/wrappers/RealReactStuff';
+import {realReactXstateBridge} from '../../shared/wrappers/RealReactXstateBridge';
 import {PlatformDependentActions} from "../../shared/interfaces/PlatformDependentActions";
 
 export const Modal: React.FC<ModalProps> = props => {
@@ -15,7 +15,7 @@ export const Modal: React.FC<ModalProps> = props => {
   const controller = useSendVcScreen(
     appService.children.get('scan'),
     appService.children.get('vc'),
-    realReactStuff, PlatformDependentActions
+    realReactXstateBridge, PlatformDependentActions
   );
 
   return (
