@@ -12,20 +12,11 @@ import {
   selectIsInvalidIdentity,
   selectIsVerifyingIdentity,
 } from '../../machines/bleShare/commonSelectors';
-// import {
-//   selectIsFaceVerificationConsent,
-// } from '../../machines/bleShare/scan/scanMachine';
 // import {VCShareFlowType} from '../../shared/Utils';
-// import {NavigationProp, useNavigation} from '@react-navigation/native';
-// import {RootRouteProps} from '../../routes';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
 import {IReactStuff} from '../../shared/interfaces/IReactStuff';
 import {ScanMachineEvents} from "../../shared/interfaces/StateMachineEvents";
-// import {PlatformDependentActions} from "../../shared/interfaces/PlatformDependentActions";
 import {IPlatformDependentActions} from "../../shared/interfaces/IPlatformDependentActions";
-
-// type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
-
 
 export function useSendVcScreen(
   scanService: ActorRef<any, any>,
@@ -33,7 +24,6 @@ export function useSendVcScreen(
   reactStuff: IReactStuff,
   platformDependentActions: IPlatformDependentActions
 ) {
-  // const navigation = useNavigation<MyVcsTabNavigation>();
 
   const CANCEL = () => scanService.send(ScanMachineEvents.CANCEL());
 
@@ -75,7 +65,6 @@ export function useSendVcScreen(
     RETRY_VERIFICATION: () => scanService.send(ScanMachineEvents.RETRY_VERIFICATION()),
     GO_TO_HOME: () => {
       platformDependentActions.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'})
-      // navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
     },
 
     // React Native stuff - return to this
@@ -83,16 +72,7 @@ export function useSendVcScreen(
     //     vcService,
     //     selectShareableVcsMetadata,
     // ),
-    // SELECT_VC_ITEM:
-    //     (index: number) =>
-    //         (vcRef: ActorRefFrom<typeof ExistingMosipVCItemMachine>) => {
-    //           setSelectedIndex(index);
-    //           const {serviceRefs, ...vcData} = vcRef.getSnapshot().context;
-    //           scanService.send(
-    //               ScanMachineEvents.SELECT_VC(vcData, VCShareFlowType.SIMPLE_SHARE),
-    //           );
-    //         },
-    SELECT_VC_ITEM: platformDependentActions.SELECT_VC_ITEM(selectedIndex)
+    SELECT_VC_ITEM: platformDependentActions.SELECT_VC_ITEM
   };
 }
 
