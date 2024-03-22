@@ -4,7 +4,7 @@ import {PinInput} from '../../../components/PinInput';
 import {Button, Column, Text} from '../../../components/ui';
 import {Modal} from '../../../components/ui/Modal';
 import {Theme} from '../../../components/ui/styleUtils';
-import {KeyboardAvoidingView, TouchableOpacity} from 'react-native';
+import {Dimensions, KeyboardAvoidingView, TouchableOpacity} from 'react-native';
 import {
   getImpressionEventData,
   incrementRetryCount,
@@ -101,33 +101,40 @@ export const OtpVerificationModal: React.FC<
                   marginBottom: 20,
                 }
           }>
-          {SvgImage.OtpVerificationIcon()}
-          <Text
-            testID="otpVerificationHeader"
-            weight="bold"
-            style={Theme.TextStyles.header}>
-            {t('title')}
-          </Text>
-          <Text
-            testID="otpVerificationDescription"
-            color={Theme.Colors.RetrieveIdLabel}
-            weight="semibold"
-            size="small"
-            align="center">
-            {t('otpSentMessage', {phone: props.phone, email: props.email})}
-          </Text>
-          <Text
-            testID="otpVerificationError"
-            align="center"
-            color={Theme.Colors.errorMessage}>
-            {props.error}
-          </Text>
-          <PinInput
-            testID="otpVerificationPinInput"
-            length={6}
-            onDone={handleEnteredOtp}
-          />
-          <Column crossAlign="center">
+          <Column
+            crossAlign="center"
+            style={{
+              height: Dimensions.get('screen').height * 0.4,
+              justifyContent: 'space-between',
+            }}>
+            {SvgImage.OtpVerificationIcon()}
+            <Text
+              testID="otpVerificationHeader"
+              weight="bold"
+              style={Theme.TextStyles.header}>
+              {t('title')}
+            </Text>
+            <Text
+              testID="otpVerificationDescription"
+              color={Theme.Colors.RetrieveIdLabel}
+              weight="semibold"
+              size="small"
+              align="center">
+              {t('otpSentMessage', {phone: props.phone, email: props.email})}
+            </Text>
+            <Text
+              testID="otpVerificationError"
+              align="center"
+              color={Theme.Colors.errorMessage}>
+              {props.error}
+            </Text>
+            <PinInput
+              testID="otpVerificationPinInput"
+              length={6}
+              onDone={handleEnteredOtp}
+            />
+          </Column>
+          <Column crossAlign="center" margin="0 0 10 0">
             <Text
               testID="otpVerificationTimer"
               color={Theme.Colors.resendCodeTimer}

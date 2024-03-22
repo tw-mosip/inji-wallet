@@ -50,12 +50,12 @@ export const GetIdInputModal: React.FC<GetIdInputModalProps> = props => {
           <Column>
             <Text
               testID="getIdDescription"
-              margin="10"
+              margin="30 0 0 0"
               style={{color: Theme.Colors.GrayText}}
               weight="regular">
               {t('applicationIdLabel')}
             </Text>
-            <Row crossAlign="flex-end">
+            <Row crossAlign="flex-end" margin="20 0 0 -10">
               <Input
                 {...testIDProps('getIdInputModalIndividualId')}
                 placeholder={!controller.id ? inputLabel : ''}
@@ -99,7 +99,7 @@ export const GetIdInputModal: React.FC<GetIdInputModalProps> = props => {
           <Button
             testID="getIdButton"
             title={t('getUIN')}
-            margin="0 0 10 0"
+            margin="0 0 20 0"
             type="gradient"
             disabled={!controller.id}
             onPress={controller.VALIDATE_INPUT}

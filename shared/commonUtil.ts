@@ -126,15 +126,25 @@ export const getScreenHeight = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      event => {
-        const keyboardHeight = event.endCoordinates.height;
-        setKeyboardHeight(keyboardHeight + 150);
-      },
-    );
-    return () => {
-      keyboardDidShowListener.remove();
+    async () => {
+      const keyboardDidShowListener = await Keyboard.addListener(
+        'keyboardDidShow',
+        event => {
+          const keyboardHeight = event.endCoordinates.height;
+          setKeyboardHeight(keyboardHeight + 150);
+        },
+      );
+      const keyboardDidHideListener = await Keyboard.addListener(
+        'keyboardDidHide',
+        event => {
+          const keyboardHeight = event.endCoordinates.height;
+          setKeyboardHeight(keyboardHeight);
+        },
+      );
+      return () => {
+        keyboardDidShowListener.remove();
+        keyboardDidHideListener.remove();
+      };
     };
   }, []);
 

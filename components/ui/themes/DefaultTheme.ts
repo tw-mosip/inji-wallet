@@ -603,12 +603,12 @@ export const DefaultTheme = {
       bottom: 18,
       borderBottomColor: Colors.Orange,
       borderBottomWidth: 1,
-      minWidth: 210,
+      minWidth: 200,
     },
     idInput: {
       position: 'relative',
       bottom: 18,
-      minWidth: 210,
+      minWidth: 200,
     },
     getId: {
       justifyContent: 'center',

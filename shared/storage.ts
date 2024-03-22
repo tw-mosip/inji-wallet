@@ -479,7 +479,6 @@ class Storage {
         ? getFreeDiskStorageOldSync()
         : getFreeDiskStorageSync();
 
-
     return freeDiskStorageInBytes <= minimumStorageLimitInBytes;
   };
 }

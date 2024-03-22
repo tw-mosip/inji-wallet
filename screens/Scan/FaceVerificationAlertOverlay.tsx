@@ -29,8 +29,13 @@ export const FaceVerificationAlertOverlay: React.FC<
           {SvgImage.ShareWithSelfie()}
         </Row>
 
-        <Column crossAlign="center" margin="10 0 15 0" padding='0'>
-          <Text testID="shareWithSelfieAlert" weight="bold" size="large" color="#000000" style={{padding:3}}>
+        <Column crossAlign="center" margin="10 0 15 0" padding="0">
+          <Text
+            testID="shareWithSelfieAlert"
+            weight="bold"
+            size="large"
+            color="#000000"
+            style={{padding: 3}}>
             {t('shareWithSelfie')}
           </Text>
 

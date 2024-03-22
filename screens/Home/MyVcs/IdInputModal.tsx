@@ -68,69 +68,72 @@ export const IdInputModal: React.FC<IdInputModalProps> = props => {
                   justifyContent: 'space-between',
                 }
           }>
-          <Text
-            align="left"
-            size="regular"
-            margin="5 0 0 0"
-            style={Theme.TextStyles.retrieveIdLabel}>
-            {t('guideLabel')}
-          </Text>
-          <Row crossAlign="center" style={Theme.Styles.idInputContainer}>
-            <Column style={Theme.Styles.idInputPicker}>
-              <Picker
-                {...testIDProps('selectIdTypePicker')}
-                selectedValue={controller.idType}
-                onValueChange={controller.SELECT_ID_TYPE}
-                style={Theme.Styles.picker}>
-                <Picker.Item label="UIN" value="UIN" />
-                <Picker.Item label="VID" value="VID" />
-              </Picker>
-            </Column>
-            <Column
-              align="center"
-              style={{
-                height: 150,
-              }}>
-              <Input
-                {...testIDProps('idInputModalIndividualId')}
-                placeholder={!controller.id ? inputLabel : ''}
-                inputContainerStyle={
-                  controller.id
-                    ? Theme.Styles.idInputBottom
-                    : Theme.Styles.idInput
-                }
-                inputStyle={{
-                  textAlign: I18nManager.isRTL ? 'right' : 'left',
-                  fontWeight: '700',
-                }}
-                selectionColor={Theme.Colors.Cursor}
-                value={controller.id}
-                keyboardType="number-pad"
-                rightIcon={
-                  <CustomTooltip
-                    testID="IdInputToolTip"
-                    title={t('toolTipTitle', {idType: controller.idType})}
-                    description={t(`toolTip${controller.idType}Description`)}
-                    width={Dimensions.get('screen').width * 0.85}
-                    height={Dimensions.get('screen').height * 0.18}
-                    triggerComponent={
-                      <Icon
-                        {...testIDProps('IdInputToolTipInfo')}
-                        name="infocirlceo"
-                        type="antdesign"
-                        color={Theme.Colors.tooltipIcon}
-                      />
-                    }
-                  />
-                }
-                errorStyle={Theme.TextStyles.error}
-                errorMessage={controller.idError}
-                onChangeText={controller.INPUT_ID}
-                ref={setIdInputRef}
-              />
-            </Column>
-          </Row>
           <Column>
+            <Text
+              align="left"
+              size="regular"
+              margin="25 0 0 0"
+              style={Theme.TextStyles.retrieveIdLabel}>
+              {t('guideLabel')}
+            </Text>
+            <Row crossAlign="center" style={Theme.Styles.idInputContainer}>
+              <Column style={Theme.Styles.idInputPicker}>
+                <Picker
+                  {...testIDProps('selectIdTypePicker')}
+                  selectedValue={controller.idType}
+                  onValueChange={controller.SELECT_ID_TYPE}
+                  style={Theme.Styles.picker}>
+                  <Picker.Item label="UIN" value="UIN" />
+                  <Picker.Item label="VID" value="VID" />
+                </Picker>
+              </Column>
+              <Column
+                align="center"
+                style={{
+                  height: 150,
+                }}>
+                <Input
+                  {...testIDProps('idInputModalIndividualId')}
+                  placeholder={!controller.id ? inputLabel : ''}
+                  inputContainerStyle={
+                    controller.id
+                      ? Theme.Styles.idInputBottom
+                      : Theme.Styles.idInput
+                  }
+                  inputStyle={{
+                    textAlign: I18nManager.isRTL ? 'right' : 'left',
+                    fontWeight: '700',
+                  }}
+                  selectionColor={Theme.Colors.Cursor}
+                  value={controller.id}
+                  keyboardType="number-pad"
+                  rightIcon={
+                    <CustomTooltip
+                      testID="IdInputToolTip"
+                      title={t('toolTipTitle', {idType: controller.idType})}
+                      description={t(`toolTip${controller.idType}Description`)}
+                      width={Dimensions.get('screen').width * 0.85}
+                      height={Dimensions.get('screen').height * 0.18}
+                      triggerComponent={
+                        <Icon
+                          {...testIDProps('IdInputToolTipInfo')}
+                          name="infocirlceo"
+                          type="antdesign"
+                          color={Theme.Colors.tooltipIcon}
+                        />
+                      }
+                    />
+                  }
+                  errorStyle={Theme.TextStyles.error}
+                  errorMessage={controller.idError}
+                  onChangeText={controller.INPUT_ID}
+                  ref={setIdInputRef}
+                />
+              </Column>
+            </Row>
+          </Column>
+
+          <Column margin="0 0 40 0">
             <Button
               testID="generateVc"
               type="gradient"
