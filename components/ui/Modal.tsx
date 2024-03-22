@@ -8,13 +8,14 @@ import {ElevationLevel, Theme} from './styleUtils';
 import testIDProps from '../../shared/commonUtil';
 import {GlobalContext} from '../../shared/GlobalContext';
 import {realReactStuff} from '../../shared/wrappers/RealReactStuff';
+import {PlatformDependentActions} from "../../shared/interfaces/PlatformDependentActions";
 
 export const Modal: React.FC<ModalProps> = props => {
   const {appService} = useContext(GlobalContext);
   const controller = useSendVcScreen(
     appService.children.get('scan'),
     appService.children.get('vc'),
-    realReactStuff,
+    realReactStuff, PlatformDependentActions
   );
 
   return (

@@ -60,6 +60,7 @@ import {TelemetryConstants} from '../../../shared/telemetry/TelemetryConstants';
 import {logState} from '../../../shared/commonUtil';
 import {VCShareFlowType} from '../../../shared/Utils';
 import {getIdType} from '../../../shared/openId4VCI/Utils';
+import {ScanMachineEvents} from "../../../shared/interfaces/StateMachineEvents";
 
 const {wallet, EventTypes, VerificationStatus} = tuvali;
 
@@ -84,51 +85,7 @@ const model = createModel(
     showFaceCaptureSuccessBanner: false,
   },
   {
-    events: {
-      SELECT_VC: (vc: VC, flowType: string) => ({vc, flowType}),
-      SCAN: (params: string) => ({params}),
-      ACCEPT_REQUEST: () => ({}),
-      VERIFY_AND_ACCEPT_REQUEST: () => ({}),
-      VC_ACCEPTED: () => ({}),
-      VC_REJECTED: () => ({}),
-      VC_SENT: () => ({}),
-      CANCEL: () => ({}),
-      CLOSE_BANNER: () => ({}),
-      STAY_IN_PROGRESS: () => ({}),
-      RETRY: () => ({}),
-      DISMISS: () => ({}),
-      GOTO_HISTORY: () => ({}),
-      CONNECTED: () => ({}),
-      DISCONNECT: () => ({}),
-      BLE_ERROR: (bleError: BLEError) => ({bleError}),
-      CONNECTION_DESTROYED: () => ({}),
-      SCREEN_BLUR: () => ({}),
-      SCREEN_FOCUS: () => ({}),
-      BLUETOOTH_PERMISSION_ENABLED: () => ({}),
-      BLUETOOTH_PERMISSION_DENIED: () => ({}),
-      BLUETOOTH_STATE_ENABLED: () => ({}),
-      BLUETOOTH_STATE_DISABLED: () => ({}),
-      NEARBY_ENABLED: () => ({}),
-      NEARBY_DISABLED: () => ({}),
-      GOTO_SETTINGS: () => ({}),
-      START_PERMISSION_CHECK: () => ({}),
-      LOCATION_ENABLED: () => ({}),
-      LOCATION_DISABLED: () => ({}),
-      LOCATION_REQUEST: () => ({}),
-      CHECK_FLOW_TYPE: () => ({}),
-      UPDATE_VC_NAME: (vcName: string) => ({vcName}),
-      STORE_RESPONSE: (response: any) => ({response}),
-      APP_ACTIVE: () => ({}),
-      FACE_VALID: () => ({}),
-      FACE_INVALID: () => ({}),
-      RETRY_VERIFICATION: () => ({}),
-      VP_CREATED: (vp: VerifiablePresentation) => ({vp}),
-      TOGGLE_USER_CONSENT: () => ({}),
-      RESET: () => ({}),
-      FACE_VERIFICATION_CONSENT: (isConsentGiven: boolean) => ({
-        isConsentGiven,
-      }),
-    },
+    events: ScanMachineEvents,
   },
 );
 const QR_LOGIN_REF_ID = 'QrLogin';

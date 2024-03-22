@@ -1,22 +1,5 @@
 import {WalletBindingResponse} from '../../../shared/cryptoutil/cryptoUtil';
-
-export interface VC {
-  id: string;
-  idType: VcIdType;
-  tag: string;
-  credential: DecodedCredential;
-  verifiableCredential: VerifiableCredential;
-  verifiablePresentation?: VerifiablePresentation;
-  generatedOn: Date;
-  requestId: string;
-  isVerified: boolean;
-  lastVerifiedOn: number;
-  locked: boolean;
-  shouldVerifyPresence?: boolean;
-  walletBindingResponse?: WalletBindingResponse;
-  credentialRegistry?: string;
-  isPinned?: boolean;
-}
+import {VC, VerifiableCredential} from '../../../shared/interfaces/VCTypes';
 
 export type VcIdType = 'UIN' | 'VID';
 
@@ -68,21 +51,6 @@ export interface VerifiableCredential {
   type: VerifiableCredentialType[];
   wellKnown: string;
   credentialTypes: Object[];
-}
-
-export interface VerifiablePresentation {
-  '@context': VCContext;
-  verifiableCredential: VerifiableCredential[];
-  type: 'VerifiablePresentation';
-  proof: {
-    created: string;
-    jws: string;
-    proofPurpose: 'authentication' | string;
-    type: 'RsaSignature2018' | string;
-    verificationMethod: string;
-    challenge: string;
-    domain: string;
-  };
 }
 
 export type VerifiableCredentialType =

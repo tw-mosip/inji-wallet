@@ -1,11 +1,6 @@
 import {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 import {RootStackParamList} from './index';
-
-export type MainBottomTabParamList = {
-  home: undefined;
-  share: undefined;
-  history: undefined;
-};
+import {MainBottomTabParamList} from "./mainBottomTabParamList";
 
 export type MainRouteProps = BottomTabScreenProps<
   MainBottomTabParamList & RootStackParamList

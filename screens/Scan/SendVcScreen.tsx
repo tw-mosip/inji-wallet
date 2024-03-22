@@ -27,6 +27,7 @@ import {Error} from '../../components/ui/Error';
 import {SvgImage} from '../../components/ui/svg';
 import {realReactStuff} from '../../shared/wrappers/RealReactStuff';
 import {ActorRef} from 'xstate';
+import {PlatformDependentActions} from "../../shared/interfaces/PlatformDependentActions";
 
 export const SendVcScreen: React.FC = (
   scanService: ActorRef<any, any>,
@@ -37,7 +38,7 @@ export const SendVcScreen: React.FC = (
   const controller = useSendVcScreen(
     appService.children.get('scan')!!,
     appService.children.get('vc')!!,
-    realReactStuff,
+    realReactStuff, PlatformDependentActions
   );
   const shareableVcsMetadataOrderedByPinStatus = getVCsOrderedByPinStatus(
     controller.shareableVcsMetadata,

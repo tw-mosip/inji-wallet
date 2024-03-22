@@ -12,27 +12,30 @@ import {
   selectIsInvalidIdentity,
   selectIsVerifyingIdentity,
 } from '../../machines/bleShare/commonSelectors';
-import {
-  ScanEvents,
-  scanMachine,
-  selectIsFaceVerificationConsent,
-} from '../../machines/bleShare/scan/scanMachine';
-import {VCShareFlowType} from '../../shared/Utils';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {RootRouteProps} from '../../routes';
+// import {
+//   selectIsFaceVerificationConsent,
+// } from '../../machines/bleShare/scan/scanMachine';
+// import {VCShareFlowType} from '../../shared/Utils';
+// import {NavigationProp, useNavigation} from '@react-navigation/native';
+// import {RootRouteProps} from '../../routes';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
 import {IReactStuff} from '../../shared/interfaces/IReactStuff';
+import {ScanMachineEvents} from "../../shared/interfaces/StateMachineEvents";
+// import {PlatformDependentActions} from "../../shared/interfaces/PlatformDependentActions";
+import {IPlatformDependentActions} from "../../shared/interfaces/IPlatformDependentActions";
 
-type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
+// type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
+
 
 export function useSendVcScreen(
   scanService: ActorRef<any, any>,
   vcService: ActorRef<any, any>,
   reactStuff: IReactStuff,
+  platformDependentActions: IPlatformDependentActions
 ) {
-  const navigation = useNavigation<MyVcsTabNavigation>();
+  // const navigation = useNavigation<MyVcsTabNavigation>();
 
-  const CANCEL = () => scanService.send(ScanEvents.CANCEL());
+  const CANCEL = () => scanService.send(ScanMachineEvents.CANCEL());
 
   // const [selectedIndex, setSelectedIndex] = useState<number>(null);
   const [selectedIndex, setSelectedIndex] = reactStuff.useState<number>(null);
@@ -40,23 +43,10 @@ export function useSendVcScreen(
   return {
     selectedIndex,
     TOGGLE_USER_CONSENT: () =>
-      scanService.send(ScanEvents.TOGGLE_USER_CONSENT()),
-    SELECT_VC_ITEM:
-      (index: number) =>
-      (vcRef: ActorRefFrom<typeof ExistingMosipVCItemMachine>) => {
-        setSelectedIndex(index);
-        const {serviceRefs, ...vcData} = vcRef.getSnapshot().context;
-        scanService.send(
-          ScanEvents.SELECT_VC(vcData, VCShareFlowType.SIMPLE_SHARE),
-        );
-      },
+      scanService.send(ScanMachineEvents.TOGGLE_USER_CONSENT()),
 
     receiverInfo: reactStuff.useSelector(scanService, selectReceiverInfo),
     vcName: reactStuff.useSelector(scanService, selectVcName),
-    shareableVcsMetadata: reactStuff.useSelector(
-      vcService,
-      selectShareableVcsMetadata,
-    ),
     selectedVc: reactStuff.useSelector(scanService, selectSelectedVc),
 
     isSelectingVc: reactStuff.useSelector(scanService, selectIsSelectingVc),
@@ -69,25 +59,40 @@ export function useSendVcScreen(
       selectIsInvalidIdentity,
     ),
     isCancelling: reactStuff.useSelector(scanService, selectIsCancelling),
-    isFaceVerificationConsent: reactStuff.useSelector(
-      scanService,
-      selectIsFaceVerificationConsent,
-    ),
+    isFaceVerificationConsent: platformDependentActions.isFaceVerificationConsent,
 
     CANCEL,
-    ACCEPT_REQUEST: () => scanService.send(ScanEvents.ACCEPT_REQUEST()),
+    ACCEPT_REQUEST: () => scanService.send(ScanMachineEvents.ACCEPT_REQUEST()),
     FACE_VERIFICATION_CONSENT: (isConsentGiven: boolean) =>
-      scanService.send(ScanEvents.FACE_VERIFICATION_CONSENT(isConsentGiven)),
+      scanService.send(ScanMachineEvents.FACE_VERIFICATION_CONSENT(isConsentGiven)),
     VERIFY_AND_ACCEPT_REQUEST: () =>
-      scanService.send(ScanEvents.VERIFY_AND_ACCEPT_REQUEST()),
-    DISMISS: () => scanService.send(ScanEvents.DISMISS()),
+      scanService.send(ScanMachineEvents.VERIFY_AND_ACCEPT_REQUEST()),
+    DISMISS: () => scanService.send(ScanMachineEvents.DISMISS()),
     UPDATE_VC_NAME: (vcName: string) =>
-      scanService.send(ScanEvents.UPDATE_VC_NAME(vcName)),
-    FACE_VALID: () => scanService.send(ScanEvents.FACE_VALID()),
-    FACE_INVALID: () => scanService.send(ScanEvents.FACE_INVALID()),
-    RETRY_VERIFICATION: () => scanService.send(ScanEvents.RETRY_VERIFICATION()),
+      scanService.send(ScanMachineEvents.UPDATE_VC_NAME(vcName)),
+    FACE_VALID: () => scanService.send(ScanMachineEvents.FACE_VALID()),
+    FACE_INVALID: () => scanService.send(ScanMachineEvents.FACE_INVALID()),
+    RETRY_VERIFICATION: () => scanService.send(ScanMachineEvents.RETRY_VERIFICATION()),
     GO_TO_HOME: () => {
-      navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
+      platformDependentActions.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'})
+      // navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
     },
+
+    // React Native stuff - return to this
+    // shareableVcsMetadata: reactStuff.useSelector(
+    //     vcService,
+    //     selectShareableVcsMetadata,
+    // ),
+    // SELECT_VC_ITEM:
+    //     (index: number) =>
+    //         (vcRef: ActorRefFrom<typeof ExistingMosipVCItemMachine>) => {
+    //           setSelectedIndex(index);
+    //           const {serviceRefs, ...vcData} = vcRef.getSnapshot().context;
+    //           scanService.send(
+    //               ScanMachineEvents.SELECT_VC(vcData, VCShareFlowType.SIMPLE_SHARE),
+    //           );
+    //         },
+    SELECT_VC_ITEM: platformDependentActions.SELECT_VC_ITEM(selectedIndex)
   };
 }
+
