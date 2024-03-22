@@ -19,4 +19,6 @@ export interface IPlatformDependentActions {
                     : [screen: RouteName, params: ParamListBase[RouteName]]
                 : never
     ) => void
+
+    shareableVcsMetadata: (vcService: ActorRef<any, any>) => any;
 }

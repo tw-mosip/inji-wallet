@@ -1,5 +1,5 @@
 import {ActorRef, ActorRefFrom} from 'xstate';
-import {selectShareableVcsMetadata} from '../../machines/VCItemMachine/vc';
+// import {selectShareableVcsMetadata} from '../../machines/VCItemMachine/vc';
 import {ExistingMosipVCItemMachine} from '../../machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine';
 import {
   selectIsSelectingVc,
@@ -40,14 +40,8 @@ export function useSendVcScreen(
     selectedVc: reactStuff.useSelector(scanService, selectSelectedVc),
 
     isSelectingVc: reactStuff.useSelector(scanService, selectIsSelectingVc),
-    isVerifyingIdentity: reactStuff.useSelector(
-      scanService,
-      selectIsVerifyingIdentity,
-    ),
-    isInvalidIdentity: reactStuff.useSelector(
-      scanService,
-      selectIsInvalidIdentity,
-    ),
+    isVerifyingIdentity: reactStuff.useSelector(scanService, selectIsVerifyingIdentity),
+    isInvalidIdentity: reactStuff.useSelector(scanService, selectIsInvalidIdentity),
     isCancelling: reactStuff.useSelector(scanService, selectIsCancelling),
     isFaceVerificationConsent: platformDependentActions.isFaceVerificationConsent,
 
@@ -68,10 +62,9 @@ export function useSendVcScreen(
     },
 
     // React Native stuff - return to this
-    // shareableVcsMetadata: reactStuff.useSelector(
-    //     vcService,
-    //     selectShareableVcsMetadata,
-    // ),
+    // shareableVcsMetadata: reactStuff.useSelector(vcService, selectShareableVcsMetadata),
+
+    shareableVcsMetadata: platformDependentActions.shareableVcsMetadata(vcService),
     SELECT_VC_ITEM: platformDependentActions.SELECT_VC_ITEM
   };
 }

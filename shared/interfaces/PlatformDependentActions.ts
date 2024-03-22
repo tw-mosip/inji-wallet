@@ -8,6 +8,7 @@ import {BOTTOM_TAB_ROUTES} from "../../routes/routesConstants";
 import {NavigationProp, useNavigation} from "@react-navigation/native";
 import {RootRouteProps} from "../../routes";
 import {IPlatformDependentActions} from "./IPlatformDependentActions";
+import {selectShareableVcsMetadata} from "../../machines/VCItemMachine/vc";
 
 type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
 
@@ -27,6 +28,13 @@ export class PlatformDependentActions implements IPlatformDependentActions {
         this.isFaceVerificationConsent = reactStuff.useSelector(scanService, selectIsFaceVerificationConsent)
         this.navigation = useNavigation<MyVcsTabNavigation>();
 
+    }
+
+    shareableVcsMetadata = (vcService: ActorRef<any, any>) => {
+        return this.reactStuff.useSelector(
+            vcService,
+            selectShareableVcsMetadata,
+        )
     }
 
     navigate = <RouteName extends string>(...args: RouteName extends unknown ? [screen: RouteName] | [screen: RouteName, params: object | undefined] : never) => {

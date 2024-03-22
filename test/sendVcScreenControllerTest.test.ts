@@ -11,7 +11,8 @@ test('two plus two is four', () => {
 const mockPlatformActions: IPlatformDependentActions = {
     isFaceVerificationConsent: jest.fn(),
     navigate: jest.fn(),
-    SELECT_VC_ITEM: jest.fn()
+    SELECT_VC_ITEM: jest.fn(),
+    shareableVcsMetadata: jest.fn()
 }
 
 const mockReactStuff: IReactStuff = {
