@@ -22,15 +22,19 @@ const Colors = {
   Gray50: '#999999',
   Gray9: '#171717',
   Gray89: '#E3E3E3',
+  Gray97: '#F7F7F7',
   DimGray: '#737373',
+  DarkGray: '#A5A5A5',
   platinumGrey: '#EDEDED',
   Orange: '#F2811D',
+  OrangeBrown: '#D9822B',
   Blue: '#0000FF',
-  LightGrey: '#F7F7F7',
+  LightGrey: '#F8F8F8',
   ShadeOfGrey: '#6F6F6F',
   mediumDarkGrey: '#7B7B7B',
   White: '#FFFFFF',
   Red: '#D52929',
+  LightRed: '#DB2E2E',
   Green: '#4B9D20',
   Transparent: 'transparent',
   Warning: '#f0ad4e',
@@ -55,12 +59,15 @@ const Colors = {
   toolTip: '#B7B7B7',
   toolTipContent: '#4B4B4B',
   toolTipPointer: '#E0E0E0',
+  Mercury: '#E6E6E6',
 };
 
 export type ElevationLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export const DefaultTheme = {
   Colors: {
+    ProfileIconColor: Colors.DarkGray,
+    DetailedViewBackground: Colors.Gray97,
     TabItemText: Colors.Orange,
     Details: Colors.Black,
     DetailsLabel: Colors.Gray40,
@@ -130,6 +137,7 @@ export const DefaultTheme = {
     tooltipIcon: Colors.toolTip,
     toolTipPointerColor: Colors.toolTipPointer,
     urlLink: Colors.Orange,
+    warningText: Colors.Red,
   },
   Styles: StyleSheet.create({
     title: {
@@ -144,6 +152,17 @@ export const DefaultTheme = {
     subtitle: {
       backgroundColor: Colors.Transparent,
       fontSize: 12,
+    },
+    fieldItemTitle: {
+      backgroundColor: Colors.Transparent,
+      fontSize: 11,
+      fontFamily: 'Inter_400Regular',
+    },
+    fieldItemValue: {
+      backgroundColor: Colors.Transparent,
+      fontSize: 12,
+      fontFamily: 'Inter_600SemiBold',
+      marginTop: 3,
     },
     loadingSubtitle: {
       backgroundColor: Colors.Grey,
@@ -171,12 +190,10 @@ export const DefaultTheme = {
       height: '100%',
     },
     kebabPressableContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      width: '100%',
       height: '100%',
-      justifyContent: 'center',
       alignItems: 'center',
+      justifyContent: 'center',
+      width: '15%',
     },
     verifiedIconContainer: {
       marginRight: 3,
@@ -212,14 +229,6 @@ export const DefaultTheme = {
       borderRadius: 6,
       backgroundColor: Colors.LightOrange,
     },
-    downloadingVcPopUp: {
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      backgroundColor: Colors.Green,
-      height: 39,
-      position: 'relative',
-      paddingHorizontal: 12,
-    },
     homeScreenContainer: {
       alignItems: 'center',
       justifyContent: 'center',
@@ -234,7 +243,8 @@ export const DefaultTheme = {
       flex: 1,
       backgroundColor: Colors.Grey6,
       borderRadius: 4,
-      padding: 5,
+      padding: 10,
+      paddingRight: 20,
     },
     closeDetailsContainer: {
       flex: 1,
@@ -307,12 +317,6 @@ export const DefaultTheme = {
       borderRadius: 12,
       fontSize: 12,
     },
-    lockDomainContainer: {
-      backgroundColor: Colors.White,
-      alignSelf: 'center',
-      borderRadius: 15,
-      width: 100,
-    },
     bottomButtonsContainer: {
       height: 'auto',
       borderTopLeftRadius: 27,
@@ -340,6 +344,16 @@ export const DefaultTheme = {
     openCardBgContainer: {
       borderRadius: 10,
       margin: 8,
+      backgroundColor: '#fff',
+      shadowColor: '#000',
+      shadowOffset: {width: -1, height: 1},
+      shadowOpacity: 0.4,
+      shadowRadius: 3,
+      elevation: 4,
+    },
+    detailedViewActivationPopupContainer: {
+      borderTopLeftRadius: 10,
+      borderTopRightRadius: 10,
       backgroundColor: '#fff',
       shadowColor: '#000',
       shadowOffset: {width: -1, height: 1},
@@ -377,17 +391,17 @@ export const DefaultTheme = {
       height: 173.276,
     },
     logo: {
-      height: 40,
-      width: 40,
+      height: 35,
+      width: 35,
     },
     issuerLogo: {
       resizeMode: 'contain',
       aspectRatio: 1,
-      height: 60,
+      height: 35,
     },
     vcDetailsLogo: {
-      height: 50,
-      width: 50,
+      height: 65,
+      width: 65,
     },
     homeCloseCardDetailsHeader: {
       flex: 1,
@@ -413,22 +427,21 @@ export const DefaultTheme = {
       borderRadius: 6,
       backgroundColor: Colors.LightOrange,
     },
+    ProfileContainer: {
+      position: 'relative',
+    },
     ProfileIconContainer: {
       alignSelf: 'center',
       justifyContent: 'center',
-      width: 90,
-      height: 90,
-      borderRadius: 15,
-      borderWidth: 0.3,
-      borderColor: Colors.Orange,
+      width: 40,
+      height: 53,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: Colors.Mercury,
       backgroundColor: Colors.White,
     },
-    ProfileIconInnerStyle: {
-      flex: 1,
-    },
     ProfileIconPinnedStyle: {
-      alignSelf: 'center',
-      justifyContent: 'center',
+      position: 'absolute',
     },
     IconContainer: {
       padding: 6,
@@ -466,24 +479,40 @@ export const DefaultTheme = {
     pinIcon: {
       height: 39,
       width: 39,
+      marginLeft: -20,
+      marginTop: -15,
+    },
+    infoIcon: {
+      height: 39,
+      width: 39,
       marginLeft: -13,
       marginTop: -9,
     },
     faceImage: {
       borderRadius: 10,
-      height: 96,
-      width: 88,
+      height: 53,
+      width: 40,
     },
     closeCardImage: {
-      width: 80,
-      height: 82,
+      width: 40,
+      height: 53,
       borderRadius: 100,
     },
-    openCardImage: {
-      width: 100,
+    detailedViewImage: {
+      width: 80,
       height: 106,
       borderRadius: 5,
       marginTop: 10,
+    },
+    openCardProfileIconContainer: {
+      alignSelf: 'center',
+      justifyContent: 'center',
+      width: 100,
+      height: 106,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: Colors.Mercury,
+      backgroundColor: Colors.White,
     },
     versionContainer: {
       backgroundColor: Colors.Grey6,
@@ -556,7 +585,6 @@ export const DefaultTheme = {
       fontFamily: 'Inter_700Bold',
     },
     idInputContainer: {
-      marginTop: 20,
       width: Dimensions.get('window').width * 0.86,
     },
     idInputPicker: {
@@ -575,12 +603,12 @@ export const DefaultTheme = {
       bottom: 18,
       borderBottomColor: Colors.Orange,
       borderBottomWidth: 1,
-      minWidth: 210,
+      minWidth: 200,
     },
     idInput: {
       position: 'relative',
       bottom: 18,
-      minWidth: 210,
+      minWidth: 200,
     },
     getId: {
       justifyContent: 'center',
@@ -592,10 +620,12 @@ export const DefaultTheme = {
     },
     hrLine: {
       borderBottomColor: Colors.Gray44,
-      borderBottomWidth: 0.3,
+      borderBottomWidth: 1,
       marginTop: 10,
-      marginLeft: 10,
-      marginRight: 10,
+      marginLeft: 14,
+      marginRight: 14,
+      marginBottom: 20,
+      opacity: 0.2,
     },
     hrLineFill: {
       borderBottomColor: Colors.platinumGrey,
@@ -658,10 +688,8 @@ export const DefaultTheme = {
     },
     keyboardAvoidStyle: {
       flex: 1,
-      paddingVertical: 40,
       paddingHorizontal: 24,
       alignItems: 'center',
-      justifyContent: 'space-between',
     },
     passwordKeyboardAvoidStyle: {
       flex: 1,
@@ -669,15 +697,83 @@ export const DefaultTheme = {
       paddingVertical: 40,
       paddingHorizontal: 24,
     },
+    newLabel: {
+      backgroundColor: Colors.Orange,
+      paddingHorizontal: 5,
+      paddingVertical: 4,
+      maxHeight: 20,
+      marginTop: 10,
+      borderRadius: 4,
+      fontSize: 10,
+      fontFamily: 'Inter_700Bold',
+      lineHeight: 12,
+    },
+    scanLayoutHeaderContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      marginLeft: I18nManager.isRTL ? 40 : 15,
+      marginTop: 15,
+    },
+    scanLayoutHeaderTitle: {
+      fontSize: 26,
+      fontFamily: 'Inter_600SemiBold',
+      paddingTop: isIOS() ? 10 : 20,
+      paddingBottom: 10,
+    },
+    sendVcHeaderContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      marginLeft: I18nManager.isRTL ? 50 : 0,
+      marginTop: 15,
+    },
+    HistoryHeaderTitleStyle: {
+      fontSize: 26,
+      fontFamily: 'Inter_600SemiBold',
+      marginTop: isIOS() ? 5 : 15,
+    },
+  }),
+  BannerStyles: StyleSheet.create({
+    container: {
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      backgroundColor: '#DB2E2E',
+      width: '100%',
+      position: 'relative',
+      paddingHorizontal: 18,
+      paddingVertical: 12,
+      marginVertical: 1,
+      columnGap: 7,
+    },
+    text: {
+      textAlignVertical: 'center',
+      fontSize: 12,
+      lineHeight: 15,
+      padding: 1,
+      fontFamily: 'Inter_600SemiBold',
+    },
+    dismiss: {paddingLeft: 9},
+    info: {
+      backgroundColor: Colors.OrangeBrown,
+    },
+    success: {
+      backgroundColor: Colors.Green,
+    },
+    error: {
+      backgroundColor: Colors.LightRed,
+    },
   }),
   QrCodeStyles: StyleSheet.create({
     magnifierZoom: {
       backgroundColor: Colors.White,
-      width: 30,
-      height: 30,
-      alignItems: 'center',
+      width: 27,
+      height: 27,
       padding: 5,
       borderTopLeftRadius: 11,
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     expandedQrCode: {
       backgroundColor: Colors.White,
@@ -700,15 +796,19 @@ export const DefaultTheme = {
       fontSize: 18,
     },
     QrView: {
-      padding: 6,
-      backgroundColor: 'white',
-      marginTop: 20,
-      borderRadius: 10,
+      width: 80,
+      height: 80,
+      padding: 8,
+      backgroundColor: Colors.White,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 5,
       elevation: 6,
       shadowColor: '#000',
       shadowOffset: {width: -1, height: 1},
       shadowOpacity: 0.4,
       shadowRadius: 3,
+      marginTop: 14,
     },
   }),
   PinInputStyle: StyleSheet.create({
@@ -830,6 +930,10 @@ export const DefaultTheme = {
       fontSize: 11,
       lineHeight: 18,
     },
+    mediumSmall: {
+      fontSize: 15,
+      lineHeight: 18,
+    },
     large: {
       fontSize: 18,
     },
@@ -895,6 +999,20 @@ export const DefaultTheme = {
       borderBottomWidth: 1,
       borderBottomColor: Colors.Orange,
     },
+    vcSearchBarContainer: {
+      alignItems: 'center',
+      borderBottomWidth: 0.5,
+      borderTopWidth: 0.5,
+      borderColor: Colors.DimGray,
+      width: Dimensions.get('window').width,
+      backgroundColor: Colors.White,
+    },
+    vcSearchIcon: {
+      justifyContent: 'center',
+      height: Dimensions.get('window').height * 0.055,
+      width: Dimensions.get('window').width * 0.1,
+      paddingLeft: 15,
+    },
     searchIcon: {
       justifyContent: 'center',
       height: Dimensions.get('window').height * 0.055,
@@ -919,6 +1037,11 @@ export const DefaultTheme = {
     outline: {
       backgroundColor: Colors.Transparent,
       borderColor: Colors.Orange,
+    },
+    disabledOutlineButton: {
+      backgroundColor: Colors.Transparent,
+      color: Colors.Grey,
+      borderColor: Colors.Grey,
     },
     container: {
       height: 45,
@@ -950,6 +1073,9 @@ export const DefaultTheme = {
     radius: {
       borderRadius: 10,
       backgroundColor: Colors.Orange,
+    },
+    Large: {
+      width: Dimensions.get('window').width * 0.9,
     },
   }),
   OIDCAuthStyles: StyleSheet.create({
@@ -1062,6 +1188,42 @@ export const DefaultTheme = {
       height: Dimensions.get('screen').height,
     },
   }),
+  BackupAndRestoreStyles: StyleSheet.create({
+    backupProgressText: {
+      fontFamily: 'Inter_400Regular',
+      fontSize: 14,
+      color: Colors.Gray44,
+    },
+    backupProcessInfo: {
+      fontWeight: 'bold',
+      paddingHorizontal: 20,
+      textAlign: 'center',
+      lineHeight: 22,
+      fontSize: 17,
+      fontFamily: 'Inter_600SemiBold',
+      marginHorizontal: 30,
+    },
+    actionOrLoaderContainer: {
+      marginLeft: 1,
+      marginRight: 1,
+    },
+    cloudInfo: {
+      paddingHorizontal: 20,
+      textAlign: 'center',
+      paddingVertical: 15,
+    },
+    cloudLabel: {
+      fontWeight: '600',
+      paddingHorizontal: 10,
+      textAlign: 'center',
+      paddingTop: 15,
+      fontFamily: 'Inter_500Medium',
+      fontSize: 14,
+      letterSpacing: 0,
+      lineHeight: 17,
+      minHeight: 50,
+    },
+  }),
   TextEditOverlayStyles: StyleSheet.create({
     overlay: {
       elevation: 5,
@@ -1100,7 +1262,6 @@ export const DefaultTheme = {
     kebabHeaderStyle: {
       justifyContent: 'space-between',
       fontFamily: 'Inter_700Bold',
-      paddingTop: 15,
     },
   }),
   MessageOverlayStyles: StyleSheet.create({
@@ -1138,76 +1299,11 @@ export const DefaultTheme = {
       borderTopRightRadius: 0,
     },
   }),
-  RevokeStyles: StyleSheet.create({
-    buttonContainer: {
-      position: 'absolute',
-      left: 0,
-      right: 'auto',
-    },
-    view: {
-      flex: 1,
-      width: Dimensions.get('screen').width,
-    },
-    revokeView: {padding: 20},
-    flexRow: {flexDirection: 'row', margin: 0, padding: 0},
-    rowStyle: {flexDirection: 'column', justifyContent: 'space-between'},
-    viewContainer: {
-      backgroundColor: 'rgba(0,0,0,.6)',
-      width: Dimensions.get('screen').width,
-      height: Dimensions.get('screen').height,
-      position: 'absolute',
-      top: 0,
-      zIndex: 999,
-    },
-    boxContainer: {
-      backgroundColor: Colors.White,
-      padding: 24,
-      elevation: 6,
-      borderRadius: 4,
-    },
-  }),
   VerifyIdentityOverlayStyles: StyleSheet.create({
     content: {
       width: Dimensions.get('screen').width,
       height: Dimensions.get('screen').height,
       backgroundColor: Colors.White,
-    },
-  }),
-  RevokeConfirmStyles: StyleSheet.create({
-    viewContainer: {
-      backgroundColor: 'rgba(0,0,0,.6)',
-      width: Dimensions.get('screen').width,
-      height: Dimensions.get('screen').height,
-      position: 'absolute',
-      top: 0,
-      zIndex: 999999,
-    },
-    boxContainer: {
-      backgroundColor: Colors.White,
-      padding: 24,
-      elevation: 6,
-      borderRadius: 4,
-    },
-  }),
-  OtpVerificationStyles: StyleSheet.create({
-    modal: {
-      width: Dimensions.get('screen').width,
-      height: Dimensions.get('screen').height,
-    },
-    viewContainer: {
-      backgroundColor: Colors.White,
-      width: Dimensions.get('screen').width,
-      height: Dimensions.get('screen').height,
-      position: 'absolute',
-      top: 0,
-      zIndex: 9,
-      padding: 32,
-    },
-    close: {
-      position: 'absolute',
-      top: 32,
-      right: 0,
-      color: Colors.Orange,
     },
   }),
   MessageStyles: StyleSheet.create({
@@ -1400,6 +1496,7 @@ export const DefaultTheme = {
       lineHeight: 21,
       paddingTop: 4,
       textAlign: 'center',
+      marginBottom: 10,
     },
     message: {
       textAlign: 'center',
@@ -1408,7 +1505,7 @@ export const DefaultTheme = {
       lineHeight: 20,
       marginTop: 6,
       marginBottom: 25,
-      marginHorizontal: 40,
+      marginHorizontal: 26,
       color: Colors.mediumDarkGrey,
     },
   }),
@@ -1419,6 +1516,29 @@ export const DefaultTheme = {
       justifyContent: 'space-around',
       backgroundColor: Colors.White,
       maxHeight: Dimensions.get('window').height,
+    },
+  }),
+  HelpScreenStyle: StyleSheet.create({
+    viewStyle: {
+      width: 100,
+      padding: 7,
+      borderRadius: 8,
+      backgroundColor: Colors.LightOrange,
+    },
+    rowStyle: {
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: 45,
+      display: 'flex',
+    },
+    iconStyle: {
+      paddingTop: 7,
+      paddingLeft: 20,
+      paddingRight: 5,
+    },
+    labelStyle: {
+      width: 70,
+      fontWeight: 'bold',
     },
   }),
   BottomTabBarStyle: StyleSheet.create({

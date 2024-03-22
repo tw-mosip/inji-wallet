@@ -8,11 +8,10 @@ import {
   isHardwareKeystoreExists,
   WalletBindingResponse,
 } from '../../../shared/cryptoutil/cryptoUtil';
-import {log} from 'xstate/lib/actions';
-import {Protocols} from '../../../shared/openId4VCI/Utils';
+import {getIdType, Protocols} from '../../../shared/openId4VCI/Utils';
 import {StoreEvents} from '../../../machines/store';
 import {MIMOTO_BASE_URL, MY_VCS_STORE_KEY} from '../../../shared/constants';
-import {VcEvents} from '../../../machines/vc';
+import {VcEvents} from '../vc';
 import i18n from '../../../i18n';
 import {KeyPair} from 'react-native-rsa-native';
 import {
@@ -34,6 +33,11 @@ import {
 import {TelemetryConstants} from '../../../shared/telemetry/TelemetryConstants';
 
 import {API_URLS} from '../../../shared/api';
+import {getHomeMachineService} from '../../../screens/Home/HomeScreenController';
+import {BackupEvents} from '../../backupAndRestore/backup';
+import Cloud, {
+  isSignedInResult,
+} from '../../../shared/CloudBackupAndRestoreUtils';
 
 const model = createModel(
   {
@@ -41,7 +45,6 @@ const model = createModel(
     vcMetadata: {} as VCMetadata,
     generatedOn: new Date() as Date,
     verifiableCredential: null as VerifiableCredential,
-    isPinned: false,
     hashedId: '',
     publicKey: '',
     privateKey: '',
@@ -53,9 +56,10 @@ const model = createModel(
     walletBindingResponse: null as WalletBindingResponse,
     tempWalletBindingIdResponse: null as WalletBindingResponse,
     walletBindingError: '',
-    walletBindingSuccess: false,
     isMachineInKebabPopupState: false,
     bindingAuthFailedMessage: '' as string,
+    phoneNumber: '' as string,
+    email: '' as string,
   },
   {
     events: {
@@ -69,11 +73,9 @@ const model = createModel(
       DOWNLOAD_READY: () => ({}),
       GET_VC_RESPONSE: (vc: VC) => ({vc}),
       VERIFY: () => ({}),
-      LOCK_VC: () => ({}),
       RESEND_OTP: () => ({}),
       INPUT_OTP: (otp: string) => ({otp}),
       REFRESH: () => ({}),
-      REVOKE_VC: () => ({}),
       ADD_WALLET_BINDING_ID: () => ({}),
       CANCEL: () => ({}),
       CONFIRM: () => ({}),
@@ -81,6 +83,7 @@ const model = createModel(
       PIN_CARD: () => ({}),
       KEBAB_POPUP: () => ({}),
       SHOW_ACTIVITY: () => ({}),
+      CLOSE_VC_MODAL: () => ({}),
       REMOVE: (vcMetadata: VCMetadata) => ({vcMetadata}),
       UPDATE_VC_METADATA: (vcMetadata: VCMetadata) => ({vcMetadata}),
       SHOW_BINDING_STATUS: () => ({}),
@@ -164,6 +167,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           onDone: [
             {
               target: 'acceptingBindingOtp',
+              actions: ['setPhoneNumber', 'setEmail'],
             },
           ],
           onError: [
@@ -227,6 +231,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
               src: 'requestBindingOtp',
               onDone: {
                 target: 'idle',
+                actions: ['setPhoneNumber', 'setEmail'],
               },
               onError: {
                 actions: 'setWalletBindingError',
@@ -268,9 +273,9 @@ export const EsignetMosipVCItemMachine = model.createMachine(
             },
             {
               target: 'updatingPrivateKey',
-              /*The walletBindingResponse is used for conditional rendering in wallet binding. 
-                However, it wrongly considers activation as successful even when there's an error 
-                in updatingPrivateKey state. So created a temporary context variable to store the binding 
+              /*The walletBindingResponse is used for conditional rendering in wallet binding.
+                However, it wrongly considers activation as successful even when there's an error
+                in updatingPrivateKey state. So created a temporary context variable to store the binding
                 response and use it in updatingPrivateKey state*/
               actions: 'setTempWalletBindingResponse',
             },
@@ -321,7 +326,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
               target: '#vc-item-openid4vci.kebabPopUp',
             },
             {
-              actions: 'setWalletBindingSuccess',
+              actions: 'sendWalletBindingSuccess',
               target: 'idle',
             },
           ],
@@ -331,7 +336,6 @@ export const EsignetMosipVCItemMachine = model.createMachine(
         on: {
           DISMISS: {
             target: 'checkingVc',
-            actions: 'resetWalletBindingSuccess',
           },
           KEBAB_POPUP: {
             target: 'kebabPopUp',
@@ -346,20 +350,14 @@ export const EsignetMosipVCItemMachine = model.createMachine(
         },
       },
       pinCard: {
-        entry: 'storeContext',
-        on: {
-          STORE_RESPONSE: {
-            actions: ['sendVcUpdated', 'VcUpdated'],
-            target: 'idle',
-          },
+        entry: 'sendVcUpdated',
+        always: {
+          target: 'idle',
         },
       },
       kebabPopUp: {
-        entry: assign({
-          isMachineInKebabPopupState: () => {
-            return true;
-          },
-        }),
+        entry: assign({isMachineInKebabPopupState: () => true}),
+        exit: assign({isMachineInKebabPopupState: () => false}),
         on: {
           DISMISS: {
             actions: assign({
@@ -372,24 +370,18 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           },
           PIN_CARD: {
             target: '#vc-item-openid4vci.pinCard',
-            actions: [
-              'setPinCard',
-              assign({
-                isMachineInKebabPopupState: () => false,
-              }),
-            ],
+            actions: 'setPinCard',
           },
           SHOW_ACTIVITY: {
             target: '#vc-item-openid4vci.kebabPopUp.showActivities',
           },
           REMOVE: {
-            actions: [
-              'setVcKey',
-              assign({
-                isMachineInKebabPopupState: () => false,
-              }),
-            ],
+            actions: 'setVcKey',
             target: '#vc-item-openid4vci.kebabPopUp.removeWallet',
+          },
+          CLOSE_VC_MODAL: {
+            actions: ['closeViewVcModal'],
+            target: '#vc-item-openid4vci',
           },
         },
         initial: 'idle',
@@ -397,7 +389,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           idle: {},
           showActivities: {
             on: {
-              DISMISS: '#vc-item-openid4vci.kebabPopUp',
+              DISMISS: '#vc-item-openid4vci',
             },
           },
           removeWallet: {
@@ -406,7 +398,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
                 target: 'removingVc',
               },
               CANCEL: {
-                target: 'idle',
+                target: '#vc-item-openid4vci',
               },
             },
           },
@@ -414,9 +406,25 @@ export const EsignetMosipVCItemMachine = model.createMachine(
             entry: 'removeVcItem',
             on: {
               STORE_RESPONSE: {
-                actions: ['removedVc', 'logVCremoved'],
-                target: '#vc-item-openid4vci',
+                actions: ['closeViewVcModal', 'removedVc', 'logVCremoved'],
+                target: 'triggerAutoBackup',
               },
+            },
+          },
+          triggerAutoBackup: {
+            invoke: {
+              src: 'isUserSignedAlready',
+              onDone: [
+                {
+                  cond: 'isSignedIn',
+                  actions: ['sendBackupEvent', 'removedVc', 'logVCremoved'],
+                  target: '#vc-item-openid4vci',
+                },
+                {
+                  actions: ['removedVc', 'logVCremoved'],
+                  target: '#vc-item-openid4vci',
+                },
+              ],
             },
           },
         },
@@ -513,27 +521,21 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           to: context => context.serviceRefs.store,
         },
       ),
-      setPinCard: assign(context => {
-        return {
-          ...context,
-          isPinned: !context.isPinned,
-        };
+
+      setPinCard: assign({
+        vcMetadata: context =>
+          new VCMetadata({
+            ...context.vcMetadata,
+            isPinned: !context.vcMetadata.isPinned,
+          }),
       }),
-      VcUpdated: send(
-        context => {
-          const {serviceRefs, ...vc} = context;
-          return {type: 'VC_UPDATE', vc};
-        },
-        {
-          to: context => context.serviceRefs.vc,
-        },
-      ),
+
+      sendBackupEvent: send(BackupEvents.DATA_BACKUP(true), {
+        to: context => context.serviceRefs.backup,
+      }),
 
       sendVcUpdated: send(
-        context =>
-          VcEvents.VC_METADATA_UPDATED(
-            new VCMetadata({...context.vcMetadata, isPinned: context.isPinned}),
-          ),
+        context => VcEvents.VC_METADATA_UPDATED(context.vcMetadata),
         {
           to: context => context.serviceRefs.vc,
         },
@@ -556,14 +558,6 @@ export const EsignetMosipVCItemMachine = model.createMachine(
       setWalletBindingErrorEmpty: assign({
         walletBindingError: () => '',
         bindingAuthFailedMessage: () => '',
-      }),
-
-      setWalletBindingSuccess: assign({
-        walletBindingSuccess: true,
-      }),
-
-      resetWalletBindingSuccess: assign({
-        walletBindingSuccess: false,
       }),
 
       sendWalletBindingSuccess: send(
@@ -598,7 +592,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
 
       sendActivationFailedEndEvent: (context, event, meta) => {
         const [errorId, errorMessage] =
-          event.data.message === 'Could not store private key in keystore'
+          event.data?.message === 'Could not store private key in keystore'
             ? [
                 TelemetryConstants.ErrorId.updatePrivateKey,
                 TelemetryConstants.ErrorMessage.privateKeyUpdationFailed,
@@ -687,6 +681,8 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: VCMetadata.fromVC(context.vcMetadata).getVcKey(),
             type: 'WALLET_BINDING_SUCCESSFULL',
+            idType: getIdType(context.vcMetadata.issuer),
+            id: context.vcMetadata.id,
             timestamp: Date.now(),
             deviceName: '',
             vcLabel: VCMetadata.fromVC(context.vcMetadata).id,
@@ -701,6 +697,8 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           ActivityLogEvents.LOG_ACTIVITY({
             _vcKey: VCMetadata.fromVC(context.vcMetadata).getVcKey(),
             type: 'WALLET_BINDING_FAILURE',
+            id: context.vcMetadata.id,
+            idType: getIdType(context.vcMetadata.issuer),
             timestamp: Date.now(),
             deviceName: '',
             vcLabel: VCMetadata.fromVC(context.vcMetadata).id,
@@ -718,6 +716,14 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           (event as ErrorPlatformEvent).data.message,
       }),
 
+      setPhoneNumber: assign({
+        phoneNumber: (_context, event) => event.data.response.maskedMobile,
+      }),
+
+      setEmail: model.assign({
+        email: (_context, event) => event.data.response.maskedEmail,
+      }),
+
       clearOtp: assign({otp: ''}),
       removeVcItem: send(
         _context => {
@@ -728,12 +734,19 @@ export const EsignetMosipVCItemMachine = model.createMachine(
         },
         {to: context => context.serviceRefs.store},
       ),
+
+      closeViewVcModal: send('DISMISS_MODAL', {
+        to: () => getHomeMachineService(),
+      }),
+
       setVcKey: model.assign({
         vcMetadata: (_, event) => event.vcMetadata,
       }),
       logVCremoved: send(
         (context, _) =>
           ActivityLogEvents.LOG_ACTIVITY({
+            idType: getIdType(context.vcMetadata.issuer),
+            id: context.vcMetadata.id,
             _vcKey: VCMetadata.fromVC(context.vcMetadata).getVcKey(),
             type: 'VC_REMOVED',
             timestamp: Date.now(),
@@ -747,6 +760,10 @@ export const EsignetMosipVCItemMachine = model.createMachine(
     },
 
     services: {
+      isUserSignedAlready: () => async () => {
+        return await Cloud.isSignedInAlready();
+      },
+
       updatePrivateKey: async context => {
         const hasSetPrivateKey: boolean = await savePrivateKey(
           context.tempWalletBindingIdResponse.walletBindingId,
@@ -824,6 +841,7 @@ export const EsignetMosipVCItemMachine = model.createMachine(
         if (response.response == null) {
           throw new Error('Could not process request');
         }
+        return response;
       },
     },
 
@@ -832,6 +850,8 @@ export const EsignetMosipVCItemMachine = model.createMachine(
         const vc = event.vc;
         return vc != null;
       },
+      isSignedIn: (_context, event) =>
+        (event.data as isSignedInResult).isSignedIn,
 
       isCustomSecureKeystore: () => isHardwareKeystoreExists,
     },

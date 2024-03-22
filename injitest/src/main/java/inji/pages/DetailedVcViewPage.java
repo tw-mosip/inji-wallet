@@ -1,5 +1,6 @@
 package inji.pages;
 
+import inji.utils.IosUtil;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
@@ -82,12 +83,12 @@ public class DetailedVcViewPage extends BasePage{
     @iOSXCUITFindBy(accessibility = "credentialRegistryValue")
     private WebElement credentialRegistryValue;
 
-    @AndroidFindBy(accessibility = "esignet-logo")
-    @iOSXCUITFindBy(xpath = "(//XCUIElementTypeImage)[3]")
+    @AndroidFindBy(accessibility = "esignetLogo")
+    @iOSXCUITFindBy(accessibility = "esignetLogo")
     private WebElement esignetLogo;
     
     @AndroidFindBy(accessibility = "arrowLeft")
-    @iOSXCUITFindBy(accessibility = "close")
+    @iOSXCUITFindBy(accessibility = "arrowLeft")
     public WebElement backArrow;
 
     public DetailedVcViewPage(AppiumDriver driver) {
@@ -139,11 +140,13 @@ public class DetailedVcViewPage extends BasePage{
     }
 
     public PleaseConfirmPopupPage clickOnActivateButtonAndroid(){
+        IosUtil.scrollToElement(driver,58,712,160,129);
         clickOnElement(activateButton);
         return new PleaseConfirmPopupPage(driver);
     }
     
     public PleaseConfirmPopupPage clickOnActivateButtonIos(){  //Scroll for ios need to be done
+        IosUtil.scrollToElement(driver,58,712,160,129);
         clickOnElement(activeButtonIos);
         return new PleaseConfirmPopupPage(driver);
     }
@@ -162,13 +165,18 @@ public class DetailedVcViewPage extends BasePage{
         return new HomePage(driver);
     }
 
+    public HomePage clickOnCrossIcon() {
+        clickOnElement(crossIcon);
+        return new HomePage(driver);
+    }
+
     public void clickOnQrCodeButton() {
         clickOnElement(detailedVcViewPageQr);
         new PleaseConfirmPopupPage(driver);
     }
 
     public boolean isQrCodeDisplayed() {
-        return qrCodeHeader.isDisplayed();
+        return isElementDisplayed(qrCodeHeader);
     }
 
     public boolean isCredentialRegistryTextDisplayed() {
@@ -180,6 +188,6 @@ public class DetailedVcViewPage extends BasePage{
     }
 
     public boolean isEsignetLogoDisplayed() {
-        return esignetLogo.isDisplayed();
+        return isElementDisplayed(esignetLogo);
     }
 }

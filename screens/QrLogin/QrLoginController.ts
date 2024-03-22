@@ -23,9 +23,9 @@ import {
   selectVoluntaryClaims,
   selectIsSendingAuthenticate,
   selectEssentialClaims,
+  selectIsFaceVerificationConsent,
 } from '../../machines/QrLoginMachine';
-import {selectBindedVcsMetadata} from '../../machines/vc';
-import {ExistingMosipVCItemMachine} from '../../machines/VCItemMachine/ExistingMosipVCItem/ExistingMosipVCItemMachine';
+import {selectBindedVcsMetadata} from '../../machines/VCItemMachine/vc';
 import {GlobalContext} from '../../shared/GlobalContext';
 import {VC} from '../../types/VC/ExistingMosipVC/vc';
 import {QrLoginProps} from './QrLogin';
@@ -57,6 +57,10 @@ export function useQrLogin({service}: QrLoginProps) {
         SELECT_VC(vcData);
       },
 
+    isFaceVerificationConsent: useSelector(
+      service,
+      selectIsFaceVerificationConsent,
+    ),
     shareableVcsMetadata: useSelector(vcService, selectBindedVcsMetadata),
     selectedVc: useSelector(service, selectSelectedVc),
     linkTransactionResponse: useSelector(
@@ -75,6 +79,8 @@ export function useQrLogin({service}: QrLoginProps) {
     selectedIndex,
     SELECT_VC,
     SELECT_CONSENT,
+    FACE_VERIFICATION_CONSENT: (isConsentGiven: boolean) =>
+      service.send(QrLoginEvents.FACE_VERIFICATION_CONSENT(isConsentGiven)),
     isWaitingForData: useSelector(service, selectIsWaitingForData),
     isShowingVcList: useSelector(service, selectIsShowingVcList),
     isLinkTransaction: useSelector(service, selectIsLinkTransaction),

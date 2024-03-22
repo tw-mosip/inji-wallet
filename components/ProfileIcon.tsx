@@ -3,20 +3,33 @@ import {View} from 'react-native';
 import React from 'react';
 import {Icon} from 'react-native-elements';
 import {SvgImage} from './ui/svg';
+import testIDProps from '../shared/commonUtil';
 
-export const ProfileIcon: React.FC = props => {
+export const ProfileIcon: React.FC<ProfileIconProps> = props => {
   return (
     <>
-      <View style={Theme.Styles.ProfileIconContainer}>
-        {props?.isPinned && SvgImage.pinIcon()}
+      <View
+        {...testIDProps(`ProfileIconOuter`)}
+        style={Theme.Styles.ProfileContainer}>
         <View
-          style={[
-            Theme.Styles.ProfileIconInnerStyle,
-            !props?.isPinned && Theme.Styles.ProfileIconPinnedStyle,
-          ]}>
-          <Icon name="person" color={Theme.Colors.Icon} size={40} />
+          {...testIDProps(`ProfileIconInner`)}
+          style={props.profileIconContainerStyles}>
+          <Icon
+            {...testIDProps(`ProfileIcon`)}
+            name="person"
+            color={Theme.Colors.ProfileIconColor}
+            size={props.profileIconSize}
+          />
         </View>
+        {props?.isPinned &&
+          SvgImage.pinIcon(Theme.Styles.ProfileIconPinnedStyle)}
       </View>
     </>
   );
 };
+
+interface ProfileIconProps {
+  isPinned?: boolean;
+  profileIconContainerStyles: object;
+  profileIconSize: number;
+}

@@ -1,5 +1,5 @@
 import * as Keychain from 'react-native-keychain';
-import Storage from '../shared/storage';
+import Storage, {MMKV} from '../shared/storage';
 import binaryToBase64 from 'react-native/Libraries/Utilities/binaryToBase64';
 import {
   EventFrom,
@@ -12,7 +12,15 @@ import {
 import {createModel} from 'xstate/lib/model';
 import {generateSecureRandom} from 'react-native-securerandom';
 import {log} from 'xstate/lib/actions';
-import {isIOS, MY_VCS_STORE_KEY, SETTINGS_STORE_KEY} from '../shared/constants';
+import {
+  isIOS,
+  MY_VCS_STORE_KEY,
+  RECEIVED_VCS_STORE_KEY,
+  SETTINGS_STORE_KEY,
+  SCAN_MACHINE_STORE_KEY,
+  FACE_AUTH_CONSENT,
+  ENOENT,
+} from '../shared/constants';
 import SecureKeystore from '@mosip/secure-keystore';
 import {
   AUTH_TIMEOUT,
@@ -31,11 +39,11 @@ import {
   getErrorEventData,
 } from '../shared/telemetry/TelemetryUtils';
 import RNSecureKeyStore from 'react-native-secure-key-store';
+import {Buffer} from 'buffer';
 
 export const keyinvalidatedString =
   'Key Invalidated due to biometric enrollment';
 export const tamperedErrorMessageString = 'Data is tampered';
-export const ENOENT = 'No such file or directory';
 
 const model = createModel(
   {
@@ -293,9 +301,11 @@ export const storeMachine =
           const hasSetCredentials = SecureKeystore.hasAlias(ENCRYPTION_ID);
           if (hasSetCredentials) {
             try {
+              const base64EncodedString =
+                Buffer.from('Dummy').toString('base64');
               await SecureKeystore.encryptData(
                 DUMMY_KEY_FOR_BIOMETRIC_ALIAS,
-                'Dummy',
+                base64EncodedString,
               );
             } catch (e) {
               sendErrorEvent(getErrorEventData('ENCRYPTION', '', e));
@@ -463,7 +473,9 @@ export const storeMachine =
                 callback(model.events.BIOMETRIC_CANCELLED(event.requester));
                 sendUpdate();
               } else {
-                console.error(e);
+                console.error(
+                  `Error while performing the operation ${event.type} with storage - ${e}`,
+                );
                 callback(model.events.STORE_ERROR(e, event.requester));
               }
             }
@@ -485,7 +497,7 @@ export const storeMachine =
                 'Could not get keychain credentials',
               ),
             );
-            console.log('Credentials failed to load for user');
+            console.error('Credentials failed to load for user');
             callback(
               model.events.ERROR(
                 new Error('Could not get keychain credentials.'),
@@ -557,6 +569,8 @@ export async function setItem(
         appId,
       };
       encryptedData = JSON.stringify(settings);
+    } else if (key === FACE_AUTH_CONSENT) {
+      encryptedData = JSON.stringify(value);
     } else {
       encryptedData = await encryptJson(encryptionKey, JSON.stringify(value));
     }
@@ -594,6 +608,8 @@ export async function getItem(
           parsedData.encryptedData = JSON.parse(decryptedData);
         }
         return parsedData;
+      } else if (key === FACE_AUTH_CONSENT) {
+        return JSON.parse(data);
       }
       decryptedData = await decryptJson(encryptionKey, data);
       return JSON.parse(decryptedData);
@@ -609,13 +625,27 @@ export async function getItem(
       );
       throw new Error(tamperedErrorMessageString);
     } else {
+      console.debug(
+        `While getting item - ${key} from storage: data value is ${data} so returning the default value`,
+      );
       return defaultValue;
     }
   } catch (e) {
+    console.error(`Exception in getting item for ${key}: ${e}`);
+    if (e.message === ENOENT) {
+      removeTamperedVcMetaData(key, encryptionKey);
+      sendErrorEvent(
+        getErrorEventData(
+          TelemetryConstants.FlowType.fetchData,
+          TelemetryConstants.ErrorId.tampered,
+          e.message,
+        ),
+      );
+      throw e;
+    }
     if (
       e.message.includes(tamperedErrorMessageString) ||
       e.message.includes(keyinvalidatedString) ||
-      e.message === ENOENT ||
       e instanceof BiometricCancellationError ||
       e.message.includes('Key not found') // this error happens when previous get Item calls failed due to key invalidation and data and keys are deleted
     ) {
@@ -635,7 +665,6 @@ export async function getItem(
         `Exception in getting item for ${key}: ${e}`,
       ),
     );
-    console.error(`Exception in getting item for ${key}: ${e}`);
     return defaultValue;
   }
 }
@@ -706,7 +735,7 @@ export async function removeItem(
   try {
     if (value === null && VCMetadata.isVCKey(key)) {
       await Storage.removeItem(key);
-      await removeVCMetaData(MY_VCS_STORE_KEY, key, encryptionKey);
+      removeTamperedVcMetaData(key, encryptionKey);
     } else if (key === MY_VCS_STORE_KEY) {
       const data = await Storage.getItem(key, encryptionKey);
       let list: Object[] = [];
@@ -722,9 +751,17 @@ export async function removeItem(
 
       await setItem(key, newList, encryptionKey);
       await Storage.removeItem(value);
+      await MMKV.removeItem(value);
     }
   } catch (e) {
     console.error('error removeItem:', e);
+    sendErrorEvent(
+      getErrorEventData(
+        TelemetryConstants.FlowType.remove,
+        TelemetryConstants.ErrorId.failure,
+        e.message,
+      ),
+    );
     throw e;
   }
 }
@@ -750,6 +787,52 @@ export async function removeVCMetaData(
     await setItem(key, newList, encryptionKey);
   } catch (e) {
     console.error('error remove VC metadata:', e);
+    sendErrorEvent(
+      getErrorEventData(
+        TelemetryConstants.FlowType.removeVcMetadata,
+        TelemetryConstants.ErrorId.failure,
+        e.message,
+      ),
+    );
+    throw e;
+  }
+}
+
+export async function removeTamperedVcMetaData(
+  key: string,
+  encryptionKey: string,
+) {
+  try {
+    const myVcsMetadata = await Storage.getItem(
+      MY_VCS_STORE_KEY,
+      encryptionKey,
+    );
+    let myVcsDecryptedMetadata: Object[] = [];
+
+    if (myVcsMetadata != null) {
+      const decryptedData = await decryptJson(encryptionKey, myVcsMetadata);
+      myVcsDecryptedMetadata = JSON.parse(decryptedData) as Object[];
+    }
+
+    const isTamperedVcInMyVCs = myVcsDecryptedMetadata?.filter(
+      (vcMetadataObject: Object) => {
+        return new VCMetadata(vcMetadataObject).getVcKey() === key;
+      },
+    ).length;
+    if (isTamperedVcInMyVCs) {
+      await removeVCMetaData(MY_VCS_STORE_KEY, key, encryptionKey);
+    } else {
+      await removeVCMetaData(RECEIVED_VCS_STORE_KEY, key, encryptionKey);
+    }
+  } catch (e) {
+    console.error('error while removing VC item metadata:', e);
+    sendErrorEvent(
+      getErrorEventData(
+        TelemetryConstants.FlowType.remove,
+        TelemetryConstants.ErrorId.tampered,
+        e.message,
+      ),
+    );
     throw e;
   }
 }
@@ -788,6 +871,13 @@ export async function removeItems(
     await setItem(key, newList, encryptionKey);
   } catch (e) {
     console.error('error removeItems:', e);
+    sendErrorEvent(
+      getErrorEventData(
+        TelemetryConstants.FlowType.remove,
+        TelemetryConstants.ErrorId.failure,
+        e.message,
+      ),
+    );
     throw e;
   }
 }

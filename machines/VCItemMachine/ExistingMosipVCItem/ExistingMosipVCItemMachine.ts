@@ -23,10 +23,8 @@ import {
   getBindingCertificateConstant,
   savePrivateKey,
 } from '../../../shared/keystore/SecureKeystore';
-import getAllConfigurations, {
-  DownloadProps,
-} from '../../../shared/commonprops/commonProps';
-import {VcEvents} from '../../vc';
+import getAllConfigurations, {DownloadProps} from '../../../shared/api';
+import {VcEvents} from '../vc';
 import i18n from '../../../i18n';
 import SecureKeystore from '@mosip/secure-keystore';
 import {VCMetadata} from '../../../shared/VCMetadata';
@@ -41,6 +39,12 @@ import {
 import {TelemetryConstants} from '../../../shared/telemetry/TelemetryConstants';
 
 import {API_URLS} from '../../../shared/api';
+import {getHomeMachineService} from '../../../screens/Home/HomeScreenController';
+import {BackupEvents} from '../../backupAndRestore/backup';
+import Cloud, {
+  isSignedInResult,
+} from '../../../shared/CloudBackupAndRestoreUtils';
+import {getIdType} from '../../../shared/openId4VCI/Utils';
 
 const model = createModel(
   {
@@ -52,28 +56,26 @@ const model = createModel(
     generatedOn: new Date() as Date,
     credential: null as DecodedCredential,
     verifiableCredential: null as VerifiableCredential,
-    storeVerifiableCredential: null as VerifiableCredential,
     requestId: '',
-    isVerified: false,
     lastVerifiedOn: null,
-    locked: false,
     otp: '',
     otpError: '',
     idError: '',
     transactionId: '',
     bindingTransactionId: '',
-    revoked: false,
     downloadCounter: 0,
     maxDownloadCount: null as number,
     downloadInterval: null as number,
     walletBindingResponse: null as WalletBindingResponse,
     tempWalletBindingIdResponse: null as WalletBindingResponse,
     walletBindingError: '',
-    walletBindingSuccess: false,
     publicKey: '',
     privateKey: '',
     isMachineInKebabPopupState: false,
     bindingAuthFailedMessage: '' as string,
+    verificationErrorMessage: '',
+    phoneNumber: '' as string,
+    email: '' as string,
   },
   {
     events: {
@@ -88,11 +90,9 @@ const model = createModel(
       FAILED: () => ({}),
       GET_VC_RESPONSE: (vc: VC) => ({vc}),
       VERIFY: () => ({}),
-      LOCK_VC: () => ({}),
       INPUT_OTP: (otp: string) => ({otp}),
       RESEND_OTP: () => ({}),
       REFRESH: () => ({}),
-      REVOKE_VC: () => ({}),
       ADD_WALLET_BINDING_ID: () => ({}),
       CANCEL: () => ({}),
       CONFIRM: () => ({}),
@@ -100,6 +100,7 @@ const model = createModel(
       PIN_CARD: () => ({}),
       KEBAB_POPUP: () => ({}),
       SHOW_ACTIVITY: () => ({}),
+      CLOSE_VC_MODAL: () => ({}),
       REMOVE: (vcMetadata: VCMetadata) => ({vcMetadata}),
       UPDATE_VC_METADATA: (vcMetadata: VCMetadata) => ({vcMetadata}),
       TAMPERED_VC: (key: string) => ({key}),
@@ -142,7 +143,7 @@ export const ExistingMosipVCItemMachine =
               {
                 actions: 'setCredential',
                 cond: 'hasCredential',
-                target: 'checkingVerificationStatus',
+                target: '#vc-item.idle',
               },
               {
                 target: 'checkingStore',
@@ -158,7 +159,7 @@ export const ExistingMosipVCItemMachine =
               {
                 actions: ['setCredential', 'updateVc'],
                 cond: 'hasCredential',
-                target: 'checkingVerificationStatus',
+                target: '#vc-item.idle',
               },
               {
                 actions: 'addVcToInProgressDownloads',
@@ -166,7 +167,7 @@ export const ExistingMosipVCItemMachine =
               },
             ],
             TAMPERED_VC: {
-              actions: ['sendTamperedVc', 'removeTamperedVcItem'],
+              actions: 'sendTamperedVc',
             },
           },
         },
@@ -236,20 +237,8 @@ export const ExistingMosipVCItemMachine =
                   },
                 ],
                 CREDENTIAL_DOWNLOADED: {
-                  actions: ['setStoreVerifiableCredential', 'storeContext'],
-                },
-                STORE_RESPONSE: {
-                  actions: [
-                    'setVerifiableCredential',
-                    'updateVc',
-                    'logDownloaded',
-                    'sendTelemetryEvents',
-                    'removeVcFromInProgressDownloads',
-                  ],
-                  target: '#vc-item.checkingVerificationStatus',
-                },
-                STORE_ERROR: {
-                  target: '#vc-item.checkingServerData.savingFailed',
+                  actions: 'setCredential',
+                  target: '#vc-item.verifyingCredential',
                 },
               },
             },
@@ -275,12 +264,6 @@ export const ExistingMosipVCItemMachine =
             VERIFY: {
               target: 'verifyingCredential',
             },
-            LOCK_VC: {
-              target: 'requestingOtp',
-            },
-            REVOKE_VC: {
-              target: 'acceptingRevokeInput',
-            },
             ADD_WALLET_BINDING_ID: {
               target: 'showBindingWarning',
             },
@@ -293,7 +276,6 @@ export const ExistingMosipVCItemMachine =
             },
             DISMISS: {
               target: 'checkingVc',
-              actions: 'resetWalletBindingSuccess',
             },
           },
         },
@@ -305,6 +287,7 @@ export const ExistingMosipVCItemMachine =
         },
         kebabPopUp: {
           entry: assign({isMachineInKebabPopupState: () => true}),
+          exit: assign({isMachineInKebabPopupState: () => false}),
           on: {
             DISMISS: {
               actions: assign({
@@ -317,24 +300,18 @@ export const ExistingMosipVCItemMachine =
             },
             PIN_CARD: {
               target: '#vc-item.pinCard',
-              actions: [
-                'setPinCard',
-                assign({
-                  isMachineInKebabPopupState: () => false,
-                }),
-              ],
+              actions: 'setPinCard',
             },
             SHOW_ACTIVITY: {
               target: '#vc-item.kebabPopUp.showActivities',
             },
             REMOVE: {
-              actions: [
-                'setVcKey',
-                assign({
-                  isMachineInKebabPopupState: () => false,
-                }),
-              ],
+              actions: 'setVcKey',
               target: '#vc-item.kebabPopUp.removeWallet',
+            },
+            CLOSE_VC_MODAL: {
+              actions: ['closeViewVcModal'],
+              target: '#vc-item',
             },
           },
           initial: 'idle',
@@ -342,7 +319,7 @@ export const ExistingMosipVCItemMachine =
             idle: {},
             showActivities: {
               on: {
-                DISMISS: '#vc-item.kebabPopUp',
+                DISMISS: '#vc-item',
               },
             },
             removeWallet: {
@@ -351,7 +328,7 @@ export const ExistingMosipVCItemMachine =
                   target: 'removingVc',
                 },
                 CANCEL: {
-                  target: 'idle',
+                  target: '#vc-item',
                 },
               },
             },
@@ -359,8 +336,30 @@ export const ExistingMosipVCItemMachine =
               entry: 'removeVcItem',
               on: {
                 STORE_RESPONSE: {
-                  actions: ['refreshMyVcs', 'logVCremoved'],
-                  target: '#vc-item',
+                  actions: ['closeViewVcModal', 'refreshMyVcs', 'logVCremoved'],
+                  target: '.triggerAutoBackup',
+                },
+              },
+              states: {
+                triggerAutoBackup: {
+                  invoke: {
+                    src: 'isUserSignedAlready',
+                    onDone: [
+                      {
+                        cond: 'isSignedIn',
+                        actions: [
+                          'sendBackupEvent',
+                          'refreshMyVcs',
+                          'logVCremoved',
+                        ],
+                        target: '#vc-item',
+                      },
+                      {
+                        actions: ['refreshMyVcs', 'logVCremoved'],
+                        target: '#vc-item',
+                      },
+                    ],
+                  },
                 },
               },
             },
@@ -371,176 +370,57 @@ export const ExistingMosipVCItemMachine =
             src: 'verifyCredential',
             onDone: [
               {
-                actions: ['markVcValid', 'storeContext', 'updateVc'],
-                target: 'idle',
+                actions: ['storeContext'],
               },
             ],
             onError: [
               {
-                actions: log((_, event) => (event.data as Error).message),
-                target: 'idle',
+                //To-Do Handle Error Scenarios
+                actions: ['updateVerificationErrorMessage'],
+                target: 'handleVCVerificationFailure',
               },
             ],
-          },
-        },
-        checkingVerificationStatus: {
-          description:
-            'Check if VC verification is still valid. VCs stored on the device must be re-checked once every [N] time has passed.',
-          always: [
-            {
-              cond: 'isVcValid',
-              target: 'idle',
-            },
-            {
-              target: 'verifyingCredential',
-            },
-          ],
-        },
-        invalid: {
-          states: {
-            otp: {},
-            backend: {},
-          },
-          on: {
-            INPUT_OTP: {
-              actions: 'setOtp',
-              target: 'requestingLock',
-            },
-            DISMISS: {
-              target: 'idle',
-            },
-          },
-        },
-        requestingOtp: {
-          invoke: {
-            src: 'requestOtp',
-            onDone: [
-              {
-                actions: [log('accepting OTP')],
-                target: 'acceptingOtpInput',
-              },
-            ],
-            onError: [
-              {
-                actions: [log('error OTP')],
-                target: '#vc-item.invalid.backend',
-              },
-            ],
-          },
-        },
-        acceptingOtpInput: {
-          entry: ['clearOtp', 'setTransactionId'],
-          on: {
-            INPUT_OTP: [
-              {
-                actions: [
-                  log('setting OTP lock'),
-                  'setTransactionId',
-                  'setOtp',
-                ],
-                target: 'requestingLock',
-              },
-            ],
-            DISMISS: {
-              actions: ['clearOtp', 'clearTransactionId'],
-              target: 'idle',
-            },
-            RESEND_OTP: {
-              target: '.resendOTP',
-            },
           },
           initial: 'idle',
+          on: {
+            STORE_RESPONSE: {
+              actions: [
+                'updateVc',
+                'logDownloaded',
+                'sendTelemetryEvents',
+                'removeVcFromInProgressDownloads',
+              ],
+              target: '.triggerAutoBackupForVcDownload',
+            },
+            STORE_ERROR: {
+              target: '#vc-item.checkingServerData.savingFailed',
+            },
+          },
           states: {
             idle: {},
-            resendOTP: {
+            triggerAutoBackupForVcDownload: {
               invoke: {
-                src: 'requestOtp',
+                src: 'isUserSignedAlready',
                 onDone: [
                   {
-                    target: 'idle',
+                    cond: 'isSignedIn',
+                    actions: ['sendBackupEvent'],
+                    target: '#vc-item.idle',
+                  },
+                  {
+                    target: '#vc-item.idle',
                   },
                 ],
               },
             },
           },
         },
-        acceptingRevokeInput: {
-          entry: [log('acceptingRevokeInput'), 'clearOtp', 'setTransactionId'],
-          on: {
-            INPUT_OTP: [
-              {
-                actions: [
-                  log('setting OTP revoke'),
-                  'setTransactionId',
-                  'setOtp',
-                ],
-                target: 'requestingRevoke',
-              },
-            ],
-            DISMISS: {
-              actions: ['clearOtp', 'clearTransactionId'],
-              target: 'idle',
-            },
-          },
-        },
-        requestingLock: {
-          invoke: {
-            src: 'requestLock',
-            onDone: [
-              {
-                actions: 'setLock',
-                target: 'lockingVc',
-              },
-            ],
-            onError: [
-              {
-                actions: 'setOtpError',
-                target: 'acceptingOtpInput',
-              },
-            ],
-          },
-        },
-        lockingVc: {
-          entry: ['storeLock'],
+
+        handleVCVerificationFailure: {
+          entry: ['removeVcMetaDataFromStorage'],
           on: {
             STORE_RESPONSE: {
-              target: 'idle',
-            },
-          },
-        },
-        requestingRevoke: {
-          invoke: {
-            src: 'requestRevoke',
-            onDone: [
-              {
-                actions: [log('doneRevoking'), 'setRevoke'],
-                target: 'revokingVc',
-              },
-            ],
-            onError: [
-              {
-                actions: [
-                  log((_, event) => (event.data as Error).message),
-                  'setOtpError',
-                ],
-                target: 'acceptingOtpInput',
-              },
-            ],
-          },
-        },
-        revokingVc: {
-          entry: ['revokeVID'],
-          on: {
-            STORE_RESPONSE: {
-              target: 'loggingRevoke',
-            },
-          },
-        },
-        loggingRevoke: {
-          entry: [log('loggingRevoke'), 'logRevoked'],
-          on: {
-            DISMISS: {
-              target: 'idle',
+              actions: ['sendVerificationError'],
             },
           },
         },
@@ -567,6 +447,7 @@ export const ExistingMosipVCItemMachine =
             onDone: [
               {
                 target: 'acceptingBindingOtp',
+                actions: ['setPhoneNumber', 'setEmail'],
               },
             ],
             onError: [
@@ -630,6 +511,7 @@ export const ExistingMosipVCItemMachine =
                 src: 'requestBindingOtp',
                 onDone: {
                   target: 'idle',
+                  actions: ['setPhoneNumber', 'setEmail'],
                 },
                 onError: {
                   actions: 'setWalletBindingError',
@@ -671,9 +553,9 @@ export const ExistingMosipVCItemMachine =
               },
               {
                 target: 'updatingPrivateKey',
-                /*The walletBindingResponse is used for conditional rendering in wallet binding. 
-                However, it wrongly considers activation as successful even when there's an error 
-                in updatingPrivateKey state. So created a temporary context variable to store the binding 
+                /*The walletBindingResponse is used for conditional rendering in wallet binding.
+                However, it wrongly considers activation as successful even when there's an error
+                in updatingPrivateKey state. So created a temporary context variable to store the binding
                 response and use it in updatingPrivateKey state*/
                 actions: 'setTempWalletBindingResponse',
               },
@@ -723,7 +605,7 @@ export const ExistingMosipVCItemMachine =
                 target: '#vc-item.kebabPopUp',
               },
               {
-                actions: 'setWalletBindingSuccess',
+                actions: 'sendWalletBindingSuccess',
                 target: 'idle',
               },
             ],
@@ -733,29 +615,6 @@ export const ExistingMosipVCItemMachine =
     },
     {
       actions: {
-        setVerifiableCredential: assign(context => {
-          return {
-            ...context,
-            verifiableCredential: {
-              ...context.storeVerifiableCredential,
-            },
-            storeVerifiableCredential: null,
-            vcMetadata: context.vcMetadata,
-          };
-        }),
-
-        setStoreVerifiableCredential: model.assign((context, event) => {
-          return {
-            ...context,
-            ...event.vc,
-            storeVerifiableCredential: {
-              ...event.vc.verifiableCredential,
-            },
-            verifiableCredential: null,
-            vcMetadata: context.vcMetadata,
-          };
-        }),
-
         removeVcMetaDataFromStorage: send(
           context => {
             return StoreEvents.REMOVE_VC_METADATA(
@@ -792,6 +651,24 @@ export const ExistingMosipVCItemMachine =
           },
         ),
 
+        sendVerificationError: send(
+          (context, event) => {
+            return {
+              type: 'VERIFY_VC_FAILED',
+              errorMessage: context.verificationErrorMessage,
+              vcMetadata: context.vcMetadata,
+            };
+          },
+          {
+            to: context => context.serviceRefs.vc,
+          },
+        ),
+
+        updateVerificationErrorMessage: assign({
+          verificationErrorMessage: (context, event) =>
+            (event.data as Error).message,
+        }),
+
         setWalletBindingError: assign({
           walletBindingError: () => {
             const errorMessage = i18n.t(`errors.genericError`, {
@@ -813,14 +690,6 @@ export const ExistingMosipVCItemMachine =
           bindingAuthFailedMessage: () => '',
         }),
 
-        setWalletBindingSuccess: assign({
-          walletBindingSuccess: true,
-        }),
-
-        resetWalletBindingSuccess: assign({
-          walletBindingSuccess: false,
-        }),
-
         sendWalletBindingSuccess: send(
           context => {
             return {
@@ -831,6 +700,10 @@ export const ExistingMosipVCItemMachine =
             to: context => context.serviceRefs.vc,
           },
         ),
+
+        sendBackupEvent: send(BackupEvents.DATA_BACKUP(true), {
+          to: context => context.serviceRefs.backup,
+        }),
 
         sendActivationStartEvent: context => {
           sendStartEvent(
@@ -853,7 +726,7 @@ export const ExistingMosipVCItemMachine =
 
         sendActivationFailedEndEvent: (context, event, meta) => {
           const [errorId, errorMessage] =
-            event.data.message === 'Could not store private key in keystore'
+            event.data?.message === 'Could not store private key in keystore'
               ? [
                   TelemetryConstants.ErrorId.updatePrivateKey,
                   TelemetryConstants.ErrorMessage.privateKeyUpdationFailed,
@@ -953,10 +826,10 @@ export const ExistingMosipVCItemMachine =
         ),
 
         removeVcFromInProgressDownloads: send(
-          (_context, event) => {
+          context => {
             return {
               type: 'REMOVE_VC_FROM_IN_PROGRESS_DOWNLOADS',
-              requestId: event.response.requestId,
+              vcMetadata: context.vcMetadata,
             };
           },
           {
@@ -1061,7 +934,6 @@ export const ExistingMosipVCItemMachine =
               return {
                 ...context,
                 ...event.vc,
-                vcMetadata: context.vcMetadata,
               };
           }
         }),
@@ -1072,6 +944,8 @@ export const ExistingMosipVCItemMachine =
             return ActivityLogEvents.LOG_ACTIVITY({
               _vcKey: context.vcMetadata.getVcKey(),
               type: 'VC_DOWNLOADED',
+              id: context.vcMetadata.id,
+              idType: getIdType(context.vcMetadata.issuer),
               timestamp: Date.now(),
               deviceName: '',
               vcLabel: data.id,
@@ -1093,6 +967,8 @@ export const ExistingMosipVCItemMachine =
             ActivityLogEvents.LOG_ACTIVITY({
               _vcKey: context.vcMetadata.getVcKey(),
               type: 'WALLET_BINDING_SUCCESSFULL',
+              idType: getIdType(context.vcMetadata.issuer),
+              id: context.vcMetadata.id,
               timestamp: Date.now(),
               deviceName: '',
               vcLabel: context.vcMetadata.id,
@@ -1109,46 +985,14 @@ export const ExistingMosipVCItemMachine =
               type: 'WALLET_BINDING_FAILURE',
               timestamp: Date.now(),
               deviceName: '',
+              id: context.vcMetadata.id,
+              idType: getIdType(context.vcMetadata.issuer),
               vcLabel: context.vcMetadata.id,
             }),
           {
             to: context => context.serviceRefs.activityLog,
           },
         ),
-
-        logRevoked: send(
-          context =>
-            ActivityLogEvents.LOG_ACTIVITY({
-              _vcKey: context.vcMetadata.getVcKey(),
-              type: 'VC_REVOKED',
-              timestamp: Date.now(),
-              deviceName: '',
-              vcLabel: context.vcMetadata.id,
-            }),
-          {
-            to: context => context.serviceRefs.activityLog,
-          },
-        ),
-
-        revokeVID: send(
-          context => {
-            return StoreEvents.REMOVE(
-              MY_VCS_STORE_KEY,
-              context.vcMetadata.getVcKey(),
-            );
-          },
-          {
-            to: context => context.serviceRefs.store,
-          },
-        ),
-
-        markVcValid: assign(context => {
-          return {
-            ...context,
-            isVerified: true,
-            lastVerifiedOn: Date.now(),
-          };
-        }),
 
         setTransactionId: assign({
           transactionId: () => String(new Date().valueOf()).substring(3, 13),
@@ -1169,23 +1013,15 @@ export const ExistingMosipVCItemMachine =
             (event as ErrorPlatformEvent).data.message,
         }),
 
+        setPhoneNumber: assign({
+          phoneNumber: (_context, event) => event.data.response.maskedMobile,
+        }),
+
+        setEmail: model.assign({
+          email: (_context, event) => event.data.response.maskedEmail,
+        }),
+
         clearOtp: assign({otp: ''}),
-
-        setLock: assign({
-          locked: context => !context.locked,
-        }),
-
-        setRevoke: assign({
-          revoked: () => true,
-        }),
-
-        storeLock: send(
-          context => {
-            const {serviceRefs, ...data} = context;
-            return StoreEvents.SET(context.vcMetadata.getVcKey(), data);
-          },
-          {to: context => context.serviceRefs.store},
-        ),
 
         removeVcItem: send(
           _context => {
@@ -1197,15 +1033,9 @@ export const ExistingMosipVCItemMachine =
           {to: context => context.serviceRefs.store},
         ),
 
-        removeTamperedVcItem: send(
-          _context => {
-            return StoreEvents.REMOVE(
-              MY_VCS_STORE_KEY,
-              _context.vcMetadata.getVcKey(),
-            );
-          },
-          {to: context => context.serviceRefs.store},
-        ),
+        closeViewVcModal: send('DISMISS_MODAL', {
+          to: () => getHomeMachineService(),
+        }),
 
         logVCremoved: send(
           (context, _) =>
@@ -1215,6 +1045,8 @@ export const ExistingMosipVCItemMachine =
               timestamp: Date.now(),
               deviceName: '',
               vcLabel: context.vcMetadata.id,
+              id: context.vcMetadata.id,
+              idType: getIdType(context.vcMetadata.issuer),
             }),
           {
             to: context => context.serviceRefs.activityLog,
@@ -1223,6 +1055,10 @@ export const ExistingMosipVCItemMachine =
       },
 
       services: {
+        isUserSignedAlready: () => async () => {
+          return await Cloud.isSignedInAlready();
+        },
+
         loadDownloadLimitConfig: async context => {
           var resp = await getAllConfigurations();
           const maxLimit: number = resp.vcDownloadMaxRetry;
@@ -1319,6 +1155,7 @@ export const ExistingMosipVCItemMachine =
           if (response.response == null) {
             throw new Error('Could not process request');
           }
+          return response;
         },
 
         checkStatus: context => (callback, onReceive) => {
@@ -1384,7 +1221,6 @@ export const ExistingMosipVCItemMachine =
                   id: context.vcMetadata.id,
                   idType: context.vcMetadata.idType,
                   requestId: context.vcMetadata.requestId,
-                  isVerified: false,
                   lastVerifiedOn: null,
                   locked: context.locked,
                   walletBindingResponse: null,
@@ -1398,7 +1234,14 @@ export const ExistingMosipVCItemMachine =
         },
 
         verifyCredential: async context => {
-          return verifyCredential(context.verifiableCredential);
+          if (context.verifiableCredential) {
+            const verificationResult = await verifyCredential(
+              context.verifiableCredential,
+            );
+            if (!verificationResult.isVerified) {
+              throw new Error(verificationResult.errorMessage);
+            }
+          }
         },
 
         requestOtp: async context => {
@@ -1417,58 +1260,11 @@ export const ExistingMosipVCItemMachine =
             console.error(error);
           }
         },
-
-        requestLock: async context => {
-          let response = null;
-          if (context.locked) {
-            response = await request(
-              API_URLS.authUnLock.method,
-              API_URLS.authUnLock.buildURL(),
-              {
-                individualId: context.vcMetadata.id,
-                individualIdType: context.vcMetadata.idType,
-                otp: context.otp,
-                transactionID: context.transactionId,
-                authType: ['bio'],
-                unlockForSeconds: '120',
-              },
-            );
-          } else {
-            response = await request(
-              API_URLS.authLock.method,
-              API_URLS.authLock.buildURL(),
-              {
-                individualId: context.vcMetadata.id,
-                individualIdType: context.vcMetadata.idType,
-                otp: context.otp,
-                transactionID: context.transactionId,
-                authType: ['bio'],
-              },
-            );
-          }
-          return response.response;
-        },
-
-        requestRevoke: async context => {
-          try {
-            return request(
-              API_URLS.requestRevoke.method,
-              API_URLS.requestRevoke.buildURL(context.vcMetadata.id),
-              {
-                transactionID: context.transactionId,
-                vidStatus: 'REVOKED',
-                individualId: context.vcMetadata.id,
-                individualIdType: 'VID',
-                otp: context.otp,
-              },
-            );
-          } catch (error) {
-            console.error(error);
-          }
-        },
       },
 
       guards: {
+        isSignedIn: (_context, event) =>
+          (event.data as isSignedInResult).isSignedIn,
         hasCredential: (_, event) => {
           const vc =
             event.type === 'GET_VC_RESPONSE' ? event.vc : event.response;
@@ -1478,10 +1274,6 @@ export const ExistingMosipVCItemMachine =
 
         isDownloadAllowed: _context => {
           return _context.downloadCounter <= _context.maxDownloadCount;
-        },
-
-        isVcValid: context => {
-          return context.isVerified;
         },
 
         isCustomSecureKeystore: () => isHardwareKeystoreExists,
@@ -1509,38 +1301,6 @@ export function selectVc(state: State) {
 
 export function selectId(state: State) {
   return state.context.vcMetadata.id;
-}
-
-export function selectIdType(state: State) {
-  return state.context.vcMetadata.idType;
-}
-
-export function selectCredential(state: State) {
-  return state.context.credential;
-}
-
-export function selectIsOtpError(state: State) {
-  return state.context.otpError;
-}
-
-export function selectIsLockingVc(state: State) {
-  return state.matches('lockingVc');
-}
-
-export function selectIsRevokingVc(state: State) {
-  return state.matches('revokingVc');
-}
-
-export function selectIsLoggingRevoke(state: State) {
-  return state.matches('loggingRevoke');
-}
-
-export function selectIsAcceptingOtpInput(state: State) {
-  return state.matches('acceptingOtpInput');
-}
-
-export function selectIsAcceptingRevokeInput(state: State) {
-  return state.matches('acceptingRevokeInput');
 }
 
 export function selectRequestBindingOtp(state: State) {

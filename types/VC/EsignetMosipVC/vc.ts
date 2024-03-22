@@ -1,5 +1,6 @@
 import {WalletBindingResponse} from '../../../shared/cryptoutil/cryptoUtil';
 import {logoType} from '../../../machines/issuersMachine';
+import {VCMetadata} from '../../../shared/VCMetadata';
 
 export interface VC {
   id?: string;
@@ -10,17 +11,11 @@ export interface VC {
   requestId?: string;
   isVerified?: boolean;
   lastVerifiedOn: number;
-  reason?: VCSharingReason[];
   shouldVerifyPresence?: boolean;
   walletBindingResponse?: WalletBindingResponse;
   credentialRegistry?: string;
   isPinned?: boolean;
   hashedId?: string;
-}
-
-export interface VCSharingReason {
-  timestamp: number;
-  message: string;
 }
 
 export type VcIdType = 'UIN' | 'VID';
@@ -73,10 +68,12 @@ export interface VerifiableCredential {
   format: string;
   credential: Credential;
   wellKnown: string;
+  credentialTypes: Object[];
 }
 
 export interface CredentialWrapper {
   verifiableCredential: VerifiableCredential;
+  vcMetadata: VCMetadata;
   identifier: string;
   generatedOn: Date;
   issuerLogo: string;

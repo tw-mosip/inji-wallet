@@ -1,6 +1,6 @@
 import {useInterpret, useSelector} from '@xstate/react';
 import {useContext, useEffect, useRef} from 'react';
-import {HomeRouteProps} from '../../routes/main';
+import {HomeRouteProps} from '../../routes/routeTypes';
 import {GlobalContext} from '../../shared/GlobalContext';
 import {
   HomeScreenEvents,
@@ -13,9 +13,9 @@ import {
   selectIssuersMachine,
   selectIsMinimumStorageLimitReached,
 } from './HomeScreenMachine';
-import {VcEvents} from '../../machines/vc';
 
-export function useHomeScreen(props: HomeRouteProps) {
+let homeMachineService;
+function useCreateHomeMachineService() {
   const {appService} = useContext(GlobalContext);
   const machine = useRef(
     HomeScreenMachine.withContext({
@@ -23,8 +23,17 @@ export function useHomeScreen(props: HomeRouteProps) {
       serviceRefs: appService.getSnapshot().context.serviceRefs,
     }),
   );
-  const service = useInterpret(machine.current);
+  return (homeMachineService = useInterpret(machine.current));
+}
+
+export function getHomeMachineService() {
+  return homeMachineService;
+}
+
+export function useHomeScreen(props: HomeRouteProps) {
+  const {appService} = useContext(GlobalContext);
   const vcService = appService.children.get('vc');
+  const service = useCreateHomeMachineService();
 
   useEffect(() => {
     if (props.route.params?.activeTab != null) {
@@ -50,12 +59,7 @@ export function useHomeScreen(props: HomeRouteProps) {
 
     DISMISS: () => service.send(HomeScreenEvents.DISMISS()),
     GOTO_ISSUERS: () => service.send(HomeScreenEvents.GOTO_ISSUERS()),
-    SELECT_TAB,
     DISMISS_MODAL: () => service.send(HomeScreenEvents.DISMISS_MODAL()),
-    REVOKE: () => {
-      vcService.send(VcEvents.REFRESH_MY_VCS());
-      service.send(HomeScreenEvents.DISMISS_MODAL());
-    },
   };
 
   function SELECT_TAB(index: number) {

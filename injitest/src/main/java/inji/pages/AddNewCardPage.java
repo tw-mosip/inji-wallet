@@ -4,7 +4,6 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
 import org.openqa.selenium.WebElement;
-import org.testng.Assert;
 
 public class AddNewCardPage extends BasePage{
 
@@ -13,7 +12,7 @@ public class AddNewCardPage extends BasePage{
     private WebElement addNewCardHeader;
 
     @AndroidFindBy(accessibility = "issuerHeading-Mosip")
-    @iOSXCUITFindBy(accessibility = "issuer-Mosip")
+    @iOSXCUITFindBy(accessibility = "issuerHeading-Mosip")
     private WebElement downloadViaUin;
     
     @AndroidFindBy(accessibility = "goBack")
@@ -26,6 +25,9 @@ public class AddNewCardPage extends BasePage{
 
     @iOSXCUITFindBy(accessibility = "Continue")
     private WebElement continueButton;
+
+    @iOSXCUITFindBy(accessibility = "Cancel")
+    private WebElement cancelButton;
 
     @AndroidFindBy(accessibility = "issuersScreenDescription")
     @iOSXCUITFindBy(accessibility = "issuersScreenDescription")
@@ -42,6 +44,10 @@ public class AddNewCardPage extends BasePage{
     @AndroidFindBy(className = "android.widget.EditText")
     @iOSXCUITFindBy(accessibility = "issuerSearchBar")
     private WebElement issuerSearchBar;
+
+    @AndroidFindBy(accessibility = "issuerHeading-Sunbird")
+    @iOSXCUITFindBy(accessibility = "issuerHeading-Sunbird")
+    private WebElement downloadViaSunbird;
     
     public AddNewCardPage(AppiumDriver driver) {
         super(driver);
@@ -100,6 +106,10 @@ public class AddNewCardPage extends BasePage{
     public void clickOnContinueButtonInSigninPopupIos(){
         clickOnElement(continueButton);
     }
+
+    public void clickOnCancelButtonInSigninPopupIos(){
+        clickOnElement(cancelButton);
+    }
     
     public void isBackButtonDisplayed() {
         backButton.isDisplayed();
@@ -136,4 +146,12 @@ public class AddNewCardPage extends BasePage{
     	clearTextBoxAndSendKeys(issuerSearchBar, text);
     }
 
+    public boolean isDownloadViaSunbirdDisplayed() {
+        return this.isElementDisplayed(downloadViaSunbird);
+    }
+    public SunbirdLoginPage clickOnDownloadViaSunbird(){
+        clickOnElement(downloadViaSunbird);
+        return new SunbirdLoginPage(driver);
+    }
 }
+

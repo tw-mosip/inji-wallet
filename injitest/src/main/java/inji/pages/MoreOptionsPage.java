@@ -32,12 +32,16 @@ public class MoreOptionsPage extends BasePage {
     private WebElement activatedForOnlineLoginButton;
 
     @AndroidFindBy(accessibility = "close")
-    @iOSXCUITFindBy(accessibility = "Close")
+    @iOSXCUITFindBy(accessibility = "close")
     private WebElement closeButton;
 
     @AndroidFindBy(uiAutomator = "new UiSelector().textContains(\"Something is wrong. Please try again later!\")")
     @iOSXCUITFindBy(accessibility = "walletBindingErrorTitle")
     public WebElement somethingIsWrongPopup;
+
+    @AndroidFindBy(accessibility = "activated")
+    @iOSXCUITFindBy(accessibility = "activated")
+    private WebElement activated;
 
     public MoreOptionsPage(AppiumDriver driver) {
         super(driver);
@@ -77,5 +81,9 @@ public class MoreOptionsPage extends BasePage {
 
     public boolean isSomethingIsWrongPopupVisible() {
         return this.isElementDisplayed(somethingIsWrongPopup);
+    }
+
+    public boolean isVcActivatedDisplayed() {
+        return this.isElementDisplayed(activated);
     }
 }

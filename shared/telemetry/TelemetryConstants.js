@@ -9,10 +9,15 @@ export const TelemetryConstants = {
     vcActivationFromKebab: 'VC Activation from kebab popup',
     appOnboarding: 'App Onboarding',
     appLogin: 'App Login',
-    vcLockOrRevoke: 'VC Lock / VC Revoke',
     getVcUsingAid: 'Get VC using AID',
     fetchData: 'Fetch Data',
     dataBackup: 'Data Backup',
+    fetchLastBackupDetails: 'Fetch Last Backup Details',
+    dataRestore: 'Data Restore',
+    decryption: 'Decryption',
+    dataBackupAndRestoreSetup: 'Data Backup & Restore Setup',
+    remove: 'remove VC',
+    removeVcMetadata: 'VC metadata removed',
   }),
 
   EndEventStatus: Object.freeze({
@@ -66,5 +71,7 @@ export const TelemetryConstants = {
     vcShareSuccessPage: 'VC Successfully Shared Page',
     vcReceivedSuccessPage: 'VC Successfully Received Page',
     dataBackupScreen: 'Data Backup Screen',
+    dataRestoreScreen: 'Data Restore Screen',
+    dataBackupAndRestoreSetupScreen: 'Data Backup & Restore Setup Screen',
   }),
 };

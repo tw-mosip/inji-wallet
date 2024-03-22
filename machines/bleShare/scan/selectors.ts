@@ -3,12 +3,12 @@ import {scanMachine} from './scanMachine';
 
 type State = StateFrom<typeof scanMachine>;
 
-export function selectReceiverInfo(state: State) {
-  return state.context.receiverInfo;
+export function selectFlowType(state: State) {
+  return state.context.flowType;
 }
 
-export function selectReason(state: State) {
-  return state.context.reason;
+export function selectReceiverInfo(state: State) {
+  return state.context.receiverInfo;
 }
 
 export function selectVcName(state: State) {
@@ -41,6 +41,13 @@ export function selectIsSelectingVc(state: State) {
 
 export function selectIsSendingVc(state: State) {
   return state.matches('reviewing.sendingVc.inProgress');
+}
+
+export function selectIsFaceIdentityVerified(state: State) {
+  return (
+    state.matches('reviewing.sendingVc.inProgress') &&
+    state.context.showFaceCaptureSuccessBanner
+  );
 }
 
 export function selectIsSendingVcTimeout(state: State) {
@@ -76,5 +83,5 @@ export function selectIsQrLoginStoring(state: State) {
 }
 
 export function selectIsDone(state: State) {
-  return state.matches('reviewing.navigatingToHome');
+  return state.matches('reviewing.disconnect');
 }
