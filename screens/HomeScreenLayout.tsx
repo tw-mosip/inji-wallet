@@ -53,7 +53,7 @@ export const HomeScreenLayout: React.FC<RootRouteProps> = props => {
           align="center"
           style={Theme.HelpScreenStyle.rowStyle}>
           <View testID="helpIcon" style={Theme.HelpScreenStyle.iconStyle}>
-            {SvgImage.infoIcon()}
+            {SvgImage.coloredInfo()}
           </View>
           <Text testID="help" style={Theme.HelpScreenStyle.labelStyle}>
             {t('help')}

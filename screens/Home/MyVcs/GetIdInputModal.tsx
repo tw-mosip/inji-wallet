@@ -87,6 +87,7 @@ export const GetIdInputModal: React.FC<GetIdInputModalProps> = props => {
                         color={Theme.Colors.tooltipIcon}
                       />
                     }
+                    triggerComponentStyles={{width: 32}}
                   />
                 }
                 errorStyle={{color: Theme.Colors.errorMessage}}

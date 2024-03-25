@@ -120,6 +120,7 @@ export const IdInputModal: React.FC<IdInputModalProps> = props => {
                         color={Theme.Colors.tooltipIcon}
                       />
                     }
+                    triggerComponentStyles={{width: 32}}
                     toolTipContent={
                       <Column>
                         <Text weight="semibold">

@@ -3,8 +3,6 @@ import {Theme} from '../../ui/styleUtils';
 import React from 'react';
 import {Dimensions} from 'react-native';
 import {CustomTooltip} from '../../ui/ToolTip';
-import {Icon} from 'react-native-elements';
-import testIDProps from '../../../shared/commonUtil';
 import {useTranslation} from 'react-i18next';
 import {SvgImage} from '../../ui/svg';
 
@@ -26,15 +24,8 @@ export const VCItemFieldName = ({fieldName, wellknown}) => {
           testID="statusToolTip"
           width={Dimensions.get('screen').width * 0.8}
           height={Dimensions.get('screen').height * 0.18}
-          triggerComponent={
-            <Icon
-              {...testIDProps('statusInfo')}
-              name="infocirlceo"
-              type="antdesign"
-              size={15}
-              color={Theme.Colors.tooltipIcon}
-            />
-          }
+          triggerComponent={SvgImage.info()}
+          triggerComponentStyles={{marginLeft: 2, marginTop: 2}}
           toolTipContent={
             <Column align="flex-start">
               <Text weight="semibold">
