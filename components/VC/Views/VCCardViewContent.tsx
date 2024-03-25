@@ -91,7 +91,10 @@ export const VCCardViewContent: React.FC<
                 accessible={false}
                 style={Theme.Styles.kebabPressableContainer}>
                 <KebabPopUp
-                  iconColor={setTextColor(props.wellknown)}
+                  iconColor={setTextColor(
+                    props.wellknown,
+                    Theme.Colors.helpText,
+                  )}
                   vcMetadata={props.vcMetadata}
                   iconName="dots-three-horizontal"
                   iconType="entypo"

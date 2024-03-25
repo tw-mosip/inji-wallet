@@ -169,8 +169,10 @@ export const VCDetailView: React.FC<
                     style={[
                       Theme.Styles.hrLine,
                       {
-                        borderBottomColor: setTextColor(wellknown, 'hrLine')
-                          ?.color,
+                        borderBottomColor: setTextColor(
+                          wellknown,
+                          Theme.Styles.hrLine.borderBottomColor,
+                        )?.color,
                       },
                     ]}></View>
                   <Column padding="0 14 14 14">
