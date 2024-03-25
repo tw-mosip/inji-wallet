@@ -271,8 +271,8 @@
       "backend": {
         "invalidOtp": "Di-wasto ang OTP",
         "expiredOtp": "Nag-expire na ang OTP",
-        "invalidUin": "Di-wastong UIN",
-        "invalidVid": "Di-wastong VID",
+        "invalidUin": "Ang pinasok na UIN ay wala!",
+        "invalidVid": "Ang ipinasok na VID ay wala!",
         "missingUin": "Ang ipinasok na UIN ay na-deactivate/na-block. Mangyaring magpasok ng wastong UIN upang magpatuloy",
         "missingVid": "Hindi mahanap ang iyong VID",
         "noMessageAvailable": "Subukan pagkatapos ng ilang oras",
@@ -295,7 +295,7 @@
         "applicationProcessing": "Hindi pa handa ang AID",
         "noMessageAvailable": "Subukan pagkatapos ng ilang oras",
         "networkRequestFailed": "Nabigo ang kahilingan sa network",
-        "invalidAid": "Hindi available ang ipinasok na AID. Pakisuri ang iyong AID bago pumasok",
+        "invalidAid": "Ang ipinasok na AID ay wala!",
         "timeout": "timeout"
       }
     }
@@ -376,7 +376,7 @@
         "message": "Nagkaroon ng isyu sa pag-download ng mga sumusunod na card. Pakisubukang muli"
       },
       "verificationFailed": {
-        "title" : "May pagkakamaling naganap!",
+        "title": "May pagkakamaling naganap!",
         "goBackButton": "Bumalik ka",
         "technicalError": "Dahil sa Technical Error, hindi namin na-download ang card.",
         "networkError": "Dahil sa hindi matatag na koneksyon sa internet, hindi namin na-download ang card. Pakisuri ang iyong koneksyon sa internet."

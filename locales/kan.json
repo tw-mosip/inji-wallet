@@ -271,8 +271,8 @@
       "backend": {
         "invalidOtp": "OTP ಅಮಾನ್ಯವಾಗಿದೆ",
         "expiredOtp": "OTP ಅವಧಿ ಮುಗಿದಿದೆ",
-        "invalidUin": "UIN ಅಮಾನ್ಯವಾಗಿದೆ",
-        "invalidVid": "VIDಅಮಾನ್ಯವಾಗಿದೆ",
+        "invalidUin": "ನಮೂದಿಸಿದ UIN ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ!",
+        "invalidVid": "ನಮೂದಿಸಿದ VID ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ!",
         "missingUin": "ನಮೂದಿಸಿದ UIN ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ/ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ UIN ಅನ್ನು ನಮೂದಿಸಿ",
         "missingVid": "VIDಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಲಭ್ಯವಿಲ್ಲ",
         "noMessageAvailable": "ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಪ್ರಯತ್ನಿಸಿ",
@@ -295,7 +295,7 @@
         "applicationProcessing": "AID ಸಿದ್ಧವಾಗಿಲ್ಲ",
         "noMessageAvailable": "ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಪ್ರಯತ್ನಿಸಿ",
         "networkRequestFailed": "ನೆಟ್‌ವರ್ಕ್ ವಿನಂತಿ ವಿಫಲವಾಗಿದೆ",
-        "invalidAid": "ನಮೂದಿಸಿದ AID ಲಭ್ಯವಿಲ್ಲ. ಪ್ರವೇಶಿಸುವ ಮೊದಲು ದಯವಿಟ್ಟು ನಿಮ್ಮ AID ಅನ್ನು ಪರಿಶೀಲಿಸಿ",
+        "invalidAid": "ನಮೂದಿಸಿದ AID ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ!",
         "timeout": "ಸಮಯ ಮೀರಿದೆ"
       }
     }
