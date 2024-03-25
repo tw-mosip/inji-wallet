@@ -115,7 +115,6 @@ const model = createModel(
       UPDATE_VC_METADATA: (vcMetadata: VCMetadata) => ({vcMetadata}),
       TAMPERED_VC: (key: string) => ({key}),
       SHOW_BINDING_STATUS: () => ({}),
-      VERIFY: () => ({}),
       DISMISS_VERIFICATION_IN_PROGRESS_BANNER: () => ({}),
     },
   },
@@ -821,39 +820,30 @@ export const ExistingMosipVCItemMachine =
             verifyingCredential: {
               invoke: {
                 src: 'verifyCredential',
-                onDone: [
-                  {
-                    actions: [
-                      'setVerificationSuccessBanner',
-                      'setIsVerified',
-                      'storeContext',
-                      'sendVcUpdated',
-                    ],
-                    target: '#vc-item.existingState.idle',
-                  },
-                ],
+                onDone: {
+                  actions: ['setIsVerified', 'storeContext'],
+                  target: 'handleVerificationResponse',
+                },
                 onError: [
                   {
                     cond: 'isPendingVerificationError',
-                    actions: [
-                      'setVerificationErrorBanner',
-                      'resetIsVerified',
-                      'storeContext',
-                      'sendVcUpdated',
-                    ],
-                    target: '#vc-item.existingState.idle',
+                    actions: ['resetIsVerified', 'storeContext'],
+                    target: 'handleVerificationResponse',
                   },
                 ],
               },
+            },
+            handleVerificationResponse: {
               on: {
                 STORE_RESPONSE: {
-                  actions: ['updateVc', 'removeVcFromInProgressDownloads'],
-                  target: '#vc-item.existingState.idle',
+                  actions: [
+                    'setVerificationStatus',
+                    'sendVcUpdated',
+                    'updateVc',
+                  ],
                 },
-                STORE_ERROR: {
-                  target:
-                    '#vc-item.existingState.checkingServerData.savingFailed',
-                },
+                //TO-DO: Handle if some error is thrown when storing verified status into storage
+                STORE_ERROR: {},
                 DISMISS_VERIFICATION_IN_PROGRESS_BANNER: {
                   actions: ['resetVerificationBannerStatus'],
                 },
@@ -1318,11 +1308,12 @@ export const ExistingMosipVCItemMachine =
             to: context => context.serviceRefs.activityLog,
           },
         ),
-        setVerificationSuccessBanner: assign({
-          verificationBannerStatus: BANNER_TYPE_SUCCESS,
-        }),
-        setVerificationErrorBanner: assign({
-          verificationBannerStatus: BANNER_TYPE_ERROR,
+        setVerificationStatus: assign({
+          verificationBannerStatus: (_, event) => {
+            return event.response.isVerified
+              ? BANNER_TYPE_SUCCESS
+              : BANNER_TYPE_ERROR;
+          },
         }),
 
         resetVerificationBannerStatus: assign({

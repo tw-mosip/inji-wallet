@@ -113,10 +113,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item-openid4vci.existingState.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.existingState.updatingPrivateKey:invocation[0]';
     sendBackupEvent: 'done.invoke.vc-item-openid4vci.existingState.kebabPopUp.triggerAutoBackup:invocation[0]';
-    sendVcUpdated:
-      | 'PIN_CARD'
-      | 'done.invoke.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
+    sendVcUpdated: 'PIN_CARD' | 'STORE_RESPONSE';
     sendWalletBindingSuccess: 'SHOW_BINDING_STATUS';
     setContext: 'GET_VC_RESPONSE' | 'STORE_RESPONSE';
     setEmail:
@@ -138,8 +135,7 @@ export interface Typegen0 {
     setVcKey: 'REMOVE';
     setVcMetadata: 'UPDATE_VC_METADATA';
     setVerifiableCredential: 'GET_VC_RESPONSE' | 'STORE_RESPONSE';
-    setVerificationErrorBanner: 'error.platform.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
-    setVerificationSuccessBanner: 'done.invoke.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
+    setVerificationStatus: 'STORE_RESPONSE';
     setWalletBindingError:
       | 'error.platform.vc-item-openid4vci.existingState.acceptingBindingOtp.resendOTP:invocation[0]'
       | 'error.platform.vc-item-openid4vci.existingState.addKeyPair:invocation[0]'
@@ -156,7 +152,8 @@ export interface Typegen0 {
     storeContext:
       | 'done.invoke.vc-item-openid4vci.existingState.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.existingState.updatingPrivateKey:invocation[0]'
-      | 'done.invoke.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
+      | 'done.invoke.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]'
+      | 'error.platform.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
     updatePrivateKey:
       | 'done.invoke.vc-item-openid4vci.existingState.addingWalletBindingId:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.existingState.updatingPrivateKey:invocation[0]';
@@ -171,6 +168,7 @@ export interface Typegen0 {
     isCustomSecureKeystore:
       | 'done.invoke.vc-item-openid4vci.existingState.addKeyPair:invocation[0]'
       | 'done.invoke.vc-item-openid4vci.existingState.addingWalletBindingId:invocation[0]';
+    isPendingVerificationError: 'error.platform.vc-item-openid4vci.verifyState.verifyingCredential:invocation[0]';
     isSignedIn: 'done.invoke.vc-item-openid4vci.existingState.kebabPopUp.triggerAutoBackup:invocation[0]';
   };
   eventsCausingServices: {
@@ -204,6 +202,7 @@ export interface Typegen0 {
     | 'existingState.updatingContextVariables'
     | 'existingState.updatingPrivateKey'
     | 'verifyState'
+    | 'verifyState.handleVerificationResponse'
     | 'verifyState.idle'
     | 'verifyState.verifyingCredential'
     | {
@@ -230,7 +229,10 @@ export interface Typegen0 {
                 | 'showActivities'
                 | 'triggerAutoBackup';
             };
-        verifyState?: 'idle' | 'verifyingCredential';
+        verifyState?:
+          | 'handleVerificationResponse'
+          | 'idle'
+          | 'verifyingCredential';
       };
   tags: never;
 }

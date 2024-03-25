@@ -171,10 +171,8 @@ export interface Typegen0 {
       | 'done.invoke.vc-item.existingState.requestingBindingOtp:invocation[0]'
       | 'done.invoke.vc-item.existingState.requestingOtp:invocation[0]'
       | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]'
-      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
       | 'error.platform.vc-item.existingState.requestingLock:invocation[0]'
-      | 'error.platform.vc-item.existingState.requestingRevoke:invocation[0]'
-      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+      | 'error.platform.vc-item.existingState.requestingRevoke:invocation[0]';
     clearTransactionId:
       | ''
       | 'CANCEL'
@@ -182,9 +180,7 @@ export interface Typegen0 {
       | 'GET_VC_RESPONSE'
       | 'SHOW_BINDING_STATUS'
       | 'STORE_RESPONSE'
-      | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]'
-      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+      | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';
     closeViewVcModal: 'CLOSE_VC_MODAL' | 'STORE_RESPONSE';
     incrementDownloadCounter:
       | 'POLL'
@@ -214,13 +210,7 @@ export interface Typegen0 {
       | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
     removeVcMetaDataFromVcMachine: 'DISMISS';
     requestStoredContext: 'GET_VC_RESPONSE' | 'REFRESH';
-    requestVcContext:
-      | 'DISMISS'
-      | 'STORE_ERROR'
-      | 'STORE_RESPONSE'
-      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]'
-      | 'xstate.init';
+    requestVcContext: 'DISMISS' | 'xstate.init';
     resetIsVerified:
       | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
       | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
@@ -243,10 +233,9 @@ export interface Typegen0 {
     sendTelemetryEvents: 'STORE_RESPONSE';
     sendVcUpdated:
       | 'PIN_CARD'
+      | 'STORE_RESPONSE'
       | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
-      | 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
     sendVerificationError: 'STORE_RESPONSE';
     sendWalletBindingSuccess: 'SHOW_BINDING_STATUS';
     setCredential:
@@ -285,8 +274,7 @@ export interface Typegen0 {
       | 'error.platform.vc-item.existingState.requestingRevoke:invocation[0]';
     setVcKey: 'REMOVE';
     setVcMetadata: 'UPDATE_VC_METADATA';
-    setVerificationErrorBanner: 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
-    setVerificationSuccessBanner: 'done.invoke.vc-item.verifyState.verifyingCredential:invocation[0]';
+    setVerificationStatus: 'STORE_RESPONSE';
     setWalletBindingError:
       | 'error.platform.vc-item.existingState.addKeyPair:invocation[0]'
       | 'error.platform.vc-item.existingState.addingWalletBindingId:invocation[0]'
@@ -395,6 +383,7 @@ export interface Typegen0 {
     | 'existingState.verifyingCredential.idle'
     | 'existingState.verifyingCredential.triggerAutoBackupForVcDownload'
     | 'verifyState'
+    | 'verifyState.handleVerificationResponse'
     | 'verifyState.idle'
     | 'verifyState.verifyingCredential'
     | {
@@ -443,7 +432,10 @@ export interface Typegen0 {
                 | {removingVc?: 'triggerAutoBackup'};
               verifyingCredential?: 'idle' | 'triggerAutoBackupForVcDownload';
             };
-        verifyState?: 'idle' | 'verifyingCredential';
+        verifyState?:
+          | 'handleVerificationResponse'
+          | 'idle'
+          | 'verifyingCredential';
       };
   tags: never;
 }

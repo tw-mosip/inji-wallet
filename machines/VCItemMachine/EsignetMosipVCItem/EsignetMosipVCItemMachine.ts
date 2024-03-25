@@ -43,7 +43,10 @@ import {BackupEvents} from '../../backupAndRestore/backup';
 import Cloud, {
   isSignedInResult,
 } from '../../../shared/CloudBackupAndRestoreUtils';
-import {verifyCredential} from '../../../shared/vcjs/verifyCredential';
+import {
+  VerificationErrorType,
+  verifyCredential,
+} from '../../../shared/vcjs/verifyCredential';
 
 const model = createModel(
   {
@@ -94,7 +97,6 @@ const model = createModel(
       REMOVE: (vcMetadata: VCMetadata) => ({vcMetadata}),
       UPDATE_VC_METADATA: (vcMetadata: VCMetadata) => ({vcMetadata}),
       SHOW_BINDING_STATUS: () => ({}),
-      VERIFY: () => ({}),
       DISMISS_VERIFICATION_IN_PROGRESS_BANNER: () => ({}),
     },
   },
@@ -456,36 +458,33 @@ export const EsignetMosipVCItemMachine = model.createMachine(
         states: {
           idle: {},
           verifyingCredential: {
-            on: {
-              DISMISS_VERIFICATION_IN_PROGRESS_BANNER: {
-                actions: ['resetVerificationBannerStatus'],
-              },
-            },
             description:
               'once the credential is downloaded, it is verified before saving',
             invoke: {
               src: 'verifyCredential',
-              onDone: [
-                {
-                  actions: [
-                    'setVerificationSuccessBanner',
-                    'setIsVerified',
-                    'sendVcUpdated',
-                    'storeContext',
-                  ],
-                  target: 'idle',
-                },
-              ],
+              onDone: {
+                actions: ['setIsVerified', 'storeContext'],
+                target: 'handleVerificationResponse',
+              },
               onError: [
                 {
-                  actions: [
-                    'setVerificationErrorBanner',
-                    'resetIsVerified',
-                    'sendVcUpdated',
-                  ],
-                  target: 'idle',
+                  cond: 'isPendingVerificationError',
+                  actions: ['resetIsVerified', 'storeContext'],
+                  target: 'handleVerificationResponse',
                 },
               ],
+            },
+          },
+          handleVerificationResponse: {
+            on: {
+              STORE_RESPONSE: {
+                actions: ['setVerificationStatus', 'sendVcUpdated', 'updateVc'],
+              },
+              //TO-DO: Handle if some error is thrown when storing verified status into storage
+              STORE_ERROR: {},
+              DISMISS_VERIFICATION_IN_PROGRESS_BANNER: {
+                actions: ['resetVerificationBannerStatus'],
+              },
             },
           },
         },
@@ -647,11 +646,13 @@ export const EsignetMosipVCItemMachine = model.createMachine(
           to: context => context.serviceRefs.vc,
         },
       ),
-      setVerificationSuccessBanner: assign({
-        verificationBannerStatus: BANNER_TYPE_SUCCESS,
-      }),
-      setVerificationErrorBanner: assign({
-        verificationBannerStatus: BANNER_TYPE_ERROR,
+
+      setVerificationStatus: assign({
+        verificationBannerStatus: (_, event) => {
+          return event.response.isVerified
+            ? BANNER_TYPE_SUCCESS
+            : BANNER_TYPE_ERROR;
+        },
       }),
 
       resetVerificationBannerStatus: assign({
@@ -957,6 +958,13 @@ export const EsignetMosipVCItemMachine = model.createMachine(
         (event.data as isSignedInResult).isSignedIn,
 
       isCustomSecureKeystore: () => isHardwareKeystoreExists,
+
+      isPendingVerificationError: (_context, event) => {
+        const isVerificationPending =
+          (event.data as Error).message ==
+          VerificationErrorType.LIBRARY_DOWN_ERROR;
+        return isVerificationPending;
+      },
     },
   },
 );
