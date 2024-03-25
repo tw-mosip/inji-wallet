@@ -76,8 +76,8 @@ export const VCItemField = props => {
 
 export const setTextColor = (wellknown: any, defaultColor) => {
   return {
-    color: wellknown?.credentials_supported[0]?.display[0]?.text_color
-      ? wellknown.credentials_supported[0].display[0].text_color
-      : defaultColor,
+    color:
+      wellknown?.credentials_supported?.InsuranceCredential?.display[0]
+        ?.text_color ?? defaultColor,
   };
 };

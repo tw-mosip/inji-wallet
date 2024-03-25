@@ -28,7 +28,6 @@ import {VCMetadata} from '../../shared/VCMetadata';
 import {WalletBinding} from './MyVcs/WalletBinding';
 import {RemoveVcWarningOverlay} from './MyVcs/RemoveVcWarningOverlay';
 import {HistoryTab} from './MyVcs/HistoryTab';
-import {BANNER_TYPE_INFO} from '../../shared/constants';
 import {BannerNotification} from '../../components/BannerNotification';
 
 export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
@@ -98,7 +97,6 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
           accessible={false}>
           <KebabPopUp
             icon={SvgImage.kebabIcon()}
-            iconColor={null}
             vcMetadata={VCMetadata.fromVC(controller.vc.vcMetadata)}
             iconName="dots-three-horizontal"
             iconType="entypo"
