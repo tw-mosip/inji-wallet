@@ -20,7 +20,6 @@ import {
   selectIsEmail,
 } from '../../machines/VCItemMachine/commonSelectors';
 import {
-  selectIsAcceptingOtpInput,
   selectVc,
   ExistingMosipVCItemEvents,
   ExistingMosipVCItemMachine,

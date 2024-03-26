@@ -201,9 +201,7 @@ export interface Typegen0 {
     refreshMyVcs:
       | 'STORE_RESPONSE'
       | 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]';
-    removeVcFromInProgressDownloads:
-      | 'STORE_RESPONSE'
-      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
+    removeVcFromInProgressDownloads: 'STORE_RESPONSE';
     removeVcItem: 'CONFIRM';
     removeVcMetaDataFromStorage:
       | 'STORE_ERROR'
@@ -231,11 +229,7 @@ export interface Typegen0 {
       | 'error.platform.vc-item.existingState.checkingServerData.verifyingDownloadLimitExpiry:invocation[0]';
     sendTamperedVc: 'TAMPERED_VC';
     sendTelemetryEvents: 'STORE_RESPONSE';
-    sendVcUpdated:
-      | 'PIN_CARD'
-      | 'STORE_RESPONSE'
-      | 'done.invoke.vc-item.existingState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
+    sendVcUpdated: 'PIN_CARD' | 'STORE_RESPONSE';
     sendVerificationError: 'STORE_RESPONSE';
     sendWalletBindingSuccess: 'SHOW_BINDING_STATUS';
     setCredential:
@@ -383,7 +377,6 @@ export interface Typegen0 {
     | 'existingState.verifyingCredential.idle'
     | 'existingState.verifyingCredential.triggerAutoBackupForVcDownload'
     | 'verifyState'
-    | 'verifyState.handleVerificationResponse'
     | 'verifyState.idle'
     | 'verifyState.verifyingCredential'
     | {
@@ -432,10 +425,7 @@ export interface Typegen0 {
                 | {removingVc?: 'triggerAutoBackup'};
               verifyingCredential?: 'idle' | 'triggerAutoBackupForVcDownload';
             };
-        verifyState?:
-          | 'handleVerificationResponse'
-          | 'idle'
-          | 'verifyingCredential';
+        verifyState?: 'idle' | 'verifyingCredential';
       };
   tags: never;
 }

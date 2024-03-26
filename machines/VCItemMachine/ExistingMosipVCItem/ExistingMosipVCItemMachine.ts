@@ -742,20 +742,13 @@ export const ExistingMosipVCItemMachine =
             verifyingCredential: {
               invoke: {
                 src: 'verifyCredential',
-                onDone: [
-                  {
-                    actions: ['setIsVerified', 'storeContext', 'sendVcUpdated'],
-                  },
-                ],
+                onDone: {
+                  actions: ['setIsVerified', 'storeContext'],
+                },
                 onError: [
                   {
                     cond: 'isPendingVerificationError',
-                    actions: [
-                      'resetIsVerified',
-                      'storeContext',
-                      'sendVcUpdated',
-                      'removeVcFromInProgressDownloads',
-                    ],
+                    actions: ['resetIsVerified', 'storeContext'],
                   },
                   {
                     actions: ['updateVerificationErrorMessage'],
@@ -768,6 +761,7 @@ export const ExistingMosipVCItemMachine =
                 STORE_RESPONSE: {
                   actions: [
                     'updateVc',
+                    'sendVcUpdated',
                     'logDownloaded',
                     'sendTelemetryEvents',
                     'removeVcFromInProgressDownloads',
@@ -822,18 +816,14 @@ export const ExistingMosipVCItemMachine =
                 src: 'verifyCredential',
                 onDone: {
                   actions: ['setIsVerified', 'storeContext'],
-                  target: 'handleVerificationResponse',
                 },
                 onError: [
                   {
                     cond: 'isPendingVerificationError',
                     actions: ['resetIsVerified', 'storeContext'],
-                    target: 'handleVerificationResponse',
                   },
                 ],
               },
-            },
-            handleVerificationResponse: {
               on: {
                 STORE_RESPONSE: {
                   actions: [
