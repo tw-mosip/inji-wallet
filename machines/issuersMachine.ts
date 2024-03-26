@@ -361,18 +361,14 @@ export const IssuersMachine = model.createMachine(
           src: 'verifyCredential',
           onDone: [
             {
-              actions: [
-                'setIsVerified',
-                'sendSuccessEndEvent',
-                'sendVcUpdated',
-              ],
+              actions: 'setIsVerified',
               target: 'storing',
             },
           ],
           onError: [
             {
               cond: 'isPendingVerificationError',
-              actions: ['resetIsVerified', 'sendVcUpdated'],
+              actions: 'resetIsVerified',
               target: 'storing',
             },
             {
@@ -400,6 +396,8 @@ export const IssuersMachine = model.createMachine(
       storing: {
         description: 'all the verified credential is stored.',
         entry: [
+          'sendSuccessEndEvent',
+          'sendVcUpdated',
           'setVCMetadata',
           'setMetadataInCredentialData',
           'storeVerifiableCredentialMeta',
