@@ -1538,7 +1538,9 @@ export const ExistingMosipVCItemMachine =
         isPendingVerificationError: (_context, event) => {
           const isVerificationPending =
             (event.data as Error).message ==
-            VerificationErrorType.LIBRARY_DOWN_ERROR;
+              VerificationErrorType.LIBRARY_DOWN_ERROR ||
+            (event.data as Error).message ==
+              VerificationErrorType.NETWORK_ERROR;
           return isVerificationPending;
         },
       },
