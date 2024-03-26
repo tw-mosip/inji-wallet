@@ -379,7 +379,7 @@
       "verificationFailed": {
         "title" : "May pagkakamaling naganap!",
         "goBackButton": "Bumalik ka",
-        "technicalError": "Dahil sa Technical Error, hindi namin na-download ang card.",
+        "technicalError": "Dahil sa Technical Error, hindi namin ma-download ang card na ito. Subukang muli mamaya.",
         "networkError": "Dahil sa hindi matatag na koneksyon sa internet, hindi namin na-download ang card. Pakisuri ang iyong koneksyon sa internet."
       }
     }

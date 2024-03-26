@@ -381,7 +381,7 @@
       "verificationFailed": {
         "title" : "An Error Occurred!",
         "goBackButton": "Go Back",
-        "technicalError": "Due to Technical Error, we were unable to download the card.",
+        "technicalError": "Due to Technical Error, we are unable to download this card. Please try again later.",
         "networkError": "Due to unstable internet connection, we were unable to download the card. Please check your internet connection."
       }
     }
