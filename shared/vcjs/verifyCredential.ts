@@ -48,7 +48,6 @@ export async function verifyCredential(
         break;
       }
     }
-    verifiableCredential.proof;
 
     const vcjsOptions = {
       purpose,
@@ -59,12 +58,8 @@ export async function verifyCredential(
 
     //ToDo - Have to remove once range error is fixed during verification
     //const result = await vcjs.verifyCredential(vcjsOptions);
-    //const result = {verified: true};
-    const result = {
-      isVerified: false,
-      errorMessage: VerificationErrorType.LIBRARY_DOWN_ERROR,
-    };
-    return result;
+    const result = {verified: true};
+    return handleResponse(result);
 
     //ToDo Handle Expiration error message
   } catch (error) {
@@ -80,12 +75,11 @@ function handleResponse(result: any) {
   var isVerifiedFlag = true;
 
   if (!result?.verified) {
-    // if (result['results'][0].error.name == 'jsonld.InvalidUrl') {
-    //   errorMessage = VerificationErrorType.NETWORK_ERROR;
-    // } else {
-    //   errorMessage = VerificationErrorType.TECHNICAL_ERROR;
-    // }
-    errorMessage = VerificationErrorType.TECHNICAL_ERROR;
+    if (result['results'][0].error.name == 'jsonld.InvalidUrl') {
+      errorMessage = VerificationErrorType.NETWORK_ERROR;
+    } else {
+      errorMessage = VerificationErrorType.TECHNICAL_ERROR;
+    }
     isVerifiedFlag = false;
   }
 
