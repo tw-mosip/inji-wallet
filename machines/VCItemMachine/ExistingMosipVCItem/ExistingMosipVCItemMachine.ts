@@ -277,12 +277,6 @@ export const ExistingMosipVCItemMachine =
             idle: {
               entry: ['clearTransactionId', 'clearOtp'],
               on: {
-                LOCK_VC: {
-                  target: 'requestingOtp',
-                },
-                REVOKE_VC: {
-                  target: 'acceptingRevokeInput',
-                },
                 ADD_WALLET_BINDING_ID: {
                   target: 'showBindingWarning',
                 },
@@ -305,63 +299,6 @@ export const ExistingMosipVCItemMachine =
               entry: 'sendVcUpdated',
               always: {
                 target: 'idle',
-              },
-            },
-            requestingOtp: {
-              invoke: {
-                src: 'requestOtp',
-                onDone: [
-                  {
-                    actions: [log('accepting OTP')],
-                    target: 'acceptingOtpInput',
-                  },
-                ],
-                onError: [
-                  {
-                    actions: [log('error OTP')],
-                    target: '#vc-item.existingState.invalid.backend',
-                  },
-                ],
-              },
-            },
-            acceptingRevokeInput: {
-              entry: [
-                log('acceptingRevokeInput'),
-                'clearOtp',
-                'setTransactionId',
-              ],
-              on: {
-                INPUT_OTP: [
-                  {
-                    actions: [
-                      log('setting OTP revoke'),
-                      'setTransactionId',
-                      'setOtp',
-                    ],
-                    target: 'requestingRevoke',
-                  },
-                ],
-                DISMISS: {
-                  actions: ['clearOtp', 'clearTransactionId'],
-                  target: 'idle',
-                },
-              },
-            },
-            showBindingWarning: {
-              on: {
-                CONFIRM: {
-                  actions: 'sendActivationStartEvent',
-                  target: 'requestingBindingOtp',
-                },
-                CANCEL: [
-                  {
-                    cond: context => context.isMachineInKebabPopupState,
-                    target: '#vc-item.existingState.kebabPopUp',
-                  },
-                  {
-                    target: 'idle',
-                  },
-                ],
               },
             },
             kebabPopUp: {
@@ -448,47 +385,82 @@ export const ExistingMosipVCItemMachine =
                 },
               },
             },
-            invalid: {
-              states: {
-                otp: {},
-                backend: {},
-              },
-              on: {
-                INPUT_OTP: {
-                  actions: 'setOtp',
-                  target: 'requestingLock',
-                },
-                DISMISS: {
-                  target: 'idle',
-                },
-              },
-            },
-            requestingRevoke: {
+            verifyingCredential: {
               invoke: {
-                src: 'requestRevoke',
-                onDone: [
-                  {
-                    actions: [log('doneRevoking'), 'setRevoke'],
-                    target: 'revokingVc',
-                  },
-                ],
+                src: 'verifyCredential',
+                onDone: {
+                  actions: ['setIsVerified', 'storeContext'],
+                },
                 onError: [
                   {
-                    actions: [
-                      log((_, event) => (event.data as Error).message),
-                      'setOtpError',
-                    ],
-                    target: 'acceptingOtpInput',
+                    cond: 'isPendingVerificationError',
+                    actions: ['resetIsVerified', 'storeContext'],
+                  },
+                  {
+                    actions: ['updateVerificationErrorMessage'],
+                    target: 'handleVCVerificationFailure',
                   },
                 ],
               },
-            },
-            revokingVc: {
-              entry: ['revokeVID'],
+              initial: 'idle',
               on: {
                 STORE_RESPONSE: {
-                  target: 'loggingRevoke',
+                  actions: [
+                    'updateVc',
+                    'sendVcUpdated',
+                    'logDownloaded',
+                    'sendTelemetryEvents',
+                    'removeVcFromInProgressDownloads',
+                  ],
+                  target: '.triggerAutoBackupForVcDownload',
                 },
+                STORE_ERROR: {
+                  target:
+                    '#vc-item.existingState.checkingServerData.savingFailed',
+                },
+              },
+              states: {
+                idle: {},
+                triggerAutoBackupForVcDownload: {
+                  invoke: {
+                    src: 'isUserSignedAlready',
+                    onDone: [
+                      {
+                        cond: 'isSignedIn',
+                        actions: ['sendBackupEvent'],
+                        target: '#vc-item.existingState.idle',
+                      },
+                      {
+                        target: '#vc-item.existingState.idle',
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            handleVCVerificationFailure: {
+              entry: ['removeVcMetaDataFromStorage'],
+              on: {
+                STORE_RESPONSE: {
+                  actions: ['sendVerificationError'],
+                },
+              },
+            },
+            showBindingWarning: {
+              on: {
+                CONFIRM: {
+                  actions: 'sendActivationStartEvent',
+                  target: 'requestingBindingOtp',
+                },
+                CANCEL: [
+                  {
+                    cond: context => context.isMachineInKebabPopupState,
+                    target: '#vc-item.existingState.kebabPopUp',
+                  },
+                  {
+                    target: 'idle',
+                  },
+                ],
               },
             },
             requestingBindingOtp: {
@@ -511,39 +483,6 @@ export const ExistingMosipVCItemMachine =
                 ],
               },
             },
-            requestingLock: {
-              invoke: {
-                src: 'requestLock',
-                onDone: [
-                  {
-                    actions: 'setLock',
-                    target: 'lockingVc',
-                  },
-                ],
-                onError: [
-                  {
-                    actions: 'setOtpError',
-                    target: 'acceptingOtpInput',
-                  },
-                ],
-              },
-            },
-            loggingRevoke: {
-              entry: [log('loggingRevoke'), 'logRevoked'],
-              on: {
-                DISMISS: {
-                  target: 'idle',
-                },
-              },
-            },
-            lockingVc: {
-              entry: ['storeLock'],
-              on: {
-                STORE_RESPONSE: {
-                  target: 'idle',
-                },
-              },
-            },
             showingWalletBindingError: {
               on: {
                 CANCEL: [
@@ -557,42 +496,6 @@ export const ExistingMosipVCItemMachine =
                     target: 'idle',
                   },
                 ],
-              },
-            },
-            acceptingOtpInput: {
-              entry: ['clearOtp', 'setTransactionId'],
-              on: {
-                INPUT_OTP: [
-                  {
-                    actions: [
-                      log('setting OTP lock'),
-                      'setTransactionId',
-                      'setOtp',
-                    ],
-                    target: 'requestingLock',
-                  },
-                ],
-                DISMISS: {
-                  actions: ['clearOtp', 'clearTransactionId'],
-                  target: 'idle',
-                },
-                RESEND_OTP: {
-                  target: '.resendOTP',
-                },
-              },
-              initial: 'idle',
-              states: {
-                idle: {},
-                resendOTP: {
-                  invoke: {
-                    src: 'requestOtp',
-                    onDone: [
-                      {
-                        target: 'idle',
-                      },
-                    ],
-                  },
-                },
               },
             },
             acceptingBindingOtp: {
@@ -633,10 +536,10 @@ export const ExistingMosipVCItemMachine =
                     src: 'requestBindingOtp',
                     onDone: {
                       target: 'idle',
+                      actions: ['setPhoneNumber', 'setEmail'],
                     },
                     onError: {
                       actions: 'setWalletBindingError',
-                      actions: ['setPhoneNumber', 'setEmail'],
                       target:
                         '#vc-item.existingState.showingWalletBindingError',
                     },
@@ -737,67 +640,6 @@ export const ExistingMosipVCItemMachine =
                     target: 'idle',
                   },
                 ],
-              },
-            },
-            verifyingCredential: {
-              invoke: {
-                src: 'verifyCredential',
-                onDone: {
-                  actions: ['setIsVerified', 'storeContext'],
-                },
-                onError: [
-                  {
-                    cond: 'isPendingVerificationError',
-                    actions: ['resetIsVerified', 'storeContext'],
-                  },
-                  {
-                    actions: ['updateVerificationErrorMessage'],
-                    target: 'handleVCVerificationFailure',
-                  },
-                ],
-              },
-              initial: 'idle',
-              on: {
-                STORE_RESPONSE: {
-                  actions: [
-                    'updateVc',
-                    'sendVcUpdated',
-                    'logDownloaded',
-                    'sendTelemetryEvents',
-                    'removeVcFromInProgressDownloads',
-                  ],
-                  target: '.triggerAutoBackupForVcDownload',
-                },
-                STORE_ERROR: {
-                  target:
-                    '#vc-item.existingState.checkingServerData.savingFailed',
-                },
-              },
-              states: {
-                idle: {},
-                triggerAutoBackupForVcDownload: {
-                  invoke: {
-                    src: 'isUserSignedAlready',
-                    onDone: [
-                      {
-                        cond: 'isSignedIn',
-                        actions: ['sendBackupEvent'],
-                        target: '#vc-item.existingState.idle',
-                      },
-                      {
-                        target: '#vc-item.existingState.idle',
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-            handleVCVerificationFailure: {
-              entry: ['removeVcMetaDataFromStorage'],
-              on: {
-                STORE_RESPONSE: {
-                  actions: ['sendVerificationError'],
-                },
               },
             },
           },
@@ -1240,10 +1082,6 @@ export const ExistingMosipVCItemMachine =
           },
         ),
 
-        setTransactionId: assign({
-          transactionId: () => String(new Date().valueOf()).substring(3, 13),
-        }),
-
         clearTransactionId: assign({transactionId: ''}),
 
         setOtp: model.assign({
@@ -1252,11 +1090,6 @@ export const ExistingMosipVCItemMachine =
 
         setVcKey: model.assign({
           vcMetadata: (_, event) => event.vcMetadata,
-        }),
-
-        setOtpError: assign({
-          otpError: (_context, event) =>
-            (event as ErrorPlatformEvent).data.message,
         }),
 
         setPhoneNumber: assign({
@@ -1500,23 +1333,6 @@ export const ExistingMosipVCItemMachine =
             }
           }
         },
-
-        requestOtp: async context => {
-          try {
-            return request(
-              API_URLS.requestOtp.method,
-              API_URLS.requestOtp.buildURL(),
-              {
-                individualId: context.vcMetadata.id,
-                individualIdType: context.vcMetadata.idType,
-                otpChannel: ['EMAIL', 'PHONE'],
-                transactionID: context.transactionId,
-              },
-            );
-          } catch (error) {
-            console.error(error);
-          }
-        },
       },
 
       guards: {
@@ -1568,9 +1384,9 @@ export function selectId(state: State) {
 }
 
 export function selectRequestBindingOtp(state: State) {
-  return state.matches('requestingBindingOtp');
+  return state.matches('existingState.requestingBindingOtp');
 }
 
 export function selectIsSavingFailedInIdle(state: State) {
-  return state.matches('checkingServerData.savingFailed.idle');
+  return state.matches('existingState.checkingServerData.savingFailed.idle');
 }
