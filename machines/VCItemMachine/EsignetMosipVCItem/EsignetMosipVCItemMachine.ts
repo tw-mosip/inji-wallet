@@ -175,12 +175,6 @@ export const EsignetMosipVCItemMachine = model.createMachine(
               ],
             },
           },
-          pinCard: {
-            entry: 'sendVcUpdated',
-            always: {
-              target: 'idle',
-            },
-          },
           requestingBindingOtp: {
             invoke: {
               src: 'requestBindingOtp',
@@ -367,6 +361,12 @@ export const EsignetMosipVCItemMachine = model.createMachine(
                 target: 'pinCard',
                 actions: 'setPinCard',
               },
+            },
+          },
+          pinCard: {
+            entry: 'sendVcUpdated',
+            always: {
+              target: 'idle',
             },
           },
           kebabPopUp: {
