@@ -83,12 +83,44 @@ export const getFieldValue = (
     }
   }
 };
+export const getCredentialDefinition = (
+  wellknown: any,
+  vcCredentialTypes: Object[],
+) => {
+  if (Array.isArray(wellknown.credentials_supported)) {
+    return wellknown.credentials_supported[0].credential_definition;
+  } else {
+    for (const supportedCredential in wellknown.credentials_supported) {
+      const credentialDefintion =
+        wellknown.credentials_supported[supportedCredential]
+          .credential_definition;
+      if (
+        JSON.stringify(credentialDefintion.type) ===
+        JSON.stringify(vcCredentialTypes)
+      ) {
+        return credentialDefintion;
+      }
+    }
+    return null;
+  }
+};
 
-export const getFieldName = (field: string, wellknown: any) => {
+export const getFieldName = (
+  field: string,
+  wellknown: any,
+  vcCredentialTypes: Object[],
+) => {
   if (wellknown && wellknown.credentials_supported) {
-    const fieldObj =
-      wellknown.credentials_supported[0].credential_definition
-        .credentialSubject[field];
+    const credentialDefinition = getCredentialDefinition(
+      wellknown,
+      vcCredentialTypes,
+    );
+    if (!credentialDefinition) {
+      console.error(
+        'Credential definition is not available for the selected credential type',
+      );
+    }
+    let fieldObj = credentialDefinition.credentialSubject[field];
     if (fieldObj) {
       const newFieldObj = fieldObj.display.map(obj => {
         return {language: obj.locale, value: obj.name};
@@ -147,9 +179,10 @@ export const fieldItemIterator = (
   verifiableCredential: any,
   wellknown: any,
   props: any,
+  vcCredentialTypes: Object[],
 ) => {
   return fields.map(field => {
-    const fieldName = getFieldName(field, wellknown);
+    const fieldName = getFieldName(field, wellknown, vcCredentialTypes);
     const fieldValue = getFieldValue(
       verifiableCredential,
       field,

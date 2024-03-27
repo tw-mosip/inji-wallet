@@ -160,6 +160,7 @@ export const VCDetailView: React.FC<
                     verifiableCredential,
                     wellknown,
                     props,
+                    props.vc?.verifiableCredential?.credentialTypes,
                   )}
                 </Column>
               </Row>
@@ -181,6 +182,7 @@ export const VCDetailView: React.FC<
                       verifiableCredential,
                       wellknown,
                       props,
+                      props.vc?.verifiableCredential?.credentialTypes,
                     )}
                   </Column>
                 </>
