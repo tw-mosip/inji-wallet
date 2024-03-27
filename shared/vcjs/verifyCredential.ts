@@ -95,7 +95,6 @@ export const VerificationErrorType = {
   TECHNICAL_ERROR: 'technicalError',
   NETWORK_ERROR: 'networkError',
   EXPIRATION_ERROR: 'expirationError',
-  LIBRARY_DOWN_ERROR: 'libraryDownError',
 };
 
 export interface VerificationResult {
