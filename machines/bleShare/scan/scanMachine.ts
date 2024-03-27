@@ -182,13 +182,11 @@ export const scanMachine =
           entry: ['removeLoggers'],
         },
         disconnectDevice: {
-          entry: ['resetFlowType', 'resetSelectedVc'],
           invoke: {
             src: 'disconnect',
           },
           on: {
             DISCONNECT: {
-              actions: ['resetFlowType', 'resetSelectedVc'],
               target: '#scan.inactive',
             },
           },
@@ -573,7 +571,6 @@ export const scanMachine =
               },
             },
             cancelling: {
-              entry: ['resetFlowType', 'resetSelectedVc'],
               always: {
                 target: '#scan.clearingConnection',
               },
@@ -746,7 +743,6 @@ export const scanMachine =
           },
         },
         disconnected: {
-          entry: ['resetSelectedVc', 'resetFlowType'],
           on: {
             RETRY: {
               target: '#scan.reviewing.cancelling',
