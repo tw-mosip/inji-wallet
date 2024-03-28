@@ -4,6 +4,9 @@ import {requestMachine} from './request/requestMachine';
 
 type State = StateFrom<typeof scanMachine & typeof requestMachine>;
 
+// TODO: Separate selectors for Scan and Request machine selectors and use it
+// this helps in removing unused code in request machine
+
 export function selectIsCancelling(state: State) {
   return state.matches('cancelling');
 }

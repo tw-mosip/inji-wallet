@@ -11,6 +11,8 @@ import {
   selectIsNavigatingToReceivedCards,
   selectIsNavigatingToHome,
 } from '../../machines/bleShare/request/selectors';
+
+// TODO: remove common selectors and use specific selectors
 import {
   selectIsAccepted,
   selectIsDisconnected,

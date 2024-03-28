@@ -10,7 +10,6 @@ import {Theme} from '../../components/ui/styleUtils';
 import {Icon} from 'react-native-elements';
 import {Loader} from '../../components/ui/Loader';
 import {VCShareFlowType} from '../../shared/Utils';
-import {VerifyIdentityOverlay} from '../VerifyIdentityOverlay';
 import {SvgImage} from '../../components/ui/svg';
 import {BANNER_TYPE_SUCCESS} from '../../shared/constants';
 import {View, I18nManager} from 'react-native';
@@ -50,16 +49,6 @@ export const ScanLayout: React.FC = () => {
 
   return (
     <React.Fragment>
-      <VerifyIdentityOverlay
-        vc={controller.selectedVc}
-        isVerifyingIdentity={controller.isVerifyingIdentity}
-        onCancel={controller.CANCEL}
-        onFaceValid={controller.FACE_VALID}
-        onFaceInvalid={controller.FACE_INVALID}
-        isInvalidIdentity={controller.isInvalidIdentity}
-        onDismiss={controller.DISMISS}
-        onRetryVerification={controller.RETRY_VERIFICATION}
-      />
 
       <ScanStack.Navigator initialRouteName="ScanScreen">
         {controller.isReviewing &&

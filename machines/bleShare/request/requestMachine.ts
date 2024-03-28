@@ -319,11 +319,12 @@ export const requestMachine =
             target: '#request.clearingConnection',
           },
         },
-        reviewing: {
+        // TODO: need to remove this state since it is not used
+        reviewing: { 
           initial: 'idle',
           states: {
             idle: {},
-            verifyingIdentity: {
+verifyingIdentity: {
               exit: 'clearShouldVerifyPresence',
               on: {
                 FACE_VALID: {
@@ -415,7 +416,7 @@ export const requestMachine =
                 },
               },
             },
-            rejected: {
+rejected: {
               entry: [
                 'setReceiveLogTypeDiscarded',
                 'logReceived',
@@ -488,7 +489,7 @@ export const requestMachine =
               },
             },
           },
-          on: {
+on: {
             ACCEPT: {
               target: '.accepting',
               actions: 'setReceiveLogTypeRegular',
