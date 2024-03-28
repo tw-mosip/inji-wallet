@@ -12,6 +12,7 @@ import {getIdType, Issuers, Protocols} from '../../../shared/openId4VCI/Utils';
 import {StoreEvents} from '../../../machines/store';
 import {
   BANNER_TYPE_ERROR,
+  BANNER_TYPE_INFO,
   BANNER_TYPE_SUCCESS,
   MIMOTO_BASE_URL,
   MY_VCS_STORE_KEY,
@@ -97,7 +98,8 @@ const model = createModel(
       REMOVE: (vcMetadata: VCMetadata) => ({vcMetadata}),
       UPDATE_VC_METADATA: (vcMetadata: VCMetadata) => ({vcMetadata}),
       SHOW_BINDING_STATUS: () => ({}),
-      DISMISS_VERIFICATION_IN_PROGRESS_BANNER: () => ({}),
+      SET_VERIFICATION_STATUS: (response: unknown) => ({response}),
+      DISMISS_VERIFICATION_STATUS_BANNER: () => ({}),
     },
   },
 );
@@ -450,7 +452,10 @@ export const EsignetMosipVCItemMachine = model.createMachine(
       verifyState: {
         on: {
           VERIFY: {
-            target: '.verifyingCredential',
+            target: '#vc-item-openid4vci.verifyState.verifyingCredential',
+          },
+          DISMISS_VERIFICATION_STATUS_BANNER: {
+            actions: 'resetVerificationBannerStatus',
           },
         },
         initial: 'idle',
@@ -463,26 +468,36 @@ export const EsignetMosipVCItemMachine = model.createMachine(
               src: 'verifyCredential',
               onDone: {
                 actions: ['setIsVerified', 'storeContext'],
-                target: 'handleVerificationResponse',
               },
               onError: [
                 {
                   cond: 'isPendingVerificationError',
                   actions: ['resetIsVerified', 'storeContext'],
-                  target: 'handleVerificationResponse',
                 },
               ],
             },
-          },
-          handleVerificationResponse: {
+            after: {
+              1000: [
+                {
+                  cond: context => context.verificationBannerStatus === '',
+                  actions: send({
+                    type: 'SET_VERIFICATION_STATUS',
+                    response: {verificationStatus: BANNER_TYPE_INFO},
+                  }),
+                },
+              ],
+            },
             on: {
               STORE_RESPONSE: {
                 actions: ['setVerificationStatus', 'sendVcUpdated', 'updateVc'],
               },
               //TO-DO: Handle if some error is thrown when storing verified status into storage
               STORE_ERROR: {},
-              DISMISS_VERIFICATION_IN_PROGRESS_BANNER: {
-                actions: ['resetVerificationBannerStatus'],
+              SET_VERIFICATION_STATUS: {
+                actions: 'setVerificationStatus',
+              },
+              DISMISS_VERIFICATION_STATUS_BANNER: {
+                actions: 'resetVerificationBannerStatus',
               },
             },
           },
@@ -648,9 +663,10 @@ export const EsignetMosipVCItemMachine = model.createMachine(
 
       setVerificationStatus: assign({
         verificationBannerStatus: (_, event) => {
-          return event.response.isVerified
-            ? BANNER_TYPE_SUCCESS
-            : BANNER_TYPE_ERROR;
+          return event.response.verificationStatus === BANNER_TYPE_INFO
+            ? BANNER_TYPE_INFO
+            : (event.response.isVerified && BANNER_TYPE_SUCCESS) ||
+                BANNER_TYPE_ERROR;
         },
       }),
 

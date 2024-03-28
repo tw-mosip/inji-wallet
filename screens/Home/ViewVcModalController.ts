@@ -130,9 +130,9 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
     RESEND_OTP: () => vcItemActor.send(ExistingMosipVCItemEvents.RESEND_OTP()),
     CANCEL: () => vcItemActor.send(ExistingMosipVCItemEvents.CANCEL()),
     CONFIRM: () => vcItemActor.send(ExistingMosipVCItemEvents.CONFIRM()),
-    DISMISS_VERIFICATION_IN_PROGRESS_BANNER: () => {
+    DISMISS_VERIFICATION_STATUS_BANNER: () => {
       vcItemActor.send(
-        ExistingMosipVCItemEvents.DISMISS_VERIFICATION_IN_PROGRESS_BANNER(),
+        ExistingMosipVCItemEvents.DISMISS_VERIFICATION_STATUS_BANNER(),
       );
     },
   };

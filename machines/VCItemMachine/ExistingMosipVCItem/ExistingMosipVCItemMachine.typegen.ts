@@ -184,7 +184,7 @@ export interface Typegen0 {
     resetIsVerified:
       | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
       | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
-    resetVerificationBannerStatus: 'DISMISS_VERIFICATION_IN_PROGRESS_BANNER';
+    resetVerificationBannerStatus: 'DISMISS_VERIFICATION_STATUS_BANNER';
     sendActivationFailedEndEvent:
       | 'DISMISS'
       | 'error.platform.vc-item.existingState.updatingPrivateKey:invocation[0]';
@@ -228,7 +228,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item.existingState.updatingPrivateKey:invocation[0]';
     setVcKey: 'REMOVE';
     setVcMetadata: 'UPDATE_VC_METADATA';
-    setVerificationStatus: 'STORE_RESPONSE';
+    setVerificationStatus: 'SET_VERIFICATION_STATUS' | 'STORE_RESPONSE';
     setWalletBindingError:
       | 'error.platform.vc-item.existingState.acceptingBindingOtp.resendOTP:invocation[0]'
       | 'error.platform.vc-item.existingState.addKeyPair:invocation[0]'
@@ -265,9 +265,7 @@ export interface Typegen0 {
       | 'done.invoke.vc-item.existingState.addKeyPair:invocation[0]'
       | 'done.invoke.vc-item.existingState.addingWalletBindingId:invocation[0]';
     isDownloadAllowed: 'POLL';
-    isPendingVerificationError:
-      | 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]'
-      | 'error.platform.vc-item.verifyState.verifyingCredential:invocation[0]';
+    isPendingVerificationError: 'error.platform.vc-item.existingState.verifyingCredential:invocation[0]';
     isSignedIn:
       | 'done.invoke.vc-item.existingState.kebabPopUp.removingVc.triggerAutoBackup:invocation[0]'
       | 'done.invoke.vc-item.existingState.verifyingCredential.triggerAutoBackupForVcDownload:invocation[0]';

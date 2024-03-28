@@ -58,6 +58,9 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
 
   useEffect(() => {
     if (!controller.vc.vcMetadata.isVerified) {
+      if (controller.verificationBannerStatus !== '') {
+        controller.DISMISS_VERIFICATION_STATUS_BANNER();
+      }
       props.vcItemActor.send({type: 'VERIFY'});
     }
   }, [controller.vc.vcMetadata.isVerified]);
@@ -126,9 +129,7 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
         <BannerNotification
           type={controller.verificationBannerStatus}
           message={t(`bannerInfo.${controller.verificationBannerStatus}`)}
-          onClosePress={() =>
-            controller.DISMISS_VERIFICATION_IN_PROGRESS_BANNER()
-          }
+          onClosePress={() => controller.DISMISS_VERIFICATION_STATUS_BANNER()}
           key={'reVerificationInProgress'}
           testId={'reVerificationInProgress'}
         />

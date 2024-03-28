@@ -2,6 +2,7 @@ import {assign, ErrorPlatformEvent, EventFrom, send, StateFrom} from 'xstate';
 import {createModel} from 'xstate/lib/model';
 import {
   BANNER_TYPE_ERROR,
+  BANNER_TYPE_INFO,
   BANNER_TYPE_SUCCESS,
   MIMOTO_BASE_URL,
   MY_VCS_STORE_KEY,
@@ -115,7 +116,8 @@ const model = createModel(
       UPDATE_VC_METADATA: (vcMetadata: VCMetadata) => ({vcMetadata}),
       TAMPERED_VC: (key: string) => ({key}),
       SHOW_BINDING_STATUS: () => ({}),
-      DISMISS_VERIFICATION_IN_PROGRESS_BANNER: () => ({}),
+      SET_VERIFICATION_STATUS: (response: unknown) => ({response}),
+      DISMISS_VERIFICATION_STATUS_BANNER: () => ({}),
     },
   },
 );
@@ -289,9 +291,6 @@ export const ExistingMosipVCItemMachine =
                 },
                 DISMISS: {
                   target: 'checkingVc',
-                },
-                DISMISS_VERIFICATION_IN_PROGRESS_BANNER: {
-                  actions: 'resetVerificationBannerStatus',
                 },
               },
             },
@@ -649,6 +648,9 @@ export const ExistingMosipVCItemMachine =
             VERIFY: {
               target: '#vc-item.verifyState.verifyingCredential',
             },
+            DISMISS_VERIFICATION_STATUS_BANNER: {
+              actions: 'resetVerificationBannerStatus',
+            },
           },
           initial: 'idle',
           states: {
@@ -661,8 +663,19 @@ export const ExistingMosipVCItemMachine =
                 },
                 onError: [
                   {
-                    cond: 'isPendingVerificationError',
+                    // cond: 'isPendingVerificationError',
                     actions: ['resetIsVerified', 'storeContext'],
+                  },
+                ],
+              },
+              after: {
+                1000: [
+                  {
+                    cond: context => context.verificationBannerStatus === '',
+                    actions: send({
+                      type: 'SET_VERIFICATION_STATUS',
+                      response: {verificationStatus: BANNER_TYPE_INFO},
+                    }),
                   },
                 ],
               },
@@ -676,8 +689,11 @@ export const ExistingMosipVCItemMachine =
                 },
                 //TO-DO: Handle if some error is thrown when storing verified status into storage
                 STORE_ERROR: {},
-                DISMISS_VERIFICATION_IN_PROGRESS_BANNER: {
-                  actions: ['resetVerificationBannerStatus'],
+                SET_VERIFICATION_STATUS: {
+                  actions: 'setVerificationStatus',
+                },
+                DISMISS_VERIFICATION_STATUS_BANNER: {
+                  actions: 'resetVerificationBannerStatus',
                 },
               },
             },
@@ -1133,9 +1149,10 @@ export const ExistingMosipVCItemMachine =
         ),
         setVerificationStatus: assign({
           verificationBannerStatus: (_, event) => {
-            return event.response.isVerified
-              ? BANNER_TYPE_SUCCESS
-              : BANNER_TYPE_ERROR;
+            return event.response.verificationStatus === BANNER_TYPE_INFO
+              ? BANNER_TYPE_INFO
+              : (event.response.isVerified && BANNER_TYPE_SUCCESS) ||
+                  BANNER_TYPE_ERROR;
           },
         }),
 

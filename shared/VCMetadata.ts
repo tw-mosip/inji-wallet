@@ -50,7 +50,7 @@ export class VCMetadata {
     });
   }
 
-  static fromVcMetadataString(vcMetadataStr: string) {
+  static fromVcMetadataString(vcMetadataStr: string | object) {
     try {
       if (typeof vcMetadataStr === 'object')
         return new VCMetadata(vcMetadataStr);
