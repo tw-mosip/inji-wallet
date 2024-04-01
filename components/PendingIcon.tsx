@@ -11,7 +11,7 @@ const PendingIcon: React.FC = () => {
           name="alert-circle"
           type="material-community"
           color={Theme.Colors.PendingIcon}
-          size={14}
+          size={12}
         />
       </View>
     </View>
