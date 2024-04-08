@@ -108,7 +108,7 @@ fileignoreconfig:
   - filename: injitest/src/test/java/androidTestCases/PinVcTest.java
     checksum: 6ec2787bee662ff158cbd7489d09ab131ab74484e42d7c5eba342e54898c891d
   - filename: injitest/src/test/java/androidTestCases/NoNetworkAndroidTest.java
-    checksum: c300122d39af06f68ecd0b6dc287daa0370fc6b744072944ddcc7fe4ded79fb3
+    checksum: 9d987a7422418f331960f897c1c10ca7e8209680b948eb8d7b48b0fe655e8659
   - filename: injitest/src/test/java/androidTestCases/CredentialRegistryTest.java
     checksum: 126ad4f513d5e417fdc3ccbace187315b8aae4399806d3259421f8bca7d41254
   - filename: injitest/src/test/java/iosTestCases/NoNetworkIosTest.java
