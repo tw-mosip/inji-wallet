@@ -65,7 +65,17 @@ export interface Typegen0 {
       | 'storeVc';
     delays: 'DESTROY_TIMEOUT' | 'SHARING_TIMEOUT';
     guards: 'isMinimumStorageLimitReached';
-    services: never;
+    services:
+      | 'advertiseDevice'
+      | 'checkBluetoothService'
+      | 'checkNearByDevicesPermission'
+      | 'checkStorageAvailability'
+      | 'disconnect'
+      | 'monitorConnection'
+      | 'receiveVc'
+      | 'requestBluetooth'
+      | 'requestNearByDevicesPermission'
+      | 'sendVcResponse';
   };
   eventsCausingActions: {
     logReceived: 'CANCEL' | 'REJECT' | 'STORE_ERROR' | 'STORE_RESPONSE';
