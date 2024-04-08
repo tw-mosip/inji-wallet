@@ -15,6 +15,7 @@ import Storage from '../../../shared/storage';
 import {RequestActions} from './RequestActions';
 import {RequestDelays} from './RequestDelays';
 import {RequestModel} from './RequestModel';
+import {RequestGuards} from './RequestGuards';
 
 const {verifier, EventTypes, VerificationStatus} = tuvali;
 
@@ -567,9 +568,7 @@ export const requestMachine =
         },
       },
 
-      guards: {
-        isMinimumStorageLimitReached: (_context, event) => Boolean(event.data),
-      },
+      guards: RequestGuards(),
 
       delays: RequestDelays(),
     },
