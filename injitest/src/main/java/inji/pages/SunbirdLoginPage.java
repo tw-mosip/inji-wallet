@@ -74,8 +74,8 @@ public class SunbirdLoginPage extends BasePage {
     @iOSXCUITFindBy(accessibility = "Policy NameValue")
     private WebElement policyName;
 
-    @AndroidFindBy(accessibility = "idTypeValue")
-    @iOSXCUITFindBy(accessibility = "idTypeValue")
+    @AndroidFindBy(accessibility = "ID TypeValue")
+    @iOSXCUITFindBy(accessibility = "ID TypeValue")
     private WebElement idType;
 
     @iOSXCUITFindBy(accessibility = "Continue")
