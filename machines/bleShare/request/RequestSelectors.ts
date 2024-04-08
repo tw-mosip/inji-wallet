@@ -1,14 +1,14 @@
 import {StateFrom} from 'xstate';
 import {AppServices} from '../../../shared/GlobalContext';
-import {requestMachine} from './requestMachine';
+import {RequestMachine} from './requestMachine';
 import {VCMetadata} from '../../../shared/VCMetadata';
 import {getMosipLogo} from '../../../components/VC/common/VCUtils';
 
-type State = StateFrom<typeof requestMachine>;
+type State = StateFrom<typeof RequestMachine>;
 
 export function createRequestMachine(serviceRefs: AppServices) {
-  return requestMachine.withContext({
-    ...requestMachine.context,
+  return RequestMachine.withContext({
+    ...RequestMachine.context,
     serviceRefs,
   });
 }

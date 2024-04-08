@@ -7,7 +7,7 @@ import {authMachine, createAuthMachine} from './auth';
 import {createSettingsMachine, settingsMachine} from './settings';
 import {StoreEvents, storeMachine} from './store';
 import {activityLogMachine, createActivityLogMachine} from './activityLog';
-import {requestMachine} from './bleShare/request/requestMachine';
+import {RequestMachine} from './bleShare/request/requestMachine';
 import {createRequestMachine} from './bleShare/request/RequestSelectors';
 import {createScanMachine, scanMachine} from './bleShare/scan/scanMachine';
 import {pure, respond} from 'xstate/lib/actions';
@@ -289,7 +289,7 @@ export const appMachine = model.createMachine(
           if (isAndroid()) {
             serviceRefs.request = spawn(
               createRequestMachine(serviceRefs),
-              requestMachine.id,
+              RequestMachine.id,
             );
           }
           return serviceRefs;
