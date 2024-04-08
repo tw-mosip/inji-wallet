@@ -20,6 +20,7 @@ import {BLEError} from '../types';
 import Storage from '../../../shared/storage';
 import {VCMetadata} from '../../../shared/VCMetadata';
 import {RequestActions} from './RequestActions';
+import {RequestDelays} from './RequestDelays';
 
 const {verifier, EventTypes, VerificationStatus} = tuvali;
 
@@ -623,10 +624,7 @@ export const requestMachine =
         isMinimumStorageLimitReached: (_context, event) => Boolean(event.data),
       },
 
-      delays: {
-        DESTROY_TIMEOUT: 500,
-        SHARING_TIMEOUT: 15 * 1000,
-      },
+      delays: RequestDelays(),
     },
   );
 
