@@ -8,7 +8,7 @@ import {scanMachine} from '../machines/bleShare/scan/scanMachine';
 import {settingsMachine} from '../machines/settings';
 import {storeMachine} from '../machines/store';
 import {backupMachine} from '../machines/backupAndRestore/backup';
-import {backupRestoreMachine} from '../machines/backupAndRestore/backupRestore';
+import {backupRestoreMachine} from '../machines/backupAndRestore/BackupRestore/BackupRestoreMachine';
 import {vcMetaMachine} from '../machines/VerifiableCredential/VCMetaMachine/VCMetaMachine';
 
 export const GlobalContext = createContext({} as GlobalServices);

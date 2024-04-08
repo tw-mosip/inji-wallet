@@ -24,14 +24,13 @@ import {
 } from '../shared/constants';
 import {logState} from '../shared/commonUtil';
 import {backupMachine, createBackupMachine} from './backupAndRestore/backup';
-import {
-  backupRestoreMachine,
-  createBackupRestoreMachine,
-} from './backupAndRestore/backupRestore';
+
 import {
   createVcMetaMachine,
   vcMetaMachine,
 } from './VerifiableCredential/VCMetaMachine/VCMetaMachine';
+import {createBackupRestoreMachine} from './backupAndRestore/BackupRestore/BackupRestoreSelectors';
+import {backupRestoreMachine} from './backupAndRestore/BackupRestore/BackupRestoreMachine';
 
 const model = createModel(
   {

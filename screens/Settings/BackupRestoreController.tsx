@@ -1,13 +1,13 @@
 import {useSelector} from '@xstate/react';
 import {useContext} from 'react';
 import {
-  BackupRestoreEvents,
   selectIsBackUpRestoring,
   selectIsBackUpRestoreFailure,
   selectIsBackUpRestoreSuccess,
   selectErrorReason,
   selectShowRestoreInProgress,
-} from '../../machines/backupAndRestore/backupRestore';
+} from '../../machines/backupAndRestore/BackupRestore/BackupRestoreSelectors';
+import {BackupRestoreEvents} from '../../machines/backupAndRestore/BackupRestore/BackupRestoreEvents';
 import {GlobalContext} from '../../shared/GlobalContext';
 
 export function useBackupRestoreScreen() {
