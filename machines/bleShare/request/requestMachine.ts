@@ -1,6 +1,5 @@
 import tuvali from '@mosip/tuvali';
 import BluetoothStateManager from 'react-native-bluetooth-state-manager';
-import {EmitterSubscription} from 'react-native';
 import {
   checkMultiple,
   PERMISSIONS,
@@ -8,70 +7,18 @@ import {
   RESULTS,
 } from 'react-native-permissions';
 import {EventFrom, StateFrom} from 'xstate';
-import {createModel} from 'xstate/lib/model';
-import {DeviceInfo} from '../../../components/DeviceInfoList';
-import {VC} from '../../VerifiableCredential/VCMetaMachine/vc';
 import {AppServices} from '../../../shared/GlobalContext';
 import {androidVersion, isAndroid} from '../../../shared/constants';
-import {ActivityLogType} from '../../activityLog';
 import {subscribe} from '../../../shared/openIdBLE/verifierEventHandler';
 import {VerifierDataEvent} from '@mosip/tuvali/src/types/events';
-import {BLEError} from '../types';
 import Storage from '../../../shared/storage';
-import {VCMetadata} from '../../../shared/VCMetadata';
 import {RequestActions} from './RequestActions';
 import {RequestDelays} from './RequestDelays';
+import {RequestModel} from './RequestModel';
 
 const {verifier, EventTypes, VerificationStatus} = tuvali;
 
-const model = createModel(
-  {
-    serviceRefs: {} as AppServices,
-    senderInfo: {} as DeviceInfo,
-    receiverInfo: {} as DeviceInfo,
-    incomingVc: {} as VC,
-    openId4VpUri: '',
-    bleError: {} as BLEError,
-    loggers: [] as EmitterSubscription[],
-    receiveLogType: '' as ActivityLogType,
-    readyForBluetoothStateCheck: false,
-  },
-  {
-    events: {
-      ACCEPT: () => ({}),
-      ACCEPT_AND_VERIFY: () => ({}),
-      GO_TO_RECEIVED_VC_TAB: () => ({}),
-      REJECT: () => ({}),
-      CANCEL: () => ({}),
-      RESET: () => ({}),
-      DISMISS: () => ({}),
-      VC_RECEIVED: (vc: VC) => ({vc}),
-      ADV_STARTED: (openId4VpUri: string) => ({openId4VpUri}),
-      CONNECTED: () => ({}),
-      DISCONNECT: () => ({}),
-      BLE_ERROR: (bleError: BLEError) => ({bleError}),
-      EXCHANGE_DONE: (senderInfo: DeviceInfo) => ({senderInfo}),
-      SCREEN_FOCUS: () => ({}),
-      SCREEN_BLUR: () => ({}),
-      BLUETOOTH_STATE_ENABLED: () => ({}),
-      BLUETOOTH_STATE_DISABLED: () => ({}),
-      NEARBY_ENABLED: () => ({}),
-      NEARBY_DISABLED: () => ({}),
-      STORE_READY: () => ({}),
-      STORE_RESPONSE: (response: unknown) => ({response}),
-      STORE_ERROR: (error: Error) => ({error}),
-      RECEIVE_DEVICE_INFO: (info: DeviceInfo) => ({info}),
-      RECEIVED_VCS_UPDATED: () => ({}),
-      VC_RESPONSE: (vcMetadatas: VCMetadata[]) => ({vcMetadatas}),
-      GOTO_SETTINGS: () => ({}),
-      APP_ACTIVE: () => ({}),
-      FACE_VALID: () => ({}),
-      FACE_INVALID: () => ({}),
-      RETRY_VERIFICATION: () => ({}),
-      GOTO_HOME: () => ({}),
-    },
-  },
-);
+const model = RequestModel;
 export const RequestEvents = model.events;
 
 export const requestMachine =
