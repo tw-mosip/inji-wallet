@@ -10,7 +10,7 @@ import {
   selectIsDone,
   selectIsNavigatingToReceivedCards,
   selectIsNavigatingToHome,
-} from '../../machines/bleShare/request/selectors';
+} from '../../machines/bleShare/request/RequestSelectors';
 import {
   selectIsAccepted,
   selectIsDisconnected,
@@ -19,7 +19,7 @@ import {
   selectIsReviewing,
   selectBleError,
 } from '../../machines/bleShare/commonSelectors';
-import {RequestEvents} from '../../machines/bleShare/request/requestMachine';
+import {RequestEvents} from '../../machines/bleShare/request/RequestEvents';
 import {
   BOTTOM_TAB_ROUTES,
   REQUEST_ROUTES,

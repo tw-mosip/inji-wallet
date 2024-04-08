@@ -9,12 +9,12 @@ import {
   selectIsSavingFailedInIdle,
   selectSenderInfo,
   selectVerifiableCredentialData,
-} from '../../machines/bleShare/request/selectors';
+} from '../../machines/bleShare/request/RequestSelectors';
 import {
   selectIsInvalidIdentity,
   selectIsVerifyingIdentity,
 } from '../../machines/bleShare/commonSelectors';
-import {RequestEvents} from '../../machines/bleShare/request/requestMachine';
+import {RequestEvents} from '../../machines/bleShare/request/RequestEvents';
 
 export function useReceiveVcScreen() {
   const {appService} = useContext(GlobalContext);

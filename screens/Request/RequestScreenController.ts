@@ -11,7 +11,7 @@ import {
   selectIsWaitingForVcTimeout,
   selectOpenId4VpUri,
   selectSenderInfo,
-} from '../../machines/bleShare/request/selectors';
+} from '../../machines/bleShare/request/RequestSelectors';
 import {
   selectIsBluetoothDenied,
   selectIsCancelling,
@@ -19,10 +19,8 @@ import {
   selectIsReviewing,
   selectReadyForBluetoothStateCheck,
 } from '../../machines/bleShare/commonSelectors';
-import {
-  RequestEvents,
-  selectIsMinimumStorageLimitReached,
-} from '../../machines/bleShare/request/requestMachine';
+import {RequestEvents} from '../../machines/bleShare/request/RequestEvents';
+import {selectIsMinimumStorageLimitReached} from '../../machines/bleShare/request/RequestSelectors';
 
 export function useRequestScreen() {
   const {t} = useTranslation('RequestScreen');

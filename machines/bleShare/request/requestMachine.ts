@@ -6,8 +6,7 @@ import {
   requestMultiple,
   RESULTS,
 } from 'react-native-permissions';
-import {EventFrom, StateFrom} from 'xstate';
-import {AppServices} from '../../../shared/GlobalContext';
+import {EventFrom} from 'xstate';
 import {androidVersion, isAndroid} from '../../../shared/constants';
 import {subscribe} from '../../../shared/openIdBLE/verifierEventHandler';
 import {VerifierDataEvent} from '@mosip/tuvali/src/types/events';
@@ -573,16 +572,3 @@ export const requestMachine =
       delays: RequestDelays(),
     },
   );
-
-type State = StateFrom<typeof requestMachine>;
-
-export function createRequestMachine(serviceRefs: AppServices) {
-  return requestMachine.withContext({
-    ...requestMachine.context,
-    serviceRefs,
-  });
-}
-
-export function selectIsMinimumStorageLimitReached(state: State) {
-  return state.matches('storageLimitReached');
-}

@@ -7,10 +7,8 @@ import {authMachine, createAuthMachine} from './auth';
 import {createSettingsMachine, settingsMachine} from './settings';
 import {StoreEvents, storeMachine} from './store';
 import {activityLogMachine, createActivityLogMachine} from './activityLog';
-import {
-  createRequestMachine,
-  requestMachine,
-} from './bleShare/request/requestMachine';
+import {requestMachine} from './bleShare/request/requestMachine';
+import {createRequestMachine} from './bleShare/request/RequestSelectors';
 import {createScanMachine, scanMachine} from './bleShare/scan/scanMachine';
 import {pure, respond} from 'xstate/lib/actions';
 import {AppServices} from '../shared/GlobalContext';
