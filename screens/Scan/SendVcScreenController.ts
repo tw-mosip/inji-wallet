@@ -15,15 +15,13 @@ import {
   selectIsInvalidIdentity,
   selectIsVerifyingIdentity,
 } from '../../machines/bleShare/commonSelectors';
-import {
-  ScanEvents,
-  selectIsFaceVerificationConsent,
-} from '../../machines/bleShare/scan/scanMachine';
+import {selectIsFaceVerificationConsent} from '../../machines/bleShare/scan/scanMachine';
 import {VCShareFlowType} from '../../shared/Utils';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {RootRouteProps} from '../../routes';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
 import {VCItemMachine} from '../../machines/VerifiableCredential/VCItemMachine/VCItemMachine';
+import {ScanEvents} from '../../machines/bleShare/scan/ScanEvents';
 
 type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
 

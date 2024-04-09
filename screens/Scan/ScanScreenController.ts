@@ -4,28 +4,26 @@ import {useTranslation} from 'react-i18next';
 import {selectShareableVcsMetadata} from '../../machines/VerifiableCredential/VCMetaMachine/VCMetaMachine';
 import {GlobalContext} from '../../shared/GlobalContext';
 import {
+  selectIsInvalid,
   selectIsLocationDenied,
   selectIsLocationDisabled,
   selectIsQrLoginStoring,
   selectIsScanning,
-  selectIsInvalid,
   selectIsShowQrLogin,
   selectQrLoginRef,
 } from '../../machines/bleShare/scan/selectors';
 import {
   selectIsBluetoothDenied,
-  selectIsNearByDevicesPermissionDenied,
-  selectReadyForBluetoothStateCheck,
   selectIsBluetoothPermissionDenied,
+  selectIsNearByDevicesPermissionDenied,
   selectIsStartPermissionCheck,
+  selectReadyForBluetoothStateCheck,
 } from '../../machines/bleShare/commonSelectors';
-import {
-  ScanEvents,
-  selectIsMinimumStorageRequiredForAuditEntryLimitReached,
-} from '../../machines/bleShare/scan/scanMachine';
+import {selectIsMinimumStorageRequiredForAuditEntryLimitReached} from '../../machines/bleShare/scan/scanMachine';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
 import {MainBottomTabParamList} from '../../routes/main';
-import {useNavigation, NavigationProp} from '@react-navigation/native';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {ScanEvents} from '../../machines/bleShare/scan/ScanEvents';
 
 export function useScanScreen() {
   const {t} = useTranslation('ScanScreen');

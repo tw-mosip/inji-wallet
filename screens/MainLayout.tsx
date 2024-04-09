@@ -9,9 +9,9 @@ import {Theme} from '../components/ui/styleUtils';
 import {useTranslation} from 'react-i18next';
 import {Column} from '../components/ui';
 import {GlobalContext} from '../shared/GlobalContext';
-import {ScanEvents} from '../machines/bleShare/scan/scanMachine';
 import testIDProps from '../shared/commonUtil';
 import {SvgImage} from '../components/ui/svg';
+import {ScanEvents} from '../machines/bleShare/scan/ScanEvents';
 
 const {Navigator, Screen} = createBottomTabNavigator();
 

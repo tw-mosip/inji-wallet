@@ -9,15 +9,14 @@ import {
   selectKebabPopUp,
   selectRemoveWalletWarning,
   selectShowActivities,
-  selectWalletBindingResponse,
   selectShowWalletBindingError,
   selectWalletBindingInProgress,
+  selectWalletBindingResponse,
 } from '../machines/VerifiableCredential/VCItemMachine/VCItemSelectors';
 import {selectActivities} from '../machines/activityLog';
 import {GlobalContext} from '../shared/GlobalContext';
 import {useContext} from 'react';
 import {VCMetadata} from '../shared/VCMetadata';
-import {ScanEvents} from '../machines/bleShare/scan/scanMachine';
 import {BOTTOM_TAB_ROUTES, ScanStackParamList} from '../routes/routesConstants';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {MainBottomTabParamList} from '../routes/main';
@@ -27,6 +26,7 @@ import {
   VCItemMachine,
 } from '../machines/VerifiableCredential/VCItemMachine/VCItemMachine';
 import {selectError} from '../machines/biometrics';
+import {ScanEvents} from '../machines/bleShare/scan/ScanEvents';
 
 type ScanLayoutNavigation = NavigationProp<
   ScanStackParamList & MainBottomTabParamList
