@@ -26,7 +26,7 @@ import {
   VCItemMachine,
 } from '../machines/VerifiableCredential/VCItemMachine/VCItemMachine';
 import {selectError} from '../machines/biometrics';
-import {ScanEvents} from '../machines/bleShare/scan/ScanEvents';
+import {ScanEvents} from '../machines/bleShare/scan/ScanModel';
 
 type ScanLayoutNavigation = NavigationProp<
   ScanStackParamList & MainBottomTabParamList

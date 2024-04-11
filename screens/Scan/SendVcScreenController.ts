@@ -21,7 +21,7 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {RootRouteProps} from '../../routes';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
 import {VCItemMachine} from '../../machines/VerifiableCredential/VCItemMachine/VCItemMachine';
-import {ScanEvents} from '../../machines/bleShare/scan/ScanEvents';
+import {ScanEvents} from '../../machines/bleShare/scan/ScanModel';
 
 type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
 

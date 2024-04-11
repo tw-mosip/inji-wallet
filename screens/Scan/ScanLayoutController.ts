@@ -38,7 +38,7 @@ import {
   selectIsReviewing,
   selectIsVerifyingIdentity,
 } from '../../machines/bleShare/commonSelectors';
-import {ScanEvents} from '../../machines/bleShare/scan/ScanEvents';
+import {ScanEvents} from '../../machines/bleShare/scan/ScanModel';
 import {BOTTOM_TAB_ROUTES, SCAN_ROUTES} from '../../routes/routesConstants';
 import {ScanStackParamList} from '../../routes/routesConstants';
 import {VCShareFlowType} from '../../shared/Utils';

@@ -11,7 +11,7 @@ import {Column} from '../components/ui';
 import {GlobalContext} from '../shared/GlobalContext';
 import testIDProps from '../shared/commonUtil';
 import {SvgImage} from '../components/ui/svg';
-import {ScanEvents} from '../machines/bleShare/scan/ScanEvents';
+import {ScanEvents} from '../machines/bleShare/scan/ScanModel';
 
 const {Navigator, Screen} = createBottomTabNavigator();
 
