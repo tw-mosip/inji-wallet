@@ -530,14 +530,15 @@ export const DefaultTheme = {
       alignItems: 'flex-end',
     },
     scannerContainer: {
-      borderRadius: 24,
+      borderRadius: 150,
       alignSelf: 'center',
-      height: 350,
-      width: 320,
+      marginTop: 50,
+      height: 380,
+      width: 300,
       overflow: 'hidden',
     },
     scanner: {
-      height: 400,
+      height: '100%',
       width: '100%',
       margin: 'auto',
     },
@@ -1307,7 +1308,6 @@ export const DefaultTheme = {
     content: {
       width: Dimensions.get('screen').width,
       height: Dimensions.get('screen').height,
-      backgroundColor: Colors.White,
     },
   }),
   MessageStyles: StyleSheet.create({
