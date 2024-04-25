@@ -1,11 +1,11 @@
 import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
-import {Camera, ImageType} from 'expo-camera';
+import {Camera} from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
-import ImageManipulator from 'expo-image-manipulator';
 import {TouchableOpacity, View, Image} from 'react-native';
 import {Button, Centered, Column, Row, Text} from './ui';
 import {useInterpret, useSelector} from '@xstate/react';
 import {useTranslation} from 'react-i18next';
+import ImageEditor from '@react-native-community/image-editor';
 import {
   FaceScannerEvents,
   selectIsCheckingPermission,
@@ -23,6 +23,7 @@ import {selectIsActive} from '../machines/app';
 import {RotatingIcon} from './RotatingIcon';
 import {Theme} from './ui/styleUtils';
 import {SvgImage} from './ui/svg';
+
 
 export const FaceScanner: React.FC<FaceScannerProps> = props => {
   const {t} = useTranslation('FaceScanner');
@@ -45,9 +46,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   // let camera: Camera;
   // const cameraDevice = useCameraDevice('front');
 
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<Camera>();
 
   const [screenColor, setScreenColor] = useState('blue');
+
 
   async function captureImage(face) {
     try {
@@ -58,33 +60,51 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
           exif: false,
         });
         console.log(pic.uri);
+        console.log('height->', pic.height);
+        console.log('width->', pic.width);
 
-        // Assuming the positions object contains the provided facial landmark positions
+        // Assuming you have the positions of the left and right eyes
         const leftEyePosition = face.leftEyePosition;
         const rightEyePosition = face.rightEyePosition;
 
-        // Calculate the minimum and maximum x and y coordinates of both eyes
-        const minX = Math.min(leftEyePosition.x, rightEyePosition.x);
-        const minY = Math.min(leftEyePosition.y, rightEyePosition.y);
-        const maxX = Math.max(leftEyePosition.x, rightEyePosition.x);
-        const maxY = Math.max(leftEyePosition.y, rightEyePosition.y);
+        // Load the original image
+        Image.getSize(pic.uri, (originalWidth, originalHeight) => {
+          // Calculate the bounding box that encompasses both eyes
+          const minX = Math.min(leftEyePosition.x, rightEyePosition.x);
+          const minY = Math.min(leftEyePosition.y, rightEyePosition.y);
+          const maxX = Math.max(leftEyePosition.x, rightEyePosition.x);
+          const maxY = Math.max(leftEyePosition.y, rightEyePosition.y);
 
-        // Calculate the width and height of the bounding box
-        const width = maxX - minX;
-        const height = maxY - minY;
+          // Calculate the width and height of the bounding box
+          const width = maxX - minX;
+          const height = maxY - minY;
 
-        // Crop the image using the bounding box
-        const croppedImage = await ImageManipulator.manipulateAsync(
-          pic.uri,
-          [
-            {
-              crop: {originX: minX, originY: minY, width, height},
-            },
-          ],
-          {compress: 1, format: ImageManipulator.SaveFormat.JPEG},
-        );
+          // Calculate the aspect ratio of the original image
+          const aspectRatio = originalWidth / originalHeight;
 
-        console.log("cropped image->", croppedImage.base64);
+          // Calculate the width and height of the cropped image based on the aspect ratio
+          let croppedWidth = width;
+          let croppedHeight = height;
+          if (width / height > aspectRatio) {
+            croppedHeight = width / aspectRatio;
+          } else {
+            croppedWidth = height * aspectRatio;
+          }
+
+          // Calculate the coordinates of the top-left corner of the bounding box in the original image
+          const offsetX = minX - (croppedWidth - width) / 2;
+          const offsetY = minY - (croppedHeight - height) / 2;
+
+          // Crop the image using the calculated bounding box
+          ImageEditor.cropImage(pic.uri, {
+            offset: {x: 50, y: 200},
+            size: {width: 1500, height: 2000},
+            displaySize: {width: 200, height: 150},
+            resizeMode: 'contain',
+          }).then((result)=> {
+            console.log("Cropped image uri-->", result.uri);
+          });
+        });
         return;
       }
     } catch (error) {
@@ -94,10 +114,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
 
   const handleFacesDetected = async ({faces}) => {
     if (faces.length > 0) {
+      //DeviceBrightness.setBrightnessLevel(1);
       const {bounds} = faces[0];
 
-      console.log('Width-->', faces[0].bounds.size.width);
-      console.log('Height-->', faces[0].bounds.size.height);
+      console.log('facessss-->', faces[0]);
 
       const withinXBounds =
         bounds.origin.x + bounds.size.width >= 300 && bounds.origin.x <= 320;
@@ -105,7 +125,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         bounds.origin.y + bounds.size.height >= 300 && bounds.origin.y <= 320;
       // Check if the entire face is within the camera frame and close to screen
       if (withinXBounds && withinYBounds) {
-        captureImage(faces);
+        await captureImage(faces[0]);
         setScreenColor('yellow');// red, blue, yellow, 
       }
     }
