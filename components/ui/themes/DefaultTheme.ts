@@ -530,11 +530,11 @@ export const DefaultTheme = {
       alignItems: 'flex-end',
     },
     scannerContainer: {
-      borderRadius: 150,
+      // borderRadius: 150,
       alignSelf: 'center',
       marginTop: 50,
-      height: 380,
-      width: 300,
+      height: 350,
+      width: 350,
       overflow: 'hidden',
     },
     scanner: {
