@@ -27,6 +27,8 @@ import {RotatingIcon} from './RotatingIcon';
 import {Theme} from './ui/styleUtils';
 import {SvgImage} from './ui/svg';
 import { Platform } from 'react-native';
+import { log } from 'xstate/lib/actions';
+import { sleep } from '../shared/commonUtil';
 
 export const FaceScanner: React.FC<FaceScannerProps> = props => {
   const {t} = useTranslation('FaceScanner');
@@ -53,106 +55,128 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
 
   const redColor = { red: 0, green: 0, blue: 255, alpha: 1 };
 
-  const [screenColor, setScreenColor] = useState('#0000FF');
+  const [screenColor, setScreenColor] = useState('#FF0000');
 
-  async function captureImage(face) {
+  async function captureImage(face1) {
+    lock = true;
     try {
+      let camoptions = {
+        mode: FaceDetector.FaceDetectorMode.accurate,
+        detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
+        runClassifications: FaceDetector.FaceDetectorClassifications.all,
+        contourMode: FaceDetector.FaceDetectorClassifications.all,
+        minDetectionInterval: 500,
+        tracking: true,
+      };
+      let faceBounds;
+      let face;
+      let faceImage;
 
-      // take picture
       if (cameraRef.current) {
+        console.log('Time before capture-->', Date.now());
         const pic = await cameraRef.current.takePictureAsync({
           base64: true,
           quality: 1,
           exif: false,
         });
 
+        if (pic !== null && pic !== undefined) {
+          face = (await FaceDetector.detectFacesAsync(pic.uri, camoptions))
+            .faces[0];
+          console.log('Captured face points', face);
+        }
 
-        console.log("Height-->", pic.height);
-        console.log("Width-->", pic.width);
-        console.log(pic.uri);
+        // if(faceBounds !== null && faceBounds !== undefined) {
+        //   console.log('Inside faceBounds');
+        //   faceImage = await ImageEditor.cropImage(pic.uri, {
+        //     offset: { x: faceBounds.bounds.origin.x, y: faceBounds.bounds.origin.y },
+        //     size: { width: faceBounds.bounds.size.width, height: faceBounds.bounds.size.height },
+        //   });
 
-        let colors: any;
-        let rgbaColors: any;
+        //   console.log('Face Image', faceImage.uri);
 
-        let redsum= 0;
-        let greensum= 0;
+        // if (faceImage !== null && faceImage !== undefined) {
+        //   face = (await FaceDetector.detectFacesAsync(faceImage.uri, camoptions)).faces[0];
+        //   console.log('Cropped face points', face);
+
+        // if (face !== null && face !== undefined) {
+
+        let colors;
+        let rgbaColors;
+        let redsum = 0;
+        let greensum = 0;
         let bluesum = 0;
 
-
-
-        let originX = face.bounds.origin.x;
-        let originY = face.bounds.origin.y;
         let faceWidth = face.bounds.size.width;
-        let scaleFactor = pic.width/faceWidth;
+        let scaleFactor = pic.width / faceWidth;
 
         let lefteyex = face.leftEyePosition.x;
         let lefteyey = face.leftEyePosition.y;
-        
+        let offsetX = 200;
 
-        ImageEditor.cropImage(pic.uri, {
-          offset: {x: (lefteyex * scaleFactor)-100, y: (lefteyey * scaleFactor)-100},
-          size: {width: 200, height: 200},
-          displaySize: {width:500, height: 500},
-        }).then(result => {
-          console.log('Cropped image uri-->', result.uri);
+        if (face !== null && face !== undefined) {
+          let croppedImage = await ImageEditor.cropImage(pic.uri, {
+            offset: {
+              x: lefteyex * scaleFactor - offsetX,
+              y: lefteyey * scaleFactor - offsetX,
+            },
+            size: {width: offsetX * 2, height: offsetX - 50},
+          });
+          console.log('Cropped image uri-->', croppedImage.uri);
 
           if (Platform.OS == 'ios') {
-            getColors(result.uri).then(result => {
-              console.log('COlors are ->', result);
-              colors = result;
-              console.log('Result color is-->', colors);
+            colors = await getColors(croppedImage.uri);
+            console.log('Colors are ->', colors);
 
-              try {
-                rgbaColors = Object.values(colors)
-                  .filter(
-                    color => typeof color === 'string' && color.startsWith('#'),
-                  )
-                  .map(color => hexRgb(color));
-                console.log('RGB colors is ->', rgbaColors);
+            rgbaColors = Object.values(colors)
+              .filter(
+                color => typeof color === 'string' && color.startsWith('#'),
+              )
+              .map(color => hexRgb(color));
 
-                rgbaColors.forEach(color => {
-                  // Calculate the sum of RGBA components
-                  redsum += color.red;
-                  greensum += color.green;
-                  bluesum += color.blue;
-                
-                  // Check if the current sum is greater than the maximum sum
-                  // if (sum > maxSum) {
-                  //     maxSum = sum;
-                  //     maxKey = Object.keys(color).find(key => key !== 'alpha'); // Exclude 'alpha' key
-                  // }
-              });
-              // console.log('Key with the highest sum:', maxKey);
-              console.log("red-->", redsum);
-              console.log("blue-->", bluesum);
-              console.log("green-->", greensum);
+            console.log('RGB colors are ->', rgbaColors);
 
-              } catch (error) {
-                console.log('Eroor is ', error);
-              }
+            rgbaColors.forEach(color => {
+              redsum += color.red;
+              greensum += color.green;
+              bluesum += color.blue;
             });
-          }
-        });
 
-        try {
-          // Calculate the Euclidean distance between two colors
-          // Red color in RGB
-          // Find the closest color to red in each object
-        } catch (err) {
-          console.log('closest error is-->', err);
+            console.log('red-->', redsum);
+            console.log('blue-->', bluesum);
+            console.log('green-->', greensum);
+          }
+        } else {
+          console.log('No face detected in the cropped image.');
         }
-        //setScreenColor('#FF0000');
-        return;
+      } else {
+        console.log('Face image could not be generated.');
       }
+      setScreenColor('#0000FF');
     } catch (error) {
       console.error('Error capturing image:', error);
     }
+    lock = false;
   }
+  
+let captureCount = 0;
+let lock = false;
+
+async function lockFlow(face){
+  if(lock){
+    setTimeout(async ()=> {
+      await lockFlow(face);
+    },200);
+    return;
+  }
+  await captureImage(face);
+}
 
   const handleFacesDetected = async ({faces}) => {
     if (faces.length > 0) {
+      console.log("Time when the face is detected-->", Date.now());
       //DeviceBrightness.setBrightnessLevel(1);
-      const {bounds} = faces[0];
+      const {bounds, yawAngle, rollAngle} = faces[0];
 
       console.log('facessss-->', faces[0]);
 
@@ -160,9 +184,13 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         bounds.origin.x + bounds.size.width >= 310 && bounds.origin.x <= 320;
       const withinYBounds =
         bounds.origin.y + bounds.size.height >= 310 && bounds.origin.y <= 320;
-      // Check if the entire face is within the camera frame and close to screen
-      if (withinXBounds && withinYBounds) {
-        await captureImage(faces[0]);
+      const withinYawAngle = yawAngle > -10 && yawAngle < 10;
+      const withinRollAngle = yawAngle > -3 && rollAngle < 3;
+      
+      if (withinXBounds && withinYBounds && withinRollAngle && withinYawAngle && captureCount < 2 ) {
+        captureCount += 1;
+        lockFlow(faces[0]);
+        // await captureImage(faces[0]);
         // red, blue, yellow, 
       }
     }
@@ -216,11 +244,11 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
           ref={cameraRef}
           onFacesDetected={handleFacesDetected}
           faceDetectorSettings={{
-            mode: FaceDetector.FaceDetectorMode.fast,
+            mode: FaceDetector.FaceDetectorMode.accurate,
             detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
             runClassifications: FaceDetector.FaceDetectorClassifications.all,
             contourMode: FaceDetector.FaceDetectorClassifications.all,
-            minDetectionInterval: 500,
+            minDetectionInterval: 1000,
             tracking: true
           }}
         />
