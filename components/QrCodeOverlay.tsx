@@ -20,6 +20,8 @@ export const QrCodeOverlay: React.FC<QrCodeOverlayProps> = props => {
   const [qrError, setQrError] = useState(false);
 
   async function getQRData(): Promise<string> {
+    if (props.verifiableCredential.credential.credentialSubject.QR)
+      return props.verifiableCredential.credential.credentialSubject.QR;
     let qrData: string;
     try {
       qrData = await RNSecureKeyStore.get(props.meta.id);
