@@ -9,6 +9,7 @@ import {
   isIOS,
   MIMOTO_BASE_URL,
   SETTINGS_STORE_KEY,
+  LIVENESS_CHECK,
 } from '../shared/constants';
 import {VCLabel} from './VerifiableCredential/VCMetaMachine/vc';
 import {StoreEvents} from './store';
@@ -29,6 +30,7 @@ const model = createModel(
     isBiometricUnlockEnabled: false,
     credentialRegistry: MIMOTO_BASE_URL,
     esignetHostUrl: ESIGNET_BASE_URL,
+    livenessCheck: LIVENESS_CHECK,
     appId: null,
     isBackupAndRestoreExplored: false as boolean,
     hasUserShownWithHardwareKeystoreNotExists: false,
@@ -38,6 +40,7 @@ const model = createModel(
   },
   {
     events: {
+      UPDATE_LIVENESS: (value: boolean) => ({value}),
       UPDATE_NAME: (name: string) => ({name}),
       UPDATE_VC_LABEL: (label: string) => ({label}),
       TOGGLE_BIOMETRIC_UNLOCK: (
@@ -124,6 +127,9 @@ export const settingsMachine = model.createMachine(
           },
           UPDATE_VC_LABEL: {
             actions: ['updateVcLabel', 'storeContext'],
+          },
+          UPDATE_LIVENESS: {
+            actions: ['updateLivenessCheck', 'storeContext'],
           },
           UPDATE_HOST: {
             actions: [
@@ -250,6 +256,10 @@ export const settingsMachine = model.createMachine(
       }),
       updateEsignetHostUrl: model.assign({
         esignetHostUrl: (_, event) => event.esignetHostUrl,
+      }),
+
+      updateLivenessCheck: model.assign({
+        livenessCheck: (_,event) => event.value,
       }),
 
       updateVcLabel: model.assign({

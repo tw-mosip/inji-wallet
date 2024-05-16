@@ -18,6 +18,7 @@ import testIDProps from '../../shared/commonUtil';
 import {SvgImage} from '../../components/ui/svg';
 import {DataBackupAndRestore} from './DataBackupAndRestore';
 import {BannerNotificationContainer} from '../../components/BannerNotificationContainer';
+import { changeLivenessToggle, LIVENESS_CHECK } from '../../shared/constants';
 
 const LanguageSetting: React.FC = () => {
   const {t} = useTranslation('SettingScreen');
@@ -75,6 +76,10 @@ export const SettingScreen: React.FC<
     } else {
       controller.TOGGLE_BIOMETRIC(biometricToggleState);
     }
+  };
+
+  const handleLivenessToggle = (livenessToggleState: boolean) => {
+    controller.UPDATE_LIVENESS_TOGGLE(livenessToggleState);
   };
 
   return (
@@ -152,6 +157,36 @@ export const SettingScreen: React.FC<
                 {...testIDProps('biometricToggle')}
                 value={controller.isBiometricUnlockEnabled}
                 onValueChange={handleBiometricToggle}
+                trackColor={{
+                  false: Theme.Colors.switchTrackFalse,
+                  true:
+                    Platform.OS == 'ios'
+                      ? Theme.Colors.switchHead
+                      : Theme.Colors.switchTrackTrue,
+                }}
+                color={Theme.Colors.switchHead}
+              />
+            </ListItem>
+            <ListItem topDivider disabled={!controller.canUseBiometrics}>
+              <Icon
+                type={'MaterialCommunityIcons'}
+                name={'fingerprint'}
+                color={Theme.Colors.Icon}
+                size={25}
+              />
+              <ListItem.Content>
+                <ListItem.Title
+                  {...testIDProps('bioUnlock')}
+                  style={{paddingTop: 3}}>
+                  <Text weight="semibold" color={Theme.Colors.settingsLabel}>
+                    {'Liveness Check'}
+                  </Text>
+                </ListItem.Title>
+              </ListItem.Content>
+              <Switch
+                {...testIDProps('livenessToggle')}
+                value={LIVENESS_CHECK}
+                onValueChange={handleLivenessToggle}
                 trackColor={{
                   false: Theme.Colors.switchTrackFalse,
                   true:

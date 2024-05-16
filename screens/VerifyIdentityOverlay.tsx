@@ -5,7 +5,7 @@ import {Theme} from '../components/ui/styleUtils';
 import {VerifiableCredential} from '../machines/VerifiableCredential/VCMetaMachine/vc';
 import {Modal} from '../components/ui/Modal';
 import {useTranslation} from 'react-i18next';
-
+import { LIVENESS_CHECK } from '../shared/constants';
 export const VerifyIdentityOverlay: React.FC<
   VerifyIdentityOverlayProps
 > = props => {
@@ -27,6 +27,7 @@ export const VerifyIdentityOverlay: React.FC<
               vcImage={vcImage}
               onValid={props.onFaceValid}
               onInvalid={props.onFaceInvalid}
+              isLiveness={LIVENESS_CHECK}
             />
           )}
         </Column>

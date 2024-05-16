@@ -148,6 +148,10 @@ export function useSettingsScreen(props: RootRouteProps & RequestRouteProps) {
       );
     },
 
+    UPDATE_LIVENESS_TOGGLE: (value: boolean) => {
+      settingsService.send(SettingsEvents.UPDATE_LIVENESS(value));
+    },
+
     UPDATE_CREDENTIAL_REGISTRY_RESPONSE: (credentialRegistryResponse: string) =>
       settingsService.send(
         SettingsEvents.UPDATE_CREDENTIAL_REGISTRY_RESPONSE(

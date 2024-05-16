@@ -1,5 +1,5 @@
 import {Platform} from 'react-native';
-import {DEBUG_MODE, ESIGNET_HOST, MIMOTO_HOST} from 'react-native-dotenv';
+import {DEBUG_MODE, ESIGNET_HOST, MIMOTO_HOST, LIVENESS_DETECTION} from 'react-native-dotenv';
 import {Argon2iConfig} from './commonUtil';
 import {VcIdType} from '../machines/VerifiableCredential/VCMetaMachine/vc';
 
@@ -7,8 +7,14 @@ export let MIMOTO_BASE_URL = MIMOTO_HOST;
 export let ESIGNET_BASE_URL = ESIGNET_HOST;
 export let DEBUG_MODE_ENABLED = DEBUG_MODE === 'true';
 
+export let LIVENESS_CHECK = LIVENESS_DETECTION;
+
+export const changeLivenessToggle = (Liveness: boolean) =>
+  (LIVENESS_CHECK = Liveness );
+
 export const changeCrendetialRegistry = (host: string) =>
   (MIMOTO_BASE_URL = host);
+
 export const changeEsignetUrl = (host: string) => (ESIGNET_BASE_URL = host);
 
 export const COMMON_PROPS_KEY: string =
