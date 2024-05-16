@@ -15,7 +15,7 @@ import {
 import {
   BOTTOM_SECTION_FIELDS_WITH_DETAILED_ADDRESS_FIELDS,
   DETAIL_VIEW_ADD_ON_FIELDS,
-  getCredentialDefinition,
+  getSelectedCredentialTypeDetails,
 } from '../../components/VC/common/VCUtils';
 import {getVerifiableCredential} from '../../machines/VerifiableCredential/VCItemMachine/VCItemSelectors';
 import {vcVerificationBannerDetails} from '../../components/BannerNotificationContainer';
@@ -228,19 +228,16 @@ export const getCredentialIssuersWellKnownConfig = async (
   } else if (wellknown) {
     response = await CACHED_API.fetchIssuerWellknownConfig(issuer, wellknown);
     if (response) {
-      if (
-        Array.isArray(response.credentials_supported) &&
-        response?.credentials_supported[0].order
-      ) {
-        fields = response?.credentials_supported[0].order;
+      const credentialDetails = getSelectedCredentialTypeDetails(
+        response,
+        vcCredentialTypes,
+      );
+      if (Object.keys(credentialDetails).includes('order')) {
+        fields = credentialDetails.order;
       } else {
-        const credentialDefinition = getCredentialDefinition(
-          response,
-          vcCredentialTypes,
+        fields = Object.keys(
+          credentialDetails.credential_definition.credentialSubject,
         );
-        fields = credentialDefinition
-          ? Object.keys(credentialDefinition.credentialSubject)
-          : [];
       }
     }
   }

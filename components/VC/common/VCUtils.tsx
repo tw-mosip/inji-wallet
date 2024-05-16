@@ -12,6 +12,7 @@ import {getIDType} from '../../../shared/openId4VCI/Utils';
 import {VCVerification} from '../../VCVerification';
 import {MIMOTO_BASE_URL} from '../../../shared/constants';
 import {useTranslation} from 'react-i18next';
+import {VCItemDetailsProps} from '../Views/VCDetailView';
 
 export const CARD_VIEW_DEFAULT_FIELDS = ['fullName'];
 export const DETAIL_VIEW_DEFAULT_FIELDS = [
@@ -46,7 +47,7 @@ export const BOTTOM_SECTION_FIELDS_WITH_DETAILED_ADDRESS_FIELDS = [
 ];
 
 export const getFieldValue = (
-  verifiableCredential: VerifiableCredential,
+  verifiableCredential: VerifiableCredential | Credential,
   field: string,
   wellknown: any,
   props: any,
@@ -84,43 +85,37 @@ export const getFieldValue = (
   }
 };
 
-export const getCredentialDefinition = (
+export const getSelectedCredentialTypeDetails = (
   wellknown: any,
   vcCredentialTypes: Object[],
 ) => {
-  if (Array.isArray(wellknown.credentials_supported)) {
-    return wellknown.credentials_supported[0].credential_definition;
-  } else {
-    for (const supportedCredential in wellknown.credentials_supported) {
-      const credentialDefinition =
-        wellknown.credentials_supported[supportedCredential]
-          .credential_definition;
-      if (
-        JSON.stringify(credentialDefinition.type) ===
-        JSON.stringify(vcCredentialTypes)
-      ) {
-        return credentialDefinition;
-      }
+  for (let credential in wellknown.credentials_supported) {
+    const credentialDetails = wellknown.credentials_supported[credential];
+
+    if (
+      JSON.stringify(credentialDetails.credential_definition.type) ===
+      JSON.stringify(vcCredentialTypes)
+    ) {
+      return credentialDetails;
     }
-    return null;
   }
+
+  console.error(
+    'Selected credential type is not available in wellknown config supported credentials list',
+  );
 };
 
 export const getFieldName = (
   field: string,
   wellknown: any,
-  vcCredentialTypes: Object[],
+  vcCredentialTypes?: Object[],
 ) => {
-  if (wellknown && wellknown.credentials_supported) {
-    const credentialDefinition = getCredentialDefinition(
+  if (wellknown && wellknown.credentials_supported && vcCredentialTypes) {
+    const credentialDetails = getSelectedCredentialTypeDetails(
       wellknown,
       vcCredentialTypes,
     );
-    if (!credentialDefinition) {
-      console.error(
-        'Credential definition is not available for the selected credential type',
-      );
-    }
+    const credentialDefinition = credentialDetails.credential_definition;
     let fieldObj = credentialDefinition.credentialSubject[field];
     if (fieldObj) {
       const newFieldObj = fieldObj.display.map(obj => {
@@ -184,15 +179,15 @@ function formattedDateTime(timeStamp: any) {
 
 export const fieldItemIterator = (
   fields: any[],
-  verifiableCredential: any,
+  verifiableCredential: VerifiableCredential | Credential,
   wellknown: any,
-  props: any,
+  props: VCItemDetailsProps,
 ) => {
   return fields.map(field => {
     const fieldName = getFieldName(
       field,
       wellknown,
-      props.verifiableCredentialData.vcCredentialTypes,
+      props.verifiableCredentialData.credentialTypes,
     );
     const fieldValue = getFieldValue(
       verifiableCredential,
