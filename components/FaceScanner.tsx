@@ -5,9 +5,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {Camera, CameraCapturedPicture, CameraType} from 'expo-camera';
+import {Camera} from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
-import * as FileSystem from 'expo-file-system';
 import {TouchableOpacity, View} from 'react-native';
 import {Button, Centered, Column, Row, Text} from './ui';
 import {useInterpret, useSelector} from '@xstate/react';
@@ -56,15 +55,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   const cameraRef = useRef<Camera>(Camera.Constants.Type.front);
 
   const [counter, setCounter] = useState(0);
-
- // let counter = 0;
-  let lock = false;
-  const [screenColor, setScreenColor] = useState('#ffffff');
+  const [screenColor, setScreenColor] = useState('#0000ff');
 
   const [picArray, setPicArray] = useState([]);
 
-  //et picArray: any[] = new Array();
-  // let picArray = {};
   let FaceCropPicArray: any[] = new Array();
   let EyeCropPicArray: any[] = new Array();
   let face;
@@ -78,8 +72,9 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
     tracking: true,
   };
 
-  const MAX_COUNTER = 10; // Total number of times handleCapture will be called
+  const MAX_COUNTER = 18; // Total number of times handleCapture will be called
   let colors = ['#0000FF','#00FF00','#FF0000'];
+  let resultsSet: any[] = new Array();
 
   function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -87,9 +82,35 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  async function CropEyes() {
+  function getEyeColorPredictionResult(
+    LeftrgbaColors: import('hex-rgb').RgbaObject[],
+    color: RgbaObject,
+  ) {
+    const palette = [
+      {R: 255, G: 0, B: 0},
+      {R: 0, G: 255, B: 0},
+      {R: 0, G: 0, B: 255},
+    ];
+  
+    LeftrgbaColors.forEach(colorRGBA => {
+      let colorRGB = {};
+      colorRGB['R'] = colorRGBA.red;
+      colorRGB['G'] = colorRGBA.green;
+      colorRGB['B'] = colorRGBA.blue;
+  
+      const closestColor = closest(colorRGB, palette);
+  
+      const result =
+        color.red === closestColor.R &&
+        color.blue === closestColor.B &&
+        color.green === closestColor.G;
+      
+      resultsSet.push(result);
+  
+    });
+  }
 
-    //console.log("Pic Array is-->", picArray, "Length is", picArray.length);
+  async function CropEyes() {
 
     await Promise.all(
       picArray.map(async pic => {
@@ -103,7 +124,6 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
 
         // prob numbers is magic numbers
         if (leftEyeOpenProb > 0.85 && rightEyeOpenProb > 0.85) {
-          // face crop
           faceImage = await ImageEditor.cropImage(image.uri, {
             offset: {x: face.bounds.origin.x, y: face.bounds.origin.y},
             size: {
@@ -112,7 +132,6 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
             },
           });
 
-          console.log("Face crop image uri-->", faceImage.uri);
           FaceCropPicArray.push({color: pic.color, image: faceImage});
         }
       }),
@@ -122,8 +141,6 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
     await Promise.all(
       FaceCropPicArray.map(async pics => {
 
-        console.log("Eye color inside FaceCropPicAraay-->", pics.color);
-        //let faceWidth = face.bounds.size.width;
         const image = pics.image;
         let lefteyex = face.leftEyePosition.x;
         let righteyex = face.rightEyePosition.x;
@@ -134,7 +151,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         let offsetY = 350;
         let leftcroppedImage;
         let rightcroppedImage;
-        // left eye crop
+
         leftcroppedImage = await ImageEditor.cropImage(image.uri, {
           offset: {
             x: lefteyex - offsetX,
@@ -143,8 +160,6 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
           size: {width: offsetX * 2, height: offsetY / 2 - 50},
         });
 
-        console.log("Left crop image uri-->", leftcroppedImage.uri);
-
         rightcroppedImage = await ImageEditor.cropImage(image.uri, {
           offset: {
             x: righteyex - offsetX,
@@ -152,7 +167,6 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
           },
           size: {width: offsetX * 2, height: offsetY / 2 - 50},
         });
-        console.log("Right crop image uri-->", rightcroppedImage.uri);
 
         EyeCropPicArray.push({
           color: pics.color,
@@ -161,13 +175,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         });
       }),
     );
-    console.log("Eye crop pic array -->", EyeCropPicArray.length);
     //FaceCropPicArray = [{}];
 
     await Promise.all(
         EyeCropPicArray.map(async pics => {
-
-          console.log("Eye color-->", pics.color);
 
           const color = hexRgb(pics.color); 
           const leftEye = pics.leftEye;
@@ -176,35 +187,24 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
           const leftEyeColors = await getColors(leftEye.uri);
           const rightEyeColors = await getColors(rightEye.uri);
 
-          console.log(
-            'Left eye colors --->',
-            leftEyeColors,
-            'and color is-->',
-            color,
-          );
-          // console.log(
-          //   'Right eye colors --->',
-          //   rightEyeColors,
-          //   'and color is-->',
-          //   color,
-          // );
-
           let colorFiltered = ['background','dominant'];
-          // [{r,g,b,a}] == color
+
           let LeftrgbaColors = Object.values(leftEyeColors)
             .filter(color => typeof color === 'string' && color.startsWith('#') && !colorFiltered.includes(color))
             .map(color => hexRgb(color));
-          console.log('RGB left are ->', LeftrgbaColors);
-
-
-          getClosestEyeColor(LeftrgbaColors,color);// {r,g,b,a}, {r,g,b,a}
 
           let RightrgbaColors = Object.values(rightEyeColors)
-            .filter(color => typeof color === 'string' && color.startsWith('#'))
+            .filter(color => typeof color === 'string' && color.startsWith('#')  && !colorFiltered.includes(color))
             .map(color => hexRgb(color));
-          //console.log('RGB right are ->', RightrgbaColors);
+
+          await getEyeColorPredictionResult(LeftrgbaColors,color);// {r,g,b,a}, {r,g,b,a}
+          await getEyeColorPredictionResult(RightrgbaColors,color);// {r,g,b,a}, {r,g,b,a}
+
         }),
       );
+      console.log("Result set is-->", resultsSet);
+      console.log("End time-->", Date.now());
+      console.log("Threshold is ->",(resultsSet.filter(element => element).length/resultsSet.length * 100));
   }
 
   async function captureImage(screenColor) {
@@ -217,6 +217,8 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         });
 
         console.log('Captured Image-->', capturedImage.uri);
+
+
         setPicArray([...picArray,{color: screenColor, image: capturedImage}]);
         console.log('Pic array length after await-->', picArray.length);
       }
@@ -231,13 +233,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
       return;
     }
     if (counter == MAX_COUNTER) {
-      console.log("COunter inside if-->", counter);
-      setCounter(15);
-      console.log("Inside max counter if");
+      setCounter(counter+1);
       cameraRef.current.pausePreview();
-      //cameraRef.current.stopRecording();
       setScreenColor('#ffffff');
-      await CropEyes();
+      const resultDataSet = await CropEyes();
       return;
     } else if (faces.length > 0) {
       const {bounds, yawAngle, rollAngle} = faces[0];
@@ -256,11 +255,12 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         withinRollAngle &&
         withinYawAngle && counter < MAX_COUNTER
       ) {
+        if(counter == 0){
+        console.log("Start time-->", Date.now())}
         const randomNum = getRandomInt(0,2);
         const randomColor = colors[randomNum];
         setScreenColor(randomColor); 
         setCounter(counter+1);
-        console.log('Counter is-->', counter);
         await captureImage(screenColor);
         }
     }
@@ -363,25 +363,3 @@ interface FaceScannerProps {
   onInvalid: () => void;
   isLiveness: boolean;
 }
-function getClosestEyeColor(LeftrgbaColors: import("hex-rgb").RgbaObject[], color: RgbaObject) {
-  const palette = [
-    {R: 255, G: 0, B: 0},
-    {R: 0, G: 255, B: 0},
-    {R: 0, G: 0, B: 255},
-  ];
-
-  LeftrgbaColors.forEach((colorRGBA) => {
-    let colorRGB = {}
-    colorRGB['R'] = colorRGBA.red;
-    colorRGB['G'] = colorRGBA.green;
-    colorRGB['B'] = colorRGBA.blue;
-    const closestColor = closest(colorRGB,palette); 
-    console.log("Closest color is ->", closestColor);
-    console.log("Check Color--> ", checkColor(color, closestColor));
-  })
-}
-
-function checkColor(control: any, color: RgbaObject) {
-  return control.R == color.red && control.G == color.green && control.B == color.blue
-}
-
