@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {Camera} from 'expo-camera';
+import {Camera, CameraCapturedPicture, ImageType} from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import {TouchableOpacity, View, Dimensions} from 'react-native';
 import { Centered, Column, Row, Text, Button} from './ui';
@@ -15,6 +15,7 @@ import ImageEditor from '@react-native-community/image-editor';
 import {getColors} from 'react-native-image-colors';
 import hexRgb, { RgbaObject } from 'hex-rgb';
 import {closest} from 'color-diff';
+import { faceCompare } from '@iriscan/biometric-sdk-react-native';
 import {
   FaceScannerEvents,
   selectIsCheckingPermission,
@@ -51,6 +52,11 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   const cameraRef = useSelector(service, selectCameraRef);
   const livenessEnabled = useSelector(settingsService, selectIsLivenessEnabled);
 
+  // const rxDataURI =/data:(?<mime>[\w/\-.]+);(?<encoding>\w+),(?<data>.*)/;
+  // const matches = rxDataURI.exec(vcImage).groups;
+
+  //const vcImage = matches.data;
+  
   const isPermissionDenied = useSelector(service, selectIsPermissionDenied);
   const isValid = useSelector(service, selectIsValid);
   const isInvalid = useSelector(service, selectIsInvalid);
@@ -62,11 +68,15 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   const [counter, setCounter] = useState(0);
   const [screenColor, setScreenColor] = useState('#0000ff');
   const [opacity, setOpacity] = useState(1);
+  const [faceToCompare, setFaceToCompare] = useState(null);
+  const MAX_COUNTER = 15; // Total number of times handleCapture will be called
 
 
   const [picArray, setPicArray] = useState([]);
   let threshold;
-
+  let faceIS;
+  let faceCompareResult;
+  const randomNumToFaceCompare = getRandomInt(counter, MAX_COUNTER);
   const [infoText, setInfoText] = useState('Hold the phone steady, keep your face focused in the centre.');
 
   let FaceCropPicArray: any[] = new Array();
@@ -82,7 +92,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
     tracking: true,
   };
 
-  const MAX_COUNTER = 5; // Total number of times handleCapture will be called
+  
   let colors = ['#0000FF','#00FF00','#FF0000'];
   let resultsSet: any[] = new Array();
 
@@ -216,6 +226,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
       threshold = resultsSet.filter(element => element).length/resultsSet.length * 100;
       console.log("Threshold is ->",threshold);
 
+      // console.log("URI iss->", faceIS);
+      // faceCompareResult = await faceCompare(vcImage, faceToCompare.base64);
+      // console.log("faceresult is-->", faceCompareResult);
+
       if(threshold > 10 ){
       props.onValid();
       }
@@ -227,9 +241,17 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         const capturedImage = await cameraRef.takePictureAsync({
           base64: true,
           quality: 1,
-          exif: false,
+          imageType: ImageType.jpg,
         });
         setPicArray([...picArray,{color: screenColor, image: capturedImage}]);
+        // counter - 0
+        // setcounter(counter+1)
+        // 
+        // if(counter == 2){
+        //   console.log("Inside cond-->", counter);
+        //   faceIS = capturedImage;
+        //   console.log("Face is--->", faceIS);
+        // }
       }
     } catch (error) {
       console.error('Error capturing image:', error);
@@ -265,13 +287,13 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         withinRollAngle &&
         withinYawAngle && counter < MAX_COUNTER
       ) {
-        if(counter == 0){
-        console.log("Start time-->", Date.now())}
         const randomNum = getRandomInt(0,2);
         const randomColor = colors[randomNum];
         setScreenColor(randomColor); 
         setCounter(counter+1);
         setInfoText('Hellooooo');
+        //  setFaceToCompare(faceIS);
+        //console.log("Face berrnsfsnfofnds->", faceToCompare);
         await captureImage(screenColor);
         }
     }
@@ -323,30 +345,32 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   return (
     <Column
       fill
-      {...(!livenessEnabled && { align: 'space-between' })}
+      {...(!livenessEnabled && {align: 'space-between'})}
       style={{backgroundColor: livenessEnabled ? screenColor : '#ffffff'}}>
-      {livenessEnabled && 
-      <View
+      {livenessEnabled && (
+        <View style={{flex: 1,
+          justifyContent: 'flex-start',
+          alignItems: 'center',}}>
+        <View
           style={{
             backgroundColor: '#ffffff',
             borderRadius: 9,
-            width: Dimensions.get('window').width * 0.75,
-            alignSelf: 'center',
+            width: Dimensions.get('window').width * 0.85,
             alignItems: 'center',
-            marginBottom: 10,
-            marginTop: 70,
-          }}
-          onPress={handleOnCancel}>
-            <Spinner
+            marginTop: 150,
+            padding: 3,
+          }}>
+          <Spinner
             type="ThreeBounce"
             color={Theme.Colors.Loading}
-            style={{marginLeft: 6}}
           />
-          <Text size="small" weight="bold" margin="8" color="black">
+          <Text size="small" weight="bold" color="black" align='center'>
             {infoText}
           </Text>
         </View>
-} 
+        </View>
+      )}
+      <View style={{ marginTop: 15 }}>
       <View style={Theme.Styles.scannerContainer}>
         <Camera
           style={Theme.Styles.scanner}
@@ -363,25 +387,29 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
           }}
         />
       </View>
+      </View>
       {livenessEnabled ? (
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 9,
-            width: Dimensions.get('window').width * 0.3,
-            alignSelf: 'center',
-            alignItems: 'center',
-            height: 40,
-            marginBottom: 75,
-            opacity: opacity,
-          }}
-          onPressIn={() => setOpacity(0.5)}
-          onPressOut={() => setOpacity(1)}
-          onPress={handleOnCancel}>
-          <Text size="small" weight="bold" margin="8" color="black">
-            Cancel
-          </Text>
-        </TouchableOpacity>
+        <View
+          style={{flex: 1, justifyContent: 'flex-end', alignItems: 'center'}}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 9,
+              width: Dimensions.get('window').width * 0.3,
+              alignSelf: 'center',
+              alignItems: 'center',
+              height: 40,
+              marginBottom: 80,
+              opacity: opacity,
+            }}
+            onPressIn={() => setOpacity(0.5)}
+            onPressOut={() => setOpacity(1)}
+            onPress={handleOnCancel}>
+            <Text size="small" weight="bold" margin="8" color="black">
+              Cancel
+            </Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <Centered>
           {isCapturing || isVerifying ? (
@@ -391,9 +419,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
               <Centered style={Theme.Styles.imageCaptureButton}>
                 <TouchableOpacity
                   onPress={() => {
-                    console.log("I am called inside touch");
-                    service.send(FaceScannerEvents.CAPTURE())
-                    console.log("I am called inside touch after");}}>
+                    console.log('I am called inside touch');
+                    service.send(FaceScannerEvents.CAPTURE());
+                    console.log('I am called inside touch after');
+                  }}>
                   {SvgImage.CameraCaptureIcon()}
                 </TouchableOpacity>
                 <Text size="small" weight="semibold" margin="8">

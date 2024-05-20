@@ -19,12 +19,16 @@ export const VerifyIdentityOverlay: React.FC<
     arrowLeft: true,
     headerTitle: t('faceAuth'),
     presentationStyle: "overFullScreen",
+    showClose: true,
+    showHeader: true,
   };
   
   if (props.isLivenessEnabled) {
     console.log("Inside here-->", props.isLivenessEnabled);
     modalProps.arrowLeft = false;
     modalProps.headerTitle = '';
+    modalProps.showClose = false;
+    modalProps.showHeader = false;
   }
   
 

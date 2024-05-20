@@ -534,11 +534,11 @@ export const DefaultTheme = {
       alignSelf: 'center',
       marginTop: 10,
       height: 350,
-      width: 350,
+      width: 320,
       overflow: 'hidden',
     },
     scanner: {
-      height: '100%',
+      height: 400,
       width: '100%',
       margin: 'auto',
     },

@@ -30,7 +30,7 @@ const model = createModel(
     isBiometricUnlockEnabled: false,
     credentialRegistry: MIMOTO_BASE_URL,
     esignetHostUrl: ESIGNET_BASE_URL,
-    livenessCheck: LIVENESS_CHECK,
+    livenessCheck: LIVENESS_CHECK as boolean,
     appId: null,
     isBackupAndRestoreExplored: false as boolean,
     hasUserShownWithHardwareKeystoreNotExists: false,

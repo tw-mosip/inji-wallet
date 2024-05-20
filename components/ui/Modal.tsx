@@ -18,7 +18,8 @@ export const Modal: React.FC<ModalProps> = props => {
       visible={props.isVisible}
       onShow={props.onShow}
       onRequestClose={props.onDismiss}>
-      <Column fill safe>
+      <Column {...(props.showHeader ? { fill: true, safe: true } : { fill: true })}>
+        { props.showHeader ? (
         <Row elevation={props.headerElevation}>
           <View style={props.modalStyle}>
             {props.headerRight && !props.arrowLeft ? (
@@ -82,9 +83,9 @@ export const Modal: React.FC<ModalProps> = props => {
               ))}
             {props.headerRight && props.headerRight}
           </View>
-        </Row>
+        </Row>  ) : null}
         {props.children}
-      </Column>
+       </Column>
     </RNModal>
   );
 };
@@ -92,6 +93,7 @@ export const Modal: React.FC<ModalProps> = props => {
 Modal.defaultProps = {
   modalStyle: Theme.ModalStyles.defaultModal,
   showClose: true,
+  showHeader: true,
 };
 
 export interface ModalProps {
@@ -99,6 +101,7 @@ export interface ModalProps {
   isVisible: boolean;
   requester?: boolean;
   showClose?: boolean;
+  showHeader?: boolean;
   modalStyle?: Object;
   onDismiss?: () => void;
   headerTitle?: string;

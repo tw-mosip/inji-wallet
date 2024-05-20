@@ -7,10 +7,7 @@ export let MIMOTO_BASE_URL = MIMOTO_HOST;
 export let ESIGNET_BASE_URL = ESIGNET_HOST;
 export let DEBUG_MODE_ENABLED = DEBUG_MODE === 'true';
 
-export let LIVENESS_CHECK = LIVENESS_DETECTION;
-
-export const changeLivenessToggle = (Liveness: boolean) =>
-  (LIVENESS_CHECK = Liveness );
+export const LIVENESS_CHECK = LIVENESS_DETECTION === 'true';
 
 export const changeCrendetialRegistry = (host: string) =>
   (MIMOTO_BASE_URL = host);

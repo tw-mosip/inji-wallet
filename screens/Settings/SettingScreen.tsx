@@ -8,7 +8,6 @@ import {useSettingsScreen} from './SettingScreenController';
 import {useTranslation} from 'react-i18next';
 import {LanguageSelector} from '../../components/LanguageSelector';
 import {ScrollView} from 'react-native-gesture-handler';
-import {Modal} from '../../components/ui/Modal';
 import {CREDENTIAL_REGISTRY_EDIT} from 'react-native-dotenv';
 import {AboutInji} from './AboutInji';
 import {EditableListItem} from '../../components/EditableListItem';
@@ -18,7 +17,6 @@ import testIDProps from '../../shared/commonUtil';
 import {SvgImage} from '../../components/ui/svg';
 import {DataBackupAndRestore} from './DataBackupAndRestore';
 import {BannerNotificationContainer} from '../../components/BannerNotificationContainer';
-import { changeLivenessToggle, LIVENESS_CHECK } from '../../shared/constants';
 
 const LanguageSetting: React.FC = () => {
   const {t} = useTranslation('SettingScreen');
@@ -167,7 +165,7 @@ export const SettingScreen: React.FC<
                 color={Theme.Colors.switchHead}
               />
             </ListItem>
-            <ListItem topDivider disabled={!controller.canUseBiometrics}>
+            <ListItem topDivider>
               <Icon
                 type={'MaterialCommunityIcons'}
                 name={'fingerprint'}
@@ -176,7 +174,7 @@ export const SettingScreen: React.FC<
               />
               <ListItem.Content>
                 <ListItem.Title
-                  {...testIDProps('bioUnlock')}
+                  {...testIDProps('Liveness')}
                   style={{paddingTop: 3}}>
                   <Text weight="semibold" color={Theme.Colors.settingsLabel}>
                     {'Liveness Check'}
