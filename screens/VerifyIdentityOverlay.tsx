@@ -5,7 +5,6 @@ import {Theme} from '../components/ui/styleUtils';
 import {VerifiableCredential} from '../machines/VerifiableCredential/VCMetaMachine/vc';
 import {Modal} from '../components/ui/Modal';
 import {useTranslation} from 'react-i18next';
-import { LIVENESS_CHECK } from '../shared/constants';
 export const VerifyIdentityOverlay: React.FC<
   VerifyIdentityOverlayProps
 > = props => {
@@ -13,11 +12,26 @@ export const VerifyIdentityOverlay: React.FC<
   const credential = props.credential;
   const vcImage = props.verifiableCredentialData.face;
 
+  const modalProps = {
+    isVisible: props.isVerifyingIdentity,
+    onDismiss: props.onCancel,
+    animationType: 'slide',
+    arrowLeft: true,
+    headerTitle: t('faceAuth'),
+    presentationStyle: "overFullScreen",
+  };
+  
+  if (props.isLivenessEnabled) {
+    console.log("Inside here-->", props.isLivenessEnabled);
+    modalProps.arrowLeft = false;
+    modalProps.headerTitle = '';
+  }
+  
+
   return (
     <>
       <Modal
-        isVisible={props.isVerifyingIdentity}
-        onDismiss={props.onCancel}>
+        {...modalProps}>
         <Column
           fill
           style={Theme.VerifyIdentityOverlayStyles.content}
@@ -27,7 +41,8 @@ export const VerifyIdentityOverlay: React.FC<
               vcImage={vcImage}
               onValid={props.onFaceValid}
               onInvalid={props.onFaceInvalid}
-              isLiveness={LIVENESS_CHECK}
+              isLiveness={props.isLivenessEnabled}
+              onCancel={props.onCancel}
             />
           )}
         </Column>
@@ -43,4 +58,5 @@ export interface VerifyIdentityOverlayProps {
   onCancel: () => void;
   onFaceValid: () => void;
   onFaceInvalid: () => void;
+  isLivenessEnabled: boolean;
 }

@@ -1067,6 +1067,14 @@ export const PurpleTheme = {
       alignSelf: 'center',
       height: 54,
     },
+    transparent: {
+      borderRadius: 9,
+      width: Dimensions.get('window').width * 0.72,
+      alignSelf: 'center',
+      height: 54,
+      color: 'black',
+      backgroundColor: Colors.White,
+    },
     float: {
       borderRadius: 9,
       alignSelf: 'center',

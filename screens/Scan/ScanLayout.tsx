@@ -50,7 +50,7 @@ export const ScanLayout: React.FC = () => {
 
   return (
     <React.Fragment>
-      <VerifyIdentityOverlay
+      {/* <VerifyIdentityOverlay
         credential={controller.credential}
         verifiableCredentialData={controller.verifiableCredentialData}
         isVerifyingIdentity={controller.isVerifyingIdentity}
@@ -59,8 +59,9 @@ export const ScanLayout: React.FC = () => {
         onFaceInvalid={controller.FACE_INVALID}
         isInvalidIdentity={controller.isInvalidIdentity}
         onDismiss={controller.DISMISS}
+        isLivenessEnabled={controller.isLivenessEnabled}
         onRetryVerification={controller.RETRY_VERIFICATION}
-      />
+      /> */}
 
       <ScanStack.Navigator initialRouteName="ScanScreen">
         {controller.isReviewing &&

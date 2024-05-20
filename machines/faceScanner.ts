@@ -209,6 +209,7 @@ export const createFaceScannerMachine = (vcImage: string) =>
         },
 
         captureImage: context => {
+          console.log("Inside captureimage");
           return context.cameraRef.takePictureAsync({
             base64: true,
             imageType: ImageType.jpg,
@@ -238,6 +239,10 @@ type State = StateFrom<ReturnType<typeof createFaceScannerMachine>>;
 
 export function selectWhichCamera(state: State) {
   return state.context.whichCamera;
+}
+
+export function selectCameraRef(state: State) {
+  return state.context.cameraRef;
 }
 
 export function selectCapturedImage(state: State) {

@@ -382,6 +382,10 @@ export function selectBiometricUnlockEnabled(state: State) {
   return state?.context?.isBiometricUnlockEnabled;
 }
 
+export function selectIsLivenessEnabled(state: State) {
+  return state?.context?.livenessCheck;
+}
+
 export function selectIsResetInjiProps(state: State) {
   return state?.matches('resetInjiProps');
 }

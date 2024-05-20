@@ -38,6 +38,7 @@ import {
   selectIsReviewing,
   selectIsVerifyingIdentity,
 } from '../../machines/bleShare/commonSelectors';
+import { selectIsLivenessEnabled } from  '../../machines/settings';
 import {ScanEvents} from '../../machines/bleShare/scan/scanMachine';
 import {BOTTOM_TAB_ROUTES, SCAN_ROUTES} from '../../routes/routesConstants';
 import {ScanStackParamList} from '../../routes/routesConstants';
@@ -58,10 +59,12 @@ export function useScanLayout() {
   const {t} = useTranslation('ScanScreen');
   const {appService} = useContext(GlobalContext);
   const scanService = appService.children.get('scan')!!;
+  const settingsService = appService.children.get('settings')!!;
   const navigation = useNavigation<ScanLayoutNavigation>();
 
   const isLocationDisabled = useSelector(scanService, selectIsLocationDisabled);
   const isLocationDenied = useSelector(scanService, selectIsLocationDenied);
+  const isLivenessEnabled = useSelector(settingsService, selectIsLivenessEnabled);
   const isBleError = useSelector(scanService, selectIsHandlingBleError);
   const isInvalidIdentity = useSelector(scanService, selectIsInvalidIdentity);
   const flowType = useSelector(scanService, selectFlowType);
@@ -292,6 +295,7 @@ export function useScanLayout() {
     isInvalid,
     isReviewing,
     isDone,
+    isLivenessEnabled,
     GOTO_HOME,
     GOTO_HISTORY,
     isDisconnected,

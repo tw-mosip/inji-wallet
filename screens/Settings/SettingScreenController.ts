@@ -18,6 +18,7 @@ import {
   selectAppId,
   selectIsResetInjiProps,
   selectEsignetHostUrl,
+  selectIsLivenessEnabled,
 } from '../../machines/settings';
 
 import {
@@ -43,6 +44,7 @@ export function useSettingsScreen(props: RootRouteProps & RequestRouteProps) {
   const [biometricState, biometricSend, bioService] =
     useMachine(biometricsMachine);
   const passcode = useSelector(authService, selectPasscode);
+  const livenessEnabled = useSelector(settingsService, selectIsLivenessEnabled);
   const isPasscodeSet = () => !!passcode;
   const isSettingUp = useSelector(authService, selectSettingUp);
 
@@ -107,6 +109,7 @@ export function useSettingsScreen(props: RootRouteProps & RequestRouteProps) {
     alertMsg,
     hideAlert,
     isPasscodeSet,
+    livenessEnabled,
     isSettingUp,
     appId: useSelector(settingsService || {}, selectAppId),
     name: useSelector(settingsService || {}, selectName),

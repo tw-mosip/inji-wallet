@@ -185,7 +185,7 @@ export const SettingScreen: React.FC<
               </ListItem.Content>
               <Switch
                 {...testIDProps('livenessToggle')}
-                value={LIVENESS_CHECK}
+                value={controller.livenessEnabled}
                 onValueChange={handleLivenessToggle}
                 trackColor={{
                   false: Theme.Colors.switchTrackFalse,

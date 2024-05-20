@@ -56,6 +56,7 @@ export const QrLogin: React.FC<QrLoginProps> = props => {
           onCancel={controller.CANCEL}
           onFaceValid={controller.FACE_VALID}
           onFaceInvalid={controller.FACE_INVALID}
+          isLivenessEnabled={controller.isLivenessEnabled}
           isInvalidIdentity={controller.isInvalidIdentity}
           onDismiss={controller.DISMISS}
           onRetryVerification={controller.RETRY_VERIFICATION}

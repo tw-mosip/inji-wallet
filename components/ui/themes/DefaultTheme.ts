@@ -530,9 +530,9 @@ export const DefaultTheme = {
       alignItems: 'flex-end',
     },
     scannerContainer: {
-      // borderRadius: 150,
+      borderRadius: 24,
       alignSelf: 'center',
-      marginTop: 50,
+      marginTop: 10,
       height: 350,
       width: 350,
       overflow: 'hidden',
@@ -1063,6 +1063,14 @@ export const DefaultTheme = {
       width: Dimensions.get('window').width * 0.72,
       alignSelf: 'center',
       height: 54,
+    },
+    transparent: {
+      borderRadius: 9,
+      width: Dimensions.get('window').width * 0.72,
+      alignSelf: 'center',
+      height: 54,
+      color: 'black',
+      backgroundColor: Colors.White,
     },
     float: {
       borderRadius: 9,
