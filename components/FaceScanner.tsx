@@ -357,7 +357,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
             borderRadius: 9,
             width: Dimensions.get('window').width * 0.85,
             alignItems: 'center',
-            marginTop: 150,
+            marginTop: Dimensions.get('window').height * 0.15,
             padding: 3,
           }}>
           <Spinner
@@ -370,7 +370,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         </View>
         </View>
       )}
-      <View style={{ marginTop: 15 }}>
+      <View style={{ flex: 2, marginTop: 15}}>
       <View style={Theme.Styles.scannerContainer}>
         <Camera
           style={Theme.Styles.scanner}
@@ -399,7 +399,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
               alignSelf: 'center',
               alignItems: 'center',
               height: 40,
-              marginBottom: 80,
+              marginBottom: Dimensions.get('window').height * 0.1,
               opacity: opacity,
             }}
             onPressIn={() => setOpacity(0.5)}
