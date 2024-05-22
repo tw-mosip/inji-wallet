@@ -25,6 +25,34 @@ const ProofPurpose = {
   PublicKey: 'publicKey',
 };
 
+export async function verifySunbirdCredential(
+  verifiableCredential: VerifiableCredential | Credential,
+): Promise<VerificationResult> {
+  try {
+    const response = await fetch('http://10.0.2.2:3000/getVerificationStatus', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(verifiableCredential),
+    });
+
+    console.log('balaggg-->response', response);
+    const responseData = await response.json();
+    console.log('balaggg-->responseData', responseData);
+    const result = {
+      isVerified: responseData.verified,
+      errorMessage: responseData.verified
+        ? VerificationErrorType.NO_ERROR
+        : VerificationErrorType.TECHNICAL_ERROR,
+    };
+    return result;
+  } catch (error) {
+    return {
+      isVerified: false,
+      errorMessage: VerificationErrorType.TECHNICAL_ERROR,
+    };
+  }
+}
+
 export async function verifyCredential(
   verifiableCredential: Credential,
 ): Promise<VerificationResult> {

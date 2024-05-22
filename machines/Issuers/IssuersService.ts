@@ -20,6 +20,7 @@ import {getVCMetadata, VCMetadata} from '../../shared/VCMetadata';
 import {
   VerificationErrorType,
   verifyCredential,
+  verifySunbirdCredential,
 } from '../../shared/vcjs/verifyCredential';
 import {
   getImpressionEventData,
@@ -111,16 +112,19 @@ export const IssuersService = () => {
         VCMetadata.fromVcMetadataString(getVCMetadata(context)).issuer ===
         Issuers.Sunbird
       ) {
-        return {
-          isVerified: true,
-          errorMessage: VerificationErrorType.NO_ERROR,
-        };
-      }
-      const verificationResult = await verifyCredential(
-        context.verifiableCredential?.credential,
-      );
-      if (!verificationResult.isVerified) {
-        throw new Error(verificationResult.errorMessage);
+        const verificationResult = await verifySunbirdCredential(
+          context.verifiableCredential?.credential,
+        );
+        if (!verificationResult.isVerified) {
+          throw new Error(verificationResult.errorMessage);
+        }
+      } else {
+        const verificationResult = await verifyCredential(
+          context.verifiableCredential?.credential,
+        );
+        if (!verificationResult.isVerified) {
+          throw new Error(verificationResult.errorMessage);
+        }
       }
     },
   };
