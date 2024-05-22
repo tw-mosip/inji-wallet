@@ -34,10 +34,7 @@ export async function verifySunbirdCredential(
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(verifiableCredential),
     });
-
-    console.log('balaggg-->response', response);
     const responseData = await response.json();
-    console.log('balaggg-->responseData', responseData);
     const result = {
       isVerified: responseData.verified,
       errorMessage: responseData.verified
