@@ -30,7 +30,7 @@ PODS:
     - ExpoModulesCore
   - EXConstants (14.4.2):
     - ExpoModulesCore
-  - EXFaceDetector (12.6.1):
+  - EXFaceDetector (12.4.0):
     - ExpoModulesCore
     - GoogleMLKit/FaceDetection (= 2.6.0)
     - MLKitCommon (= 5.0.0)
@@ -53,9 +53,6 @@ PODS:
     - GoogleSignIn (~> 7.0)
     - React-Core
   - ExpoCrypto (12.6.0):
-    - ExpoModulesCore
-  - ExpoImageManipulator (11.8.0):
-    - EXImageLoader
     - ExpoModulesCore
   - ExpoKeepAwake (12.3.0):
     - ExpoModulesCore
@@ -141,6 +138,8 @@ PODS:
   - hermes-engine (0.71.8):
     - hermes-engine/Pre-built (= 0.71.8)
   - hermes-engine/Pre-built (0.71.8)
+  - ImageColors (2.4.0):
+    - ExpoModulesCore
   - libevent (2.1.12)
   - MLImage (1.0.0-beta2)
   - MLKitCommon (5.0.0):
@@ -438,6 +437,10 @@ PODS:
   - react-native-cloud-storage (1.3.0):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
+  - react-native-image-editor (4.2.0):
+    - RCT-Folly (= 2021.07.22.00)
+    - React-Core
+    - React-RCTImage
   - react-native-location (2.5.0):
     - React
   - react-native-mmkv-storage (0.9.1):
@@ -623,7 +626,6 @@ DEPENDENCIES:
   - Expo (from `../node_modules/expo`)
   - "ExpoAdapterGoogleSignIn (from `../node_modules/@react-native-google-signin/google-signin/expo/ios`)"
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
-  - ExpoImageManipulator (from `../node_modules/expo-image-manipulator/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLocalAuthentication (from `../node_modules/expo-local-authentication/ios`)
   - ExpoLocalization (from `../node_modules/expo-localization/ios`)
@@ -637,6 +639,7 @@ DEPENDENCIES:
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - ImageColors (from `../node_modules/react-native-image-colors/ios`)
   - libevent (~> 2.1.12)
   - Permission-BluetoothPeripheral (from `../node_modules/react-native-permissions/ios/BluetoothPeripheral`)
   - Permission-Camera (from `../node_modules/react-native-permissions/ios/Camera`)
@@ -659,6 +662,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-app-auth (from `../node_modules/react-native-app-auth`)
   - react-native-cloud-storage (from `../node_modules/react-native-cloud-storage`)
+  - "react-native-image-editor (from `../node_modules/@react-native-community/image-editor`)"
   - react-native-location (from `../node_modules/react-native-location`)
   - react-native-mmkv-storage (from `../node_modules/react-native-mmkv-storage`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
@@ -770,8 +774,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-google-signin/google-signin/expo/ios"
   ExpoCrypto:
     :path: "../node_modules/expo-crypto/ios"
-  ExpoImageManipulator:
-    :path: "../node_modules/expo-image-manipulator/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
   ExpoLocalAuthentication:
@@ -798,6 +800,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
+  ImageColors:
+    :path: "../node_modules/react-native-image-colors/ios"
   Permission-BluetoothPeripheral:
     :path: "../node_modules/react-native-permissions/ios/BluetoothPeripheral"
   Permission-Camera:
@@ -838,6 +842,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-app-auth"
   react-native-cloud-storage:
     :path: "../node_modules/react-native-cloud-storage"
+  react-native-image-editor:
+    :path: "../node_modules/@react-native-community/image-editor"
   react-native-location:
     :path: "../node_modules/react-native-location"
   react-native-mmkv-storage:
@@ -924,7 +930,7 @@ SPEC CHECKSUMS:
   ASN1Decoder: 6110fdeacfdb41559b1481457a1645be716610aa
   biometric-sdk-react-native: d2a3a1279013cc4a7514a1b43fe557eb76e4e4c1
   BiometricSdk: 303e7329404ea4d922dc14108449d10d21574f77
-  boost: 64032b9e9b938fda23325e68a3771f0fabf414dc
+  boost: 57d2868c099736d80fcd648bf211b4431e51a558
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   CatCrypto: a477899b6be4954e75be4897e732da098cc0a5a8
   CrcSwift: f85dea6b41dddb5f98bb3743fd777ce58b77bc2e
@@ -934,7 +940,7 @@ SPEC CHECKSUMS:
   EXBarCodeScanner: 8e23fae8d267dbef9f04817833a494200f1fce35
   EXCamera: 2dc2bd2828bca4e283018a0b5a84aec6639ff0b4
   EXConstants: ce5bbea779da8031ac818c36bea41b10e14d04e1
-  EXFaceDetector: ab64eb2c274008b156052e5c4c64e485cd1b5cf6
+  EXFaceDetector: 7ea53dbcdeac3f98f409a43fe31ca22195efc900
   EXFileSystem: f8b838a880254de42a5a7da20ed5ce12e2697c1b
   EXFont: 6ea3800df746be7233208d80fe379b8ed74f4272
   EXImageLoader: fd053169a8ee932dd83bf1fe5487a50c26d27c2b
@@ -943,7 +949,6 @@ SPEC CHECKSUMS:
   Expo: ba9abdf444dc6d2c05a82c4c1b51a2400beb6167
   ExpoAdapterGoogleSignIn: 6c55782832b7fbdc2c27dac05ef00445c103b8f3
   ExpoCrypto: 42485127a5968dda6f67ac5f2b42d3c0af31d7db
-  ExpoImageManipulator: c1d7cb865eacd620a35659f3da34c70531f10b59
   ExpoKeepAwake: be4cbd52d9b177cde0fd66daa1913afa3161fc1d
   ExpoLocalAuthentication: 32919307c66fb3661caefa07e7811a95a7539d7b
   ExpoLocalization: f26cd431ad9ea3533c5b08c4fabd879176a794bb
@@ -967,6 +972,7 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 5595ec75acf5be50814f81e9189490412bad82ba
   GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
   hermes-engine: 47986d26692ae75ee7a17ab049caee8864f855de
+  ImageColors: 88be684570585c07ae2750bff34eb7b78bfc53b4
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   MLImage: a454f9f8ecfd537783a12f9488f5be1a68820829
   MLKitCommon: 3bc17c6f7d25ce3660f030350b46ae7ec9ebca6e
@@ -998,6 +1004,7 @@ SPEC CHECKSUMS:
   React-logger: 342f358b8decfbf8f272367f4eacf4b6154061be
   react-native-app-auth: 1d12b6874a24152715a381d8e9149398ce7c2c95
   react-native-cloud-storage: d16e1647fc5f13d6b5763f7aea241de94e7991e0
+  react-native-image-editor: a60c74bc79f6101b7863c092aa53726e9e40a327
   react-native-location: 5a40ec1cc6abf2f6d94df979f98ec76c3a415681
   react-native-mmkv-storage: cfb6854594cfdc5f7383a9e464bb025417d1721c
   react-native-netinfo: 2517ad504b3d303e90d7a431b0fcaef76d207983

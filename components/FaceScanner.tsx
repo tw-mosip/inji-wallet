@@ -8,14 +8,14 @@ import React, {
 import {Camera, CameraCapturedPicture, ImageType} from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import {TouchableOpacity, View, Dimensions} from 'react-native';
-import { Centered, Column, Row, Text, Button} from './ui';
+import {Centered, Column, Row, Text, Button} from './ui';
 import {useInterpret, useSelector} from '@xstate/react';
 import {useTranslation} from 'react-i18next';
 import ImageEditor from '@react-native-community/image-editor';
 import {getColors} from 'react-native-image-colors';
-import hexRgb, { RgbaObject } from 'hex-rgb';
+import hexRgb, {RgbaObject} from 'hex-rgb';
 import {closest} from 'color-diff';
-import { faceCompare } from '@iriscan/biometric-sdk-react-native';
+import {faceCompare} from '@iriscan/biometric-sdk-react-native';
 import {
   FaceScannerEvents,
   selectIsCheckingPermission,
@@ -36,10 +36,13 @@ import {RotatingIcon} from './RotatingIcon';
 import {Theme} from './ui/styleUtils';
 import {SvgImage} from './ui/svg';
 import Spinner from 'react-native-spinkit';
-import {isAndroid} from '../shared/constants';
+import {
+  isAndroid,
+  LIVENESS_CHECK,
+  LIVENESS_THRESHOLD,
+} from '../shared/constants';
 
 export const FaceScanner: React.FC<FaceScannerProps> = props => {
-
   const {t} = useTranslation('FaceScanner');
   const {appService} = useContext(GlobalContext);
   const settingsService = appService?.children?.get('settings') || {};
@@ -70,11 +73,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   const [faceToCompare, setFaceToCompare] = useState(null);
   const MAX_COUNTER = 15; // Total number of times handleCapture will be called
 
-
   const [picArray, setPicArray] = useState([]);
   let threshold;
   let faceCompareResult;
-  const randomNumToFaceCompare = getRandomInt(counter, MAX_COUNTER - 1); 
+  const randomNumToFaceCompare = getRandomInt(counter, MAX_COUNTER - 1);
   const [infoText, setInfoText] = useState<string>(t('livenessCaptureGuide'));
 
   let FaceCropPicArray: any[] = new Array();
@@ -108,30 +110,27 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
       {R: 0, G: 255, B: 0},
       {R: 0, G: 0, B: 255},
     ];
-  
+
     LeftrgbaColors.forEach(colorRGBA => {
       let colorRGB = {};
       colorRGB['R'] = colorRGBA.red;
       colorRGB['G'] = colorRGBA.green;
       colorRGB['B'] = colorRGBA.blue;
-  
+
       const closestColor = closest(colorRGB, palette);
-  
+
       const result =
         color.red === closestColor.R &&
         color.blue === closestColor.B &&
         color.green === closestColor.G;
 
       resultsSet.push(result);
-  
     });
   }
 
   async function CropEyes() {
-
     await Promise.all(
       picArray.map(async pic => {
-
         const image = pic.image;
         face = (await FaceDetector.detectFacesAsync(image.uri, camoptions))
           .faces[0];
@@ -232,19 +231,21 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
 
     threshold =
       (resultsSet.filter(element => element).length / resultsSet.length) * 100;
-    console.log('Threshold is ->', threshold);
+    console.log('FACE_LIVENESS :: Threshold is ->', threshold);
 
-    console.log('Face to compare URI is-->', faceToCompare.uri);
     faceCompareResult = await faceCompare(vcFace, faceToCompare.base64);
-    console.log('faceresult is-->', faceCompareResult);
+    console.log(
+      'FACE_LIVENESS :: face compare result is-->',
+      faceCompareResult,
+    );
 
-    console.log('End time-->', Date.now());
-    // if(threshold > 40  && faceCompareResult){
-    // props.onValid();
-    // }
-    // else{
-    props.onInvalid();
-    // }
+    console.log('FACE_LIVENESS :: End time-->', Date.now());
+
+    if (threshold > LIVENESS_THRESHOLD && faceCompareResult) {
+      props.onValid();
+    } else {
+      props.onInvalid();
+    }
   }
 
   async function captureImage(screenColor) {
@@ -297,7 +298,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         counter < MAX_COUNTER
       ) {
         if (counter == 0) {
-          console.log('Start time-->', Date.now());
+          console.log('FACE_LIVENESS :: Start time-->', Date.now());
         }
         const randomNum = getRandomInt(0, 2);
         const randomColor = colors[randomNum];
@@ -428,9 +429,9 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
               <Centered style={Theme.Styles.imageCaptureButton}>
                 <TouchableOpacity
                   onPress={() => {
-                    console.log('I am called inside touch');
+                    // console.log('I am called inside touch');
                     service.send(FaceScannerEvents.CAPTURE());
-                    console.log('I am called inside touch after');
+                    // console.log('I am called inside touch after');
                   }}>
                   {SvgImage.CameraCaptureIcon()}
                 </TouchableOpacity>
