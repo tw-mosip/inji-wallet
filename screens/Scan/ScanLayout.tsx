@@ -15,6 +15,7 @@ import {SvgImage} from '../../components/ui/svg';
 import {BANNER_TYPE_SUCCESS} from '../../shared/constants';
 import {View, I18nManager} from 'react-native';
 import {Text} from './../../components/ui';
+import {Error} from '../../components/ui/Error';
 
 const ScanStack = createNativeStackNavigator();
 
@@ -50,18 +51,34 @@ export const ScanLayout: React.FC = () => {
 
   return (
     <React.Fragment>
-      {/* <VerifyIdentityOverlay
+      <VerifyIdentityOverlay
         credential={controller.credential}
         verifiableCredentialData={controller.verifiableCredentialData}
         isVerifyingIdentity={controller.isVerifyingIdentity}
         onCancel={controller.CANCEL}
         onFaceValid={controller.FACE_VALID}
         onFaceInvalid={controller.FACE_INVALID}
-        isInvalidIdentity={controller.isInvalidIdentity}
-        onDismiss={controller.DISMISS}
         isLivenessEnabled={controller.isLivenessEnabled}
-        onRetryVerification={controller.RETRY_VERIFICATION}
-      /> */}
+      />
+
+      <Error
+        isModal
+        alignActionsOnEnd
+        showClose={false}
+        isVisible={controller.isInvalidIdentity}
+        title={t('ScanScreen:postFaceCapture.captureFailureTitle')}
+        message={t('ScanScreen:postFaceCapture.captureFailureMessage')}
+        image={SvgImage.PermissionDenied()}
+        primaryButtonTestID={'retry'}
+        primaryButtonText={t('ScanScreen:status.retry')}
+        primaryButtonEvent={controller.RETRY_VERIFICATION}
+        textButtonTestID={'home'}
+        textButtonText={t('ScanScreen:status.accepted.home')}
+        textButtonEvent={controller.GOTO_HOME}
+        customImageStyles={{paddingBottom: 0, marginBottom: -6}}
+        customStyles={{marginTop: '20%'}}
+        testID={'shareWithSelfieError'}
+      />
 
       <ScanStack.Navigator initialRouteName="ScanScreen">
         {controller.isReviewing &&

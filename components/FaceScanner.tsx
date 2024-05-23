@@ -29,14 +29,14 @@ import {
   selectIsVerifying,
   selectCameraRef,
 } from '../machines/faceScanner';
-import {selectIsLivenessEnabled,
-} from '../machines/settings';
+import {selectIsLivenessEnabled} from '../machines/settings';
 import {GlobalContext} from '../shared/GlobalContext';
 import {selectIsActive} from '../machines/app';
 import {RotatingIcon} from './RotatingIcon';
 import {Theme} from './ui/styleUtils';
 import {SvgImage} from './ui/svg';
 import Spinner from 'react-native-spinkit';
+import {isAndroid} from '../shared/constants';
 
 export const FaceScanner: React.FC<FaceScannerProps> = props => {
 
@@ -52,11 +52,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   const cameraRef = useSelector(service, selectCameraRef);
   const livenessEnabled = useSelector(settingsService, selectIsLivenessEnabled);
 
-  // const rxDataURI =/data:(?<mime>[\w/\-.]+);(?<encoding>\w+),(?<data>.*)/;
-  // const matches = rxDataURI.exec(vcImage).groups;
+  const rxDataURI = /data:(?<mime>[\w/\-.]+);(?<encoding>\w+),(?<data>.*)/;
+  const matches = rxDataURI.exec(props.vcImage).groups;
+  const vcFace = matches.data;
 
-  //const vcImage = matches.data;
-  
   const isPermissionDenied = useSelector(service, selectIsPermissionDenied);
   const isValid = useSelector(service, selectIsValid);
   const isInvalid = useSelector(service, selectIsInvalid);
@@ -74,10 +73,9 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
 
   const [picArray, setPicArray] = useState([]);
   let threshold;
-  let faceIS;
   let faceCompareResult;
-  const randomNumToFaceCompare = getRandomInt(counter, MAX_COUNTER);
-  const [infoText, setInfoText] = useState('Hold the phone steady, keep your face focused in the centre.');
+  const randomNumToFaceCompare = getRandomInt(counter, MAX_COUNTER - 1); 
+  const [infoText, setInfoText] = useState<string>(t('livenessCaptureGuide'));
 
   let FaceCropPicArray: any[] = new Array();
   let EyeCropPicArray: any[] = new Array();
@@ -92,8 +90,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
     tracking: true,
   };
 
-  
-  let colors = ['#0000FF','#00FF00','#FF0000'];
+  let colors = ['#0000FF', '#00FF00', '#FF0000'];
   let resultsSet: any[] = new Array();
 
   function getRandomInt(min, max) {
@@ -159,12 +156,16 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
 
     await Promise.all(
       FaceCropPicArray.map(async pics => {
-
         const image = pics.image;
-        let lefteyex = face.leftEyePosition.x;
-        let righteyex = face.rightEyePosition.x;
-        let lefteyey = face.leftEyePosition.y;
-        let righteyey = face.rightEyePosition.y;
+
+        let lefteyex = isAndroid() ? face.LEFT_EYE.x : face.leftEyePosition.x;
+        let righteyex = isAndroid()
+          ? face.RIGHT_EYE.x
+          : face.rightEyePosition.x;
+        let lefteyey = isAndroid() ? face.LEFT_EYE.y : face.leftEyePosition.y;
+        let righteyey = isAndroid()
+          ? face.RIGHT_EYE.x
+          : face.rightEyePosition.y;
 
         let offsetX = 200;
         let offsetY = 350;
@@ -196,43 +197,54 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
     );
 
     await Promise.all(
-        EyeCropPicArray.map(async pics => {
+      EyeCropPicArray.map(async pics => {
+        const color = hexRgb(pics.color);
+        const leftEye = pics.leftEye;
+        const rightEye = pics.rightEye;
 
-          const color = hexRgb(pics.color); 
-          const leftEye = pics.leftEye;
-          const rightEye = pics.rightEye;
+        const leftEyeColors = await getColors(leftEye.uri);
+        const rightEyeColors = await getColors(rightEye.uri);
 
-          const leftEyeColors = await getColors(leftEye.uri);
-          const rightEyeColors = await getColors(rightEye.uri);
+        let colorFiltered = ['background', 'dominant'];
 
-          let colorFiltered = ['background','dominant'];
+        let LeftrgbaColors = Object.values(leftEyeColors)
+          .filter(
+            color =>
+              typeof color === 'string' &&
+              color.startsWith('#') &&
+              !colorFiltered.includes(color),
+          )
+          .map(color => hexRgb(color));
 
-          let LeftrgbaColors = Object.values(leftEyeColors)
-            .filter(color => typeof color === 'string' && color.startsWith('#') && !colorFiltered.includes(color))
-            .map(color => hexRgb(color));
+        let RightrgbaColors = Object.values(rightEyeColors)
+          .filter(
+            color =>
+              typeof color === 'string' &&
+              color.startsWith('#') &&
+              !colorFiltered.includes(color),
+          )
+          .map(color => hexRgb(color));
 
-          let RightrgbaColors = Object.values(rightEyeColors)
-            .filter(color => typeof color === 'string' && color.startsWith('#')  && !colorFiltered.includes(color))
-            .map(color => hexRgb(color));
+        await getEyeColorPredictionResult(LeftrgbaColors, color); // {r,g,b,a}, {r,g,b,a}
+        await getEyeColorPredictionResult(RightrgbaColors, color); // {r,g,b,a}, {r,g,b,a}
+      }),
+    );
 
-          await getEyeColorPredictionResult(LeftrgbaColors,color);// {r,g,b,a}, {r,g,b,a}
-          await getEyeColorPredictionResult(RightrgbaColors,color);// {r,g,b,a}, {r,g,b,a}
+    threshold =
+      (resultsSet.filter(element => element).length / resultsSet.length) * 100;
+    console.log('Threshold is ->', threshold);
 
-        }),
-      );
-      console.log("Result set is-->", resultsSet);
-      console.log("End time-->", Date.now());
+    console.log('Face to compare URI is-->', faceToCompare.uri);
+    faceCompareResult = await faceCompare(vcFace, faceToCompare.base64);
+    console.log('faceresult is-->', faceCompareResult);
 
-      threshold = resultsSet.filter(element => element).length/resultsSet.length * 100;
-      console.log("Threshold is ->",threshold);
-
-      // console.log("URI iss->", faceIS);
-      // faceCompareResult = await faceCompare(vcImage, faceToCompare.base64);
-      // console.log("faceresult is-->", faceCompareResult);
-
-      if(threshold > 10 ){
-      props.onValid();
-      }
+    console.log('End time-->', Date.now());
+    // if(threshold > 40  && faceCompareResult){
+    // props.onValid();
+    // }
+    // else{
+    props.onInvalid();
+    // }
   }
 
   async function captureImage(screenColor) {
@@ -243,15 +255,11 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
           quality: 1,
           imageType: ImageType.jpg,
         });
-        setPicArray([...picArray,{color: screenColor, image: capturedImage}]);
-        // counter - 0
-        // setcounter(counter+1)
-        // 
-        // if(counter == 2){
-        //   console.log("Inside cond-->", counter);
-        //   faceIS = capturedImage;
-        //   console.log("Face is--->", faceIS);
-        // }
+        setPicArray([...picArray, {color: screenColor, image: capturedImage}]);
+
+        if (counter === randomNumToFaceCompare) {
+          setFaceToCompare(capturedImage);
+        }
       }
     } catch (error) {
       console.error('Error capturing image:', error);
@@ -259,11 +267,11 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   }
 
   const handleFacesDetected = async ({faces}) => {
-    if (!livenessEnabled){
+    if (!livenessEnabled) {
       return;
     }
     if (counter == MAX_COUNTER) {
-      setCounter(counter+1);
+      setCounter(counter + 1);
       cameraRef.pausePreview();
       setScreenColor('#ffffff');
       await CropEyes();
@@ -273,31 +281,33 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
 
       // Magic numbers
       const withinXBounds =
-        bounds.origin.x + bounds.size.width >= 310 && bounds.origin.x <= 320;
+        bounds.origin.x + bounds.size.width >= 280 && bounds.origin.x <= 300;
       const withinYBounds =
-        bounds.origin.y + bounds.size.height >= 310 && bounds.origin.y <= 320;
+        bounds.origin.y + bounds.size.height >= 280 && bounds.origin.y <= 300;
       const withinYawAngle = yawAngle > -10 && yawAngle < 10;
       const withinRollAngle = yawAngle > -3 && rollAngle < 3;
 
-      setInfoText("Keep your face inside");
+      setInfoText(t('faceOutGuide'));
 
       if (
         withinXBounds &&
         withinYBounds &&
         withinRollAngle &&
-        withinYawAngle && counter < MAX_COUNTER
+        withinYawAngle &&
+        counter < MAX_COUNTER
       ) {
-        const randomNum = getRandomInt(0,2);
-        const randomColor = colors[randomNum];
-        setScreenColor(randomColor); 
-        setCounter(counter+1);
-        setInfoText('Hellooooo');
-        //  setFaceToCompare(faceIS);
-        //console.log("Face berrnsfsnfofnds->", faceToCompare);
-        await captureImage(screenColor);
+        if (counter == 0) {
+          console.log('Start time-->', Date.now());
         }
+        const randomNum = getRandomInt(0, 2);
+        const randomColor = colors[randomNum];
+        setScreenColor(randomColor);
+        setCounter(counter + 1);
+        setInfoText(t('faceInGuide'));
+        await captureImage(screenColor);
+      }
     }
-  }
+  };
 
   const setCameraRef = useCallback(
     (node: Camera) => {
@@ -348,45 +358,44 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
       {...(!livenessEnabled && {align: 'space-between'})}
       style={{backgroundColor: livenessEnabled ? screenColor : '#ffffff'}}>
       {livenessEnabled && (
-        <View style={{flex: 1,
-          justifyContent: 'flex-start',
-          alignItems: 'center',}}>
         <View
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 9,
-            width: Dimensions.get('window').width * 0.85,
-            alignItems: 'center',
-            marginTop: Dimensions.get('window').height * 0.15,
-            padding: 3,
-          }}>
-          <Spinner
-            type="ThreeBounce"
-            color={Theme.Colors.Loading}
-          />
-          <Text size="small" weight="bold" color="black" align='center'>
-            {infoText}
-          </Text>
-        </View>
+          style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center'}}>
+          <View
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 9,
+              width: Dimensions.get('window').width * 0.85,
+              alignItems: 'center',
+              marginTop: Dimensions.get('window').height * 0.15,
+              padding: 3,
+            }}>
+            <Spinner type="ThreeBounce" color={Theme.Colors.Loading} />
+            <Text size="small" weight="bold" color="black" align="center">
+              {infoText}
+            </Text>
+          </View>
         </View>
       )}
-      <View style={{ flex: 2, marginTop: 15}}>
-      <View style={Theme.Styles.scannerContainer}>
-        <Camera
-          style={Theme.Styles.scanner}
-          type={whichCamera}
-          ref={setCameraRef}
-          onFacesDetected={handleFacesDetected}
-          faceDetectorSettings={{
-            mode: FaceDetector.FaceDetectorMode.accurate,
-            detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
-            runClassifications: FaceDetector.FaceDetectorClassifications.all,
-            contourMode: FaceDetector.FaceDetectorClassifications.all,
-            minDetectionInterval: 1000,
-            tracking: true,
-          }}
-        />
-      </View>
+      <View style={{flex: 2, marginTop: 15}}>
+        <View style={Theme.Styles.scannerContainer}>
+          <View>
+            <Camera
+              style={Theme.Styles.scanner}
+              type={whichCamera}
+              ref={setCameraRef}
+              onFacesDetected={handleFacesDetected}
+              faceDetectorSettings={{
+                mode: FaceDetector.FaceDetectorMode.accurate,
+                detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
+                runClassifications:
+                  FaceDetector.FaceDetectorClassifications.all,
+                contourMode: FaceDetector.FaceDetectorClassifications.all,
+                minDetectionInterval: 1000,
+                tracking: true,
+              }}
+            />
+          </View>
+        </View>
       </View>
       {livenessEnabled ? (
         <View
