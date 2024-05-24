@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {Camera, CameraCapturedPicture, ImageType} from 'expo-camera';
+import {Camera, ImageType} from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import {TouchableOpacity, View, Dimensions} from 'react-native';
 import {Centered, Column, Row, Text, Button} from './ui';
@@ -36,11 +36,8 @@ import {RotatingIcon} from './RotatingIcon';
 import {Theme} from './ui/styleUtils';
 import {SvgImage} from './ui/svg';
 import Spinner from 'react-native-spinkit';
-import {
-  isAndroid,
-  LIVENESS_CHECK,
-  LIVENESS_THRESHOLD,
-} from '../shared/constants';
+import {isAndroid, LIVENESS_THRESHOLD} from '../shared/constants';
+import {getRandomInt} from '../shared/commonUtil';
 
 export const FaceScanner: React.FC<FaceScannerProps> = props => {
   const {t} = useTranslation('FaceScanner');
@@ -71,177 +68,199 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   const [screenColor, setScreenColor] = useState('#0000ff');
   const [opacity, setOpacity] = useState(1);
   const [faceToCompare, setFaceToCompare] = useState(null);
-  const MAX_COUNTER = 15; // Total number of times handleCapture will be called
+  const MAX_COUNTER = 15;
 
   const [picArray, setPicArray] = useState([]);
-  let threshold;
-  let faceCompareResult;
   const randomNumToFaceCompare = getRandomInt(counter, MAX_COUNTER - 1);
   const [infoText, setInfoText] = useState<string>(t('livenessCaptureGuide'));
 
   let FaceCropPicArray: any[] = new Array();
   let EyeCropPicArray: any[] = new Array();
-  let face;
-  let faceImage;
-  let camoptions = {
+  let predictedColorResults: any[] = new Array();
+  let facePoints;
+  let calculatedThreshold;
+  let faceCompareOuptut;
+  let capturedFaceImage;
+
+  const screenFlashColors = ['#0000FF', '#00FF00', '#FF0000'];
+  const colorFiltered = ['background', 'dominant'];
+  const offsetX = 200;
+  const offsetY = 350;
+  const captureInterval = 1000;
+  const eyeOpenProbability = 0.85;
+  const eyeCropHeightConst = 50;
+  const XAndYBoundsMax = 280;
+  const XAndYBoundsMin = 300;
+  const rollAngleThreshold = 10;
+  const yawAngleThreshold = 3;
+  const colorComparePalette = [
+    {R: 255, G: 0, B: 0},
+    {R: 0, G: 255, B: 0},
+    {R: 0, G: 0, B: 255},
+  ];
+  const imageCaptureConfig = {
+    base64: true,
+    quality: 1,
+    imageType: ImageType.jpg,
+  };
+  const faceDetectorConfig = {
     mode: FaceDetector.FaceDetectorMode.accurate,
     detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
     runClassifications: FaceDetector.FaceDetectorClassifications.all,
     contourMode: FaceDetector.FaceDetectorClassifications.all,
-    minDetectionInterval: 500,
+    minDetectionInterval: captureInterval,
     tracking: true,
   };
 
-  let colors = ['#0000FF', '#00FF00', '#FF0000'];
-  let resultsSet: any[] = new Array();
+  const setCameraRef = useCallback(
+    (node: Camera) => {
+      if (node != null && !isScanning) {
+        service.send(FaceScannerEvents.READY(node));
+      }
+    },
+    [isScanning],
+  );
 
-  function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  function getNormalizedFacePoints(facePoints: any): number[] {
+    return isAndroid()
+      ? [
+          facePoints.LEFT_EYE.x,
+          facePoints.LEFT_EYE.y,
+          facePoints.RIGHT_EYE.x,
+          facePoints.RIGHT_EYE.y,
+        ]
+      : [
+          facePoints.leftEyePosition.x,
+          facePoints.leftEyePosition.y,
+          facePoints.rightEyePosition.x,
+          facePoints.rightEyePosition.y,
+        ];
   }
 
-  function getEyeColorPredictionResult(
-    LeftrgbaColors: import('hex-rgb').RgbaObject[],
+  function filterColor(color) {
+    return (
+      typeof color === 'string' &&
+      color.startsWith('#') &&
+      !colorFiltered.includes(color)
+    );
+  }
+
+  function handleOnCancel() {
+    props.onCancel();
+  }
+
+  async function getEyeColorPredictionResult(
+    LeftrgbaColors: RgbaObject[],
     color: RgbaObject,
   ) {
-    const palette = [
-      {R: 255, G: 0, B: 0},
-      {R: 0, G: 255, B: 0},
-      {R: 0, G: 0, B: 255},
-    ];
-
     LeftrgbaColors.forEach(colorRGBA => {
       let colorRGB = {};
       colorRGB['R'] = colorRGBA.red;
       colorRGB['G'] = colorRGBA.green;
       colorRGB['B'] = colorRGBA.blue;
 
-      const closestColor = closest(colorRGB, palette);
+      const closestColor = closest(colorRGB, colorComparePalette);
 
       const result =
         color.red === closestColor.R &&
         color.blue === closestColor.B &&
         color.green === closestColor.G;
 
-      resultsSet.push(result);
+      predictedColorResults.push(result);
     });
   }
 
-  async function CropEyes() {
+  async function cropEyeAreaFromFace() {
     await Promise.all(
       picArray.map(async pic => {
-        const image = pic.image;
-        face = (await FaceDetector.detectFacesAsync(image.uri, camoptions))
-          .faces[0];
+        facePoints = (
+          await FaceDetector.detectFacesAsync(pic.image.uri, faceDetectorConfig)
+        ).faces[0];
 
-        let leftEyeOpenProb = face.leftEyeOpenProbability;
-        let rightEyeOpenProb = face.rightEyeOpenProbability;
-
-        // prob numbers is magic numbers
-        if (leftEyeOpenProb > 0.85 && rightEyeOpenProb > 0.85) {
-          faceImage = await ImageEditor.cropImage(image.uri, {
-            offset: {x: face.bounds.origin.x, y: face.bounds.origin.y},
+        if (
+          facePoints.leftEyeOpenProbability > eyeOpenProbability &&
+          facePoints.rightEyeOpenProbability > eyeOpenProbability
+        ) {
+          capturedFaceImage = await ImageEditor.cropImage(pic.image.uri, {
+            offset: {
+              x: facePoints.bounds.origin.x,
+              y: facePoints.bounds.origin.y,
+            },
             size: {
-              width: face.bounds.size.width,
-              height: face.bounds.size.height,
+              width: facePoints.bounds.size.width,
+              height: facePoints.bounds.size.height,
             },
           });
 
-          FaceCropPicArray.push({color: pic.color, image: faceImage});
+          FaceCropPicArray.push({color: pic.color, image: capturedFaceImage});
         }
       }),
     );
 
     await Promise.all(
-      FaceCropPicArray.map(async pics => {
-        const image = pics.image;
+      FaceCropPicArray.map(async pic => {
+        let [leftEyeX, leftEyeY, rightEyeX, rightEyeY] =
+          getNormalizedFacePoints(facePoints);
 
-        let lefteyex = isAndroid() ? face.LEFT_EYE.x : face.leftEyePosition.x;
-        let righteyex = isAndroid()
-          ? face.RIGHT_EYE.x
-          : face.rightEyePosition.x;
-        let lefteyey = isAndroid() ? face.LEFT_EYE.y : face.leftEyePosition.y;
-        let righteyey = isAndroid()
-          ? face.RIGHT_EYE.x
-          : face.rightEyePosition.y;
-
-        let offsetX = 200;
-        let offsetY = 350;
-        let leftcroppedImage;
-        let rightcroppedImage;
-
-        leftcroppedImage = await ImageEditor.cropImage(image.uri, {
+        const leftCroppedImage = await ImageEditor.cropImage(pic.image.uri, {
           offset: {
-            x: lefteyex - offsetX,
-            y: lefteyey - offsetY,
+            x: leftEyeX - offsetX,
+            y: leftEyeY - offsetY,
           },
-          size: {width: offsetX * 2, height: offsetY / 2 - 50},
+          size: {width: offsetX * 2, height: offsetY / 2 - eyeCropHeightConst},
         });
 
-        rightcroppedImage = await ImageEditor.cropImage(image.uri, {
+        const rightCroppedImage = await ImageEditor.cropImage(pic.image.uri, {
           offset: {
-            x: righteyex - offsetX,
-            y: righteyey - offsetY,
+            x: rightEyeX - offsetX,
+            y: rightEyeY - offsetY,
           },
-          size: {width: offsetX * 2, height: offsetY / 2 - 50},
+          size: {width: offsetX * 2, height: offsetY / 2 - eyeCropHeightConst},
         });
 
         EyeCropPicArray.push({
-          color: pics.color,
-          leftEye: leftcroppedImage,
-          rightEye: rightcroppedImage,
+          color: pic.color,
+          leftEye: leftCroppedImage,
+          rightEye: rightCroppedImage,
         });
       }),
     );
 
     await Promise.all(
-      EyeCropPicArray.map(async pics => {
-        const color = hexRgb(pics.color);
-        const leftEye = pics.leftEye;
-        const rightEye = pics.rightEye;
+      EyeCropPicArray.map(async pic => {
+        const leftEyeColors = await getColors(pic.leftEye.uri);
+        const rightEyeColors = await getColors(pic.rightEye.uri);
 
-        const leftEyeColors = await getColors(leftEye.uri);
-        const rightEyeColors = await getColors(rightEye.uri);
-
-        let colorFiltered = ['background', 'dominant'];
-
-        let LeftrgbaColors = Object.values(leftEyeColors)
-          .filter(
-            color =>
-              typeof color === 'string' &&
-              color.startsWith('#') &&
-              !colorFiltered.includes(color),
-          )
+        const leftRGBAColors = Object.values(leftEyeColors)
+          .filter(filterColor)
           .map(color => hexRgb(color));
 
-        let RightrgbaColors = Object.values(rightEyeColors)
-          .filter(
-            color =>
-              typeof color === 'string' &&
-              color.startsWith('#') &&
-              !colorFiltered.includes(color),
-          )
+        const rightRGBAColors = Object.values(rightEyeColors)
+          .filter(filterColor)
           .map(color => hexRgb(color));
 
-        await getEyeColorPredictionResult(LeftrgbaColors, color); // {r,g,b,a}, {r,g,b,a}
-        await getEyeColorPredictionResult(RightrgbaColors, color); // {r,g,b,a}, {r,g,b,a}
+        const rgbColor = hexRgb(pic.color);
+        await getEyeColorPredictionResult(leftRGBAColors, rgbColor);
+        await getEyeColorPredictionResult(rightRGBAColors, rgbColor);
       }),
     );
 
-    threshold =
-      (resultsSet.filter(element => element).length / resultsSet.length) * 100;
-    console.log('FACE_LIVENESS :: Threshold is ->', threshold);
+    calculatedThreshold =
+      predictedColorResults.filter(element => element).length /
+      predictedColorResults.length;
 
-    faceCompareResult = await faceCompare(vcFace, faceToCompare.base64);
+    console.log('FACE_LIVENESS :: Threshold is ->', calculatedThreshold);
+
+    faceCompareOuptut = await faceCompare(vcFace, faceToCompare.base64);
+
     console.log(
       'FACE_LIVENESS :: face compare result is-->',
-      faceCompareResult,
+      faceCompareOuptut,
     );
 
     console.log('FACE_LIVENESS :: End time-->', Date.now());
 
-    if (threshold > LIVENESS_THRESHOLD && faceCompareResult) {
+    if (calculatedThreshold > LIVENESS_THRESHOLD && faceCompareOuptut) {
       props.onValid();
     } else {
       props.onInvalid();
@@ -251,11 +270,10 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
   async function captureImage(screenColor) {
     try {
       if (cameraRef) {
-        const capturedImage = await cameraRef.takePictureAsync({
-          base64: true,
-          quality: 1,
-          imageType: ImageType.jpg,
-        });
+        const capturedImage = await cameraRef.takePictureAsync(
+          imageCaptureConfig,
+        );
+
         setPicArray([...picArray, {color: screenColor, image: capturedImage}]);
 
         if (counter === randomNumToFaceCompare) {
@@ -267,26 +285,30 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
     }
   }
 
-  const handleFacesDetected = async ({faces}) => {
+  async function handleFacesDetected({faces}) {
     if (!livenessEnabled) {
       return;
     }
+
     if (counter == MAX_COUNTER) {
       setCounter(counter + 1);
       cameraRef.pausePreview();
       setScreenColor('#ffffff');
-      await CropEyes();
+      await cropEyeAreaFromFace();
       return;
     } else if (faces.length > 0) {
       const {bounds, yawAngle, rollAngle} = faces[0];
 
-      // Magic numbers
       const withinXBounds =
-        bounds.origin.x + bounds.size.width >= 280 && bounds.origin.x <= 300;
+        bounds.origin.x + bounds.size.width >= XAndYBoundsMax &&
+        bounds.origin.x <= XAndYBoundsMin;
       const withinYBounds =
-        bounds.origin.y + bounds.size.height >= 280 && bounds.origin.y <= 300;
-      const withinYawAngle = yawAngle > -10 && yawAngle < 10;
-      const withinRollAngle = yawAngle > -3 && rollAngle < 3;
+        bounds.origin.y + bounds.size.height >= XAndYBoundsMax &&
+        bounds.origin.y <= XAndYBoundsMin;
+      const withinYawAngle =
+        yawAngle > -yawAngleThreshold && yawAngle < yawAngleThreshold;
+      const withinRollAngle =
+        rollAngle > -rollAngleThreshold && rollAngle < rollAngleThreshold;
 
       setInfoText(t('faceOutGuide'));
 
@@ -300,27 +322,15 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         if (counter == 0) {
           console.log('FACE_LIVENESS :: Start time-->', Date.now());
         }
+
         const randomNum = getRandomInt(0, 2);
-        const randomColor = colors[randomNum];
+        const randomColor = screenFlashColors[randomNum];
         setScreenColor(randomColor);
         setCounter(counter + 1);
         setInfoText(t('faceInGuide'));
         await captureImage(screenColor);
       }
     }
-  };
-
-  const setCameraRef = useCallback(
-    (node: Camera) => {
-      if (node != null && !isScanning) {
-        service.send(FaceScannerEvents.READY(node));
-      }
-    },
-    [isScanning],
-  );
-
-  function handleOnCancel() {
-    props.onCancel();
   }
 
   useEffect(() => {
@@ -385,15 +395,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
               type={whichCamera}
               ref={setCameraRef}
               onFacesDetected={handleFacesDetected}
-              faceDetectorSettings={{
-                mode: FaceDetector.FaceDetectorMode.accurate,
-                detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
-                runClassifications:
-                  FaceDetector.FaceDetectorClassifications.all,
-                contourMode: FaceDetector.FaceDetectorClassifications.all,
-                minDetectionInterval: 1000,
-                tracking: true,
-              }}
+              faceDetectorSettings={faceDetectorConfig}
             />
           </View>
         </View>
@@ -429,9 +431,7 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
               <Centered style={Theme.Styles.imageCaptureButton}>
                 <TouchableOpacity
                   onPress={() => {
-                    // console.log('I am called inside touch');
                     service.send(FaceScannerEvents.CAPTURE());
-                    // console.log('I am called inside touch after');
                   }}>
                   {SvgImage.CameraCaptureIcon()}
                 </TouchableOpacity>
