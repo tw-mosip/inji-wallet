@@ -15,6 +15,7 @@ import ImageEditor from '@react-native-community/image-editor';
 import {getColors} from 'react-native-image-colors';
 import hexRgb, {RgbaObject} from 'hex-rgb';
 import {closest} from 'color-diff';
+import {Ellipse, Defs, Mask, Rect, Svg } from 'react-native-svg';
 import {faceCompare} from '@iriscan/biometric-sdk-react-native';
 import {
   FaceScannerEvents,
@@ -394,9 +395,35 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
               style={Theme.Styles.scanner}
               type={whichCamera}
               ref={setCameraRef}
-              onFacesDetected={handleFacesDetected}
-              faceDetectorSettings={faceDetectorConfig}
+              {...(livenessEnabled
+                ? {
+                    onFacesDetected: handleFacesDetected,
+                    faceDetectorSettings: faceDetectorConfig,
+                  }
+                : {})}
             />
+            {livenessEnabled && (
+              <Svg height="100%" width="100%" style={{position: 'absolute'}}>
+                <Defs>
+                  <Mask id="mask" x="0" y="0" height="100%" width="100%">
+                    <Rect
+                      height="100%"
+                      width="100%"
+                      fill="#fff"
+                      opacity="0.3"
+                    />
+                    <Ellipse rx="38%" ry="45%" cx="50%" cy="50%" fill="black" />
+                  </Mask>
+                </Defs>
+                <Rect
+                  height="100%"
+                  width="100%"
+                  fill="rgba(0, 0, 0, 0.8)"
+                  mask="url(#mask)"
+                  fill-opacity="0"
+                />
+              </Svg>
+            )}
           </View>
         </View>
       </View>

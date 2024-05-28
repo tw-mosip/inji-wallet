@@ -538,7 +538,7 @@ export const DefaultTheme = {
       overflow: 'hidden',
     },
     scanner: {
-      height: 400,
+      height: '100%',
       width: '100%',
       margin: 'auto',
     },

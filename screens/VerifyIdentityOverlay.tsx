@@ -24,7 +24,6 @@ export const VerifyIdentityOverlay: React.FC<
   };
   
   if (props.isLivenessEnabled) {
-    console.log("Inside here-->", props.isLivenessEnabled);
     modalProps.arrowLeft = false;
     modalProps.headerTitle = '';
     modalProps.showClose = false;
