@@ -246,7 +246,7 @@ fileignoreconfig:
   - filename: screens/Issuers/CredentialTypeSelectionScreen.tsx
     checksum: 144bbf59e86a89bf580ac7931645ca3eaed69a9409de36f6ce9f88a14091a9d3
   - filename: components/QrCodeOverlay.tsx
-    checksum: 47220a4ebd8af702afe622a29b689f651eb23387bac1c623f241839beb413d25
+    checksum: b49a3f53dd4a522f8ce47f2af72ade33e337ddbd40068911458bb3ad54197b63
   - filename: machines/Issuers/IssuersEvents.ts
     checksum: fd8c30e0cf43a784be883c9d79a3bff0d2bcd9075e937d225939040542998b10
   - filename: machines/Issuers/IssuersGuards.ts
@@ -284,7 +284,7 @@ fileignoreconfig:
   - filename: machines/QrLogin/QrLoginServices.ts
     checksum: b20d0caa6d23078b4010ea5185f01270356422dd216edd7834b069cdedd3383d
   - filename: machines/bleShare/scan/scanActions.ts
-    checksum: 7b1c55e1913622d142433a296f1c75ec831441670d9b84cfaabb4863af2c1fe6
+    checksum: 1be68caa29937d5f724fc45f8164ee607e556aae008c00ac89b83968030ed7ed
   - filename: injitest/src/test/java/iosTestCases/ActivateVcTest.java
     checksum: 280fcbfa6e7b26baa41aa9e60e8be857a16fd409f2dcc5b31d53ced7d1b26dec
   - filename: injitest/src/test/java/iosTestCases/GenerateUinOrVidTest.java
