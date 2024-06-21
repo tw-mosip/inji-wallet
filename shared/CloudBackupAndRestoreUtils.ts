@@ -28,7 +28,7 @@ class Cloud {
     SUCCESS: 'SUCCESS',
     FAILURE: 'FAILURE',
   };
-  static readonly timeout = 10000;
+  static readonly timeout = 30000;
   private static readonly requiredScopes = [
     'https://www.googleapis.com/auth/drive.appdata',
     'https://www.googleapis.com/auth/drive.file',
