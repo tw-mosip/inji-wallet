@@ -7,7 +7,7 @@ apply plugin: "com.facebook.react"
 apply plugin: "org.sonarqube"
 
 configurations.all {
-    resolutionStrategy.force 'androidx.activity:activity-ktx:1.7.1','androidx.activity:activity:1.7.0', 'com.fasterxml.jackson.core:jackson-core:2.14.0'
+    resolutionStrategy.force 'androidx.activity:activity-ktx:1.7.1', 'androidx.activity:activity:1.7.0', 'com.fasterxml.jackson.core:jackson-core:2.14.0', "com.fasterxml.jackson.core:jackson-databind:2.13.5"
 }
 
 react {
@@ -170,7 +170,7 @@ android {
                 keyAlias "$keystoreAlias"
                 keyPassword "$keystorePass"
                 v2SigningEnabled true
-                v1SigningEnabled false
+                v1SigningEnabled true //TODO: disable V1 signing as it was introduced for device issue
             } else {
                 android.buildTypes.debug.signingConfig = null
             }
@@ -245,11 +245,13 @@ android {
         }
     }
 
+    useLibrary("org.apache.http.legacy")
+
     packagingOptions {
-      pickFirst 'lib/arm64-v8a/liblog.so'    
-      pickFirst 'lib/armeabi-v7a/liblog.so'  
-      pickFirst 'lib/x86/liblog.so'
-      pickFirst 'lib/x86_64/liblog.so'
+        pickFirst 'lib/arm64-v8a/liblog.so'
+        pickFirst 'lib/armeabi-v7a/liblog.so'
+        pickFirst 'lib/x86/liblog.so'
+        pickFirst 'lib/x86_64/liblog.so'
         exclude 'META-INF/license.txt'
         exclude 'META-INF/notice.txt'
     }
@@ -289,7 +291,8 @@ dependencies {
     compileOnly project(':react-native-android-location-services-dialog-box')
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation "io.mosip:inji-vci-client:1.2-SNAPSHOT"
-    implementation ("io.mosip.vercred:vcverifier:1.0.0") {
+    implementation("io.mosip.vercred:vcverifier:1.0.12-SNAPSHOT") {
+        exclude group: 'org.bouncycastle', module: 'bcprov-jdk18on'
         exclude group: 'net.jcip', module: 'jcip-annotations'
     }
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
