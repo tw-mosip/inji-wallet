@@ -31,7 +31,9 @@ export async function verifyCredential(
 ): Promise<VerificationResult> {
   if (isAndroid()) {
     const vcVerifier = NativeModules.VcVerifierModule;
-    const isVerified = await vcVerifier.verify(verifiableCredential.toString());
+    const isVerified = await vcVerifier.verify(
+      JSON.stringify(verifiableCredential),
+    );
     console.log('CredentialsVerifier isVerified ', isVerified);
     return {
       isVerified: isVerified,
