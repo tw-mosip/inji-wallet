@@ -83,7 +83,7 @@ export const IssuersService = () => {
       );
       credential['credential']['renderMethod'] = [
         {
-          id: 'https://<url>/insurance_svg_template.svg',
+          id: 'https://34e6-2401-4900-1f2b-c22-c944-58cd-bfed-966c.ngrok-free.app/insurance_svg_template.svg',
           type: 'SvgRenderingTemplate',
           name: 'Portrait Mode',
         },

@@ -68,6 +68,7 @@ export const API_CACHED_STORAGE_KEYS = {
     `CACHE_FETCH_ISSUER_CONFIG_${issuerId}`,
   fetchIssuerWellknownConfig: (issuerId: string) =>
     `CACHE_FETCH_ISSUER_WELLKNOWN_CONFIG_${issuerId}`,
+  fetchSvgTemplate: 'CACHE_SVG_TEMPLATE'
 };
 
 export function isIOS(): boolean {

@@ -1,4 +1,4 @@
-import {request} from './request';
+import {request, requestTextResponse} from './request';
 import {
   API_CACHED_STORAGE_KEYS,
   changeCrendetialRegistry,
@@ -126,6 +126,11 @@ export const API = {
       undefined,
       '',
     ),
+  fetchSvgTemplate: async (requestUrl: string) => {
+    return await requestTextResponse(
+        requestUrl
+    );
+  }
 };
 
 export const CACHED_API = {
@@ -158,6 +163,13 @@ export const CACHED_API = {
       fetchCall: API.fetchAllProperties,
       onErrorHardCodedValue: INITIAL_CONFIG.allProperties,
     }),
+
+  fetchSvgTemplate: (isCachePreferred: boolean) =>
+      generateCacheAPIFunction({
+        isCachePreferred,
+        cacheKey: API_CACHED_STORAGE_KEYS.fetchSvgTemplate,
+        fetchCall: API.fetchIssuers,
+      }),
 };
 
 interface GenerateCacheAPIFunctionProps {
