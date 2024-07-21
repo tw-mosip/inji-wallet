@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Image, ImageBackground, View} from 'react-native';
 import {
@@ -19,6 +19,7 @@ import {
   getTextColor,
 } from '../common/VCUtils';
 import {ProfileIcon} from '../../ProfileIcon';
+import {SvgXml} from 'react-native-svg';
 
 const getProfileImage = (face: any) => {
   if (face) {
@@ -39,6 +40,7 @@ export const VCDetailView: React.FC<VCItemDetailsProps> = props => {
   const logo = props.verifiableCredentialData.issuerLogo;
   const face = props.verifiableCredentialData.face;
   const verifiableCredential = props.credential;
+  const svgTemplate = props.svgTemplate;
 
   const shouldShowHrLine = verifiableCredential => {
     const availableFieldNames = Object.keys(
@@ -59,77 +61,87 @@ export const VCDetailView: React.FC<VCItemDetailsProps> = props => {
   return (
     <>
       <Column scroll>
-        <Column fill>
-          <Column
-            padding="10 10 3 10"
-            backgroundColor={Theme.Colors.DetailedViewBackground}>
-            <ImageBackground
-              imageStyle={{width: '100%'}}
-              resizeMethod="scale"
-              resizeMode="stretch"
-              style={[
-                Theme.Styles.openCardBgContainer,
-                getBackgroundColour(props.wellknown),
-              ]}
-              source={Theme.OpenCard}>
-              <Row padding="14 14 0 14" margin="0 0 0 0">
-                <Column crossAlign="center">
-                  {getProfileImage(face)}
-                  <QrCodeOverlay
-                    verifiableCredential={verifiableCredential}
-                    meta={props.verifiableCredentialData.vcMetadata}
-                  />
-                  <Column
-                    width={80}
-                    height={59}
-                    crossAlign="center"
-                    margin="12 0 0 0">
-                    <Image
-                      src={logo?.url}
-                      alt={logo?.alt_text}
-                      style={Theme.Styles.issuerLogo}
-                      resizeMethod="scale"
-                      resizeMode="contain"
+        {svgTemplate !== '' ? (
+          <Column backgroundColor={Theme.Colors.DetailedViewBackground}>
+            <View>
+              {svgTemplate !== '' && (
+                <SvgXml width="400" height="700" xml={svgTemplate} />
+              )}
+            </View>
+          </Column>
+        ) : (
+          <Column fill>
+            <Column
+              padding="10 10 3 10"
+              backgroundColor={Theme.Colors.DetailedViewBackground}>
+              <ImageBackground
+                imageStyle={{width: '100%'}}
+                resizeMethod="scale"
+                resizeMode="stretch"
+                style={[
+                  Theme.Styles.openCardBgContainer,
+                  getBackgroundColour(props.wellknown),
+                ]}
+                source={Theme.OpenCard}>
+                <Row padding="14 14 0 14" margin="0 0 0 0">
+                  <Column crossAlign="center">
+                    {getProfileImage(face)}
+                    <QrCodeOverlay
+                      verifiableCredential={verifiableCredential}
+                      meta={props.verifiableCredentialData.vcMetadata}
                     />
+                    <Column
+                      width={80}
+                      height={59}
+                      crossAlign="center"
+                      margin="12 0 0 0">
+                      <Image
+                        src={logo?.url}
+                        alt={logo?.alt_text}
+                        style={Theme.Styles.issuerLogo}
+                        resizeMethod="scale"
+                        resizeMode="contain"
+                      />
+                    </Column>
                   </Column>
-                </Column>
-                <Column
-                  align="space-evenly"
-                  margin={'0 0 0 24'}
-                  style={{flex: 1}}>
-                  {fieldItemIterator(
-                    props.fields,
-                    verifiableCredential,
-                    props.wellknown,
-                    props,
-                  )}
-                </Column>
-              </Row>
-              {shouldShowHrLine(verifiableCredential) && (
-                <>
-                  <View
-                    style={[
-                      Theme.Styles.hrLine,
-                      {
-                        borderBottomColor: getTextColor(
-                          props.wellknown,
-                          Theme.Styles.hrLine.borderBottomColor,
-                        ),
-                      },
-                    ]}></View>
-                  <Column padding="0 14 14 14">
+                  <Column
+                    align="space-evenly"
+                    margin={'0 0 0 24'}
+                    style={{flex: 1}}>
                     {fieldItemIterator(
-                      DETAIL_VIEW_BOTTOM_SECTION_FIELDS,
+                      props.fields,
                       verifiableCredential,
                       props.wellknown,
                       props,
                     )}
                   </Column>
-                </>
-              )}
-            </ImageBackground>
+                </Row>
+                {shouldShowHrLine(verifiableCredential) && (
+                  <>
+                    <View
+                      style={[
+                        Theme.Styles.hrLine,
+                        {
+                          borderBottomColor: getTextColor(
+                            props.wellknown,
+                            Theme.Styles.hrLine.borderBottomColor,
+                          ),
+                        },
+                      ]}></View>
+                    <Column padding="0 14 14 14">
+                      {fieldItemIterator(
+                        DETAIL_VIEW_BOTTOM_SECTION_FIELDS,
+                        verifiableCredential,
+                        props.wellknown,
+                        props,
+                      )}
+                    </Column>
+                  </>
+                )}
+              </ImageBackground>
+            </Column>
           </Column>
-        </Column>
+        )}
       </Column>
       {props.vcHasImage && (
         <View
@@ -224,4 +236,5 @@ export interface VCItemDetailsProps {
   onBinding?: () => void;
   activeTab?: Number;
   vcHasImage: boolean;
+  svgTemplate: string;
 }

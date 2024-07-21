@@ -81,6 +81,13 @@ export const IssuersService = () => {
         proofJWT,
         accessToken,
       );
+      credential['credential']['renderMethod'] = [
+        {
+          id: 'https://<url>/insurance_svg_template.svg',
+          type: 'SvgRenderingTemplate',
+          name: 'Portrait Mode',
+        },
+      ];
 
       console.info(`VC download via ${context.selectedIssuerId} is successful`);
       return updateCredentialInformation(context, credential);

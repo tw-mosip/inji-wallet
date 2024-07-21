@@ -14,6 +14,16 @@ export class BackendResponseError extends Error {
   }
 }
 
+export async function requestTextResponse(requestURL: string) {
+  try {
+    const response = await fetch(requestURL);
+    let textResponse = await response.text();
+    return textResponse;
+  } catch (error) {
+    return '';
+  }
+}
+
 export async function request(
   method: HTTP_METHOD,
   path: `/${string}` | string,

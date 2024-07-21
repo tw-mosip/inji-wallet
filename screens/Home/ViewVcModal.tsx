@@ -154,6 +154,7 @@ export const ViewVcModal: React.FC<ViewVcModalProps> = props => {
           walletBindingResponse={controller.walletBindingResponse}
           activeTab={props.activeTab}
           vcHasImage={profileImage !== undefined}
+          svgTemplate={controller.svgTemplate}
         />
       )}
 

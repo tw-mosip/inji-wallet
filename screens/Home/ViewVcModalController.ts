@@ -31,6 +31,9 @@ import {
 } from '../../machines/VerifiableCredential/VCItemMachine/VCItemMachine';
 import {selectIsAcceptingOtpInput} from './MyVcs/AddVcModalMachine';
 import {BannerStatusType} from '../../components/BannerNotification';
+import {requestTextResponse} from '../../shared/request';
+import {SVG_TEMPLATE_MODE} from '../../shared/constants';
+import {replaceSVGTemplatePlaceholders} from '../../shared/commonUtil';
 
 export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   const [toastVisible, setToastVisible] = useState(false);
@@ -44,6 +47,8 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   const isSuccessBio = useSelector(bioService, selectIsSuccess);
   const vc = useSelector(vcItemActor, selectVc);
   const otError = useSelector(vcItemActor, selectOtpError);
+  const [svgTemplate, setSvgTemplate] = useState('');
+  const credential = useSelector(vcItemActor, selectCredential);
   const onSuccess = () => {
     bioSend({type: 'SET_IS_AVAILABLE', data: true});
     setError('');
@@ -74,6 +79,19 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
     });
   };
 
+  const fetchSvgTemplate = async () => {
+    for (const renderItem of credential.renderMethod) {
+      if (renderItem.name == SVG_TEMPLATE_MODE.PORTRAIT) {
+        let svgTemplateResponse = await requestTextResponse(renderItem['id']);
+        svgTemplateResponse = replaceSVGTemplatePlaceholders(
+          svgTemplateResponse,
+          credential,
+        );
+        setSvgTemplate(svgTemplateResponse);
+      }
+    }
+  };
+
   useEffect(() => {
     if (isSuccessBio && reAuthenticating != '') {
       onSuccess();
@@ -83,11 +101,19 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   useEffect(() => {
     vcItemActor.send(VCItemEvents.REFRESH());
   }, [isVisible]);
+
+  useEffect(() => {
+    if (credential.renderMethod) {
+      fetchSvgTemplate();
+    }
+  }, [credential]);
+
   return {
+    svgTemplate,
     error,
     message,
     toastVisible,
-    credential: useSelector(vcItemActor, selectCredential),
+    credential,
     verifiableCredentialData: useSelector(
       vcItemActor,
       selectVerifiableCredentialData,
