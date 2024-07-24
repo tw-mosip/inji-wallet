@@ -27,7 +27,12 @@ export const DUMMY_KEY_FOR_BIOMETRIC_ALIAS =
 export function generateKeys(): Promise<KeyPair> {
   return Promise.resolve(RSA.generateKeys(2048));
 }
-
+export function generateKeyPairECK1() {
+  const privKey = secp.utils.randomPrivateKey();
+  const pubKey = secp.getPublicKey(privKey, false);
+  console.log('pub-priv keys' + privKey + ' \n' + pubKey);
+  return {publicKey: pubKey, privateKey: privKey};
+}
 /**
  * isCustomKeystore is a cached check of existence of a hardware keystore.
  */
@@ -64,10 +69,32 @@ export async function getJWT(
   privateKey: string,
 ) {
   try {
+    const keyPairEC = generateKeyPairECK1();
+    const x = base64url(Buffer.from(keyPairEC.publicKey.slice(1, 33))); // Skip the first byte (0x04) in the uncompressed public key
+    const y = base64url(Buffer.from(keyPairEC.privateKey.slice(33)));
+    const jwk = {
+      kty: 'EC',
+      crv: 'secp256k1',
+      x: x,
+      y: y,
+      alg: 'ES256K',
+      use: 'sig',
+    };
+    const header = {
+      jwk: jwk,
+      alg: 'ES256K',
+      typ: 'openid4vci-proof+jwt',
+    };
     const header64 = encodeB64(JSON.stringify(header));
     const payLoad64 = encodeB64(JSON.stringify(payLoad));
     const preHash = header64 + '.' + payLoad64;
-    const signature64 = await createSignature(privateKey, preHash, alias);
+    const signature64 = await createSignatureECK1(
+      keyPairEC.privateKey,
+      preHash,
+    );
+    console.log(
+      'sign hereL: ' + header64 + '.' + payLoad64 + '.' + signature64,
+    );
     return header64 + '.' + payLoad64 + '.' + signature64;
   } catch (e) {
     console.error('Exception Occurred While Constructing JWT ', e);
