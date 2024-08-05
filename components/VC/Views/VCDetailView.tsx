@@ -62,7 +62,9 @@ export const VCDetailView: React.FC<VCItemDetailsProps> = props => {
     <>
       <Column scroll>
         {svgTemplate !== '' ? (
-          <Column backgroundColor={Theme.Colors.DetailedViewBackground}>
+          <Column
+            padding="10 0 5 5"
+            backgroundColor={Theme.Colors.DetailedViewBackground}>
             <View>
               {svgTemplate !== '' && (
                 <SvgXml width="400" height="700" xml={svgTemplate} />

@@ -177,7 +177,7 @@ export const replaceSVGTemplatePlaceholders = (
         }
       }
     });
-    return value !== undefined ? String(value) : '--';
+    return value !== undefined ? String(value) : '';
   });
 };
 

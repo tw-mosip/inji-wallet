@@ -253,7 +253,12 @@ android {
     }
 }
 
+repositories {
+    mavenLocal()
+}
 dependencies {
+   implementation 'io.mosip:injivcrenderer:17.0.0'
+    //implementation(name: "injivcrenderer-release", ext: "aar")
     implementation("com.facebook.react:react-android")
     implementation 'com.facebook.soloader:soloader:0.10.1+'
     implementation("io.mosip:pixelpass:1.2-SNAPSHOT")
@@ -262,6 +267,7 @@ dependencies {
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
+
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
 
     // If your app supports Android versions before Ice Cream Sandwich (API level 14)

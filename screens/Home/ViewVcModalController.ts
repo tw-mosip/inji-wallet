@@ -34,7 +34,8 @@ import {BannerStatusType} from '../../components/BannerNotification';
 import {requestTextResponse} from '../../shared/request';
 import {SVG_TEMPLATE_MODE} from '../../shared/constants';
 import {replaceSVGTemplatePlaceholders} from '../../shared/commonUtil';
-import {API} from "../../shared/api";
+import {API} from '../../shared/api';
+import {VcRenderer} from '../../shared/vcRenderer/VcRenderer';
 
 export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   const [toastVisible, setToastVisible] = useState(false);
@@ -80,17 +81,18 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
     });
   };
 
-
   const fetchSvgTemplate = async () => {
     for (const renderItem of credential.renderMethod) {
-      if(renderItem.name == SVG_TEMPLATE_MODE.PORTRAIT){
-        let svgTemplateResponse = await API.fetchSvgTemplate(renderItem["id"])
-        svgTemplateResponse = replaceSVGTemplatePlaceholders(svgTemplateResponse, credential)
-        setSvgTemplate(svgTemplateResponse)
+      if (renderItem.name == SVG_TEMPLATE_MODE.PORTRAIT) {
+        let svgTemplateResponse = await API.fetchSvgTemplate(renderItem['id']);
+        svgTemplateResponse = await VcRenderer.replacePlaceholders(
+          credential,
+          svgTemplateResponse,
+        );
+        setSvgTemplate(svgTemplateResponse);
       }
     }
   };
-
 
   useEffect(() => {
     if (isSuccessBio && reAuthenticating != '') {
@@ -103,10 +105,10 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   }, [isVisible]);
 
   useEffect(() => {
-    if(credential.renderMethod) {
-      fetchSvgTemplate()
+    if (credential.renderMethod) {
+      fetchSvgTemplate();
     }
-  }, [credential])
+  }, [credential]);
 
   return {
     svgTemplate,
