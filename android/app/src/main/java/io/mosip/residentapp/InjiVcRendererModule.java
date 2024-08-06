@@ -26,12 +26,12 @@ public class InjiVcRendererModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void replaceSvgTemplatePlaceholders(String vcJsonString, String svgTemplate, Promise promise) {
+    public void replaceSvgTemplatePlaceholders(String vcJsonString, Promise promise) {
         try {
-            String replacedWithVcData = injiVcRenderer.replaceSVGTemplatePlaceholders(svgTemplate, vcJsonString);
-            promise.resolve(replacedWithVcData);
+            String replacedTemplate = injiVcRenderer.renderSvg(vcJsonString);
+            promise.resolve(replacedTemplate);
         } catch (Exception e) {
-            promise.reject("ERROR while replacing placeholders in SVG Template", e.toString());
+            promise.reject("ERROR_REPLACING_PLACEHOLDERS", "Error while replacing placeholders in SVG Template: " + e.getMessage());
         }
     }
 }

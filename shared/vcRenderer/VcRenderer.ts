@@ -5,7 +5,6 @@ export class VcRenderer {
     const InjiVcRenderer = NativeModules.InjiVcRenderer;
     const updatedTemplate = await InjiVcRenderer.replaceSvgTemplatePlaceholders(
       JSON.stringify(vc),
-      svgTemplate,
     );
     return updatedTemplate;
   }

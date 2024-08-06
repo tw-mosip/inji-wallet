@@ -33,7 +33,6 @@ import {selectIsAcceptingOtpInput} from './MyVcs/AddVcModalMachine';
 import {BannerStatusType} from '../../components/BannerNotification';
 import {requestTextResponse} from '../../shared/request';
 import {SVG_TEMPLATE_MODE} from '../../shared/constants';
-import {replaceSVGTemplatePlaceholders} from '../../shared/commonUtil';
 import {API} from '../../shared/api';
 import {VcRenderer} from '../../shared/vcRenderer/VcRenderer';
 
