@@ -26,7 +26,7 @@ public class InjiVcRendererModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void replaceSvgTemplatePlaceholders(String vcJsonString, Promise promise) {
+    public void renderSvg(String vcJsonString, Promise promise) {
         try {
             String replacedTemplate = injiVcRenderer.renderSvg(vcJsonString);
             promise.resolve(replacedTemplate);

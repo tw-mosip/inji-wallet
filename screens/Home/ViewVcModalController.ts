@@ -48,7 +48,7 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   const isSuccessBio = useSelector(bioService, selectIsSuccess);
   const vc = useSelector(vcItemActor, selectVc);
   const otError = useSelector(vcItemActor, selectOtpError);
-  const [svgTemplate, setSvgTemplate] = useState('');
+  const [svgImage, setSvgImage] = useState('');
   const credential = useSelector(vcItemActor, selectCredential);
   const onSuccess = () => {
     bioSend({type: 'SET_IS_AVAILABLE', data: true});
@@ -83,12 +83,8 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   const fetchSvgTemplate = async () => {
     for (const renderItem of credential.renderMethod) {
       if (renderItem.name == SVG_TEMPLATE_MODE.PORTRAIT) {
-        let svgTemplateResponse = await API.fetchSvgTemplate(renderItem['id']);
-        svgTemplateResponse = await VcRenderer.replacePlaceholders(
-          credential,
-          svgTemplateResponse,
-        );
-        setSvgTemplate(svgTemplateResponse);
+        let svgImage = await VcRenderer.renderSvg(credential);
+        setSvgImage(svgImage);
       }
     }
   };
@@ -110,7 +106,7 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   }, [credential]);
 
   return {
-    svgTemplate,
+    svgImage,
     error,
     message,
     toastVisible,
