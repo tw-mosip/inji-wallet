@@ -7,6 +7,7 @@ import getAllConfigurations, {
   DownloadProps,
 } from '../../../shared/api';
 import {
+  generateKeyPairECK1,
   generateKeys,
   isHardwareKeystoreExists,
 } from '../../../shared/cryptoutil/cryptoUtil';
@@ -91,15 +92,16 @@ export const VCItemServices = model => {
     },
 
     generateKeyPair: async context => {
-      if (!isHardwareKeystoreExists) {
-        return await generateKeys();
-      }
-      const isBiometricsEnabled = RNSecureKeystoreModule.hasBiometricsEnabled();
-      return RNSecureKeystoreModule.generateKeyPair(
-        VCMetadata.fromVC(context.vcMetadata).id,
-        isBiometricsEnabled,
-        0,
-      );
+      // if (!isHardwareKeystoreExists) {
+      //   return await generateKeys();
+      // }
+      // const isBiometricsEnabled = RNSecureKeystoreModule.hasBiometricsEnabled();
+      // return RNSecureKeystoreModule.generateKeyPair(
+      //   VCMetadata.fromVC(context.vcMetadata).id,
+      //   isBiometricsEnabled,
+      //   0,
+      // );
+      return generateKeyPairECK1();
     },
     requestBindingOTP: async context => {
       const response = await request(

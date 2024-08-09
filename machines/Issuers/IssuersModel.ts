@@ -27,6 +27,7 @@ export const IssuersModel = createModel(
     publicKey: ``,
     privateKey: ``,
     vcMetadata: {} as VCMetadata,
+    keyType: '' as String,
   },
   {
     events: IssuersEvents,

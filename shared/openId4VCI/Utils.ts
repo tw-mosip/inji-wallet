@@ -4,9 +4,9 @@ import {isIOS} from '../constants';
 import pem2jwk from 'simple-pem2jwk';
 import {displayType, issuerType} from '../../machines/Issuers/IssuersMachine';
 import getAllConfigurations, {CACHED_API} from '../api';
-
+import base64url from 'base64url';
 import i18next from 'i18next';
-import {getJWT} from '../cryptoutil/cryptoUtil';
+import {generateKeyPairECK1, getJWT, getJWTECK1} from '../cryptoutil/cryptoUtil';
 import i18n from '../../i18n';
 import {
   CredentialWrapper,
@@ -22,6 +22,7 @@ import {getVerifiableCredential} from '../../machines/VerifiableCredential/VCIte
 import {vcVerificationBannerDetails} from '../../components/BannerNotificationContainer';
 import {getErrorEventData, sendErrorEvent} from '../telemetry/TelemetryUtils';
 import {TelemetryConstants} from '../telemetry/TelemetryConstants';
+import {NativeModules} from 'react-native';
 
 export const Protocols = {
   OpenId4VCI: 'OpenId4VCI',
@@ -250,6 +251,39 @@ export const removeBottomSectionFields = fields => {
   );
 };
 
+export function getKeyTypeFromWellknown() {
+  return 'RSA256';
+}
+const {RNSecureKeyStoreModule} = NativeModules;
+export async function hasKeyPair(keyType: any) {
+  return (await RNSecureKeyStoreModule.hasAlias(keyType)) == true;
+}
+
+export async function fetchKeyPair(keyType: any) {
+  if (keyType == ('RSA256' || 'ES256'))
+    return await RNSecureKeyStoreModule.retrieveKey(keyType);
+  else{
+    const {publicKey,privateKey}=await RNSecureKeyStoreModule.retrieveGenericKey(keyType)
+    return {
+      publicKey:publicKey,
+      privateKey:privateKey
+    }
+  }
+}
+
+export async function generateHardwareBackedKeyPair(keyType: any) {
+  return {publicKey:RNSecureKeyStoreModule.generateKeyPair(keyType,true,0),privateKey:""};
+}
+
+export async function generateGenericKeyPair(keyType: any) {
+    return await keyType=="ES256K"?generateKeyPairECK1():generateKeyPairED25519()
+}
+
+async function generateKeyPairED25519()
+{
+  return await generateKeyPairECK1()
+}
+
 export const vcDownloadTimeout = async (): Promise<number> => {
   const response = await getAllConfigurations();
 
@@ -294,4 +328,36 @@ export async function constructProofJWT(
   };
 
   return await getJWT(jwtHeader, jwtPayload, Issuers_Key_Ref, privateKey);
+}
+
+export async function constructProofJWTECK1(
+  publicKey: any,
+  privateKey: string,
+  accessToken: string,
+  selectedIssuer: issuerType,
+): Promise<string> {
+  const x = base64url(Buffer.from(publicKey.slice(1, 33))); // Skip the first byte (0x04) in the uncompressed public key
+  const y = base64url(Buffer.from(publicKey.slice(33)));
+  const jwk = {
+    kty: 'EC',
+    crv: 'secp256k1',
+    x: x,
+    y: y,
+    alg: 'ES256K',
+    use: 'sig',
+  };
+  const header = {
+    jwk: jwk,
+    alg: 'ES256K',
+    typ: 'openid4vci-proof+jwt',
+  };
+  const decodedToken = jwtDecode(accessToken);
+  const jwtPayload = {
+    iss: selectedIssuer.client_id,
+    nonce: decodedToken.c_nonce,
+    aud: selectedIssuer.credential_audience,
+    iat: Math.floor(new Date().getTime() / 1000),
+    exp: Math.floor(new Date().getTime() / 1000) + 18000,
+  };
+  return await getJWTECK1(header, jwtPayload, Issuers_Key_Ref, privateKey);
 }

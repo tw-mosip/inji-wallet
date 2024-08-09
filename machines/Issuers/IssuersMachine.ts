@@ -94,7 +94,7 @@ export const IssuersMachine = model.createMachine(
         invoke: {
           src: 'downloadIssuerWellknown',
           onDone: {
-            actions: 'updateIssuerFromWellknown',
+            actions: ['updateIssuerFromWellknown','setKeyType'],
             target: 'downloadCredentialTypes',
           },
           onError: {
@@ -165,7 +165,7 @@ export const IssuersMachine = model.createMachine(
             actions: [
               'setTokenResponse',
               'setLoadingReasonAsSettingUp',
-              'getKeyPairFromStore',
+              'getKeyPairFromStore', //why is this used
             ],
           },
           onError: [

@@ -1,8 +1,16 @@
-import {ErrorMessage, Issuers_Key_Ref} from '../../shared/openId4VCI/Utils';
+import {
+  ErrorMessage,
+  Issuers_Key_Ref,
+  fetchKeyPair,
+  getKeyTypeFromWellknown,
+  hasKeyPair,
+} from '../../shared/openId4VCI/Utils';
 import {
   MY_VCS_STORE_KEY,
   NETWORK_REQUEST_FAILED,
   REQUEST_TIMEOUT,
+  isAndroid,
+  isIOS,
 } from '../../shared/constants';
 import {assign, send} from 'xstate';
 import {StoreEvents} from '../store';
@@ -18,7 +26,9 @@ import {
 } from '../../shared/telemetry/TelemetryUtils';
 import {TelemetryConstants} from '../../shared/telemetry/TelemetryConstants';
 import {KeyPair} from 'react-native-rsa-native';
+import {NativeModules} from 'react-native';
 
+const {RNSecureKeystoreModule} = NativeModules;
 export const IssuersActions = (model: any) => {
   return {
     setIsVerified: assign({
@@ -83,11 +93,18 @@ export const IssuersActions = (model: any) => {
     }),
 
     loadKeyPair: assign({
-      publicKey: (_, event: any) => event.response?.publicKey,
-      privateKey: (context: any, event: any) =>
-        event.response?.privateKey
-          ? event.response.privateKey
-          : context.privateKey,
+      publicKey: async (context: any) => {
+        if (await hasKeyPair(context.keyType)) {
+          return fetchKeyPair(context.keyType).publicKey;
+        }
+        return '';
+      },
+      privateKey: async (context: any) => {
+        if (await hasKeyPair(context.keyType)) {
+          return await fetchKeyPair(context.keyType).privateKey;
+        }
+        return '';
+      },
     }),
     getKeyPairFromStore: send(StoreEvents.GET(Issuers_Key_Ref), {
       to: (context: any) => context.serviceRefs.store,
@@ -95,17 +112,10 @@ export const IssuersActions = (model: any) => {
     sendBackupEvent: send(BackupEvents.DATA_BACKUP(true), {
       to: (context: any) => context.serviceRefs.backup,
     }),
-    storeKeyPair: send(
-      (context: any) => {
-        return StoreEvents.SET(Issuers_Key_Ref, {
-          publicKey: context.publicKey,
-          privateKey: context.privateKey,
-        });
-      },
-      {
-        to: context => context.serviceRefs.store,
-      },
-    ),
+    storeKeyPair: (context: any)=>{
+      if(!isHardwareKeystoreExists)
+      RNSecureKeystoreModule.storeGenericKey(context.publicKey,context.privateKey,context.keyType)
+    },
     storeVerifiableCredentialMeta: send(
       context => StoreEvents.PREPEND(MY_VCS_STORE_KEY, getVCMetadata(context)),
       {
@@ -197,15 +207,22 @@ export const IssuersActions = (model: any) => {
     }),
     setPublicKey: assign({
       publicKey: (_, event: any) => {
-        if (!isHardwareKeystoreExists) {
-          return (event.data as KeyPair).public;
-        }
-        return event.data as string;
+        return event.data.publicKey
       },
     }),
 
     setPrivateKey: assign({
-      privateKey: (_, event: any) => (event.data as KeyPair).private,
+      privateKey: (context: any, event: any) => {
+        event.response?.privateKey
+          ? event.response.privateKey
+          : context.privateKey;
+      },
+    }),
+
+    setKeyType: assign({
+      keyType: (context: any, event: any) => {
+        return getKeyTypeFromWellknown();
+      },
     }),
 
     logDownloaded: send(
@@ -274,3 +291,4 @@ export const IssuersActions = (model: any) => {
     ),
   };
 };
+
