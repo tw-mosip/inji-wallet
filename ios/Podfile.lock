@@ -431,6 +431,8 @@ PODS:
   - react-native-cloud-storage (1.4.0):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
+  - react-native-get-random-values (1.11.0):
+    - React-Core
   - react-native-image-editor (4.2.0):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
@@ -651,6 +653,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-app-auth (from `../node_modules/react-native-app-auth`)
   - react-native-cloud-storage (from `../node_modules/react-native-cloud-storage`)
+  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - "react-native-image-editor (from `../node_modules/@react-native-community/image-editor`)"
   - react-native-location (from `../node_modules/react-native-location`)
   - react-native-mmkv-storage (from `../node_modules/react-native-mmkv-storage`)
@@ -826,6 +829,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-app-auth"
   react-native-cloud-storage:
     :path: "../node_modules/react-native-cloud-storage"
+  react-native-get-random-values:
+    :path: "../node_modules/react-native-get-random-values"
   react-native-image-editor:
     :path: "../node_modules/@react-native-community/image-editor"
   react-native-location:
@@ -983,6 +988,7 @@ SPEC CHECKSUMS:
   React-logger: 342f358b8decfbf8f272367f4eacf4b6154061be
   react-native-app-auth: 1d12b6874a24152715a381d8e9149398ce7c2c95
   react-native-cloud-storage: 4a4726995158d9d45bc6c4a27fd83ab4d0673632
+  react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-image-editor: a60c74bc79f6101b7863c092aa53726e9e40a327
   react-native-location: 5a40ec1cc6abf2f6d94df979f98ec76c3a415681
   react-native-mmkv-storage: cfb6854594cfdc5f7383a9e464bb025417d1721c

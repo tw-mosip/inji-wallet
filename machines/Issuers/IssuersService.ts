@@ -4,12 +4,17 @@ import NetInfo from '@react-native-community/netinfo';
 import {
   constructAuthorizationConfiguration,
   constructProofJWT,
+  constructProofJWTECK1,
+  generateGenericKeyPair,
+  generateHardwareBackedKeyPair,
+  generateKeyPair,
   Issuers_Key_Ref,
   updateCredentialInformation,
   vcDownloadTimeout,
 } from '../../shared/openId4VCI/Utils';
 import {authorize} from 'react-native-app-auth';
 import {
+  generateKeyPairECK1,
   generateKeys,
   isHardwareKeystoreExists,
 } from '../../shared/cryptoutil/cryptoUtil';
@@ -38,18 +43,18 @@ export const IssuersService = () => {
     checkInternet: async () => await NetInfo.fetch(),
     downloadIssuerWellknown: async (context: any) => {
       const wellknownResponse = await CACHED_API.fetchIssuerWellknownConfig(
-          context.selectedIssuerId,
-        );
-        return wellknownResponse;
-      
+        context.selectedIssuerId,
+      );
+      return wellknownResponse;
     },
     downloadCredentialTypes: async (context: any) => {
       const credentialTypes = [];
       for (const key in context.selectedIssuer
         .credential_configurations_supported) {
-        credentialTypes.push(
-          {id:key, ...context.selectedIssuer.credential_configurations_supported[key]},
-        );
+        credentialTypes.push({
+          id: key,
+          ...context.selectedIssuer.credential_configurations_supported[key],
+        });
       }
       return credentialTypes;
     },
@@ -64,7 +69,7 @@ export const IssuersService = () => {
           ?.type ?? ['VerifiableCredential'],
         credentialFormat: context.selectedCredentialType.format,
       };
-      const proofJWT = await constructProofJWT(
+      const proofJWT = await constructProofJWTECK1(
         context.publicKey,
         context.privateKey,
         accessToken,
@@ -87,25 +92,18 @@ export const IssuersService = () => {
             TelemetryConstants.Screens.webViewPage,
         ),
       );
-        return await authorize(
-          constructAuthorizationConfiguration(
-            context.selectedIssuer,
-            context.selectedCredentialType.scope,
-          ),
-        );
-      
-      },
-     
-    generateKeyPair: async () => {
-      if (!isHardwareKeystoreExists) {
-        return await generateKeys();
-      }
-      const isBiometricsEnabled = RNSecureKeystoreModule.hasBiometricsEnabled();
-      return RNSecureKeystoreModule.generateKeyPair(
-        Issuers_Key_Ref,
-        isBiometricsEnabled,
-        0,
+      return await authorize(
+        constructAuthorizationConfiguration(
+          context.selectedIssuer,
+          context.selectedCredentialType.scope,
+        ),
       );
+    },
+
+    generateKeyPair: async (context: any) => {
+      if (context.keyType === ('RSA256' || 'ES256'))
+        return await generateHardwareBackedKeyPair(context.keyType);
+      else return await generateGenericKeyPair(context.keyType);
     },
     verifyCredential: async (context: any) => {
       //this issuer specific check has to be removed once vc validation is done.
