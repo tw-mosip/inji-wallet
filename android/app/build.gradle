@@ -253,7 +253,11 @@ android {
     }
 }
 
+repositories {
+    mavenLocal()
+}
 dependencies {
+    implementation 'io.mosip:injivcrenderer:0.1.0'
     implementation("com.facebook.react:react-android")
     implementation 'com.facebook.soloader:soloader:0.10.1+'
     implementation("io.mosip:pixelpass:0.2.0-SNAPSHOT")

@@ -20,6 +20,7 @@ public class InjiPackage implements ReactPackage {
         List<NativeModule> modules = new ArrayList<>();
 
         modules.add(new InjiVciClientModule(reactApplicationContext));
+        modules.add(new InjiVcRendererModule(reactApplicationContext));
         modules.add(new RNPixelpassModule(reactApplicationContext));
         modules.add(new RNSecureKeystoreModule(reactApplicationContext));
         modules.add(new RNVersionModule());
