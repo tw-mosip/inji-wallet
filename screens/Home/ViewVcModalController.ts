@@ -31,6 +31,8 @@ import {
 } from '../../machines/VerifiableCredential/VCItemMachine/VCItemMachine';
 import {selectIsAcceptingOtpInput} from './MyVcs/AddVcModalMachine';
 import {BannerStatusType} from '../../components/BannerNotification';
+import {SVG_TEMPLATE_MODE} from '../../shared/constants';
+import {VcRenderer} from '../../shared/vcRenderer/VcRenderer';
 
 export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   const [toastVisible, setToastVisible] = useState(false);
@@ -44,6 +46,8 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   const isSuccessBio = useSelector(bioService, selectIsSuccess);
   const vc = useSelector(vcItemActor, selectVc);
   const otError = useSelector(vcItemActor, selectOtpError);
+  const [svgImage, setSvgImage] = useState('');
+  const credential = useSelector(vcItemActor, selectCredential);
   const onSuccess = () => {
     bioSend({type: 'SET_IS_AVAILABLE', data: true});
     setError('');
@@ -74,6 +78,15 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
     });
   };
 
+  const fetchSvgTemplate = async () => {
+    for (const renderItem of credential.renderMethod) {
+      if (renderItem.name == SVG_TEMPLATE_MODE.PORTRAIT) {
+        let svgTemplateResponse = await VcRenderer.renderSvg(credential);
+        setSvgImage(svgTemplateResponse);
+      }
+    }
+  };
+
   useEffect(() => {
     if (isSuccessBio && reAuthenticating != '') {
       onSuccess();
@@ -83,11 +96,19 @@ export function useViewVcModal({vcItemActor, isVisible}: ViewVcModalProps) {
   useEffect(() => {
     vcItemActor.send(VCItemEvents.REFRESH());
   }, [isVisible]);
+
+  useEffect(() => {
+    if (credential.renderMethod) {
+      fetchSvgTemplate();
+    }
+  }, [credential]);
+
   return {
+    svgImage,
     error,
     message,
     toastVisible,
-    credential: useSelector(vcItemActor, selectCredential),
+    credential,
     verifiableCredentialData: useSelector(
       vcItemActor,
       selectVerifiableCredentialData,

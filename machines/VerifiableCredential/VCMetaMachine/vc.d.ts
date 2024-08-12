@@ -58,6 +58,7 @@ export interface Credential {
   };
   type: string[];
   credentialTypes: string[];
+  renderMethod: Object[];
 }
 
 export interface VerifiableCredential {

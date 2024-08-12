@@ -38,18 +38,18 @@ export const IssuersService = () => {
     checkInternet: async () => await NetInfo.fetch(),
     downloadIssuerWellknown: async (context: any) => {
       const wellknownResponse = await CACHED_API.fetchIssuerWellknownConfig(
-          context.selectedIssuerId,
-        );
-        return wellknownResponse;
-      
+        context.selectedIssuerId,
+      );
+      return wellknownResponse;
     },
     downloadCredentialTypes: async (context: any) => {
       const credentialTypes = [];
       for (const key in context.selectedIssuer
         .credential_configurations_supported) {
-        credentialTypes.push(
-          {id:key, ...context.selectedIssuer.credential_configurations_supported[key]},
-        );
+        credentialTypes.push({
+          id: key,
+          ...context.selectedIssuer.credential_configurations_supported[key],
+        });
       }
       return credentialTypes;
     },
@@ -75,6 +75,13 @@ export const IssuersService = () => {
         proofJWT,
         accessToken,
       );
+      // credential['credential']['renderMethod'] = [
+      //   {
+      //     id: 'https://<lsvg-host-url>/insurance_svg_template.svg',
+      //     type: 'SvgRenderingTemplate',
+      //     name: 'Portrait Mode',
+      //   },
+      // ];
 
       console.info(`VC download via ${context.selectedIssuerId} is successful`);
       return updateCredentialInformation(context, credential);
@@ -87,15 +94,14 @@ export const IssuersService = () => {
             TelemetryConstants.Screens.webViewPage,
         ),
       );
-        return await authorize(
-          constructAuthorizationConfiguration(
-            context.selectedIssuer,
-            context.selectedCredentialType.scope,
-          ),
-        );
-      
-      },
-     
+      return await authorize(
+        constructAuthorizationConfiguration(
+          context.selectedIssuer,
+          context.selectedCredentialType.scope,
+        ),
+      );
+    },
+
     generateKeyPair: async () => {
       if (!isHardwareKeystoreExists) {
         return await generateKeys();

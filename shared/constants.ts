@@ -149,3 +149,8 @@ export const copilotTestID = {
   '5': 'settings',
   '6': 'cardView',
 };
+
+export const SVG_TEMPLATE_MODE = {
+  PORTRAIT: 'Portrait Mode',
+  LANDSCAPE: 'Landscape Mode',
+};
