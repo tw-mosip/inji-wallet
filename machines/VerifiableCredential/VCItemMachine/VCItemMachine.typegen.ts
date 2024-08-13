@@ -57,7 +57,7 @@
 "closeViewVcModal": "CLOSE_VC_MODAL" | "STORE_RESPONSE";
 "incrementDownloadCounter": "POLL" | "done.invoke.vc-item-machine.vcUtilitiesState.loadVc.loadVcFromServer.loadDownloadLimitConfig:invocation[0]";
 "logDownloaded": "STORE_RESPONSE";
-"logRemovedVc": "STORE_RESPONSE" | "done.invoke.vc-item-machine.vcUtilitiesState.kebabPopUp.triggerAutoBackup:invocation[0]";
+"logRemovedVc": "STORE_RESPONSE";
 "logWalletBindingFailure": "error.platform.vc-item-machine.vcUtilitiesState.walletBinding.addKeyPair:invocation[0]" | "error.platform.vc-item-machine.vcUtilitiesState.walletBinding.addingWalletBindingId:invocation[0]" | "error.platform.vc-item-machine.vcUtilitiesState.walletBinding.requestingBindingOTP:invocation[0]" | "error.platform.vc-item-machine.vcUtilitiesState.walletBinding.updatingPrivateKey:invocation[0]";
 "logWalletBindingSuccess": "done.invoke.vc-item-machine.vcUtilitiesState.walletBinding.addingWalletBindingId:invocation[0]" | "done.invoke.vc-item-machine.vcUtilitiesState.walletBinding.updatingPrivateKey:invocation[0]";
 "refreshAllVcs": "STORE_RESPONSE" | "done.invoke.vc-item-machine.vcUtilitiesState.kebabPopUp.triggerAutoBackup:invocation[0]";

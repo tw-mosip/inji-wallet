@@ -2,8 +2,12 @@ import {isSignedInResult} from '../../shared/CloudBackupAndRestoreUtils';
 import {ErrorMessage, OIDCErrors} from '../../shared/openId4VCI/Utils';
 import {isHardwareKeystoreExists} from '../../shared/cryptoutil/cryptoUtil';
 import {BiometricCancellationError} from '../../shared/error/BiometricCancellationError';
-import {NETWORK_REQUEST_FAILED} from '../../shared/constants';
+import {
+  BIOMETRIC_CANCELLED,
+  NETWORK_REQUEST_FAILED,
+} from '../../shared/constants';
 import {VerificationErrorType} from '../../shared/vcjs/verifyCredential';
+import {err} from 'react-native-svg/lib/typescript/xml';
 
 export const IssuersGuards = () => {
   return {
@@ -11,7 +15,9 @@ export const IssuersGuards = () => {
       (event.data as Error).message == VerificationErrorType.NETWORK_ERROR,
     isSignedIn: (_: any, event: any) =>
       (event.data as isSignedInResult).isSignedIn,
-    hasKeyPair: (context: any) => !!context.publicKey,
+    hasKeyPair: (context: any) => {
+      return !!context.publicKey;
+    },
     isInternetConnected: (_: any, event: any) => !!event.data.isConnected,
     isOIDCflowCancelled: (_: any, event: any) => {
       // iOS & Android have different error strings for user cancelled flow
@@ -45,6 +51,9 @@ export const IssuersGuards = () => {
     isGenericError: (_: any, event: any) => {
       const errorMessage = event.data.message;
       return !errorMessage.includes(NETWORK_REQUEST_FAILED);
+    },
+    isBiometricCancelled: (_: any, event: any) => {
+      return event.data.message.toString() === BIOMETRIC_CANCELLED;
     },
   };
 };

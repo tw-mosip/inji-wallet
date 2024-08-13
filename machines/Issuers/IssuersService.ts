@@ -5,9 +5,10 @@ import {
   constructAuthorizationConfiguration,
   constructProofJWT,
   constructProofJWTECK1,
+  fetchKeyPair,
   generateGenericKeyPair,
   generateHardwareBackedKeyPair,
-  generateKeyPair,
+  hasKeyPair,
   Issuers_Key_Ref,
   updateCredentialInformation,
   vcDownloadTimeout,
@@ -59,6 +60,7 @@ export const IssuersService = () => {
       return credentialTypes;
     },
     downloadCredential: async (context: any) => {
+      console.warn("downnn")
       const downloadTimeout = await vcDownloadTimeout();
       const accessToken: string = context.tokenResponse?.accessToken;
       const issuerMeta: Object = {
@@ -69,7 +71,8 @@ export const IssuersService = () => {
           ?.type ?? ['VerifiableCredential'],
         credentialFormat: context.selectedCredentialType.format,
       };
-      const proofJWT = await constructProofJWTECK1(
+      const proofJWT = await constructProofJWT(
+        context.keyType,
         context.publicKey,
         context.privateKey,
         accessToken,
@@ -101,8 +104,13 @@ export const IssuersService = () => {
     },
 
     generateKeyPair: async (context: any) => {
-      if (context.keyType === ('RSA256' || 'ES256'))
+      console.log("keytype",context.keyType)
+      if (context.keyType === 'RS256' || context.keyType === 'ES256')
+      {
+        console.warn("here in generation")
         return await generateHardwareBackedKeyPair(context.keyType);
+      }
+        
       else return await generateGenericKeyPair(context.keyType);
     },
     verifyCredential: async (context: any) => {
@@ -121,5 +129,11 @@ export const IssuersService = () => {
         };
       }
     },
+
+    getKeyPair: async(context:any)=>{
+      if (await hasKeyPair(context.keyType)) {
+        return await fetchKeyPair(context.keyType);
+      }
+    }
   };
 };

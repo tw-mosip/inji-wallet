@@ -40,6 +40,8 @@ import {
 import RNSecureKeyStore from 'react-native-secure-key-store';
 import {Buffer} from 'buffer';
 import {VC} from './VerifiableCredential/VCMetaMachine/vc';
+import { da } from 'date-fns/locale';
+import base64 from 'react-native-base64'
 
 export const keyinvalidatedString =
   'Key Invalidated due to biometric enrollment';
@@ -106,7 +108,7 @@ export const storeMachine =
       states: {
         checkEncryptionKey: {
           invoke: {
-            src: 'hasAndroidEncryptionKey',
+            src: 'hasEncryptionKey',
           },
           on: {
             READY: {
@@ -298,15 +300,24 @@ export const storeMachine =
 
       services: {
         clear: () => clear(),
-        hasAndroidEncryptionKey: () => async callback => {
-          const hasSetCredentials =
+        hasEncryptionKey: () => async callback => {
+          console.log("has encryption")
+          let hasSetCredentials
+          try{
+            hasSetCredentials =await 
             RNSecureKeystoreModule.hasAlias(ENCRYPTION_ID);
+          }
+          catch(e){
+            hasSetCredentials=false
+          }
+          
+            console.log("has creds", hasSetCredentials)
           if (hasSetCredentials) {
             try {
               const base64EncodedString =
                 Buffer.from('Dummy').toString('base64');
               await RNSecureKeystoreModule.encryptData(
-                DUMMY_KEY_FOR_BIOMETRIC_ALIAS,
+                ENCRYPTION_ID,
                 base64EncodedString,
               );
             } catch (e) {
@@ -538,15 +549,16 @@ export const storeMachine =
               );
             }
           } else {
-            const isBiometricsEnabled =
+            console.log("generating")
+            const isBiometricsEnabled =await 
               RNSecureKeystoreModule.hasBiometricsEnabled();
             await RNSecureKeystoreModule.generateKey(
               ENCRYPTION_ID,
               isBiometricsEnabled,
               AUTH_TIMEOUT,
             );
-            RNSecureKeystoreModule.generateHmacshaKey(HMAC_ALIAS);
-            RNSecureKeystoreModule.generateKey(
+            await RNSecureKeystoreModule.generateHmacshaKey(HMAC_ALIAS);
+            await RNSecureKeystoreModule.generateKey(
               DUMMY_KEY_FOR_BIOMETRIC_ALIAS,
               isBiometricsEnabled,
               0,
@@ -572,11 +584,14 @@ export async function setItem(
     if (key === SETTINGS_STORE_KEY) {
       const appId = value.appId;
       delete value.appId;
+      console.log("valuejson",value)
       const settings = {
         encryptedData: await encryptJson(encryptionKey, JSON.stringify(value)),
         appId,
       };
+      console.log("settingsdata", settings.encryptedData)
       encryptedData = JSON.stringify(settings);
+      console.log("fkenc",encryptedData)
     } else if (key === SHOW_FACE_AUTH_CONSENT_SHARE_FLOW) {
       encryptedData = JSON.stringify(value);
     } else {
@@ -641,20 +656,24 @@ export async function getItem(
     if (data != null) {
       let decryptedData;
       if (key === SETTINGS_STORE_KEY) {
+        console.log("dataencri",data)
         let parsedData = JSON.parse(data);
+        console.log("encri",parsedData)
         if (parsedData.encryptedData) {
           decryptedData = await decryptJson(
             encryptionKey,
             parsedData.encryptedData,
           );
-          parsedData.encryptedData = JSON.parse(decryptedData);
+          console.log(base64.decode(decryptedData))
+          parsedData.encryptedData = JSON.parse(base64.decode(decryptedData));
+         
         }
         return parsedData;
       } else if (key === SHOW_FACE_AUTH_CONSENT_SHARE_FLOW) {
-        return JSON.parse(data);
+        return JSON.parse(base64.decode(decryptedData));
       }
       decryptedData = await decryptJson(encryptionKey, data);
-      return JSON.parse(decryptedData);
+      return JSON.parse(base64.decode(decryptedData));
     }
     if (data === null && VCMetadata.isVCKey(key)) {
       await removeItem(key, data, encryptionKey);
@@ -704,7 +723,7 @@ export async function getItem(
       getErrorEventData(
         TelemetryConstants.FlowType.fetchData,
         TelemetryConstants.ErrorId.tampered,
-        `Exception in getting item for ${key}: ${e}`,
+        `tting item for ${key}: ${e}`,
       ),
     );
     return defaultValue;

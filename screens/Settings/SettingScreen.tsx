@@ -18,6 +18,7 @@ import testIDProps from '../../shared/commonUtil';
 import {SvgImage} from '../../components/ui/svg';
 import {DataBackupAndRestore} from './DataBackupAndRestore';
 import {BannerNotificationContainer} from '../../components/BannerNotificationContainer';
+import { KeySelector } from '../../components/keySelector';
 
 const LanguageSetting: React.FC = () => {
   const {t} = useTranslation('SettingScreen');
@@ -38,6 +39,41 @@ const LanguageSetting: React.FC = () => {
               style={{paddingTop: 3}}>
               <Text weight="semibold" color={Theme.Colors.settingsLabel}>
                 {t('language')}
+              </Text>
+            </ListItem.Title>
+          </ListItem.Content>
+          <Icon
+            {...testIDProps('chevronRightIcon')}
+            name="chevron-right"
+            size={21}
+            color={Theme.Colors.chevronRightColor}
+            style={{marginRight: 15}}
+          />
+        </ListItem>
+      }
+    />
+  );
+};
+
+const KeySetting: React.FC = () => {
+  const {t} = useTranslation('SettingScreen');
+
+  return (
+    <KeySelector
+      triggerComponent={
+        <ListItem {...testIDProps('Keys')}>
+          <Icon
+            name="key"
+            size={22}
+            type="simple-line-icon"
+            color={Theme.Colors.Icon}
+          />
+          <ListItem.Content>
+            <ListItem.Title
+              {...testIDProps('languageTitle')}
+              style={{paddingTop: 3}}>
+              <Text weight="semibold" color={Theme.Colors.settingsLabel}>
+                Keys
               </Text>
             </ListItem.Title>
           </ListItem.Content>
@@ -228,6 +264,7 @@ export const SettingScreen: React.FC<
               </ListItem.Title>
             </ListItem.Content>
           </ListItem>
+          <KeySetting />
         </Column>
       </ScrollView>
     </React.Fragment>

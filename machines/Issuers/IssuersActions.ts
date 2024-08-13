@@ -93,18 +93,11 @@ export const IssuersActions = (model: any) => {
     }),
 
     loadKeyPair: assign({
-      publicKey: async (context: any) => {
-        if (await hasKeyPair(context.keyType)) {
-          return fetchKeyPair(context.keyType).publicKey;
-        }
-        return '';
-      },
-      privateKey: async (context: any) => {
-        if (await hasKeyPair(context.keyType)) {
-          return await fetchKeyPair(context.keyType).privateKey;
-        }
-        return '';
-      },
+      publicKey: (_, event: any) => event.response?.publicKey,
+      privateKey: (context: any, event: any) =>
+        event.response?.privateKey
+          ? event.response.privateKey
+          : context.privateKey,
     }),
     getKeyPairFromStore: send(StoreEvents.GET(Issuers_Key_Ref), {
       to: (context: any) => context.serviceRefs.store,
@@ -113,7 +106,7 @@ export const IssuersActions = (model: any) => {
       to: (context: any) => context.serviceRefs.backup,
     }),
     storeKeyPair: (context: any) => {
-      if (!isHardwareKeystoreExists)
+      if (context.keyType!="ES256" && context.keyType!="RS256")
         RNSecureKeystoreModule.storeGenericKey(
           context.publicKey,
           context.privateKey,

@@ -11,7 +11,7 @@ import {TabRef} from './HomeScreenMachine';
 import {ActorRefFrom} from 'xstate';
 import LinearGradient from 'react-native-linear-gradient';
 import {ErrorMessageOverlay} from '../../components/MessageOverlay';
-import {Pressable} from 'react-native';
+import {NativeModules, Pressable} from 'react-native';
 import testIDProps from '../../shared/commonUtil';
 import {BannerNotificationContainer} from '../../components/BannerNotificationContainer';
 import {VCItemMachine} from '../../machines/VerifiableCredential/VCItemMachine/VCItemMachine';
@@ -19,7 +19,8 @@ import {VerifiableCredential} from '../../machines/VerifiableCredential/VCMetaMa
 import {useTranslation} from 'react-i18next';
 import {Copilot} from '../../components/ui/Copilot';
 
-export const HomeScreen: React.FC<HomeRouteProps> = props => {
+export const HomeScreen: React.FC<HomeRouteProps> =  props => {
+  const {RNSecureKeystoreModule}=NativeModules
   const controller = useHomeScreen(props);
   const {t} = useTranslation();
 

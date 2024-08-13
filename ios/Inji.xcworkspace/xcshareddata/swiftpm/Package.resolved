@@ -38,12 +38,21 @@
       }
     },
     {
+      "identity" : "joseswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/airsidemobile/JOSESwift.git",
+      "state" : {
+        "revision" : "10ed3b6736def7c26eb87135466b1cb46ea7e37f",
+        "version" : "2.4.0"
+      }
+    },
+    {
       "identity" : "pixelpass-ios-swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mosip/pixelpass-ios-swift/",
       "state" : {
         "branch" : "develop",
-        "revision" : "0b716d5f6545b10de84c69edbf59565e66776ccd"
+        "revision" : "170f3489e77940212f471ee1cb9f3ab392039a45"
       }
     },
     {
@@ -52,7 +61,16 @@
       "location" : "https://github.com/tw-mosip/secure-keystore-ios-swift",
       "state" : {
         "branch" : "inji-1578",
-        "revision" : "9f7ba06448cf019dea5bf8341f99e7c0de9d2dcb"
+        "revision" : "4de02f858a9f52b4f634b5fe4070c1b95eac873a"
+      }
+    },
+    {
+      "identity" : "swiftcbor",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/valpackett/SwiftCBOR",
+      "state" : {
+        "branch" : "master",
+        "revision" : "ec24382864e5ffc6d3915c0818745d5ab12545a8"
       }
     },
     {

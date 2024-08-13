@@ -147,19 +147,25 @@ export const constructAuthorizationConfiguration = (
   };
 };
 
-export const getJWK = async publicKey => {
+export const getJWK = async (publicKey,keyType) => {
   try {
     let publicKeyJWKString;
     let publicKeyJWK;
-    if (isIOS()) {
-      publicKeyJWKString = await jose.JWK.asKey(publicKey, 'pem');
-      publicKeyJWK = publicKeyJWKString.toJSON();
-    } else {
-      publicKeyJWK = await pem2jwk(publicKey);
-    }
+      if(keyType=='RS256'|| keyType=='ES256')
+      {
+        publicKeyJWKString = await jose.JWK.asKey(publicKey, 'pem');
+        publicKeyJWK = publicKeyJWKString.toJSON();
+      }
+      else{
+        if(keyType=='ES256K')
+        publicKeyJWK=getJWKEC()
+        if(keyType=='ED25519')
+        publicKeyJWK=getJWKED()
+      }
+      
     return {
       ...publicKeyJWK,
-      alg: 'RS256',
+      alg: keyType,
       use: 'sig',
     };
   } catch (e) {
@@ -256,19 +262,35 @@ export const removeBottomSectionFields = fields => {
 };
 
 export function getKeyTypeFromWellknown() {
-  return 'RSA256';
+  return 'RS256';
 }
-const {RNSecureKeyStoreModule} = NativeModules;
+var l=0
 export async function hasKeyPair(keyType: any) {
-  return (await RNSecureKeyStoreModule.hasAlias(keyType)) == true;
+  const {RNSecureKeystoreModule} = NativeModules;
+  try{
+    console.warn("checking key",l)
+    l++
+    return (await RNSecureKeystoreModule.hasAlias(keyType))
+  }catch(e){
+    console.warn("key not found",l)
+    return false
+  }
 }
 
 export async function fetchKeyPair(keyType: any) {
-  if (keyType == ('RSA256' || 'ES256'))
-    return await RNSecureKeyStoreModule.retrieveKey(keyType);
+  const {RNSecureKeystoreModule} = NativeModules;
+  console.warn("retrieving key")
+  if (keyType == ('RS256' || 'ES256'))
+  {
+    
+     return await RNSecureKeystoreModule.retrieveKey(keyType);
+  }
+   
   else {
-    const {publicKey, privateKey} =
-      await RNSecureKeyStoreModule.retrieveGenericKey(keyType);
+    const keyPair =
+      await RNSecureKeystoreModule.retrieveGenericKey(keyType);
+      const publicKey=keyPair[0]
+      const privateKey=keyPair[1]
     return {
       publicKey: publicKey,
       privateKey: privateKey,
@@ -277,8 +299,10 @@ export async function fetchKeyPair(keyType: any) {
 }
 
 export async function generateHardwareBackedKeyPair(keyType: any) {
+  const {RNSecureKeystoreModule} = NativeModules;
+  console.warn("inside hrdwr keypair")
   return {
-    publicKey: RNSecureKeyStoreModule.generateKeyPair(keyType, true, 0),
+    publicKey: await RNSecureKeystoreModule.generateKeyPair(keyType, true, 0),
     privateKey: '',
   };
 }
@@ -317,14 +341,15 @@ export enum ErrorMessage {
 }
 
 export async function constructProofJWT(
+  keyType: string,
   publicKey: string,
   privateKey: string,
   accessToken: string,
   selectedIssuer: issuerType,
 ): Promise<string> {
   const jwtHeader = {
-    alg: 'RS256',
-    jwk: await getJWK(publicKey),
+    alg: keyType,
+    jwk:await getJWK(publicKey,keyType),
     typ: 'openid4vci-proof+jwt',
   };
   const decodedToken = jwtDecode(accessToken);
@@ -336,7 +361,7 @@ export async function constructProofJWT(
     exp: Math.floor(new Date().getTime() / 1000) + 18000,
   };
 
-  return await getJWT(jwtHeader, jwtPayload, Issuers_Key_Ref, privateKey);
+  return await getJWT(jwtHeader, jwtPayload,keyType,privateKey);
 }
 
 export async function constructProofJWTECK1(

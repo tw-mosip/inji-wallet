@@ -19,7 +19,7 @@ import {CredentialDownloadResponse, request} from '../../../shared/request';
 import {WalletBindingResponse} from '../VCMetaMachine/vc';
 import {verifyCredential} from '../../../shared/vcjs/verifyCredential';
 import {getVerifiableCredential} from './VCItemSelectors';
-import {getSelectedCredentialTypeDetails} from '../../../shared/openId4VCI/Utils';
+import {generateGenericKeyPair, generateHardwareBackedKeyPair, getSelectedCredentialTypeDetails} from '../../../shared/openId4VCI/Utils';
 import {getCredentialTypes} from '../../../components/VC/common/VCUtils';
 
 const {RNSecureKeystoreModule} = NativeModules;
@@ -91,17 +91,10 @@ export const VCItemServices = model => {
       return walletResponse;
     },
 
-    generateKeyPair: async context => {
-      // if (!isHardwareKeystoreExists) {
-      //   return await generateKeys();
-      // }
-      // const isBiometricsEnabled = RNSecureKeystoreModule.hasBiometricsEnabled();
-      // return RNSecureKeystoreModule.generateKeyPair(
-      //   VCMetadata.fromVC(context.vcMetadata).id,
-      //   isBiometricsEnabled,
-      //   0,
-      // );
-      return generateKeyPairECK1();
+    generateKeyPair: async (context: any) => {
+      if (context.keyType === ('RS256' || 'ES256'))
+        return await generateHardwareBackedKeyPair(context.keyType);
+      else return await generateGenericKeyPair(context.keyType);
     },
     requestBindingOTP: async context => {
       const response = await request(

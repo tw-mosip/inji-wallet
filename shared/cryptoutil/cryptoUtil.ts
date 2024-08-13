@@ -1,6 +1,11 @@
 import {KeyPair, RSA} from 'react-native-rsa-native';
 import forge from 'node-forge';
-import {BIOMETRIC_CANCELLED, DEBUG_MODE_ENABLED, isIOS} from '../constants';
+import {
+  BIOMETRIC_CANCELLED,
+  DEBUG_MODE_ENABLED,
+  isAndroid,
+  isIOS,
+} from '../constants';
 import {NativeModules} from 'react-native';
 import {BiometricCancellationError} from '../error/BiometricCancellationError';
 import {EncryptedOutput} from './encryptedOutput';
@@ -18,7 +23,7 @@ secp.etc.hmacSha256Async = (k, ...m) =>
 
 // 5min
 export const AUTH_TIMEOUT = 5 * 60;
-export const ENCRYPTION_ID = 'c7c22a6c-9759-4605-ac88-46f4041d863d';
+export const ENCRYPTION_ID = 'c7c22a6c-9759-4605-ac88-46f4041d86l';
 export const HMAC_ALIAS = '860cc320-4248-11ee-be56-0242ac120002';
 //This key is used to request biometric at app open to reset auth timeout which is used by encryption key
 export const DUMMY_KEY_FOR_BIOMETRIC_ALIAS =
@@ -41,57 +46,38 @@ export const isHardwareKeystoreExists = isCustomSecureKeystore(
   getKeyTypeFromWellknown(),
 );
 
-export async function getJWTECK1(
-  header: object,
-  payLoad: object,
-  alias: string,
-  privateKey: any,
-) {
-  try {
-    const header64 = encodeB64(JSON.stringify(header));
-    const payLoad64 = encodeB64(JSON.stringify(payLoad));
-    const preHash = header64 + '.' + payLoad64;
-    const signature64 = await createSignatureECK1(privateKey, preHash);
-    console.log(
-      'sign hereL: ' + header64 + '.' + payLoad64 + '.' + signature64,
-    );
-    return header64 + '.' + payLoad64 + '.' + signature64;
-  } catch (e) {
-    console.error('Exception Occurred While Constructing JWT ', e);
-    throw e;
-  }
-}
+// export async function getJWTECK1(
+//   header: object,
+//   payLoad: object,
+//   alias: string,
+//   privateKey: any,
+// ) {
+//   try {
+//     const header64 = encodeB64(JSON.stringify(header));
+//     const payLoad64 = encodeB64(JSON.stringify(payLoad));
+//     const preHash = header64 + '.' + payLoad64;
+//     const signature64 = await createSignatureECK1(privateKey, preHash);
+//     console.log(
+//       'sign hereL: ' + header64 + '.' + payLoad64 + '.' + signature64,
+//     );
+//     return header64 + '.' + payLoad64 + '.' + signature64;
+//   } catch (e) {
+//     console.error('Exception Occurred While Constructing JWT ', e);
+//     throw e;
+//   }
+// }
 
 export async function getJWT(
   header: object,
   payLoad: object,
-  alias: string,
-  privateKey: string,
+  keytype: string,
+  privateKey: string
 ) {
   try {
-    const keyPairEC = generateKeyPairECK1();
-    const x = base64url(Buffer.from(keyPairEC.publicKey.slice(1, 33))); // Skip the first byte (0x04) in the uncompressed public key
-    const y = base64url(Buffer.from(keyPairEC.privateKey.slice(33)));
-    const jwk = {
-      kty: 'EC',
-      crv: 'secp256k1',
-      x: x,
-      y: y,
-      alg: 'ES256K',
-      use: 'sig',
-    };
-    const header = {
-      jwk: jwk,
-      alg: 'ES256K',
-      typ: 'openid4vci-proof+jwt',
-    };
     const header64 = encodeB64(JSON.stringify(header));
     const payLoad64 = encodeB64(JSON.stringify(payLoad));
     const preHash = header64 + '.' + payLoad64;
-    const signature64 = await createSignatureECK1(
-      keyPairEC.privateKey,
-      preHash,
-    );
+    const signature64 = await createSignature(preHash, keytype, privateKey);
     console.log(
       'sign hereL: ' + header64 + '.' + payLoad64 + '.' + signature64,
     );
@@ -108,26 +94,29 @@ export async function createSignatureECK1(privateKey, prehash) {
   return base64url(Buffer.from(sign.toCompactRawBytes()));
 }
 export async function createSignature(
-  privateKey: string,
   preHash: string,
   alias: string,
+  privateKey: String,
 ) {
   let signature64;
 
   if (!isHardwareKeystoreExists) {
-    const key = forge.pki.privateKeyFromPem(privateKey);
-    const md = forge.md.sha256.create();
-    md.update(preHash, 'utf8');
-
-    const signature = key.sign(md);
-    return encodeB64(signature);
+    throw Error;
   } else {
     try {
-      signature64 = await RNSecureKeystoreModule.sign('RSA256', alias, preHash);
+      if (alias == 'RS256' || alias == 'ES256')
+        signature64 = await RNSecureKeystoreModule.sign(alias, alias, preHash);
+      else {
+        if (alias == 'ES256K') return createSignatureECK1(privateKey, preHash);
+        if(alias=='ED25519')
+        {
+          //to be imlplemented
+        }
+      }
     } catch (error) {
       console.error('Error in creating signature:', error);
       if (error.toString().includes(BIOMETRIC_CANCELLED)) {
-        throw new BiometricCancellationError(error.toString());
+        throw new BiometricCancellationError(BIOMETRIC_CANCELLED);
       }
       throw error;
     }
@@ -151,12 +140,9 @@ export function encodeB64(str: string) {
  * This can make a call to the Android native layer hence taking up more time,
  *  use the isCustomKeystore constant in the app lifeycle instead.
  */
-function isCustomSecureKeystore(keyType) {
-  return !isIOS()
-    ? RNSecureKeystoreModule.deviceSupportsHardware()
-    : false
-    ? 'RSA256' || 'ES256' //move to same function
-    : false;
+function isCustomSecureKeystore(keyType: any) {
+  console.log('existsss');
+  return isAndroid() ? RNSecureKeystoreModule.deviceSupportsHardware() : true;
 }
 
 export async function encryptJson(
@@ -203,7 +189,7 @@ export async function decryptJson(
     if (!isHardwareKeystoreExists) {
       return decryptWithForge(encryptedData, encryptionKey);
     }
-
+    console.log('I am not called');
     return await RNSecureKeystoreModule.decryptData(
       ENCRYPTION_ID,
       encryptedData,

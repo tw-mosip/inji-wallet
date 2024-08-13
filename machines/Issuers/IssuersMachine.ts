@@ -162,11 +162,8 @@ export const IssuersMachine = model.createMachine(
         invoke: {
           src: 'invokeAuthorization',
           onDone: {
-            actions: [
-              'setTokenResponse',
-              'setLoadingReasonAsSettingUp',
-              'getKeyPairFromStore', //why is this used
-            ],
+            actions: ['setTokenResponse', 'setLoadingReasonAsSettingUp'],
+            target: '.getKeyPairFromKeystore',
           },
           onError: [
             {
@@ -201,26 +198,30 @@ export const IssuersMachine = model.createMachine(
         },
         initial: 'idle',
         states: {
-          idle: {
-            on: {
-              STORE_RESPONSE: {
+          idle: {},
+          getKeyPairFromKeystore: {
+            invoke: {
+              src: 'getKeyPair',
+              onDone: {
                 actions: 'loadKeyPair',
                 target: '#issuersMachine.checkKeyPair',
               },
-              BIOMETRIC_CANCELLED: {
-                target: 'userCancelledBiometric',
-              },
-              STORE_ERROR: {
-                target: '#issuersMachine.checkKeyPair',
-              },
+              onError: [
+                {
+                  cond: 'isBiometricCancelled',
+                  target: 'userCancelledBiometric',
+                },
+                {
+                  target: '#issuersMachine.checkKeyPair',
+                },
+              ],
             },
           },
           userCancelledBiometric: {
             on: {
               TRY_AGAIN: [
                 {
-                  actions: ['getKeyPairFromStore'],
-                  target: 'idle',
+                  target: 'getKeyPairFromKeystore',
                 },
               ],
               RESET_ERROR: {
