@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {
   BottomTabNavigationOptions,
   createBottomTabNavigator,
@@ -17,10 +17,15 @@ import {CopilotProvider} from 'react-native-copilot';
 import {View} from 'react-native';
 import {CopilotTooltip} from '../components/CopilotTooltip';
 import {Copilot} from '../components/ui/Copilot';
+import {useSelector} from '@xstate/react';
+import {QrLoginRouteProps} from '../routes';
+import {selectIsIntendData} from '../machines/app';
 
 const {Navigator, Screen} = createBottomTabNavigator();
 
-export const MainLayout: React.FC = () => {
+//export const MainLayout: React.FC = () => {
+
+export const MainLayout: React.FC<QrLoginRouteProps> = props => {
   const {t} = useTranslation('MainLayout');
 
   const {appService} = useContext(GlobalContext);
@@ -31,6 +36,14 @@ export const MainLayout: React.FC = () => {
     tabBarActiveTintColor: Theme.Colors.IconBg,
     ...Theme.BottomTabBarStyle,
   };
+
+  const isIntendData = useSelector(appService, selectIsIntendData);
+  useEffect(() => {
+    console.log('Request Intent: ', selectIsIntendData);
+    if (isIntendData) {
+      props.navigation.navigate('QrLogin');
+    }
+  }, [isIntendData]);
 
   return (
     <CopilotProvider

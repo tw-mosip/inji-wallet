@@ -114,3 +114,7 @@ export function selectIsSharing(state: State) {
 export function selectIsFaceVerificationConsent(state: State) {
   return state.matches('faceVerificationConsent');
 }
+
+export function selectIsCheckFaceAuthConsent(state: State) {
+  return state.matches('checkFaceAuthConsent');
+}

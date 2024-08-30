@@ -14,6 +14,7 @@ import {IntroSlidersScreen} from '../screens/Home/IntroSlidersScreen';
 import {RequestLayout} from '../screens/Request/RequestLayout';
 import {RequestStackParamList} from '../screens/Request/RequestLayoutController';
 import {SplashScreen} from '../screens/SplashScreen';
+import {QrLogin} from '../screens/QrLogin/QrLogin';
 
 export const baseRoutes: Screen[] = [
   {
@@ -60,6 +61,13 @@ export const baseRoutes: Screen[] = [
       headerShown: false,
     },
   },
+  {
+    name: 'QrLogin',
+    component: QrLogin,
+    options: {
+      headerShown: false,
+    },
+  },
 ];
 
 export const authRoutes: Screen[] = [
@@ -81,6 +89,7 @@ export type RootStackParamList = {
   IntroSliders: undefined;
   Welcome: undefined;
   Auth: undefined;
+  QrLogin: undefined;
   Passcode: {
     setup: boolean;
     message?: string;
@@ -113,4 +122,9 @@ export type BiometricRouteProps = NativeStackScreenProps<
 export type RequestRouteProps = NativeStackScreenProps<
   RequestStackParamList,
   'Request'
+>;
+
+export type QrLoginRouteProps = NativeStackScreenProps<
+  RootStackParamList,
+  'QrLogin'
 >;

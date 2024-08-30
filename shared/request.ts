@@ -58,6 +58,7 @@ export async function request(
   }
 
   const jsonResponse = await response.json();
+  console.log('Request URL ::', requestUrl);
 
   if (response.status >= 400) {
     let backendUrl = host + path;

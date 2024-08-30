@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {AppLayout} from './screens/AppLayout';
 import {useFont} from './shared/hooks/useFont';
 import {GlobalContextProvider} from './components/GlobalContextProvider';
@@ -14,7 +14,7 @@ import {
 } from './machines/app';
 import {DualMessageOverlay} from './components/DualMessageOverlay';
 import {useApp} from './screens/AppController';
-import {Alert, AppState} from 'react-native';
+import {Alert, AppState, Linking} from 'react-native';
 import {
   configureTelemetry,
   getErrorEventData,
@@ -57,6 +57,20 @@ const AppLayoutWrapper: React.FC = () => {
       appService.send(APP_EVENTS.INACTIVE());
     }
   }, []);
+
+  /*   useEffect(() => {
+    const getUrlAsync = async () => {
+      // Get the deep link used to open the app
+      const initialUrl = await Linking.getInitialURL();
+
+      // The setTimeout is just for testing purpose
+      setTimeout(() => {
+        console.log("Deeplinking:: ", initialUrl);
+      }, 1000);
+    };
+
+    getUrlAsync();
+  }, []); */
 
   if (isDecryptError) {
     DecryptErrorAlert(controller, t);

@@ -1,12 +1,13 @@
 import NetInfo, {NetInfoStateType} from '@react-native-community/netinfo';
 import {AppState, AppStateStatus} from 'react-native';
 import {getDeviceId, getDeviceName} from 'react-native-device-info';
-import {assign, EventFrom, send, spawn, StateFrom} from 'xstate';
+import {ActorRefFrom, assign, EventFrom, send, spawn, StateFrom} from 'xstate';
 import {createModel} from 'xstate/lib/model';
 import {authMachine, createAuthMachine} from './auth';
 import {createSettingsMachine, settingsMachine} from './settings';
 import {StoreEvents, storeMachine} from './store';
 import {activityLogMachine, createActivityLogMachine} from './activityLog';
+import {createQrLoginMachine, qrLoginMachine} from './QrLogin/QrLoginMachine';
 import {
   createRequestMachine,
   requestMachine,
@@ -32,6 +33,11 @@ import {
   createVcMetaMachine,
   vcMetaMachine,
 } from './VerifiableCredential/VCMetaMachine/VCMetaMachine';
+import {NativeModules} from 'react-native';
+import {VCShareFlowType} from '../shared/Utils';
+import {VC} from './VerifiableCredential/VCMetaMachine/vc';
+
+const QRLoginIntent = NativeModules.QRLoginIntent;
 
 const model = createModel(
   {
@@ -40,6 +46,8 @@ const model = createModel(
     isReadError: false,
     isDecryptError: false,
     isKeyInvalidateError: false,
+    linkCode: '',
+    isIntendData: false,
   },
   {
     events: {
@@ -158,12 +166,39 @@ export const appMachine = model.createMachine(
               src: 'checkFocusState',
             },
             on: {
-              ACTIVE: '.active',
+              ACTIVE: '.intent',
               INACTIVE: '.inactive',
             },
             initial: 'checking',
             states: {
               checking: {},
+              intent: {
+                invoke: {
+                  src: 'checkIntent',
+                  onDone: [
+                    {
+                      cond: 'isIntendData',
+                      target: 'moveToQRLogin',
+                      actions: ['setLinkCode'],
+                    },
+                    {
+                      target: 'active',
+                    },
+                  ],
+                },
+              },
+              moveToQRLogin: {
+                entry: [
+                  () => console.log('Spawning the QR login machine'),
+                  'setQRLoginRef',
+                  'setScanData',
+                  'setIsIntendData',
+                ],
+                //  invoke: {
+                //   id: 'QrLogin',
+                //   src: qrLoginMachine,
+                // }
+              },
               active: {
                 entry: ['forwardToServices'],
               },
@@ -198,7 +233,38 @@ export const appMachine = model.createMachine(
   },
   {
     actions: {
-      forwardToServices: pure((context, event) =>
+      setQRLoginRef: assign({
+        serviceRefs: (context: any) => {
+          const serviceRefs = {
+            ...context.serviceRefs,
+          };
+          serviceRefs.qrLogin = spawn(
+            createQrLoginMachine(context.serviceRefs),
+            'QrLogin',
+          );
+          return serviceRefs;
+        },
+      }),
+      setLinkCode: assign({
+        linkCode: (_context, event) =>
+          new URL(event.data).searchParams.get('linkCode'),
+      }),
+
+      setIsIntendData: assign({
+        isIntendData: context => context.linkCode != '',
+      }),
+
+      setScanData: context => {
+        const vc = {} as VC;
+        context.serviceRefs.qrLogin.send({
+          type: 'GET',
+          linkCode: context.linkCode,
+          flowType: VCShareFlowType.SIMPLE_SHARE,
+          selectedVc: vc,
+          faceAuthConsentGiven: false,
+        });
+      },
+      forwardToSerices: pure((context, event) =>
         Object.values(context.serviceRefs).map(serviceRef =>
           send({...event, type: `APP_${event.type}`}, {to: serviceRef}),
         ),
@@ -344,7 +410,18 @@ export const appMachine = model.createMachine(
       },
     },
 
+    guards: {
+      isIntendData: (_context, event) => {
+        //return false;
+        return event.data != '';
+      },
+    },
+
     services: {
+      checkIntent: () => async () => {
+        return await QRLoginIntent.isRequestIntent();
+      },
+
       getAppInfo: () => async callback => {
         const appInfo = {
           deviceId: getDeviceId(),
@@ -446,4 +523,8 @@ export function selectIsDecryptError(state: State) {
 
 export function selectIsKeyInvalidateError(state: State) {
   return state.context.isKeyInvalidateError;
+}
+
+export function selectIsIntendData(state: State) {
+  return state.context.isIntendData;
 }

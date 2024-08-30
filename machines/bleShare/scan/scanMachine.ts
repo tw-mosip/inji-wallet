@@ -305,6 +305,7 @@ export const scanMachine =
             'removeLoggers',
             'registerLoggers',
             'clearUri',
+            () => console.log('Spawning QRLogin machine'),
             'setChildRef',
             'resetFaceCaptureBannerStatus',
           ],

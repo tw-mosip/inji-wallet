@@ -10,6 +10,7 @@ import {storeMachine} from '../machines/store';
 import {backupMachine} from '../machines/backupAndRestore/backup';
 import {backupRestoreMachine} from '../machines/backupAndRestore/backupRestore';
 import {vcMetaMachine} from '../machines/VerifiableCredential/VCMetaMachine/VCMetaMachine';
+import {qrLoginMachine} from '../machines/QrLogin/QrLoginMachine';
 
 export const GlobalContext = createContext({} as GlobalServices);
 
@@ -27,4 +28,5 @@ export interface AppServices {
   scan: ActorRefFrom<typeof scanMachine>;
   backup: ActorRefFrom<typeof backupMachine>;
   backupRestore: ActorRefFrom<typeof backupRestoreMachine>;
+  qrLogin: ActorRefFrom<typeof qrLoginMachine>;
 }

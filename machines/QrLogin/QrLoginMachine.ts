@@ -28,7 +28,13 @@ export const qrLoginMachine =
       },
       id: 'QrLogin',
       initial: 'waitingForData',
-      entry: ['resetSelectedVc', 'resetFlowType'],
+      entry: [
+        (context, event) => {
+          console.log('Event Data!!!', JSON.stringify(event));
+        },
+        'resetSelectedVc',
+        'resetFlowType',
+      ],
       states: {
         waitingForData: {
           on: {
@@ -103,6 +109,7 @@ export const qrLoginMachine =
           },
         },
         showvcList: {
+          entry: [() => console.log('I am in showvcList state')],
           on: {
             SELECT_VC: {
               actions: 'setSelectedVc',
