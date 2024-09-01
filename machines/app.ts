@@ -1,5 +1,5 @@
 import NetInfo, {NetInfoStateType} from '@react-native-community/netinfo';
-import {AppState, AppStateStatus} from 'react-native';
+import {AppState, AppStateStatus, NativeModules} from 'react-native';
 import {getDeviceId, getDeviceName} from 'react-native-device-info';
 import {assign, EventFrom, send, spawn, StateFrom} from 'xstate';
 import {createModel} from 'xstate/lib/model';
@@ -19,6 +19,7 @@ import {
   changeEsignetUrl,
   ESIGNET_BASE_URL,
   isAndroid,
+  isIOS,
   MIMOTO_BASE_URL,
   SETTINGS_STORE_KEY,
 } from '../shared/constants';
@@ -103,11 +104,36 @@ export const appMachine = model.createMachine(
                   'unsetIsDecryptError',
                   'resetKeyInvalidateError',
                 ],
-                target: 'services',
+                target: 'checkKeyPairs',
               },
               ERROR: {
                 actions: ['setIsReadError', 'updateKeyInvalidateError'],
               },
+            },
+          },
+          checkKeyPairs: {
+            invoke: {
+              src: 'checkKeyPairs',
+              onDone: [
+                {
+                  target: 'services',
+                },
+              ],
+              onError: [
+                {
+                  target: 'generateKeyPairs',
+                },
+              ],
+            },
+          },
+          generateKeyPairs: {
+            invoke: {
+              src: 'generateKeyPairsAndStore',
+              onDone: [
+                {
+                  target: 'checkKeyPairs',
+                },
+              ],
             },
           },
           services: {
@@ -133,7 +159,7 @@ export const appMachine = model.createMachine(
           },
           info: {
             invoke: {
-              src: 'getAppInfo',
+              src: 'getAppInfogetAppInfo',
             },
             on: {
               APP_INFO_RECEIVED: {
@@ -397,6 +423,13 @@ export const appMachine = model.createMachine(
         };
       },
 
+      checkKeypairs: async () => {
+        return await checkAllKeyPairs();
+      },
+
+      generateKeyPairsAndStore: async ()=>{
+        return await generateKeyPairsAndStore()
+      },
       checkNetworkState: () => callback => {
         return NetInfo.addEventListener(state => {
           if (state.isConnected) {
