@@ -19,6 +19,7 @@ import * as secp from '@noble/secp256k1';
 import base64 from 'react-native-base64';
 import {KeyTypes} from './KeyTypes';
 import convertDerToRsFormat from './signFormatConverter';
+import { hasKeyPair } from '../openId4VCI/Utils';
 
 //polyfills setup
 secp.etc.hmacSha256Sync = (k, ...m) =>
@@ -54,6 +55,97 @@ export async function generateKeyPairRSA() {
     publicKey: keyPair.public,
     privateKey: keyPair.private,
   };
+}
+
+export function generateKeyPairECK1() {
+  const privKey = secp.utils.randomPrivateKey();
+  const pubKey = secp.getPublicKey(privKey, false);
+  console.log('pub-priv keys' + privKey + ' \n' + pubKey);
+  return {publicKey: pubKey, privateKey: privKey};
+}
+
+export async function generateKeyPairECR1() {
+  if (isAndroid()) {
+    const isBiometricsEnabled=await RNSecureKeystoreModule.hasBiometricsEnabled()
+    return {
+      publicKey: await RNSecureKeystoreModule.generateKeyPair(
+        KeyTypes.ES256,
+        KeyTypes.ES256,
+        isBiometricsEnabled,
+        0,
+      ),
+      privateKey: '',
+    };
+  }
+  const keystore = jose.JWK.createKeyStore();
+  const key = await keystore.generate('EC', 'P-256');
+  const jwkPublicKey = key.toJSON(); // Public key JWK
+  const jwkPrivateKey = key.toJSON(true); // Private key JWK (include private part)
+  console.log('JWK Public Key:', jwkPublicKey);
+  console.log('JWK Private Key:', jwkPrivateKey);
+  return {
+    publicKey: JSON.stringify(jwkPublicKey),
+    privateKey: JSON.stringify(jwkPrivateKey),
+  };
+}
+
+export async function generateKeyPairED() {}
+
+export async function generateKeyPair(keyType: any) {
+  console.log('keytype prob ');
+  switch (keyType) {
+    case KeyTypes.RS256:
+      return generateKeyPairRSA();
+    case KeyTypes.ES256:
+      return generateKeyPairECR1();
+    case KeyTypes.ES256K:
+      return generateKeyPairECK1();
+    case KeyTypes.ED25519:
+      return generateKeyPairED();
+    default:
+      break;
+  }
+}
+
+export async function checkAllKeyPairs() {
+  const isRSAKeyhasKeyPair = await hasKeyPair(KeyTypes.RS256);
+  const isECR1Keypair = await hasKeyPair(KeyTypes.ES256);
+  const isECK1KeyPair = await hasKeyPair(KeyTypes.ES256K);
+  const isEDKeyPair = await hasKeyPair(KeyTypes.ED25519);
+  if (!(isRSAKeyhasKeyPair && isECK1KeyPair && isECK1KeyPair && isEDKeyPair))
+    throw Error('Keys not present');
+}
+
+export async function generateKeyPairsAndStore() {
+  const {RNSecureKeystoreModule} = NativeModules;
+  const RSAKeyPair = await generateKeyPair(KeyTypes.RS256);
+  const ECR1KeyPair = await generateKeyPair(KeyTypes.ES256);
+  const ECK1KeyPair = generateKeyPair(KeyTypes.ES256K);
+  const EDKeyPair = generateKeyPair(KeyTypes.ED25519);
+
+  await RNSecureKeystoreModule.storeGenericKey(
+    ECK1KeyPair.publicKey,
+    ECK1KeyPair.privateKey,
+    KeyTypes.ES256K,
+  );
+  await RNSecureKeystoreModule.storeGenericKey(
+    EDKeyPair.publicKey,
+    EDKeyPair.privateKey,
+    KeyTypes.ED25519,
+  );
+
+  if(isIOS()){
+    await RNSecureKeystoreModule.storeGenericKey(
+      RSAKeyPair.publicKey,
+      RSAKeyPair.privateKey,
+      KeyTypes.RS256,
+    );
+    await RNSecureKeystoreModule.storeGenericKey(
+      ECR1KeyPair.publicKey,
+      ECR1KeyPair.privateKey,
+      KeyTypes.ES256,
+    );
+  }
 }
 
 export function generateKeyPairECK1() {
