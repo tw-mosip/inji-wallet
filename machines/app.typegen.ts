@@ -14,13 +14,13 @@
 "checkKeyPairs": "done.invoke.app.init.checkKeyPairs:invocation[0]";
 "checkNetworkState": "done.invoke.app.ready.network:invocation[0]";
 "generateKeyPairsAndStore": "done.invoke.app.init.generateKeyPairs:invocation[0]";
-"getAppInfogetAppInfo": "done.invoke.app.init.info:invocation[0]";
+"getAppInfo": "done.invoke.app.init.info:invocation[0]";
         };
         missingImplementations: {
           actions: never;
           delays: never;
           guards: never;
-          services: "checkKeyPairs" | "getAppInfogetAppInfo";
+          services: "checkKeyPairs";
         };
         eventsCausingActions: {
           "forwardToServices": "ACTIVE" | "INACTIVE" | "OFFLINE" | "ONLINE";
@@ -52,7 +52,7 @@
 "checkKeyPairs": "READY" | "done.invoke.app.init.generateKeyPairs:invocation[0]";
 "checkNetworkState": "APP_INFO_RECEIVED";
 "generateKeyPairsAndStore": "error.platform.app.init.checkKeyPairs:invocation[0]";
-"getAppInfogetAppInfo": "STORE_RESPONSE";
+"getAppInfo": "STORE_RESPONSE";
         };
         matchesStates: "init" | "init.checkKeyPairs" | "init.credentialRegistry" | "init.generateKeyPairs" | "init.info" | "init.services" | "init.store" | "ready" | "ready.focus" | "ready.focus.active" | "ready.focus.checking" | "ready.focus.inactive" | "ready.network" | "ready.network.checking" | "ready.network.offline" | "ready.network.online" | "waiting" | { "init"?: "checkKeyPairs" | "credentialRegistry" | "generateKeyPairs" | "info" | "services" | "store";
 "ready"?: "focus" | "network" | { "focus"?: "active" | "checking" | "inactive";
