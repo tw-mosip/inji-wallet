@@ -46,12 +46,20 @@ export const ScanActions = (model: any, QR_LOGIN_REF_ID: any) => {
       },
     }),
 
+    setIsIntended: model.assign({
+      isIntended: true,
+    }),
+    resetIsIntended: model.assign({
+      isIntended: false,
+    }),
+    resetLinkCode: model.assign({
+      isIntended: '',
+    }),
     updateShowFaceAuthConsent: model.assign({
       showFaceAuthConsent: (_, event) => {
         return event.response || event.response === null;
       },
     }),
-
     setShowFaceAuthConsent: model.assign({
       showFaceAuthConsent: (_, event) => {
         return !event.isDoNotAskAgainChecked;
@@ -229,6 +237,10 @@ export const ScanActions = (model: any, QR_LOGIN_REF_ID: any) => {
     setLinkCode: assign({
       linkCode: (_, event) =>
         new URL(event.params).searchParams.get('linkCode'),
+    }),
+
+    setLinkCodeFromIntend: assign({
+      linkCode: (_, event) => event.linkCode,
     }),
     setQuickShareData: assign({
       quickShareData: (_, event) =>

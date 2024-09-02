@@ -55,6 +55,7 @@ const ScanEvents = {
   }),
   ALLOWED: () => ({}),
   DENIED: () => ({}),
+  INDENT_DATA: (linkCode: string) => ({linkCode}),
 };
 
 export const ScanModel = createModel(
@@ -77,6 +78,7 @@ export const ScanModel = createModel(
     showFaceAuthConsent: true as boolean,
     readyForBluetoothStateCheck: false,
     showFaceCaptureSuccessBanner: false,
+    isIndentData: false,
   },
   {
     events: ScanEvents,

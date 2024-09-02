@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   BottomTabNavigationOptions,
   createBottomTabNavigator,
@@ -14,18 +14,24 @@ import testIDProps from '../shared/commonUtil';
 import {SvgImage} from '../components/ui/svg';
 import {isIOS} from '../shared/constants';
 import {CopilotProvider} from 'react-native-copilot';
-import {View} from 'react-native';
+import {NativeModules, View} from 'react-native';
 import {CopilotTooltip} from '../components/CopilotTooltip';
 import {Copilot} from '../components/ui/Copilot';
 import {useSelector} from '@xstate/react';
-import {QrLoginRouteProps} from '../routes';
-import {selectIsIntendData} from '../machines/app';
+import {QrLoginRouteProps, ScanRouteProps} from '../routes';
+import {selectIsLinkCode} from '../machines/app';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {BOTTOM_TAB_ROUTES, ScanStackParamList} from '../routes/routesConstants';
+import {MainBottomTabParamList} from '../routes/routeTypes';
 
 const {Navigator, Screen} = createBottomTabNavigator();
 
 //export const MainLayout: React.FC = () => {
+type ScanLayoutNavigation = NavigationProp<
+  ScanStackParamList & MainBottomTabParamList
+>;
 
-export const MainLayout: React.FC<QrLoginRouteProps> = props => {
+export const MainLayout: React.FC<ScanRouteProps> = props => {
   const {t} = useTranslation('MainLayout');
 
   const {appService} = useContext(GlobalContext);
@@ -36,14 +42,15 @@ export const MainLayout: React.FC<QrLoginRouteProps> = props => {
     tabBarActiveTintColor: Theme.Colors.IconBg,
     ...Theme.BottomTabBarStyle,
   };
+  const navigation = useNavigation<ScanLayoutNavigation>();
 
-  const isIntendData = useSelector(appService, selectIsIntendData);
+  const linkCode = useSelector(appService, selectIsLinkCode);
   useEffect(() => {
-    console.log('Request Intent: ', selectIsIntendData);
-    if (isIntendData) {
-      props.navigation.navigate('QrLogin');
+    console.log('Request Intent: ', linkCode);
+    if (linkCode != '') {
+      navigation.navigate(BOTTOM_TAB_ROUTES.share);
     }
-  }, [isIntendData]);
+  }, [linkCode]);
 
   return (
     <CopilotProvider

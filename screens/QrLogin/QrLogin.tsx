@@ -18,25 +18,17 @@ export const QrLogin: React.FC<QrLoginProps> = props => {
   const controller = useQrLogin(props);
   const {t} = useTranslation('QrLogin');
 
-  useEffect(() => {
-    console.log('controller.isShowingVcList: ', controller.isShowingVcList);
-  }, [controller.isShowingVcList]);
-
   return (
     <View
       isVisible={props.isVisible}
       onDismiss={controller.DISMISS}
       headerTitle={t('title')}
       headerRight={<Icon name={''} />}>
-      {console.log('QRLogin Screen', controller.isShowingVcList)}
-      {console.log('QRLogin Screen', controller.isWaitingForData)}
-      {console.log('QRLogin Screen', controller.isCheckFaceAuthConsent)}
       <Column fill>
         <MyBindedVcs
           isVisible={controller.isShowingVcList}
           service={props.service}
         />
-
         <MessageOverlay
           isVisible={
             controller.isWaitingForData ||

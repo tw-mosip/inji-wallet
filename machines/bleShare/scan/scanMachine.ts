@@ -83,11 +83,30 @@ export const scanMachine =
                 target: 'restrictSharingVc',
               },
               {
+                target: 'startSharingVc',
+              },
+            ],
+          },
+        },
+        startSharingVc: {
+          on: {
+            INDENT_DATA: [
+              {
+                actions: [
+                  'setChildRef',
+                  'setLinkCodeFromIntend',
+                  'setIsIntended',
+                ],
+                cond: (_, event) => event.linkCode != '',
+                target: '#scan.showQrLogin',
+              },
+              {
                 target: 'startPermissionCheck',
               },
             ],
           },
         },
+
         restrictSharingVc: {},
 
         startPermissionCheck: {
@@ -305,7 +324,6 @@ export const scanMachine =
             'removeLoggers',
             'registerLoggers',
             'clearUri',
-            () => console.log('Spawning QRLogin machine'),
             'setChildRef',
             'resetFaceCaptureBannerStatus',
           ],
@@ -363,7 +381,10 @@ export const scanMachine =
             },
           },
           on: {
-            DISMISS: '#scan.checkFaceAuthConsent',
+            DISMISS: {
+              target: '#scan.checkFaceAuthConsent',
+              actions: ['resetLinkCode', 'resetIsIntended'],
+            },
           },
           initial: 'idle',
           states: {
@@ -386,6 +407,7 @@ export const scanMachine =
                 getStartEventData(TelemetryConstants.FlowType.qrLogin),
               ),
           ],
+          exit: ['resetLinkCode', 'resetIsIntended'],
         },
         connecting: {
           invoke: {

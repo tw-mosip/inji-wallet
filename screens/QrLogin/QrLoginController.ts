@@ -37,70 +37,71 @@ import {VCItemMachine} from '../../machines/VerifiableCredential/VCItemMachine/V
 
 type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
 
-export function useQrLogin({service}: QrLoginProps) {
+export function useQrLogin(props: QrLoginProps) {
   const {appService} = useContext(GlobalContext);
-  const service1 = appService.children.get('QrLogin')!!;
+  const service = props.service;
+  //const service = appService.children.get('QrLogin')!!;
   const navigation = useNavigation<MyVcsTabNavigation>();
 
   const vcMetaService = appService.children.get('vcMeta')!!;
   const [selectedIndex, setSelectedIndex] = useState<number>(null);
   return {
     isFaceVerificationConsent: useSelector(
-      service1,
+      service,
       selectIsFaceVerificationConsent,
     ),
     linkTransactionResponse: useSelector(
-      service1,
+      service,
       selectLinkTransactionResponse,
     ),
     shareableVcsMetadata: useSelector(vcMetaService, selectBindedVcsMetadata),
     verifiableCredentialData: useSelector(
-      service1,
+      service,
       selectVerifiableCredentialData,
     ),
-    domainName: useSelector(service1, selectDomainName),
-    logoUrl: useSelector(service1, selectLogoUrl),
-    essentialClaims: useSelector(service1, selectEssentialClaims),
-    voluntaryClaims: useSelector(service1, selectVoluntaryClaims),
-    clientName: useSelector(service1, selectClientName),
-    error: useSelector(service1, selectErrorMessage),
-    selectCredential: useSelector(service1, selectCredential),
-    isWaitingForData: useSelector(service1, selectIsWaitingForData),
-    isShowingVcList: useSelector(service1, selectIsShowingVcList),
-    isLinkTransaction: useSelector(service1, selectIsLinkTransaction),
-    isLoadingMyVcs: useSelector(service1, selectIsloadMyVcs),
-    isRequestConsent: useSelector(service1, selectIsRequestConsent),
-    isShowingError: useSelector(service1, selectIsShowError),
-    isSendingAuthenticate: useSelector(service1, selectIsSendingAuthenticate),
-    isSendingConsent: useSelector(service1, selectIsSendingConsent),
-    isVerifyingIdentity: useSelector(service1, selectIsisVerifyingIdentity),
-    isInvalidIdentity: useSelector(service1, selectIsInvalidIdentity),
-    isVerifyingSuccesful: useSelector(service1, selectIsVerifyingSuccesful),
-    isCheckFaceAuthConsent: useSelector(service1, selectIsCheckFaceAuthConsent),
-    isShare: useSelector(service1, selectIsSharing),
+    domainName: useSelector(service, selectDomainName),
+    logoUrl: useSelector(service, selectLogoUrl),
+    essentialClaims: useSelector(service, selectEssentialClaims),
+    voluntaryClaims: useSelector(service, selectVoluntaryClaims),
+    clientName: useSelector(service, selectClientName),
+    error: useSelector(service, selectErrorMessage),
+    selectCredential: useSelector(service, selectCredential),
+    isWaitingForData: useSelector(service, selectIsWaitingForData),
+    isShowingVcList: useSelector(service, selectIsShowingVcList),
+    isLinkTransaction: useSelector(service, selectIsLinkTransaction),
+    isLoadingMyVcs: useSelector(service, selectIsloadMyVcs),
+    isRequestConsent: useSelector(service, selectIsRequestConsent),
+    isShowingError: useSelector(service, selectIsShowError),
+    isSendingAuthenticate: useSelector(service, selectIsSendingAuthenticate),
+    isSendingConsent: useSelector(service, selectIsSendingConsent),
+    isVerifyingIdentity: useSelector(service, selectIsisVerifyingIdentity),
+    isInvalidIdentity: useSelector(service, selectIsInvalidIdentity),
+    isVerifyingSuccesful: useSelector(service, selectIsVerifyingSuccesful),
+    isCheckFaceAuthConsent: useSelector(service, selectIsCheckFaceAuthConsent),
+    isShare: useSelector(service, selectIsSharing),
     selectedIndex,
     SELECT_CONSENT: (value: boolean, claim: string) => {
-      service1.send(QrLoginEvents.TOGGLE_CONSENT_CLAIM(value, claim));
+      service.send(QrLoginEvents.TOGGLE_CONSENT_CLAIM(value, claim));
     },
     SELECT_VC_ITEM:
       (index: number) => (vcRef: ActorRefFrom<typeof VCItemMachine>) => {
         setSelectedIndex(index);
         const vcData = vcRef.getSnapshot().context;
-        service1.send(QrLoginEvents.SELECT_VC(vcData));
+        service.send(QrLoginEvents.SELECT_VC(vcData));
       },
     FACE_VERIFICATION_CONSENT: (isDoNotAskAgainChecked: boolean) =>
-      service1.send(
+      service.send(
         QrLoginEvents.FACE_VERIFICATION_CONSENT(isDoNotAskAgainChecked),
       ),
-    DISMISS: () => service1.send(QrLoginEvents.DISMISS()),
+    DISMISS: () => service.send(QrLoginEvents.DISMISS()),
     SCANNING_DONE: (qrCode: string) =>
-      service1.send(QrLoginEvents.SCANNING_DONE(qrCode)),
-    CONFIRM: () => service1.send(QrLoginEvents.CONFIRM()),
-    VERIFY: () => service1.send(QrLoginEvents.VERIFY()),
-    CANCEL: () => service1.send(QrLoginEvents.CANCEL()),
-    FACE_VALID: () => service1.send(QrLoginEvents.FACE_VALID()),
-    FACE_INVALID: () => service1.send(QrLoginEvents.FACE_INVALID()),
-    RETRY_VERIFICATION: () => service1.send(QrLoginEvents.RETRY_VERIFICATION()),
+      service.send(QrLoginEvents.SCANNING_DONE(qrCode)),
+    CONFIRM: () => service.send(QrLoginEvents.CONFIRM()),
+    VERIFY: () => service.send(QrLoginEvents.VERIFY()),
+    CANCEL: () => service.send(QrLoginEvents.CANCEL()),
+    FACE_VALID: () => service.send(QrLoginEvents.FACE_VALID()),
+    FACE_INVALID: () => service.send(QrLoginEvents.FACE_INVALID()),
+    RETRY_VERIFICATION: () => service.send(QrLoginEvents.RETRY_VERIFICATION()),
     GO_TO_HOME: () => {
       navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
     },

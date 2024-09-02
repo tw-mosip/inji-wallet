@@ -125,3 +125,7 @@ export function selectIsMinimumStorageRequiredForAuditEntryLimitReached(
 export function selectIsFaceVerificationConsent(state: State) {
   return state.matches('reviewing.faceVerificationConsent');
 }
+
+export function selectIsStartSharingVC(state: State) {
+  return state.matches('startSharingVc');
+}

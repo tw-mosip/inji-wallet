@@ -47,7 +47,6 @@ const model = createModel(
     isDecryptError: false,
     isKeyInvalidateError: false,
     linkCode: '',
-    isIntendData: false,
   },
   {
     events: {
@@ -64,6 +63,7 @@ const model = createModel(
       APP_INFO_RECEIVED: (info: AppInfo) => ({info}),
       STORE_RESPONSE: (response: unknown) => ({response}),
       RESET_KEY_INVALIDATE_ERROR_DISMISS: () => ({}),
+      RESET_LINKCODE: () => ({}),
     },
   },
 );
@@ -85,6 +85,9 @@ export const appMachine = model.createMachine(
     on: {
       DECRYPT_ERROR: {
         actions: ['setIsDecryptError'],
+      },
+      RESET_LINKCODE: {
+        actions: ['resetLinkCode'],
       },
       DECRYPT_ERROR_DISMISS: {
         actions: ['unsetIsDecryptError'],
@@ -166,41 +169,25 @@ export const appMachine = model.createMachine(
               src: 'checkFocusState',
             },
             on: {
-              ACTIVE: '.intent',
+              ACTIVE: '.active',
               INACTIVE: '.inactive',
             },
             initial: 'checking',
             states: {
               checking: {},
-              intent: {
-                invoke: {
-                  src: 'checkIntent',
-                  onDone: [
-                    {
-                      cond: 'isIntendData',
-                      target: 'moveToQRLogin',
-                      actions: ['setLinkCode'],
-                    },
-                    {
-                      target: 'active',
-                    },
-                  ],
-                },
-              },
-              moveToQRLogin: {
-                entry: [
-                  () => console.log('Spawning the QR login machine'),
-                  'setQRLoginRef',
-                  'setScanData',
-                  'setIsIntendData',
-                ],
-                //  invoke: {
-                //   id: 'QrLogin',
-                //   src: qrLoginMachine,
-                // }
-              },
               active: {
                 entry: ['forwardToServices'],
+                invoke: [
+                  {
+                    src: 'checkIntent',
+                    onDone: {
+                      actions: ['setLinkCode'],
+                    },
+                  },
+                  {
+                    src: 'resetIntentData',
+                  },
+                ],
               },
               inactive: {
                 entry: ['forwardToServices'],
@@ -233,37 +220,13 @@ export const appMachine = model.createMachine(
   },
   {
     actions: {
-      setQRLoginRef: assign({
-        serviceRefs: (context: any) => {
-          const serviceRefs = {
-            ...context.serviceRefs,
-          };
-          serviceRefs.qrLogin = spawn(
-            createQrLoginMachine(context.serviceRefs),
-            'QrLogin',
-          );
-          return serviceRefs;
-        },
-      }),
       setLinkCode: assign({
-        linkCode: (_context, event) =>
-          new URL(event.data).searchParams.get('linkCode'),
+        linkCode: (_, event) =>
+          new URL(event.data).searchParams.get('linkCode')!!,
       }),
-
-      setIsIntendData: assign({
-        isIntendData: context => context.linkCode != '',
+      resetLinkCode: assign({
+        linkCode: '',
       }),
-
-      setScanData: context => {
-        const vc = {} as VC;
-        context.serviceRefs.qrLogin.send({
-          type: 'GET',
-          linkCode: context.linkCode,
-          flowType: VCShareFlowType.SIMPLE_SHARE,
-          selectedVc: vc,
-          faceAuthConsentGiven: false,
-        });
-      },
       forwardToSerices: pure((context, event) =>
         Object.values(context.serviceRefs).map(serviceRef =>
           send({...event, type: `APP_${event.type}`}, {to: serviceRef}),
@@ -410,16 +373,13 @@ export const appMachine = model.createMachine(
       },
     },
 
-    guards: {
-      isIntendData: (_context, event) => {
-        //return false;
-        return event.data != '';
-      },
-    },
-
     services: {
       checkIntent: () => async () => {
         return await QRLoginIntent.isRequestIntent();
+      },
+      resetIntentData: () => async () => {
+        console.log('Reseting data');
+        return await QRLoginIntent.resetIndentData();
       },
 
       getAppInfo: () => async callback => {
@@ -525,6 +485,6 @@ export function selectIsKeyInvalidateError(state: State) {
   return state.context.isKeyInvalidateError;
 }
 
-export function selectIsIntendData(state: State) {
-  return state.context.isIntendData;
+export function selectIsLinkCode(state: State) {
+  return state.context.linkCode;
 }

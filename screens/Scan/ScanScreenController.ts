@@ -27,6 +27,7 @@ import {selectIsMinimumStorageRequiredForAuditEntryLimitReached} from '../../mac
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
 import {MainBottomTabParamList} from '../../routes/routeTypes';
 import {useNavigation, NavigationProp} from '@react-navigation/native';
+import {selectIsLinkCode} from '../../machines/app';
 
 export function useScanScreen() {
   const {t} = useTranslation('ScanScreen');
@@ -40,6 +41,7 @@ export function useScanScreen() {
   );
 
   const isLocationDisabled = useSelector(scanService, selectIsLocationDisabled);
+  const linkCode = useSelector(appService, selectIsLinkCode);
   const isLocationDenied = useSelector(scanService, selectIsLocationDenied);
   const isReadyForBluetoothStateCheck = useSelector(
     scanService,
@@ -113,5 +115,7 @@ export function useScanScreen() {
     ALLOWED,
     DENIED,
     isLocalPermissionRational,
+    // SEND_INDENT_DATA: () => scanService.send(ScanEvents.INDENT_DATA(linkCode)),
+    linkCode,
   };
 }

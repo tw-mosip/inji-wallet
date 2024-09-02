@@ -34,4 +34,12 @@ public class RNQRLoginIntentModule extends ReactContextBaseJavaModule {
     }
   }
 
+  @ReactMethod
+  public void resetIndentData(){
+    System.out.println("Resetting the intent data");
+    IntentData intentData = IntentData.getInstance();
+    intentData.setIntendData(false);
+    intentData.setQrData("");
+  }
+
 }
