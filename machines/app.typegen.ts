@@ -20,7 +20,7 @@
           actions: never;
           delays: never;
           guards: never;
-          services: "checkKeyPairs";
+          services: never;
         };
         eventsCausingActions: {
           "forwardToServices": "ACTIVE" | "INACTIVE" | "OFFLINE" | "ONLINE";

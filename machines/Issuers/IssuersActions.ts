@@ -63,7 +63,7 @@ export const IssuersActions = (model: any) => {
     }),
     setSelectedCredentialType: model.assign({
       selectedCredentialType: (_: any, event: any) => event.credType,
-      wellknownKeyTypes: (_: any, event: any)=> event.credType.proof_types_supported.jwt as string[]
+      wellknownKeyTypes: (_: any, event: any)=> event.credType.proof_types_supported.jwt.proof_signing_alg_values_supported as string[]
     }),
     setSupportedCredentialTypes: model.assign({
       supportedCredentialTypes: (_: any, event: any) => event.data,

@@ -5,6 +5,8 @@ import {AppServices} from '../shared/GlobalContext';
 import {StoreEvents, StoreResponseEvent} from './store';
 import {generateSecureRandom} from 'react-native-securerandom';
 import binaryToBase64 from 'react-native/Libraries/Utilities/binaryToBase64';
+import { isIOS } from '../shared/constants';
+import { NativeModules } from 'react-native';
 
 const model = createModel(
   {
@@ -74,9 +76,19 @@ export const authMachine = model.createMachine(
               target: 'checkingAuth',
               actions: ['setContext'],
             },
-            {target: 'savingDefaults'},
+            {
+              target: 'clearKeyChain'
+            },
           ],
         },
+      },
+      clearKeyChain:{
+        invoke:{
+          src:'clearKeys',
+          onDone:[{
+            target:'savingDefaults'
+          }]
+        }
       },
       savingDefaults: {
         entry: ['storeContext'],
@@ -213,6 +225,13 @@ export const authMachine = model.createMachine(
         const randomBytes = await generateSecureRandom(16);
         return binaryToBase64(randomBytes) as string;
       },
+      clearKeys:async()=>{
+        if(isIOS())
+        { 
+          const{RNSecureKeystoreModule}=NativeModules
+          await RNSecureKeystoreModule.clearKeys()
+        }
+      }
     },
 
     guards: {
