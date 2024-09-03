@@ -59,10 +59,18 @@ export async function generateKeyPairRSA() {
 
 export function generateKeyPairECK1() {
   const privKey = secp.utils.randomPrivateKey();
-  const decoder = new TextDecoder(); 
+  const decoder = new TextDecoder();
   const pubKey = secp.getPublicKey(privKey, false);
-  console.log('pub-priv keys' + privKey + ' \n' + pubKey);
-  return {publicKey: decoder.decode(pubKey), privateKey: decoder.decode(privKey)};
+  console.log(
+    'pub-priv keys' +
+      Buffer.from(pubKey).toString('base64') +
+      ' \n' +
+      Buffer.from(privKey).toString('base64'),
+  );
+  return {
+    publicKey: Buffer.from(pubKey).toString('base64'),
+    privateKey: Buffer.from(privKey).toString('base64'),
+  };
 }
 
 export async function generateKeyPairECR1() {
@@ -91,9 +99,14 @@ export async function generateKeyPairECR1() {
   };
 }
 
-export async function generateKeyPairED() {}
+export async function generateKeyPairED() {
+  return {
+    privateKey: '',
+    publicKey: '',
+  };
+}
 
-export async function generateKeyPair(keyType: any) {
+export async function generateKeyPair(keyType: any): Promise<any> {
   console.log('keytype prob ');
   switch (keyType) {
     case KeyTypes.RS256:
@@ -111,13 +124,20 @@ export async function generateKeyPair(keyType: any) {
 
 export async function checkAllKeyPairs() {
   const RSAKey = await fetchKeyPair(KeyTypes.RS256);
-  console.log("hg",RSAKey)
+  console.log('hg', RSAKey);
   const ECR1Key = await fetchKeyPair(KeyTypes.ES256);
-  console.log("hgecr",ECR1Key.publicKey)
+  console.log('hgecr', ECR1Key.publicKey);
   const ECK1Key = await fetchKeyPair(KeyTypes.ES256K);
-  console.log("hgeck",ECK1Key.publicKey)
+  console.log('hgeck', ECK1Key.publicKey);
   const EDKey = 'key';
-  if (!(!!RSAKey.publicKey && !!ECR1Key.publicKey && !!ECK1Key.publicKey && !!EDKey))
+  if (
+    !(
+      !!RSAKey.publicKey &&
+      !!ECR1Key.publicKey &&
+      !!ECK1Key.publicKey &&
+      !!EDKey
+    )
+  )
     throw Error('Keys not present');
 }
 
@@ -125,19 +145,19 @@ export async function generateKeyPairsAndStore() {
   const {RNSecureKeystoreModule} = NativeModules;
   const RSAKeyPair = await generateKeyPair(KeyTypes.RS256);
   const ECR1KeyPair = await generateKeyPair(KeyTypes.ES256);
-  const ECK1KeyPair = generateKeyPair(KeyTypes.ES256K);
-  const EDKeyPair = generateKeyPair(KeyTypes.ED25519);
-
+  const ECK1KeyPair = await generateKeyPair(KeyTypes.ES256K);
+  //const EDKeyPair = generateKeyPair(KeyTypes.ED25519);
+  console.log(ECK1KeyPair.publicKey + 'ecccccccc');
   await RNSecureKeystoreModule.storeGenericKey(
     ECK1KeyPair.publicKey,
     ECK1KeyPair.privateKey,
     KeyTypes.ES256K,
   );
-  await RNSecureKeystoreModule.storeGenericKey(
-    EDKeyPair.publicKey,
-    EDKeyPair.privateKey,
-    KeyTypes.ED25519,
-  );
+  // await RNSecureKeystoreModule.storeGenericKey(
+  //   EDKeyPair.publicKey,
+  //   EDKeyPair.privateKey,
+  //   KeyTypes.ED25519,
+  // );
 
   if (isIOS()) {
     await RNSecureKeystoreModule.storeGenericKey(
@@ -153,146 +173,6 @@ export async function generateKeyPairsAndStore() {
   }
 }
 
-export function generateKeyPairECK1() {
-  const privKey = secp.utils.randomPrivateKey();
-  const pubKey = secp.getPublicKey(privKey, false);
-  console.log('pub-priv keys' + privKey + ' \n' + pubKey);
-  return {publicKey: pubKey, privateKey: privKey};
-}
-
-export async function generateKeyPairECR1() {
-  if (isAndroid()) {
-    const isBiometricsEnabled=await RNSecureKeystoreModule.hasBiometricsEnabled()
-    return {
-      publicKey: await RNSecureKeystoreModule.generateKeyPair(
-        KeyTypes.ES256,
-        KeyTypes.ES256,
-        isBiometricsEnabled,
-        0,
-      ),
-      privateKey: '',
-    };
-  }
-  const keystore = jose.JWK.createKeyStore();
-  const key = await keystore.generate('EC', 'P-256');
-  const jwkPublicKey = key.toJSON(); // Public key JWK
-  const jwkPrivateKey = key.toJSON(true); // Private key JWK (include private part)
-  console.log('JWK Public Key:', jwkPublicKey);
-  console.log('JWK Private Key:', jwkPrivateKey);
-  return {
-    publicKey: JSON.stringify(jwkPublicKey),
-    privateKey: JSON.stringify(jwkPrivateKey),
-  };
-}
-
-export async function generateKeyPairED() {}
-
-export async function generateKeyPair(keyType: any) {
-  console.log('keytype prob ');
-  switch (keyType) {
-    case KeyTypes.RS256:
-      return generateKeyPairRSA();
-    case KeyTypes.ES256:
-      return generateKeyPairECR1();
-    case KeyTypes.ES256K:
-      return generateKeyPairECK1();
-    case KeyTypes.ED25519:
-      return generateKeyPairED();
-    default:
-      break;
-  }
-}
-
-export async function checkAllKeyPairs() {
-  const isRSAKeyhasKeyPair = await hasKeyPair(KeyTypes.RS256);
-  const isECR1Keypair = await hasKeyPair(KeyTypes.ES256);
-  const isECK1KeyPair = await hasKeyPair(KeyTypes.ES256K);
-  const isEDKeyPair = await hasKeyPair(KeyTypes.ED25519);
-  if (!(isRSAKeyhasKeyPair && isECK1KeyPair && isECK1KeyPair && isEDKeyPair))
-    throw Error('Keys not present');
-}
-
-export async function generateKeyPairsAndStore() {
-  const {RNSecureKeystoreModule} = NativeModules;
-  const RSAKeyPair = await generateKeyPair(KeyTypes.RS256);
-  const ECR1KeyPair = await generateKeyPair(KeyTypes.ES256);
-  const ECK1KeyPair = generateKeyPair(KeyTypes.ES256K);
-  const EDKeyPair = generateKeyPair(KeyTypes.ED25519);
-
-  await RNSecureKeystoreModule.storeGenericKey(
-    ECK1KeyPair.publicKey,
-    ECK1KeyPair.privateKey,
-    KeyTypes.ES256K,
-  );
-  await RNSecureKeystoreModule.storeGenericKey(
-    EDKeyPair.publicKey,
-    EDKeyPair.privateKey,
-    KeyTypes.ED25519,
-  );
-
-  if(isIOS()){
-    await RNSecureKeystoreModule.storeGenericKey(
-      RSAKeyPair.publicKey,
-      RSAKeyPair.privateKey,
-      KeyTypes.RS256,
-    );
-    await RNSecureKeystoreModule.storeGenericKey(
-      ECR1KeyPair.publicKey,
-      ECR1KeyPair.privateKey,
-      KeyTypes.ES256,
-    );
-  }
-}
-
-export function generateKeyPairECK1() {
-  const privKey = secp.utils.randomPrivateKey();
-  const pubKey = secp.getPublicKey(privKey, false);
-  console.log('pub-priv keys' + privKey + ' \n' + pubKey);
-  return {publicKey: pubKey, privateKey: privKey};
-}
-
-export async function generateKeyPairECR1() {
-  if (isAndroid()) {
-    const isBiometricsEnabled=await RNSecureKeystoreModule.hasBiometricsEnabled()
-    return {
-      publicKey: await RNSecureKeystoreModule.generateKeyPair(
-        KeyTypes.ES256,
-        KeyTypes.ES256,
-        isBiometricsEnabled,
-        0,
-      ),
-      privateKey: '',
-    };
-  }
-  const keystore = jose.JWK.createKeyStore();
-  const key = await keystore.generate('EC', 'P-256');
-  const jwkPublicKey = key.toJSON(); // Public key JWK
-  const jwkPrivateKey = key.toJSON(true); // Private key JWK (include private part)
-  console.log('JWK Public Key:', jwkPublicKey);
-  console.log('JWK Private Key:', jwkPrivateKey);
-  return {
-    publicKey: JSON.stringify(jwkPublicKey),
-    privateKey: JSON.stringify(jwkPrivateKey),
-  };
-}
-
-export async function generateKeyPairED() {}
-
-export async function generateKeyPair(keyType: any) {
-  console.log('keytype prob ');
-  switch (keyType) {
-    case KeyTypes.RS256:
-      return generateKeyPairRSA();
-    case KeyTypes.ES256:
-      return generateKeyPairECR1();
-    case KeyTypes.ES256K:
-      return generateKeyPairECK1();
-    case KeyTypes.ED25519:
-      return generateKeyPairED();
-    default:
-      break;
-  }
-}
 /**
  * isCustomKeystore is a cached check of existence of a hardware keystore.
  */
@@ -554,7 +434,9 @@ export async function fetchKeyPair(keyType: any) {
           privateKey: '',
         };
       } else {
-        const keyPair= await RNSecureKeystoreModule.retrieveGenericKey(keyType);
+        const keyPair = await RNSecureKeystoreModule.retrieveGenericKey(
+          keyType,
+        );
         const publicKey = keyPair[0];
         const privateKey = keyPair[1];
         return {
@@ -564,17 +446,16 @@ export async function fetchKeyPair(keyType: any) {
       }
     } else {
       const keyPair = await RNSecureKeystoreModule.retrieveGenericKey(keyType);
-      console.log('keyPair', keyPair[0]);
-      const encoder=new TextEncoder()
-      const publicKey = encoder.encode(keyPair[0]);
-      const privateKey = encoder.encode(keyPair[1]);
+      console.log('keyPair', keyPair);
+      const publicKey = Buffer.from(keyPair[0], 'base64');
+      const privateKey = Buffer.from(keyPair[1], 'base64');
       return {
         publicKey: publicKey,
         privateKey: privateKey,
       };
     }
   } catch (e) {
-    console.log('error getting key');
+    console.log('error getting key', e);
     return {
       publicKey: '',
       privateKey: '',

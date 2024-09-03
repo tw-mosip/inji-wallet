@@ -525,8 +525,8 @@ export const storeMachine =
               ),
             );
           } else {
-            const isBiometricsEnabled = await
-              RNSecureKeystoreModule.hasBiometricsEnabled();
+            const isBiometricsEnabled =
+              await RNSecureKeystoreModule.hasBiometricsEnabled();
             await RNSecureKeystoreModule.generateKey(
               ENCRYPTION_ID,
               isBiometricsEnabled,
@@ -625,6 +625,7 @@ export async function getItem(
 ) {
   try {
     const data = await Storage.getItem(key, encryptionKey);
+    console.log('to be decrypted', data);
     if (data != null) {
       let decryptedData;
       if (key === SETTINGS_STORE_KEY) {
@@ -640,6 +641,7 @@ export async function getItem(
       } else if (key === SHOW_FACE_AUTH_CONSENT_SHARE_FLOW) {
         return JSON.parse(data);
       }
+      console.log('to be passed for decrption', data);
       decryptedData = await decryptJson(encryptionKey, data);
       return JSON.parse(decryptedData);
     }

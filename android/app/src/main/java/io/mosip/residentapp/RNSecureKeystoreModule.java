@@ -14,6 +14,9 @@ import com.reactnativesecurekeystore.common.Util;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function2;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.Arguments;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RNSecureKeystoreModule extends ReactContextBaseJavaModule {
@@ -190,15 +193,34 @@ public class RNSecureKeystoreModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public String retrieveKey(String alias){
-    return keystore.retrieveKey(alias);
+  public void retrieveKey(String alias, Promise promise){
+     try{
+      promise.resolve(keystore.retrieveKey(alias));
+     }
+     catch(Exception e){
+      promise.reject(e.getMessage());
+     }
+     
   }
 
+  @ReactMethod
   public void storeGenericKey(String publicKey, String privateKey, String account){
     keystore.storeGenericKey(publicKey,privateKey,account);
   }
 
-  public List<String> retrieveGenericKey(String account){
-    return keystore.retrieveGenericKey(account);
+  @ReactMethod
+  public void retrieveGenericKey(String account,Promise promise){
+    try {
+      List<String> keyList=keystore.retrieveGenericKey(account);
+      WritableArray writableArray = Arguments.createArray();
+      for (String key : keyList) {
+        writableArray.pushString(key);
+    }
+    promise.resolve(writableArray);
+    } catch (Exception e) {
+      promise.reject(e.getMessage());
+    }
+    
+   
   }
 }
