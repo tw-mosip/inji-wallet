@@ -111,7 +111,7 @@ export const IssuersService = () => {
 
     getKeyPair: async (context:any) => {
       console.log("keyset",context.keyType)
-      if (await hasKeyPair(context.keyType)) {
+      if (!!(await fetchKeyPair(context.keyType)).publicKey) {
         return await fetchKeyPair(context.keyType);
       }
       console.log("exiting getkeypair")
