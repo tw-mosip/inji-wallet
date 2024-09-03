@@ -33,6 +33,7 @@ import {
   createVcMetaMachine,
   vcMetaMachine,
 } from './VerifiableCredential/VCMetaMachine/VCMetaMachine';
+import { checkAllKeyPairs, generateKeyPairsAndStore } from '../shared/cryptoutil/cryptoUtil';
 
 const model = createModel(
   {
@@ -423,7 +424,7 @@ export const appMachine = model.createMachine(
         };
       },
 
-      checkKeypairs: async () => {
+      checkKeyPairs: async () => {
         return await checkAllKeyPairs();
       },
 
