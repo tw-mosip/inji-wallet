@@ -1,6 +1,12 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Image, ImageBackground, View} from 'react-native';
+import {
+  Dimensions,
+  Image,
+  ImageBackground,
+  NativeModules,
+  View,
+} from 'react-native';
 import {
   Credential,
   VerifiableCredential,
@@ -20,7 +26,10 @@ import {
   getTextColor,
 } from '../common/VCUtils';
 import {ProfileIcon} from '../../ProfileIcon';
-import {SvgXml} from 'react-native-svg';
+import {SvgCss} from 'react-native-svg';
+import {ExpandedQrCodeOverlay} from '../../ExpandedQrCodeView';
+import {MAX_QR_DATA_LENGTH} from '../../../shared/constants';
+import RNSecureKeyStore, {ACCESSIBLE} from 'react-native-secure-key-store';
 
 const getProfileImage = (face: any) => {
   if (face) {
@@ -42,6 +51,7 @@ export const VCDetailView: React.FC<VCItemDetailsProps> = props => {
   const face = props.verifiableCredentialData.face;
   const verifiableCredential = props.credential;
   const svgImage = props.svgImage;
+  const {RNPixelpassModule} = NativeModules;
 
   const shouldShowHrLine = verifiableCredential => {
     const availableFieldNames = Object.keys(
@@ -59,16 +69,90 @@ export const VCDetailView: React.FC<VCItemDetailsProps> = props => {
     return false;
   };
 
+  const {width: deviceWidth} = Dimensions.get('window');
+
+  useEffect(() => {
+    (async () => {
+      const qrData = await getQRData();
+      if (qrData?.length < MAX_QR_DATA_LENGTH) {
+        setQrString(qrData);
+      } else {
+        setQrError(true);
+      }
+    })();
+  }, []);
+
+  const [isQrOverlayVisible, setIsQrOverlayVisible] = useState(false);
+  const toggleQrOverlay = () => setIsQrOverlayVisible(!isQrOverlayVisible);
+
+  const [qrString, setQrString] = useState('');
+  const [qrError, setQrError] = useState(false);
+
+  async function getQRData(): Promise<string> {
+    let qrData: string;
+    try {
+      qrData = await RNSecureKeyStore.get(
+        props.verifiableCredentialData.vcMetadata.id,
+      );
+    } catch {
+      qrData = await RNPixelpassModule.generateQRData(
+        JSON.stringify(verifiableCredential),
+        '',
+      );
+      await RNSecureKeyStore.set(
+        props.verifiableCredentialData.vcMetadata.id,
+        qrData,
+        {
+          accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY,
+        },
+      );
+    }
+    return qrData;
+  }
+
+  function onQRError() {
+    console.warn('Data is too big');
+    setQrError(true);
+  }
+
   return (
     <>
       <Column scroll>
         {svgImage !== '' ? (
-          <Column
-            padding="5 5 5 5"
-            backgroundColor={Theme.Colors.DetailedViewBackground}>
-            <View>
-              <SvgXml width="400" height="700" xml={svgImage} />
-            </View>
+          <Column padding="30 0 0 0">
+            <SvgCss
+              viewBox="0 0 350 530"
+              xml={svgImage}
+              width={deviceWidth - 20}
+              height={((deviceWidth - 20) * 530) / 350}
+              style={{marginHorizontal: 10}}
+            />
+            {!qrError && (
+              <Button
+                testID="share"
+                styles={{width: '90%', marginTop: 30, marginHorizontal: 20}}
+                title="Tap to Zoom QR Code"
+                type="gradient"
+                onPress={() => setIsQrOverlayVisible(true)}
+              />
+            )}
+
+            <Button
+              testID="viewActivityLog"
+              type="outline"
+              styles={{
+                marginVertical: 30,
+                marginHorizontal: 20,
+              }}
+              title="View Activity Log"
+              onPress={() => console.log('cancel')}
+            />
+            <ExpandedQrCodeOverlay
+              isVisible={isQrOverlayVisible}
+              toggleOverlay={toggleQrOverlay}
+              qrString={qrString}
+              onQRError={onQRError}
+            />
           </Column>
         ) : (
           <Column fill>
@@ -144,7 +228,7 @@ export const VCDetailView: React.FC<VCItemDetailsProps> = props => {
           </Column>
         )}
       </Column>
-      {props.vcHasImage && (
+      {props.vcHasImage && props.svgImage == '' && (
         <View
           style={{
             position: 'relative',
