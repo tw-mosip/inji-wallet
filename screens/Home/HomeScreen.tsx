@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Icon} from 'react-native-elements';
 import {Column} from '../../components/ui';
 import {Theme} from '../../components/ui/styleUtils';
@@ -11,7 +11,7 @@ import {TabRef} from './HomeScreenMachine';
 import {ActorRefFrom} from 'xstate';
 import LinearGradient from 'react-native-linear-gradient';
 import {ErrorMessageOverlay} from '../../components/MessageOverlay';
-import {Pressable} from 'react-native';
+import {Linking, Pressable} from 'react-native';
 import testIDProps from '../../shared/commonUtil';
 import {BannerNotificationContainer} from '../../components/BannerNotificationContainer';
 import {VCItemMachine} from '../../machines/VerifiableCredential/VCItemMachine/VCItemMachine';
@@ -19,10 +19,32 @@ import {VerifiableCredential} from '../../machines/VerifiableCredential/VCMetaMa
 import {useTranslation} from 'react-i18next';
 import {Copilot} from '../../components/ui/Copilot';
 import HomeScreenWebView from './HomeScreenWebView';
+import HomeScreenWebView2 from './HomeScreenWebView2';
+import {View} from 'react-native';
+import Result from './Result';
 
 export const HomeScreen: React.FC<HomeRouteProps> = props => {
   const controller = useHomeScreen(props);
   const {t} = useTranslation();
+
+  const [status, setStatus] = useState('');
+
+  const handleDeepLink = deepLinkData => {
+    if (deepLinkData.url != null) {
+      const intentURL = new URL(deepLinkData.url);
+      if (intentURL.host === 'redirection') {
+        setStatus(intentURL.searchParams.get('status')!!);
+      }
+    }
+  };
+
+  useEffect(() => {
+    Linking.addEventListener('url', handleDeepLink);
+
+    return () => {
+      Linking.removeEventListener('url', handleDeepLink);
+    };
+  }, []);
 
   useEffect(() => {
     if (controller.IssuersService) {
@@ -86,7 +108,9 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
             />
           </Column>
         )}
-        <HomeScreenWebView/>
+        {/*  <HomeScreenWebView2 status = {status}/> */}
+        <HomeScreenWebView />
+        <Result status={status}></Result>
       </Column>
 
       <Copilot
