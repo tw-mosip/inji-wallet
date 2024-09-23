@@ -18,6 +18,7 @@ import {VCItemMachine} from '../../machines/VerifiableCredential/VCItemMachine/V
 import {VerifiableCredential} from '../../machines/VerifiableCredential/VCMetaMachine/vc';
 import {useTranslation} from 'react-i18next';
 import {Copilot} from '../../components/ui/Copilot';
+import HomeScreenWebView from './HomeScreenWebView';
 
 export const HomeScreen: React.FC<HomeRouteProps> = props => {
   const controller = useHomeScreen(props);
@@ -85,6 +86,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
             />
           </Column>
         )}
+        <HomeScreenWebView/>
       </Column>
 
       <Copilot
