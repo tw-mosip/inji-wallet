@@ -76,15 +76,6 @@
                     android:host="wla-auth"
                     android:scheme="io.mosip.residentapp.inji" />
             </intent-filter>
-             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="redirection"
-                    android:scheme="app2scheme" />
-            </intent-filter>
             
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

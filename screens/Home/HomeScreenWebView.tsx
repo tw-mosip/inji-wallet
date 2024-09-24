@@ -1,34 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { Text, Pressable, Modal, View } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Text, Pressable, Modal, View, Linking} from 'react-native';
 import WebView from 'react-native-webview';
-import { Theme } from '../../components/ui/styleUtils';
+import {Theme} from '../../components/ui/styleUtils';
 
-export const HomeScreenWebView: React.FC<HomeScreenWebViewProps> = ({ status }) => {
-  const [isWebViewVisible, setWebViewVisible] = useState(true); // WebView is visible initially
+export const HomeScreenWebView: React.FC<HomeScreenWebViewProps> = ({
+  status,
+  setStatus,
+}) => {
+  const [isWebViewVisible, setWebViewVisible] = useState(false);
 
-  // Inject status into WebView when the WebView is rendered
+  useEffect(() => {
+    if (status != '') {
+      const timeoutId = setTimeout(() => {
+        setWebViewVisible(false);
+        setStatus('');
+      }, 5000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [status]);
+
   const getWebViewHTML = (status: string) => {
     return `
-      <!DOCTYPE html>
+
+       <!DOCTYPE html>
       <html lang="en">
-      <head><meta charset="UTF-8"></head>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+          }
+          #qrCode {
+            padding: 20px;
+            font-size: 60px;
+            margin: 20px;
+          }
+          #app2Message {
+          	font-size: 25px;
+          }
+
+        </style>
+      </head>
       <body>
-        <h1>Custom WebView Content</h1>
-        <button id="success">Send Success to App 2</button>
-        <button id="failure">Send Failure to App 2</button>
+        <div>
+          <button id="qrCode">Clickable QR code</button>
+          <div id="app2Message"><h1>${
+            status ? `Message from App ID Peru: ${status}` : ''
+          }</h1></div>
+        </div>
         <script>
-          document.getElementById('success').addEventListener('click', function() {
+          document.getElementById('qrCode').addEventListener('click', function() {
             window.ReactNativeWebView.postMessage('success');
-          });
-          document.getElementById('failure').addEventListener('click', function() {
-            window.ReactNativeWebView.postMessage('failure');
-          });
-        </script>
-        <div id="app2Message">Message from App2: ${status}</div>
-        <button id="openApp2">Open App2</button>
-        <script>
-          document.getElementById('openApp2').addEventListener('click', function() {
-            window.ReactNativeWebView.postMessage('openApp2');
           });
         </script>
       </body>
@@ -36,48 +63,38 @@ export const HomeScreenWebView: React.FC<HomeScreenWebViewProps> = ({ status }) 
     `;
   };
 
-  const handleWebViewMessage = (event) => {
+  const handleWebViewMessage = event => {
     const message = event.nativeEvent.data;
-    if (message === 'openApp2') {
-      setWebViewVisible(false); // Hide WebView when opening App2
-      // Simulate opening App2 (this would be where you trigger deep linking)
-    }
+    Linking.openURL(`app2scheme://redirection?status=${message}`);
   };
 
   return (
     <React.Fragment>
-      {/* WebView Modal */}
+      <Pressable
+        onPress={() => setWebViewVisible(true)}
+        style={({pressed}) => ({
+          backgroundColor: pressed ? '#ddd' : Theme.Colors.gradientBtn[0],
+          padding: 10,
+          borderRadius: 5,
+          alignItems: 'center',
+        })}>
+        <Text style={{color: 'white', fontSize: 18}}>
+          Open Platform ID Peru
+        </Text>
+      </Pressable>
       <Modal
         visible={isWebViewVisible}
         onRequestClose={() => setWebViewVisible(false)}
         animationType="none">
         <WebView
           source={{
-            html: getWebViewHTML(status), // Pass the status as part of the WebView HTML content
+            html: getWebViewHTML(status),
           }}
           javaScriptEnabled={true}
           onMessage={handleWebViewMessage}
-          style={{ flex: 1 }}
+          style={{flex: 1}}
         />
-
-        {/* Button to close WebView */}
-        <Pressable
-          onPress={() => setWebViewVisible(false)}
-          style={{
-            backgroundColor: Theme.Colors.gradientBtn[0],
-            padding: 10,
-            borderRadius: 5,
-            alignItems: 'center',
-            margin: 20,
-          }}>
-          <Text style={{ color: 'white', fontSize: 18 }}>Close WebView</Text>
-        </Pressable>
       </Modal>
-
-      {/* Show the message from App2 in a separate view */}
-      <View style={{ padding: 20, backgroundColor: '#f8f8f8' }}>
-        <Text style={{ fontSize: 18 }}>Message from App2: {status}</Text>
-      </View>
     </React.Fragment>
   );
 };
@@ -86,4 +103,5 @@ export default HomeScreenWebView;
 
 export interface HomeScreenWebViewProps {
   status: string;
+  setStatus: (string) => void;
 }
