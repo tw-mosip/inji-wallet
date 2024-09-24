@@ -1,5 +1,5 @@
 {
-  "originHash" : "37844cf80fe1416dd9922e75c396bd616f0723f347f5649a1c0355a3ba3f3a82",
+  "originHash" : "23605762247a1c453627ce326361ce9a41806d86fd97ebda599994901cc7610b",
   "pins" : [
     {
       "identity" : "base45-swift",
@@ -44,6 +44,15 @@
       "state" : {
         "branch" : "develop",
         "revision" : "0b716d5f6545b10de84c69edbf59565e66776ccd"
+      }
+    },
+    {
+      "identity" : "secure-keystore-ios-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mosip/secure-keystore-ios-swift",
+      "state" : {
+        "branch" : "develop",
+        "revision" : "9ae89f3dea4fbcf2554f6fb9b16ae49533996373"
       }
     },
     {

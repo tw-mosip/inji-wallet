@@ -28,21 +28,24 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
   const {t} = useTranslation();
 
   const [status, setStatus] = useState('');
+  const [isWebViewVisible, setWebViewVisible] = useState(false); // Add WebView visibility state
 
   const handleDeepLink = deepLinkData => {
     if (deepLinkData.url != null) {
       const intentURL = new URL(deepLinkData.url);
       if (intentURL.host === 'redirection') {
-        setStatus(intentURL.searchParams.get('status')!!);
+        const newStatus = intentURL.searchParams.get('status')!!;
+        setStatus(newStatus); // Update status with message from App2
+        setWebViewVisible(true); // Open WebView when deep link is received
       }
     }
   };
 
   useEffect(() => {
-    Linking.addEventListener('url', handleDeepLink);
+    const listener = Linking.addEventListener('url', handleDeepLink);
 
     return () => {
-      Linking.removeEventListener('url', handleDeepLink);
+      listener.remove();
     };
   }, []);
 
@@ -108,8 +111,10 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
             />
           </Column>
         )}
-        {/*  <HomeScreenWebView2 status = {status}/> */}
-        <HomeScreenWebView />
+
+        {/* Conditionally render WebView */}
+        {isWebViewVisible && <HomeScreenWebView status={status} />} 
+
         <Result status={status}></Result>
       </Column>
 
