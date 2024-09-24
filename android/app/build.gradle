@@ -205,7 +205,7 @@ android {
             applicationId "io.mosip.inji.wallet"
             versionName defaultConfig.versionName
             dimension "inji"
-            resValue "string", "app_name", "Inji Wallet"
+            resValue "string", "app_name", "Inji(App2)"
         }
         collab {
             applicationId "io.mosip.inji.collab"

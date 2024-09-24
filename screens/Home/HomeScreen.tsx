@@ -18,25 +18,19 @@ import {VCItemMachine} from '../../machines/VerifiableCredential/VCItemMachine/V
 import {VerifiableCredential} from '../../machines/VerifiableCredential/VCMetaMachine/vc';
 import {useTranslation} from 'react-i18next';
 import {Copilot} from '../../components/ui/Copilot';
-import HomeScreenWebView from './HomeScreenWebView';
 import HomeScreenWebView2 from './HomeScreenWebView2';
-import {View} from 'react-native';
-import Result from './Result';
 
 export const HomeScreen: React.FC<HomeRouteProps> = props => {
   const controller = useHomeScreen(props);
   const {t} = useTranslation();
 
-  const [status, setStatus] = useState('');
-  const [isWebViewVisible, setWebViewVisible] = useState(false); // Add WebView visibility state
+  const [isVisible, setIsVisible] = useState(false);
 
   const handleDeepLink = deepLinkData => {
     if (deepLinkData.url != null) {
       const intentURL = new URL(deepLinkData.url);
       if (intentURL.host === 'redirection') {
-        const newStatus = intentURL.searchParams.get('status')!!;
-        setStatus(newStatus); // Update status with message from App2
-        setWebViewVisible(true); // Open WebView when deep link is received
+        setIsVisible(true);
       }
     }
   };
@@ -111,11 +105,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
             />
           </Column>
         )}
-
-        {/* Conditionally render WebView */}
-        {isWebViewVisible && <HomeScreenWebView status={status} />} 
-
-        <Result status={status}></Result>
+        <HomeScreenWebView2 isVisible={isVisible} setVisible={setIsVisible} />
       </Column>
 
       <Copilot

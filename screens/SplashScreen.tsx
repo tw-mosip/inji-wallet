@@ -7,10 +7,8 @@ import {Column} from '../components/ui';
 import {useAppLayout} from './AppLayoutController';
 
 export const SplashScreen: React.FC<RootRouteProps> = props => {
-  const imageResource =
-    APPLICATION_THEME?.toLowerCase() === 'purple'
-      ? require('../assets/purpleSplashScreen.png')
-      : require('../assets/orangeSplashScreen.png');
+  const imageResource = require('../assets/purpleSplashScreen.png');
+
   const controller = useAppLayout();
   useEffect(() => {
     setTimeout(() => {

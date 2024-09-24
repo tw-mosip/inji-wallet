@@ -3,8 +3,7 @@ import {PurpleTheme} from './themes/PurpleTheme';
 import {APPLICATION_THEME} from 'react-native-dotenv';
 
 // To change the theme, CSS theme file has to import and assign it to Theme in line no 6
-export const Theme =
-  APPLICATION_THEME?.toLowerCase() === 'purple' ? PurpleTheme : DefaultTheme;
+export const Theme = PurpleTheme;
 
 type SpacingXY = [number, number];
 type SpacingFull = [number, number, number, number];
