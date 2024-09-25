@@ -43,12 +43,19 @@ export const HomeScreenWebView: React.FC<HomeScreenWebViewProps> = ({
           #app2Message {
           	font-size: 25px;
           }
+          img {
+            margin-top: 20px; /* Space between button and image */
+            max-width: 100%; /* Make the image responsive */
+            height: auto; /* Maintain aspect ratio */
+          }
 
         </style>
       </head>
       <body>
         <div>
-          <button id="qrCode">Clickable QR code</button>
+          <button id="qrCode">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/QR_Code_Example.svg" alt="QR Code" />
+          </button>
           <div id="app2Message"><h1>${
             status ? `Message from App ID Peru: ${status}` : ''
           }</h1></div>
