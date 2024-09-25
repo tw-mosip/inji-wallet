@@ -23,7 +23,9 @@ export const HomeScreenWebView2: React.FC<HomeScreenWebView2Props> = props => {
               borderRadius: 5,
               marginBottom: 20,
             })}>
-            <Text style={{color: 'white', fontSize: 18}}>Send Success</Text>
+            <Text style={{color: 'white', fontSize: 18}}>
+              Face Auth Success
+            </Text>
           </Pressable>
 
           <Pressable
@@ -33,7 +35,9 @@ export const HomeScreenWebView2: React.FC<HomeScreenWebView2Props> = props => {
               padding: 10,
               borderRadius: 5,
             })}>
-            <Text style={{color: 'white', fontSize: 18}}>Send Failure</Text>
+            <Text style={{color: 'white', fontSize: 18}}>
+              Face Auth Failure
+            </Text>
           </Pressable>
         </View>
       </Modal>
