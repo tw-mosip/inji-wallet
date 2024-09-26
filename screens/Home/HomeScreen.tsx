@@ -18,12 +18,13 @@ import {VCItemMachine} from '../../machines/VerifiableCredential/VCItemMachine/V
 import {VerifiableCredential} from '../../machines/VerifiableCredential/VCMetaMachine/vc';
 import {useTranslation} from 'react-i18next';
 import HomeScreenWebView from './HomeScreenWebView';
+import {Copilot} from '../../components/ui/Copilot';
 
 export const HomeScreen: React.FC<HomeRouteProps> = props => {
   const controller = useHomeScreen(props);
   const {t} = useTranslation();
 
-  const [status, setStatus] = useState('');
+  /*  const [status, setStatus] = useState('');
 
   const handleDeepLink = deepLinkData => {
     if (deepLinkData.url != null) {
@@ -41,7 +42,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
     return () => {
       listener.remove();
     };
-  }, []);
+  }, []); */
 
   useEffect(() => {
     if (controller.IssuersService) {
@@ -106,7 +107,15 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
           </Column>
         )}
       </Column>
-      <HomeScreenWebView status={status} setStatus={setStatus} />
+      {/*  <HomeScreenWebView status={status} setStatus={setStatus} /> */}
+
+      <Copilot
+        title={t('copilot:downloadTitle')}
+        description={t('copilot:downloadMessage')}
+        order={2}
+        targetStyle={Theme.Styles.downloadFabIconCopilotContainer}
+        children={<DownloadFABIcon />}
+      />
 
       <ErrorMessageOverlay
         translationPath={'MyVcsTab'}

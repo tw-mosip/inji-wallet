@@ -22,6 +22,10 @@ export const API_URLS: ApiUrls = {
     method: 'GET',
     buildURL: (): `/${string}` => '/v1/mimoto/issuers',
   },
+  trustedVerifiersList: {
+    method: 'GET',
+    buildURL: (): `/${string}` => '/v1/mimoto/verifiers',
+  },
   issuerConfig: {
     method: 'GET',
     buildURL: (issuerId: string): `/${string}` =>

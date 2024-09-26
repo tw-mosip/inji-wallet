@@ -44,6 +44,9 @@ export const IssuersActions = (model: any) => {
     setLoadingReasonAsDisplayIssuers: model.assign({
       loadingReason: 'displayIssuers',
     }),
+    setLoadingReasonAsFaceAuth: model.assign({
+      loadingReason: 'faceAuthentication',
+    }),
     setLoadingReasonAsDownloadingCredentials: model.assign({
       loadingReason: 'downloadingCredentials',
     }),

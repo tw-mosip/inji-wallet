@@ -27,6 +27,7 @@ export async function request(
   if (path.includes('v1/mimoto')) headers['X-AppId'] = __AppId.getValue();
   let response;
   const requestUrl = path.indexOf('https://') != -1 ? path : host + path;
+  console.log('Request URL: ', requestUrl);
   if (timeoutMillis === undefined) {
     response = await fetch(requestUrl, {
       method,

@@ -1,20 +1,21 @@
 import React, {useEffect, useState} from 'react';
 import {Text, Pressable, Modal, View, Linking} from 'react-native';
 import WebView from 'react-native-webview';
-import {Theme} from '../../components/ui/styleUtils';
 
 export const HomeScreenWebView: React.FC<HomeScreenWebViewProps> = ({
   status,
   setStatus,
+  faceAuthSuccess,
 }) => {
-  const [isWebViewVisible, setWebViewVisible] = useState(false);
+  const [isWebViewVisible, setWebViewVisible] = useState(true);
 
   useEffect(() => {
     if (status != '') {
       const timeoutId = setTimeout(() => {
         setWebViewVisible(false);
         setStatus('');
-      }, 5000);
+        faceAuthSuccess();
+      }, 2000);
       return () => clearTimeout(timeoutId);
     }
   }, [status]);
@@ -77,18 +78,6 @@ export const HomeScreenWebView: React.FC<HomeScreenWebViewProps> = ({
 
   return (
     <React.Fragment>
-      <Pressable
-        onPress={() => setWebViewVisible(true)}
-        style={({pressed}) => ({
-          backgroundColor: pressed ? '#ddd' : Theme.Colors.gradientBtn[0],
-          padding: 10,
-          borderRadius: 5,
-          alignItems: 'center',
-        })}>
-        <Text style={{color: 'white', fontSize: 18}}>
-          Open Platform ID Peru
-        </Text>
-      </Pressable>
       <Modal
         visible={isWebViewVisible}
         onRequestClose={() => setWebViewVisible(false)}
@@ -111,4 +100,5 @@ export default HomeScreenWebView;
 export interface HomeScreenWebViewProps {
   status: string;
   setStatus: (string) => void;
+  faceAuthSuccess: () => void;
 }

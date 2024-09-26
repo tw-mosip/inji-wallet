@@ -171,11 +171,8 @@ export const IssuersMachine = model.createMachine(
         invoke: {
           src: 'invokeAuthorization',
           onDone: {
-            actions: [
-              'setTokenResponse',
-              'setLoadingReasonAsSettingUp',
-              'getKeyPairFromStore',
-            ],
+            actions: ['setTokenResponse', 'setLoadingReasonAsFaceAuth'],
+            target: '.performFaceAuthAndRedirection',
           },
           onError: [
             {
@@ -218,6 +215,20 @@ export const IssuersMachine = model.createMachine(
               },
               BIOMETRIC_CANCELLED: {
                 target: 'userCancelledBiometric',
+              },
+              STORE_ERROR: {
+                target: '#issuersMachine.checkKeyPair',
+              },
+            },
+          },
+          performFaceAuthAndRedirection: {
+            on: {
+              FACE_AUTH_SUCCESS: {
+                actions: ['setLoadingReasonAsSettingUp', 'getKeyPairFromStore'],
+              },
+              STORE_RESPONSE: {
+                actions: 'loadKeyPair',
+                target: '#issuersMachine.checkKeyPair',
               },
               STORE_ERROR: {
                 target: '#issuersMachine.checkKeyPair',

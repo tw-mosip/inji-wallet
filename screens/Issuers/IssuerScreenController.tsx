@@ -55,6 +55,8 @@ export function useIssuerScreenController({route, navigation}) {
       service.send(IssuerScreenTabEvents.SELECTED_ISSUER(id)),
     TRY_AGAIN: () => service.send(IssuerScreenTabEvents.TRY_AGAIN()),
     RESET_ERROR: () => service.send(IssuerScreenTabEvents.RESET_ERROR()),
+    FACE_AUTH_SUCCESS: () =>
+      service.send(IssuerScreenTabEvents.FACE_AUTH_SUCCESS()),
     DOWNLOAD_ID: () => {
       service.send(IssuerScreenTabEvents.DOWNLOAD_ID());
       navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
