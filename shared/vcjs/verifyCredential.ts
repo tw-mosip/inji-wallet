@@ -13,6 +13,7 @@ import {TelemetryConstants} from '../telemetry/TelemetryConstants';
 import {getMosipIdentifier} from '../commonUtil';
 import {NativeModules} from 'react-native';
 import {isAndroid} from '../constants';
+import { VCFormat } from '../VCFormat';
 
 // FIXME: Ed25519Signature2018 not fully supported yet.
 // Ed25519Signature2018 proof type check is not tested with its real credential
@@ -30,8 +31,18 @@ const vcVerifier = NativeModules.VCVerifierModule;
 
 export async function verifyCredential(
   verifiableCredential: Credential,
+  vcFormat: String
 ): Promise<VerificationResult> {
   try {
+    if (VCFormat.mso_mdoc === vcFormat && isAndroid()) {
+      let vcVerifierResult = await vcVerifier.verifyCredentials(
+        JSON.stringify(verifiableCredential),
+      );
+      return handleVcVerifierResponse(
+        vcVerifierResult,
+        verifiableCredential,
+      );
+    } 
     let purpose: PublicKeyProofPurpose | AssertionProofPurpose;
     const proof = verifiableCredential.proof;
     switch (proof.proofPurpose) {

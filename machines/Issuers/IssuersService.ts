@@ -24,8 +24,10 @@ import {
   sendImpressionEvent,
 } from '../../shared/telemetry/TelemetryUtils';
 import {TelemetryConstants} from '../../shared/telemetry/TelemetryConstants';
-import {isMosipVC} from '../../shared/Utils';
+import {isMockVC, isMosipVC} from '../../shared/Utils';
 import {VciClient} from '../../shared/vciClient/VciClient';
+import {VCFormat} from '../../shared/VCFormat';
+import {VerifiableCredential} from '../VerifiableCredential/VCMetaMachine/vc';
 
 export const IssuersService = () => {
   return {
@@ -79,7 +81,7 @@ export const IssuersService = () => {
       );
 
       console.info(`VC download via ${context.selectedIssuerId} is successful`);
-      return updateCredentialInformation(context, credential);
+      return await updateCredentialInformation(context, credential);
     },
     invokeAuthorization: async (context: any) => {
       sendImpressionEvent(
@@ -124,9 +126,13 @@ export const IssuersService = () => {
 
     verifyCredential: async (context: any) => {
       //this issuer specific check has to be removed once vc validation is done.
-      if (isMosipVC(context.selectedIssuerId)) {
+      if (
+        isMosipVC(context.selectedIssuerId) ||
+        context.selectedCredentialType.format === VCFormat.mso_mdoc
+      ) {
         const verificationResult = await verifyCredential(
-          context.verifiableCredential?.credential,
+          (context.verifiableCredential as VerifiableCredential).credential,
+          context.selectedCredentialType.format,
         );
         if (!verificationResult.isVerified) {
           throw new Error(verificationResult.errorMessage);
