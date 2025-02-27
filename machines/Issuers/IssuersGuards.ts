@@ -60,8 +60,11 @@ export const IssuersGuards = () => {
     hasCredentialOfferUri: (_: any, event: any) => {
       return getSearchParamsFromUri(event.data).get(CredentialOfferParams.URI);
     },
-    isPreAuthFlow: (context: any) => {
-      return context.selectedIssuer.hasPreAuthCode;
+    isPreAuthFlow: (context: any, event: any) => {
+      console.log('isPreAuthFlow', event.data);
+      return (
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code' in event.data
+      );
     },
   };
 };

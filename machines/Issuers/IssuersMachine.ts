@@ -90,6 +90,14 @@ export const IssuersMachine = model.createMachine(
           SCAN_CREDENTIAL_OFFER_QR_CODE: {
             target: 'scanCredentialOfferQrCode',
           },
+          SELECTED_CREDENTIAL_OFFER_ISSUER: {
+            actions: [
+              'setSelectedIssuerId',
+              'setLoadingReasonAsSettingUp',
+              'setSelectedIssuers',
+            ],
+            target: 'downloadIssuerWellknown',
+          },
         },
       },
       scanCredentialOfferQrCode: {
@@ -97,28 +105,23 @@ export const IssuersMachine = model.createMachine(
         on: {
           QR_CODE_SCANNED: [
             {
-              actions: 'updateCredentialOfferValues',
-              cond: 'hasCredentialOfferUri',
-              target: 'downloadCredentialOfferData',
-            },
-            {
-              actions: 'updateCredentialOfferValues',
-              target: 'selectingIssuer',
+              target: 'addCredentialOfferIssuer',
             },
           ],
         },
       },
 
-      downloadCredentialOfferData: {
-        description: 'fetches the credential offer data',
+      addCredentialOfferIssuer: {
+        description:
+          'sends qr data to VCI library to get the credential offer issuer',
         invoke: {
-          src: 'downloadCredentialOfferData',
+          src: 'fetchAndAddCredentialOfferIssuer',
           onDone: {
-            actions: 'setCredentialOfferData',
+            actions: 'addCredentialOfferIssuer',
             target: 'selectingIssuer',
           },
           onError: {
-            actions: 'resetCredentialOfferValues',
+            actions: 'setError',
             target: 'selectingIssuer',
           },
         },
@@ -177,29 +180,84 @@ export const IssuersMachine = model.createMachine(
           SELECTED_CREDENTIAL_TYPE: [
             {
               actions: 'setSelectedCredentialType',
-              cond: 'isPreAuthFlow',
-              target: 'fetchAccessTokenWithPreAuthCode',
-            },
-            {
-              actions: 'setSelectedCredentialType',
-              target: 'fetchAuthorizationEndpoint',
+              target: 'getAuthFlowType',
             },
           ],
         },
       },
-      fetchAccessTokenWithPreAuthCode: {
+      getAuthFlowType: {
         invoke: {
-          src: 'fetchAccessTokenWithPreAuthCode',
-          onDone: {
-            actions: ['setTokenResponse', 'setLoadingReasonAsSettingUp'],
-            target: 'performAuthorization.setSelectedKey',
-          },
+          src: 'getAuthFlowType',
+          onDone: [
+            {
+              cond: 'isPreAuthFlow',
+              target: 'keyManagement',
+            },
+            {
+              target: 'fetchAuthorizationEndpoint',
+            },
+          ],
           onError: {
             actions: ['setError', 'resetLoadingReason'],
             target: 'error',
           },
         },
       },
+      // downloadCredentialsWithPreAuthCode: {
+      //   entry: ['setLoadingReasonAsDownloadingCredentials'],
+      //   invoke: {
+      //     src: 'downloadCredentialsWithPreAuthCode',
+      //     onDone: {
+      //       actions: ['setVerifiableCredential', 'setCredentialWrapper'],
+      //       target: 'verifyingCredential',
+      //     },
+      //     onError: [
+      //       {
+      //         cond: 'hasUserCancelledBiometric',
+      //         target: '.userCancelledBiometric',
+      //       },
+      //       {
+      //         cond: 'isGenericError',
+      //         target: 'selectingIssuer',
+      //         actions: [
+      //           'resetSelectedCredentialType',
+      //           'setError',
+      //           'resetLoadingReason',
+      //           'sendDownloadingFailedToVcMeta',
+      //         ],
+      //       },
+      //       {
+      //         actions: ['setError', 'resetLoadingReason'],
+      //         target: 'error',
+      //       },
+      //     ],
+
+      //   },
+      //   on: {
+      //     CANCEL: {
+      //       target: 'selectingIssuer',
+      //       actions: 'resetSelectedCredentialType',
+      //     },
+      //   },
+      //   initial: 'idle',
+      //   states: {
+      //     idle: {},
+      //     userCancelledBiometric: {
+      //       on: {
+      //         TRY_AGAIN: [
+      //           {
+      //             actions: ['setLoadingReasonAsDownloadingCredentials'],
+      //             target: '#issuersMachine.downloadCredentials',
+      //           },
+      //         ],
+      //         RESET_ERROR: {
+      //           actions: 'resetLoadingReason',
+      //           target: '#issuersMachine.selectingIssuer',
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
       fetchAuthorizationEndpoint: {
         invoke: {
           src: 'fetchAuthorizationEndpoint',
@@ -262,22 +320,16 @@ export const IssuersMachine = model.createMachine(
         },
       },
       performAuthorization: {
-        description:
-          'invokes the issuers authorization endpoint and gets the access token',
         invoke: {
           src: 'invokeAuthorization',
           onDone: {
             actions: ['setTokenResponse', 'setLoadingReasonAsSettingUp'],
-            target: '.setSelectedKey',
+            target: 'keyManagement',
           },
           onError: [
             {
               cond: 'isOIDCflowCancelled',
-              actions: [
-                'resetSelectedCredentialType',
-                'resetError',
-                'resetLoadingReason',
-              ],
+              actions: ['handleOIDCFlowCancelled'],
               target: 'selectingIssuer',
             },
             {
@@ -286,28 +338,19 @@ export const IssuersMachine = model.createMachine(
               target: 'error',
             },
             {
-              actions: [
-                'resetSelectedCredentialType',
-                'setNetworkOrTechnicalError',
-                'resetLoadingReason',
-                (_, event) =>
-                  console.error(
-                    'Error Occurred while invoking Auth - ',
-                    event.data,
-                  ),
-              ],
               target: 'error',
             },
           ],
         },
-        initial: 'idle',
+      },
+      keyManagement: {
+        initial: 'setSelectedKey',
         states: {
-          idle: {},
           setSelectedKey: {
             invoke: {
               src: 'getKeyOrderList',
               onDone: {
-                actions: 'setSelectedKey',
+                actions: ['setSelectedKey'],
                 target: 'getKeyPairFromKeystore',
               },
               onError: {
@@ -331,7 +374,7 @@ export const IssuersMachine = model.createMachine(
               src: 'getKeyPair',
               onDone: {
                 actions: ['loadKeyPair'],
-                target: '#issuersMachine.checkKeyPair',
+                target: '#issuersMachine.downloadCredentials',
               },
               onError: [
                 {
@@ -354,79 +397,45 @@ export const IssuersMachine = model.createMachine(
                   target: '#issuersMachine.selectingIssuer',
                 },
                 {
-                  target: '#issuersMachine.checkKeyPair',
+                  target: 'generateKeyPair',
                 },
               ],
             },
           },
           userCancelledBiometric: {
             on: {
-              TRY_AGAIN: [
-                {
-                  target: 'getKeyPairFromKeystore',
-                },
-              ],
+              TRY_AGAIN: {
+                target: 'getKeyPairFromKeystore',
+              },
               RESET_ERROR: {
                 actions: 'resetLoadingReason',
                 target: '#issuersMachine.selectingIssuer',
               },
             },
           },
-        },
-      },
-      checkKeyPair: {
-        description: 'checks whether key pair is generated',
-        entry: ['setLoadingReasonAsDownloadingCredentials'],
-        invoke: {
-          src: 'getSelectedKey',
-          onDone: [
-            {
-              cond: 'hasKeyPair',
-              target: 'downloadCredentials',
-            },
-            {
-              target: 'generateKeyPair',
-            },
-          ],
-
-          onError: [
-            {
-              target: 'selectingIssuer',
-            },
-          ],
-        },
-      },
-      generateKeyPair: {
-        description:
-          'if keypair is not generated, new one is created and stored',
-        invoke: {
-          src: 'generateKeyPair',
-          onDone: [
-            {
-              actions: [
-                'setPublicKey',
-                'setPrivateKey',
-                'setLoadingReasonAsDownloadingCredentials',
-                'storeKeyPair',
+          generateKeyPair: {
+            description:
+              'if keypair is not generated, new one is created and stored',
+            invoke: {
+              src: 'generateKeyPair',
+              onDone: [
+                {
+                  actions: [
+                    'setPublicKey',
+                    'setPrivateKey',
+                    'setLoadingReasonAsDownloadingCredentials',
+                    'storeKeyPair',
+                  ],
+                  target: '#issuersMachine.downloadCredentials',
+                },
               ],
-              cond: 'isCustomSecureKeystore',
-              target: 'downloadCredentials',
             },
-            {
-              actions: [
-                // to be decided
-                'setPublicKey',
-                'setLoadingReasonAsDownloadingCredentials',
-                'setPrivateKey',
-                'storeKeyPair',
-              ],
-              target: 'downloadCredentials',
-            },
-          ],
+          },
         },
       },
       downloadCredentials: {
         description: 'credential is downloaded from the selected issuer',
+        entry: ['setLoadingReasonAsDownloadingCredentials'],
         invoke: {
           src: 'downloadCredential',
           onDone: {
@@ -589,6 +598,6 @@ export interface issuerType {
   display: [displayType];
   credentialTypes: [CredentialTypes];
   authorizationEndpoint: string;
-  hasPreAuthCode: boolean;
+  grants: object;
   credential_issuer_host: string;
 }

@@ -112,7 +112,9 @@ export const getDisplayObjectForCurrentLanguage = (
     obj => obj[languageKey] == currentLanguage,
   )[0];
   if (!displayType) {
-    displayType = display.filter(obj => obj[languageKey] === 'en')[0];
+    displayType =
+      display.filter(obj => obj[languageKey] === 'en')[0] ||
+      display.filter(obj => obj[languageKey] === 'en-US')[0];
   }
   return displayType;
 };
@@ -246,7 +248,8 @@ export const OIDCErrors = {
 
   AUTHORIZATION_ENDPOINT_DISCOVERY: {
     GRANT_TYPE_NOT_SUPPORTED: 'Grant type not supported by Wallet',
-    FAILED_TO_FETCH_AUTHORIZATION_ENDPOINT: 'Failed to fetch authorization endpoint or grant type not supported by wallet',
+    FAILED_TO_FETCH_AUTHORIZATION_ENDPOINT:
+      'Failed to fetch authorization endpoint or grant type not supported by wallet',
   },
 };
 
@@ -375,7 +378,7 @@ export function selectCredentialRequestKey(
       return keyOrder[index];
     }
   }
-  return '';
+  return KeyTypes.ED25519;
 }
 
 export const constructIssuerMetaData = (
