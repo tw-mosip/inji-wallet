@@ -9,6 +9,7 @@ import {Modal} from '../../components/ui/Modal';
 import {QrLoginRef} from '../../machines/QrLogin/QrLoginMachine';
 import {ScrollView} from 'react-native';
 import {getClientNameForCurrentLanguage} from '../../i18n';
+import { Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export const QrConsent: React.FC<QrConsentProps> = props => {
   const {t} = useTranslation('QrLogin');
@@ -44,6 +45,7 @@ export const QrConsent: React.FC<QrConsentProps> = props => {
             {t('access')}
           </Text>
         </Column>
+        <GestureHandlerRootView>
         <ScrollView>
           <Column>
             {
@@ -111,6 +113,7 @@ export const QrConsent: React.FC<QrConsentProps> = props => {
             ))}
           </Column>
         </ScrollView>
+        </GestureHandlerRootView>
         <Column
           margin={'0 -20 0 -20'}
           style={Theme.Styles.bottomButtonsContainer}

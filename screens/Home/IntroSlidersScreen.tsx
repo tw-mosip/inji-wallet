@@ -2,11 +2,11 @@ import React, {useRef} from 'react';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import {
   Dimensions,
-  Image,
   ImageBackground,
   StatusBar,
   View,
 } from 'react-native';
+import { Image } from 'react-native-elements';
 import {Centered, Column, Row, Text, Button} from '../../components/ui';
 import {Theme} from '../../components/ui/styleUtils';
 import {useTranslation} from 'react-i18next';
@@ -60,7 +60,7 @@ export const IntroSlidersScreen: React.FC<RootRouteProps> = props => {
 
   const renderItem = ({item}) => {
     return (
-      <ImageBackground source={Theme.IntroSliderbackground}>
+      <ImageBackground source={require('./IntroBg.png')}>
         <Centered>
           <Row align="space-between" style={Theme.Styles.introSliderHeader}>
             <Column style={{marginLeft: INTRO_SLIDER_LOGO_MARGIN}}>

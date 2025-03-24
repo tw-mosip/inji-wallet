@@ -1,14 +1,8 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import {Camera} from 'expo-camera';
-import {Column, Text, Button} from '.././ui';
-import {useInterpret, useSelector} from '@xstate/react';
-import {useTranslation} from 'react-i18next';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { CameraType, Camera } from 'expo-camera';
+import { Column, Text, Button } from '.././ui';
+import { useInterpret, useSelector } from '@xstate/react';
+import { useTranslation } from 'react-i18next';
 import {
   FaceScannerEvents,
   selectIsCheckingPermission,
@@ -21,10 +15,10 @@ import {
   selectIsVerifying,
   selectCameraRef,
 } from '../../machines/faceScanner';
-import {GlobalContext} from '../../shared/GlobalContext';
-import {selectIsActive} from '../../machines/app';
-import {Theme} from '.././ui/styleUtils';
-import {getRandomInt} from '../../shared/commonUtil';
+import { GlobalContext } from '../../shared/GlobalContext';
+import { selectIsActive } from '../../machines/app';
+import { Theme } from '.././ui/styleUtils';
+import { getRandomInt } from '../../shared/commonUtil';
 import {
   checkBlink,
   cropEyeAreaFromFace,
@@ -34,24 +28,23 @@ import {
 } from './FaceScannerHelper';
 import LivenessDetection from './LivenessDetection';
 import FaceCompare from './FaceCompare';
-import {LIVENESS_CHECK} from '../../shared/constants';
+import { LIVENESS_CHECK } from '../../shared/constants';
 
-export const FaceScanner: React.FC<FaceScannerProps> = props => {
-  const {t} = useTranslation('FaceScanner');
-  const {appService} = useContext(GlobalContext);
+export const FaceScanner: React.FC<FaceScannerProps> = (props) => {
+  const { t } = useTranslation('FaceScanner');
+  const { appService } = useContext(GlobalContext);
   const isActive = useSelector(appService, selectIsActive);
 
   const machine = useRef(createFaceScannerMachine(props.vcImages));
   const service = useInterpret(machine.current);
 
-  const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
+  const [cameraType, setCameraType] = useState(CameraType.front);
   const cameraRef = useSelector(service, selectCameraRef);
 
   const isPermissionDenied = useSelector(service, selectIsPermissionDenied);
   const isValid = useSelector(service, selectIsValid);
   const isInvalid = useSelector(service, selectIsInvalid);
   const isCheckingPermission = useSelector(service, selectIsCheckingPermission);
-  const isScanning = useSelector(service, selectIsScanning);
   const isCapturing = useSelector(service, selectIsCapturing);
   const isVerifying = useSelector(service, selectIsVerifying);
 
@@ -73,30 +66,24 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         service.send(FaceScannerEvents.READY(node));
       }
     },
-    [isScanning],
+    [isScanning, service],
   );
 
   const flipCamera = () => {
-    setCameraType(prevType =>
-      prevType === Camera.Constants.Type.front
-        ? Camera.Constants.Type.back
-        : Camera.Constants.Type.front,
+    setCameraType((prevType) =>
+      prevType === CameraType.front ? CameraType.back : CameraType.front,
     );
   };
 
-  function handleOnCancel() {
+  const handleOnCancel = () => {
     props.onCancel();
-  }
+  };
 
-  async function captureImage(screenColor) {
+  const captureImage = async (screenColor: string) => {
     try {
       if (cameraRef) {
-        const capturedImage = await cameraRef.takePictureAsync(
-          imageCaptureConfig,
-        );
-
-        setPicArray([...picArray, {color: screenColor, image: capturedImage}]);
-
+        const capturedImage = await cameraRef.takePictureAsync(imageCaptureConfig);
+        setPicArray((prevArray) => [...prevArray, { color: screenColor, image: capturedImage }]);
         if (counter === randomNumToFaceCompare) {
           setFaceToCompare(capturedImage);
         }
@@ -104,64 +91,51 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
     } catch (error) {
       console.error('Error capturing image:', error);
     }
-  }
+  };
 
-  async function handleFacesDetected({faces}) {
-    checkBlink(faces[0]);
+  const handleFacesDetected = async ({ faces }: { faces: any[] }) => {
+    if (!faces || faces.length === 0) return;
 
-    if (counter == MAX_COUNTER) {
-      setCounter(counter + 1);
-      cameraRef.pausePreview();
+    if (counter === MAX_COUNTER) {
+      setCounter((prev) => prev + 1);
+      cameraRef?.pausePreview();
 
       setScreenColor('#ffffff');
       setInfoText(t('faceProcessingInfo'));
 
-      const result = await cropEyeAreaFromFace(
-        picArray,
-        props.vcImages[0],
-        faceToCompare,
-      );
+      const result = await cropEyeAreaFromFace(picArray, props.vcImages[0], faceToCompare);
       return result ? props.onValid() : props.onInvalid();
-    } else if (faces.length > 0) {
-      const [withinXBounds, withinYBounds, withinYawAngle, withinRollAngle] =
-        getFaceBounds(faces[0]);
-
-      setInfoText(t('faceOutGuide'));
-
-      if (
-        withinXBounds &&
-        withinYBounds &&
-        withinRollAngle &&
-        withinYawAngle &&
-        counter < MAX_COUNTER
-      ) {
-        const randomNum = getRandomInt(0, 2);
-        const randomColor = screenFlashColors[randomNum];
-        setScreenColor(randomColor);
-        setCounter(counter + 1);
-        setInfoText(t('faceInGuide'));
-        await captureImage(screenColor);
-      }
     }
-  }
+
+    const face = faces[0];
+    const [withinXBounds, withinYBounds, withinYawAngle, withinRollAngle] = getFaceBounds(face);
+
+    if (withinXBounds && withinYBounds && withinRollAngle && withinYawAngle) {
+      setScreenColor(screenFlashColors[getRandomInt(0, 2)]);
+      setCounter((prev) => prev + 1);
+      setInfoText(t('faceInGuide'));
+      await captureImage(screenColor);
+    } else {
+      setInfoText(t('faceOutGuide'));
+    }
+  };
 
   useEffect(() => {
-    if (isValid) {
-      props.onValid();
-    } else if (isInvalid) {
-      props.onInvalid();
-    }
-  }, [isValid, isInvalid]);
+    if (isValid) props.onValid();
+    if (isInvalid) props.onInvalid();
+  }, [isValid, isInvalid, props]);
 
   useEffect(() => {
     if (isActive) {
       service.send(FaceScannerEvents.APP_FOCUSED());
     }
-  }, [isActive]);
+  }, [isActive, service]);
 
   if (isCheckingPermission) {
-    return <Column></Column>;
-  } else if (isPermissionDenied) {
+    return <Column />;
+  }
+
+  if (isPermissionDenied) {
     return (
       <Column padding="24" fill align="space-between">
         <Text
@@ -194,24 +168,24 @@ export const FaceScanner: React.FC<FaceScannerProps> = props => {
         t={t}
       />
     );
-  } else {
-    return (
-      <FaceCompare
-        whichCamera={cameraType}
-        setCameraRef={setCameraRef}
-        flipCamera={flipCamera}
-        isCapturing={isCapturing}
-        isVerifying={isVerifying}
-        service={service}
-        t={t}
-      />
-    );
   }
+
+  return (
+    <FaceCompare
+      whichCamera={cameraType}
+      setCameraRef={setCameraRef}
+      flipCamera={flipCamera}
+      isCapturing={isCapturing}
+      isVerifying={isVerifying}
+      service={service}
+      t={t}
+    />
+  );
 };
+
 interface FaceScannerProps {
   vcImages: string[];
   onValid: () => void;
   onInvalid: () => void;
-  isLiveness: boolean;
   onCancel: () => void;
 }

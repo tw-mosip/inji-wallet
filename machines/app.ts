@@ -159,7 +159,9 @@ export const appMachine = model.createMachine(
           },
           credentialRegistry: {
             entry: [
+              ()=>console.log("before loadcredsreg"),
               'loadCredentialRegistryHostFromStorage',
+              ()=>console.log("after loadcredsreg"),
               'loadEsignetHostFromStorage',
             ],
             on: {
@@ -264,7 +266,7 @@ export const appMachine = model.createMachine(
       resetLinkCode: assign({
         linkCode: '',
       }),
-      forwardToSerices: pure((context, event) =>
+      forwardToServices: pure((context, event) =>
         Object.values(context.serviceRefs).map(serviceRef =>
           send({...event, type: `APP_${event.type}`}, {to: serviceRef}),
         ),
@@ -412,7 +414,9 @@ export const appMachine = model.createMachine(
 
     services: {
       isQrLoginByDeepLink: () => async () => {
+        console.log("before qrdeeplink")
         const data = await QrLoginIntent.isQrLoginByDeepLink();
+        console.log("after qrdeeplink",data)
         return data;
       },
       resetQRLoginDeepLinkData: () => async () => {

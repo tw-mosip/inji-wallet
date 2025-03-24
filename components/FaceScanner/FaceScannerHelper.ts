@@ -3,8 +3,8 @@ import {LIVENESS_THRESHOLD, isAndroid} from '../../shared/constants';
 import {closest} from 'color-diff';
 import * as FaceDetector from 'expo-face-detector';
 import ImageEditor from '@react-native-community/image-editor';
-import {ImageType} from 'expo-camera';
 import {getColors} from 'react-native-image-colors';
+import { ImageType } from 'expo-camera/build/legacy/Camera.types';
 import {faceCompare} from '@iriscan/biometric-sdk-react-native';
 
 let FaceCropPicArray: any[] = new Array();
@@ -42,7 +42,7 @@ const colorComparePalette = [
 export const imageCaptureConfig = {
   base64: true,
   quality: 1,
-  imageType: ImageType.jpg,
+  imageType: ImageType.jpg
 };
 
 export const faceDetectorConfig: FaceDetectorConfig = {

@@ -16,6 +16,7 @@ module.exports = function (api) {
         verbose: false,
       },
     ],
+    ['@babel/plugin-transform-private-methods', { loose: true }],
     [
       'babel-plugin-inline-import',
       {
@@ -33,6 +34,7 @@ module.exports = function (api) {
         },
       },
     ],
+   
   ];
   if (isNotInDebugMode) {
     plugins.push(['transform-remove-console', {exclude: ['error', 'warn']}]);
@@ -44,7 +46,7 @@ module.exports = function (api) {
       ['@babel/preset-env', {targets: {node: 'current'}}],
       '@babel/preset-typescript',
       '@babel/preset-react',
-      'module:metro-react-native-babel-preset',
+      'module:@react-native/babel-preset',
     ],
     sourceType: 'module',
     plugins: [

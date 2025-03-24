@@ -321,6 +321,6 @@ export class Display {
   }
 
   getBackgroundImage(defaultBackgroundImage: string) {
-    return this.backgroundImage ?? defaultBackgroundImage;
+    return defaultBackgroundImage;
   }
 }
