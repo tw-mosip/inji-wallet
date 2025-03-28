@@ -57,5 +57,11 @@ export const IssuersGuards = () => {
       const errorMessage = event.data.message;
       return errorMessage === ErrorMessage.GENERIC;
     },
+    hasCredentialOfferUri: (_: any, event: any) => {
+      return getSearchParamsFromUri(event.data).get(CredentialOfferParams.URI);
+    },
+    isPreAuthFlow: (context: any) => {
+      return context.selectedIssuer.hasPreAuthCode;
+    },
   };
 };

@@ -240,6 +240,12 @@ export const IssuersScreen: React.FC<
   return (
     <React.Fragment>
       <BannerNotificationContainer />
+      <Button
+        testID="scanCredentialOfferQrCode"
+        type="clear"
+        title="Scan Qr Code"
+        onPress={controller.SCAN_CREDENTIAL_OFFER_QR_CODE}
+      />
       {controller.issuers.length > 0 && (
         <Column style={Theme.IssuersScreenStyles.issuerListOuterContainer}>
           <Row

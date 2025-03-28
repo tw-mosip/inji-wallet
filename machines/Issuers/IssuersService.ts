@@ -32,6 +32,11 @@ export const IssuersService = () => {
     downloadIssuersList: async () => {
       return await CACHED_API.fetchIssuers();
     },
+    downloadCredentialOfferData: async (context: any) => {
+      return await CACHED_API.fetchCredentialOfferData(
+        context.credentialOfferURI,
+      );
+    },
     checkInternet: async () => await NetInfo.fetch(),
     downloadIssuerWellknown: async (context: any) => {
       const wellknownResponse = await CACHED_API.fetchIssuerWellknownConfig(
@@ -58,6 +63,8 @@ export const IssuersService = () => {
     },
     fetchAuthorizationEndpoint: async (context: any) => {
       const wellknownResponse = context.selectedIssuerWellknownResponse;
+      const authorizationServers =
+        wellknownResponse['authorization_servers'] || [];
       const credentialIssuer = wellknownResponse['credential_issuer'];
       const authorizationServers = wellknownResponse[
         'authorization_servers'
@@ -69,32 +76,42 @@ export const IssuersService = () => {
         'implicit',
       ];
 
-      for (const server of authorizationServers) {
-        try {
-          const authorizationServersMetadata =
-            await CACHED_API.fetchIssuerAuthorizationServerMetadata(server);
+      for (const server of serversToCheck) {
+        const authorizationServersMetadata =
+          await CACHED_API.fetchIssuerAuthorizationServerMetadata(server);
 
-          if (
-            (
-              authorizationServersMetadata?.['grant_types_supported'] ||
-              DEFAULT_AUTHORIZATION_SERVER_SUPPORTED_GRANT_TYPES
-            ).some(grant => SUPPORTED_GRANT_TYPES.includes(grant))
-          ) {
-            return authorizationServersMetadata['authorization_endpoint'];
-          }
-        } catch (error) {
-          console.error(`Failed to fetch metadata for ${server}:`, error);
+        if (
+          (authorizationServersMetadata['grant_types_supported'] || []).some(
+            grant => SUPPORTED_GRANT_TYPES.includes(grant),
+          )
+        ) {
+          return authorizationServersMetadata['authorization_endpoint'];
         }
       }
 
       throw new Error(
-        OIDCErrors.AUTHORIZATION_ENDPOINT_DISCOVERY.FAILED_TO_FETCH_AUTHORIZATION_ENDPOINT,
+        OIDCErrors.AUTHORIZATION_ENDPOINT_DISCOVERY.GRANT_TYPE_NOT_SUPPORTED,
+      );
+    },
+
+    fetchAccessTokenWithPreAuthCode: async (context: any) => {
+      const preAuthCode = '1011086789793991645341730';
+      console.log(
+        'tokenEndpoint new ::',
+        context.selectedIssuer.token_endpoint,
+      );
+      const grant_type = 'urn:ietf:params:oauth:grant-type:pre-authorized_code';
+      const tokenResponse = await API.fetchAccessTokenWithPreAuthCode(
+        grant_type,
+        preAuthCode,
+        context.selectedIssuer.token_endpoint,
       );
     },
 
     downloadCredential: async (context: any) => {
       const downloadTimeout = await vcDownloadTimeout();
-      const accessToken: string = context.tokenResponse?.accessToken;
+      const accessToken: string = context.tokenResponse?.access_token;
+      console.log('accessToken ::', accessToken);
       const proofJWT = await constructProofJWT(
         context.publicKey,
         context.privateKey,

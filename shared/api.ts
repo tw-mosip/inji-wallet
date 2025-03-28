@@ -115,6 +115,44 @@ export const API = {
     );
     return response.response.issuers || [];
   },
+  fetchCredentialOfferData: async (credentialOfferUri: string) => {
+    const response = await request(
+      API_URLS.credentialOfferData.method,
+      API_URLS.credentialOfferData.buildURL(credentialOfferUri),
+    );
+    return response;
+  },
+
+  fetchAccessTokenWithPreAuthCode: async (
+    grant_type: string,
+    preAuthCode: string,
+    token_endpoint: string,
+  ) => {
+    const body: Record<string, unknown> = {
+      grant_type,
+      'pre-authorized_code': preAuthCode,
+    };
+
+    const response = await request(
+      API_URLS.fetchAccessTokenWithPreAuthCode.method,
+      API_URLS.fetchAccessTokenWithPreAuthCode.buildURL(token_endpoint),
+      body,
+      undefined,
+      {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    );
+
+    return response;
+  },
+
+  fetchIssuerConfig: async (issuerId: string) => {
+    const response = await request(
+      API_URLS.issuerConfig.method,
+      API_URLS.issuerConfig.buildURL(issuerId),
+    );
+    return response.response;
+  },
   fetchIssuerWellknownConfig: async (credentialIssuer: string) => {
     const response = await request(
       API_URLS.issuerWellknownConfig.method,

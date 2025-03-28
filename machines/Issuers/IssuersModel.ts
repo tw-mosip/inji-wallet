@@ -31,6 +31,8 @@ export const IssuersModel = createModel(
     vcMetadata: {} as VCMetadata,
     keyType: 'RS256' as string,
     wellknownKeyTypes: [] as string[],
+    credentialOfferData: null as CredentialOfferData | null,
+    credentialOfferURI: '' as string,
   },
   {
     events: IssuersEvents,

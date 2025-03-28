@@ -14,6 +14,7 @@ import {
   selectStoring,
   selectVerificationErrorMessage,
   selectIsNonGenericError,
+  selectIsQrScanning,
 } from '../../machines/Issuers/IssuersSelectors';
 import {ActorRefFrom} from 'xstate';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
@@ -76,6 +77,9 @@ export function useIssuerScreenController({route, navigation}) {
           0,
         );
       }
+    },
+    SCAN_CREDENTIAL_OFFER_QR_CODE: () => {
+      service.send(IssuerScreenTabEvents.SCAN_CREDENTIAL_OFFER_QR_CODE());
     },
   };
 }
