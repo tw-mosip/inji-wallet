@@ -104,6 +104,7 @@ export const updateCredentialInformation = async (
 export const getDisplayObjectForCurrentLanguage = (
   display: [displayType],
 ): displayType => {
+  console.log('display', display);
   const currentLanguage = i18next.language;
   const languageKey = Object.keys(display[0]).includes('language')
     ? 'language'
@@ -114,8 +115,10 @@ export const getDisplayObjectForCurrentLanguage = (
   if (!displayType) {
     displayType =
       display.filter(obj => obj[languageKey] === 'en')[0] ||
-      display.filter(obj => obj[languageKey] === 'en-US')[0];
+      display.filter(obj => obj[languageKey] === 'en-US')[0] ||
+      display[0];
   }
+  console.log('displayType', displayType);
   return displayType;
 };
 
@@ -271,16 +274,17 @@ export async function constructProofJWT(
   accessToken: string,
   selectedIssuer: issuerType,
   keyType: string,
+  cNonce?: string,
 ): Promise<string> {
   const jwtHeader = {
-    alg: keyType,
+    alg: keyType == KeyTypes.ED25519 ? 'EdDSA' : keyType,
     jwk: await getJWK(publicKey, keyType),
     typ: 'openid4vci-proof+jwt',
   };
   const decodedToken = jwtDecode(accessToken);
   const jwtPayload = {
     iss: selectedIssuer.client_id,
-    nonce: decodedToken.c_nonce,
+    nonce: cNonce ?? decodedToken.c_nonce,
     aud: selectedIssuer.credential_audience,
     iat: Math.floor(new Date().getTime() / 1000),
     exp: Math.floor(new Date().getTime() / 1000) + 18000,
@@ -316,7 +320,7 @@ export const getJWK = async (publicKey, keyType) => {
     }
     return {
       ...publicKeyJWK,
-      alg: keyType,
+      alg: keyType == KeyTypes.ED25519 ? 'EdDSA' : keyType,
       use: 'sig',
     };
   } catch (e) {
@@ -375,7 +379,7 @@ export function selectCredentialRequestKey(
 
   for (const index in keyOrder) {
     if (lowerCaseKeyTypes.includes(keyOrder[index].toLowerCase())) {
-      return keyOrder[index];
+      return KeyTypes.ED25519;
     }
   }
   return KeyTypes.ED25519;
@@ -391,10 +395,18 @@ export const constructIssuerMetaData = (
     credentialEndpoint: selectedIssuer.credential_endpoint,
     downloadTimeoutInMilliSeconds: downloadTimeout,
     credentialFormat: selectedCredentialType.format,
+    preAuthorizedCode:
+      selectedIssuer.grants?.[
+        'urn:ietf:params:oauth:grant-type:pre-authorized_code'
+      ]?.['pre-authorized_code'],
+    tokenEndpoint: selectedIssuer.token_endpoint,
   };
   if (selectedCredentialType.format === VCFormat.ldp_vc) {
     issuerMeta['credentialType'] = selectedCredentialType?.credential_definition
       ?.type ?? ['VerifiableCredential'];
+    if (selectedCredentialType?.credential_definition['@context'])
+      issuerMeta["context"] =
+        selectedCredentialType?.credential_definition['@context'];
   } else if (selectedCredentialType.format === VCFormat.mso_mdoc) {
     issuerMeta['doctype'] = selectedCredentialType.doctype;
     issuerMeta['claims'] = selectedCredentialType.claims;

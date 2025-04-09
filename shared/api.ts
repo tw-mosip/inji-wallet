@@ -120,13 +120,7 @@ export const API = {
     );
     return response.response.issuers || [];
   },
-  fetchCredentialOfferData: async (credentialOfferUri: string) => {
-    const response = await request(
-      API_URLS.credentialOfferData.method,
-      API_URLS.credentialOfferData.buildURL(credentialOfferUri),
-    );
-    return response;
-  },
+
   fetchCredentialRequest: async (
     accessToken: string,
     credentialConfigurationId: string,
@@ -159,28 +153,28 @@ export const API = {
     }
   },
 
-  fetchAccessTokenWithPreAuthCode: async (
-    grant_type: string,
-    preAuthCode: string,
-    token_endpoint: string,
-  ) => {
-    const body: Record<string, unknown> = {
-      grant_type,
-      'pre-authorized_code': preAuthCode,
-    };
+  // fetchAccessTokenWithPreAuthCode: async (
+  //   grant_type: string,
+  //   preAuthCode: string,
+  //   token_endpoint: string,
+  // ) => {
+  //   const body: Record<string, unknßown> = {
+  //     grant_type,
+  //     'pre-authorized_code': preAuthCode,
+  //   };
 
-    const response = await request(
-      API_URLS.fetchAccessTokenWithPreAuthCode.method,
-      API_URLS.fetchAccessTokenWithPreAuthCode.buildURL(token_endpoint),
-      body,
-      undefined,
-      {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    );
+  //   const response = await request(
+  //     API_URLS.fetchAccessTokenWithPreAuthCode.method,
+  //     API_URLS.fetchAccessTokenWithPreAuthCode.buildURL(token_endpoint),
+  //     body,
+  //     undefined,
+  //     {
+  //       'Content-Type': 'application/x-www-form-urlencoded',
+  //     },
+  //   );
 
-    return response;
-  },
+  //   return response;
+  // },
 
   fetchIssuerConfig: async (issuerId: string) => {
     const response = await request(

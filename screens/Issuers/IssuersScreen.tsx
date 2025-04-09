@@ -32,13 +32,21 @@ import {SvgImage} from '../../components/ui/svg';
 import {Icon} from 'react-native-elements';
 import {BannerNotificationContainer} from '../../components/BannerNotificationContainer';
 import {CredentialTypeSelectionScreen} from './CredentialTypeSelectionScreen';
-
+import { QrScanner } from '../../components/QrScanner';
+import { useMachine } from '@xstate/react';
+import { IssuersMachine } from '../../machines/Issuers/IssuersMachine';
+import { IssuersModel } from '../../machines/Issuers/IssuersModel';
 export const IssuersScreen: React.FC<
   HomeRouteProps | RootRouteProps
 > = props => {
+  const model= IssuersModel;
   const controller = useIssuerScreenController(props);
   const {t} = useTranslation('IssuersScreen');
-
+const [state, send] = useMachine(
+  IssuersMachine.withContext({
+    ...IssuersModel.initialContext,
+  })
+);
   const issuers = controller.issuers;
   let [filteredSearchData, setFilteredSearchData] = useState(issuers);
   const [search, setSearch] = useState('');
@@ -140,15 +148,17 @@ export const IssuersScreen: React.FC<
   };
 
   const filterIssuers = (searchText: string) => {
+    console.log('issuers ::', issuers);
     const filteredData = issuers.filter(item => {
       if (
         getDisplayObjectForCurrentLanguage(item.display)
-          ?.title.toLowerCase()
+          ?.name.toLowerCase()
           .includes(searchText.toLowerCase())
       ) {
         return getDisplayObjectForCurrentLanguage(item.display);
       }
     });
+    console.log('filteredData ::', filteredData);
     setFilteredSearchData(filteredData);
     setSearch(searchText);
     if (searchText !== '') {
@@ -240,9 +250,24 @@ export const IssuersScreen: React.FC<
     );
   }
 
+  if (controller.isQrScanning) {
+    return qrScannerComponent();
+  }
+  function qrScannerComponent() {
+    return (
+      <Column crossAlign="center">
+        <QrScanner
+          onQrFound={controller.QR_CODE_SCANNED}
+          title="Scan Credential Offer QR code to add issuers"
+        />
+      </Column>
+    );
+  }
+
   return (
     <React.Fragment>
       <BannerNotificationContainer />
+      
       <Button
         testID="scanCredentialOfferQrCode"
         type="clear"
@@ -334,6 +359,7 @@ export const IssuersScreen: React.FC<
               <FlatList
                 data={filteredSearchData}
                 renderItem={({item}) => (
+                  console.log('item ::', item),
                   <Issuer
                     testID={removeWhiteSpace(item.issuer_id)}
                     key={item.issuer_id}
@@ -356,3 +382,5 @@ export const IssuersScreen: React.FC<
     </React.Fragment>
   );
 };
+
+

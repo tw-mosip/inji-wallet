@@ -30,7 +30,7 @@ export const Issuer: React.FC<IssuerProps> = (props: IssuerProps) => {
         <Text
           testID={`issuerHeading-${props.testID}`}
           style={Theme.IssuersScreenStyles.issuerHeading}>
-          {props.displayDetails.title}
+          {props.displayDetails.title??props.displayDetails.name}
         </Text>
         <Text
           testID={`issuerDescription-${props.testID}`}

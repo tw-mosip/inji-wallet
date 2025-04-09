@@ -15,6 +15,7 @@ export const IssuersModel = createModel(
   {
     issuers: [] as issuerType[],
     selectedIssuerId: '' as string,
+    qrData: '' as string,
     selectedIssuer: {} as issuerType,
     selectedIssuerWellknownResponse: {} as IssuerWellknownResponse,
     tokenResponse: {} as AuthorizeResult,
@@ -31,7 +32,6 @@ export const IssuersModel = createModel(
     vcMetadata: {} as VCMetadata,
     keyType: 'RS256' as string,
     wellknownKeyTypes: [] as string[],
-    credentialOfferURI: '' as string,
   },
   {
     events: IssuersEvents,

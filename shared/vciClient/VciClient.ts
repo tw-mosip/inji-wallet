@@ -1,17 +1,9 @@
-import {NativeModules, NativeEventEmitter} from 'react-native';
-import {__AppId} from '../GlobalVariables';
+import { NativeModules, NativeEventEmitter } from 'react-native';
+import { __AppId } from '../GlobalVariables';
+import { constructProofJWT } from '../openId4VCI/Utils';
+import { issuerType } from '../../machines/Issuers/IssuersMachine';
 
 const emitter = new NativeEventEmitter(NativeModules.InjiVciClient);
-
-let listenerAttached = false;
-if (!listenerAttached) {
-  emitter.addListener('onRequestProof', async event => {
-    const {accessToken} = event;
-    const jwt = `accessToken${accessToken}jvjvhjvhjvhjvhv`; // actual signer logic here
-    await NativeModules.InjiVciClient.sendProofFromJS(jwt);
-  });
-  listenerAttached = true;
-}
 
 export class VciClient {
   static get client() {
@@ -20,13 +12,21 @@ export class VciClient {
     return nativeClient;
   }
 
-  static fetchCredentialOfferIssuer(credentialOffer: any) {
-    return VciClient.client.fetchCredentialOfferIssuer(credentialOffer);
+  static async fetchCredentialOfferIssuer(credentialOffer: any) {
+    return await VciClient.client.fetchCredentialOffer(credentialOffer);
   }
 
-  static async downloadCredentialViaPreAuth(issuerMetaData: Object) {
-    const credentialResponse =
-      await VciClient.client.requestCredentialByPreAuthFlow(issuerMetaData);
+  static async downloadCredentialViaPreAuth(issuerMetaData: Object, publicKey: string, privateKey: string, keyType: KeyType, issuer:issuerType) {
+    const listener = emitter.addListener('onRequestProof', async event => {
+      const { accessToken,cNonce } = event;
+
+      const jwt = await constructProofJWT(publicKey, privateKey, accessToken,issuer, keyType, cNonce);
+      await NativeModules.InjiVciClient.sendProofFromJS(jwt);
+
+      listener.remove();
+    });
+
+    const credentialResponse = await VciClient.client.downloadCredentialViaPreAuth(issuerMetaData, '');
     return JSON.parse(credentialResponse);
   }
 

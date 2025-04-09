@@ -12,7 +12,6 @@ import {
   constructIssuerMetaData,
   constructProofJWT,
   hasKeyPair,
-  OIDCErrors,
   updateCredentialInformation,
   vcDownloadTimeout,
   verifyCredentialData,
@@ -31,41 +30,21 @@ export const IssuersService = () => {
       return await Cloud.isSignedInAlready();
     },
     downloadIssuersList: async () => {
-      const {RNSecureKeystoreModule} = NativeModules;
       const trustedIssuersList = await CACHED_API.fetchIssuers();
-      const stored = await RNSecureKeystoreModule.getData(
-        'credentialOfferIssuers',
-      );
-      const credentialOfferIssuersList: issuerType[] = stored
-        ? JSON.parse(stored)
-        : [];
-      return trustedIssuersList.concat(credentialOfferIssuersList);
+      return trustedIssuersList;
     },
     checkInternet: async () => await NetInfo.fetch(),
-    fetchAndAddCredentialOfferIssuer: async (
-      event: any,
-    ): Promise<issuerType> => {
-      const {RNSecureKeystoreModule} = NativeModules;
+    fetchCredentialOfferIssuer: async (context: any): Promise<issuerType> => {
+      console.log('event ::', context.qrData);
       const credentialOfferJson = await VciClient.fetchCredentialOfferIssuer(
-        event.data,
+        context.qrData,
       );
-      const credentialOfferIssuer = JSON.parse(
+      console.log('credentialOfferIssuerJson ::', credentialOfferJson);
+      const credentialOffer= JSON.parse(
         credentialOfferJson,
-      ) as issuerType;
-      const existingData = await RNSecureKeystoreModule.getData(
-        'credentialOfferIssuers',
-      );
-      const existingList: issuerType[] = existingData
-        ? JSON.parse(existingData)
-        : [];
-      const updatedList = [...existingList, credentialOfferIssuer];
-
-      await RNSecureKeystoreModule.storeData(
-        'credentialOfferIssuers',
-        JSON.stringify(updatedList),
-      );
-
-      return credentialOfferIssuer;
+      ) as issuerType
+      credentialOffer.credential_issuer_host=credentialOffer.credential_issuer
+      return credentialOffer;
     },
     getAuthFlowType: async (context: any) => {
       if (context.selectedIssuer?.grants) {
@@ -107,81 +86,73 @@ export const IssuersService = () => {
           `No credential type found for issuer ${selectedIssuer.issuer_id}`,
         );
       }
-
+      console.log('credentialTypes ::', credentialTypes);
       return credentialTypes;
     },
     fetchAuthorizationEndpoint: async (context: any) => {
       const wellknownResponse = context.selectedIssuerWellknownResponse;
       const authorizationServers =
         wellknownResponse['authorization_servers'] || [];
-      console.log('authorizationServers ::', authorizationServers);
       const credentialIssuer = wellknownResponse['credential_issuer'];
-      const authorizationServers = wellknownResponse[
-        'authorization_servers'
-      ] || [credentialIssuer];
+      const grants = context.selectedIssuer?.grants || {};
 
-      const SUPPORTED_GRANT_TYPES = ['authorization_code'];
-      const DEFAULT_AUTHORIZATION_SERVER_SUPPORTED_GRANT_TYPES = [
-        'authorization_code',
-        'implicit',
-      ];
+      // 1. Decide flow: prefer auth_code flow
+      const flow = grants['authorization_code']
+        ? 'authorization_code'
+        : 'urn:ietf:params:oauth:grant-type:pre-authorized_code';
 
-      for (const server of serversToCheck) {
-        try {
-          console.log('server ::', server);
-          const authorizationServersMetadata =
-            await CACHED_API.fetchIssuerAuthorizationServerMetadata(server);
+      const grantObject = grants[flow];
+      const directAuthServer = grantObject?.authorization_server;
 
-          if (
-            (
-              authorizationServersMetadata['grant_types_supported'] || [
-                'authorization_code',
-                'implicit',
-              ]
-            ).some(grant => SUPPORTED_GRANT_TYPES.includes(grant))
-          ) {
-            console.log(
-              'authorizationServersMetadata ::',
-              authorizationServersMetadata['authorization_endpoint'],
-            );
-            return authorizationServersMetadata['authorization_endpoint'];
-          }
-        } catch (error) {
-          console.log('error ::', error);
-        }
+      if (directAuthServer) {
+        const metadata =
+          await CACHED_API.fetchIssuerAuthorizationServerMetadata(
+            directAuthServer,
+          );
+          console.log('metadata ::', metadata);
+        return metadata;
       }
-      throw new Error(
-        OIDCErrors.AUTHORIZATION_ENDPOINT_DISCOVERY.GRANT_TYPE_NOT_SUPPORTED,
-      );
-    },
+      console.log('authorizationServers ::', authorizationServers);
+      const serversToCheck =
+        authorizationServers.length > 0
+          ? authorizationServers
+          : [credentialIssuer];
+      for (const server of serversToCheck) {
+        const metadata =
+          await CACHED_API.fetchIssuerAuthorizationServerMetadata(server);
+        if (
+          (
+            metadata['grant_types_supported'] || [
+              'authorization_code',
+              'implicit',
+            ]
+          ).some(grant => [flow].includes(grant))
+        )
+          console.log('metadata ::', metadata);
+        return metadata;
+      }
 
-    fetchAccessTokenWithPreAuthCode: async (context: any) => {
-      const preAuthCode =
-        context.selectedIssuer.grants[
-          'urn:ietf:params:oauth:grant-type:pre-authorized_code'
-        ]['pre-authorized_code'];
-      console.log(
-        'tokenEndpoint new ::',
-        context.selectedIssuer.token_endpoint,
-      );
-      const grant_type = 'urn:ietf:params:oauth:grant-type:pre-authorized_code';
-      const tokenResponse = await API.fetchAccessTokenWithPreAuthCode(
-        grant_type,
-        preAuthCode,
-        context.selectedIssuer.token_endpoint,
-      );
+      throw new Error('Authorization endpoint discovery failed');
     },
 
     downloadCredential: async (context: any) => {
       const downloadTimeout = await vcDownloadTimeout();
       var credential;
-      if (context.selectedIssuer.hasPreAuthCode) {
+      if (
+        context.selectedIssuer.grants?.[
+          'urn:ietf:params:oauth:grant-type:pre-authorized_code'
+        ]
+      ) {
         credential = await VciClient.downloadCredentialViaPreAuth(
           constructIssuerMetaData(
             context.selectedIssuer,
             context.selectedCredentialType,
             downloadTimeout,
           ),
+          context.publicKey,
+          context.privateKey,
+          context.keyType,
+          context.selectedIssuer,
         );
       } else {
         const accessToken: string = context.tokenResponse?.accessToken;

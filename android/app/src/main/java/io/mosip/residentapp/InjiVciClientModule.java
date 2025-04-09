@@ -14,16 +14,17 @@ import com.facebook.react.bridge.ReadableMap;
 import com.google.gson.Gson;
 import java.util.Objects;
 import io.mosip.residentapp.InjiProofCallbackBridge;
+import io.mosip.residentapp.VCIBridge;
 
 import io.mosip.vciclient.VCIClient;
 import io.mosip.vciclient.constants.CredentialFormat;
 import io.mosip.vciclient.credentialOffer.CredentialOffer;
+import io.mosip.vciclient.CredentialOfferIssuer.CredentialOfferIssuer;
 import io.mosip.vciclient.credentialOffer.CredentialOfferService;
 import io.mosip.vciclient.credentialResponse.CredentialResponse;
 import io.mosip.vciclient.dto.IssuerMetaData;
 import io.mosip.vciclient.proof.jwt.JWTProof;
 import io.mosip.vciclient.proof.Proof;
-
 
 public class InjiVciClientModule extends ReactContextBaseJavaModule {
     private VCIClient vciClient;
@@ -31,7 +32,9 @@ public class InjiVciClientModule extends ReactContextBaseJavaModule {
 
     public InjiVciClientModule(@Nullable ReactApplicationContext reactContext) {
         super(reactContext);
+
         this.reactContext = reactContext;
+        VCIBridge.reactContext = this.reactContext;
     }
 
     @NonNull
@@ -47,14 +50,14 @@ public class InjiVciClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void requestCredential(ReadableMap issuerMetaData, String jwtProofValue, String accessToken, Promise promise) {
+    public void requestCredential(ReadableMap issuerMetaData, String jwtProofValue, String accessToken,
+            Promise promise) {
         try {
             IssuerMetaData constructedIssuerMetadata = constructIssuerMetaData(issuerMetaData);
             CredentialResponse response = vciClient.requestCredential(
                     constructedIssuerMetadata,
                     new JWTProof(jwtProofValue),
-                    accessToken
-            );
+                    accessToken);
             promise.resolve(response.toJsonString());
         } catch (Exception exception) {
             promise.reject(exception);
@@ -68,15 +71,10 @@ public class InjiVciClientModule extends ReactContextBaseJavaModule {
 
             new Thread(() -> {
                 try {
-                    CredentialResponse response = vciClient.requestCredentialByPreAuthFlow(
+                    CredentialResponse response = VCIBridge.requestCredentialByPreAuthSync(
+                            vciClient,
                             metaData,
-                            userPin,
-                            accessToken -> {
-                                InjiProofCallbackBridge.createAndSetDeferred();
-                                InjiProofCallbackBridge.emitAccessTokenToJS(reactContext, accessToken);
-                                return InjiProofCallbackBridge.awaitDeferredResult(); // suspends
-                            }
-                    );
+                            userPin);
                     reactContext.runOnUiQueueThread(() -> {
                         promise.resolve(response != null ? response.toJsonString() : null);
                     });
@@ -97,9 +95,9 @@ public class InjiVciClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void fetchCredentialOffer(String input, Promise promise) {
+    public void fetchCredentialOfferIssuer(String input, Promise promise) {
         try {
-            CredentialOffer credentialOffer = CredentialOfferService.fetchCredentialOffer(input);
+            CredentialOfferIssuer credentialOffer = vciClient.fetchCredentialOfferIssuer(input);
             String json = new Gson().toJson(credentialOffer);
             promise.resolve(json);
         } catch (Exception e) {
@@ -109,26 +107,34 @@ public class InjiVciClientModule extends ReactContextBaseJavaModule {
 
     private IssuerMetaData constructIssuerMetaData(ReadableMap issuerMetaData) {
         String format = issuerMetaData.getString("credentialFormat");
+        String[] contextArray = null;
+        if (issuerMetaData.hasKey("context") && !issuerMetaData.isNull("context")) {
+            contextArray = convertReadableArrayToStringArray(issuerMetaData.getArray("context"));
+        }
         if (Objects.equals(format, CredentialFormat.LDP_VC.getValue())) {
             return new IssuerMetaData(
                     issuerMetaData.getString("credentialAudience"),
                     issuerMetaData.getString("credentialEndpoint"),
                     issuerMetaData.getInt("downloadTimeoutInMilliSeconds"),
                     convertReadableArrayToStringArray(issuerMetaData.getArray("credentialType")),
+                    contextArray,
                     CredentialFormat.LDP_VC,
                     null,
-                    null
-            );
+                    null,
+                    issuerMetaData.getString("preAuthorizedCode"),
+                    issuerMetaData.getString("tokenEndpoint"));
         } else if (Objects.equals(format, CredentialFormat.MSO_MDOC.getValue())) {
             return new IssuerMetaData(
                     issuerMetaData.getString("credentialAudience"),
                     issuerMetaData.getString("credentialEndpoint"),
                     issuerMetaData.getInt("downloadTimeoutInMilliSeconds"),
                     null,
+                    null,
                     CredentialFormat.MSO_MDOC,
                     issuerMetaData.getString("doctype"),
-                    issuerMetaData.getMap("claims").toHashMap()
-            );
+                    issuerMetaData.getMap("claims").toHashMap(),
+                    null,
+                    null);
         } else {
             throw new IllegalStateException("Unexpected credential format: " + format);
         }
