@@ -6,7 +6,10 @@ import {ActorRefFrom} from 'xstate';
 import {Theme} from '../../components/ui/styleUtils';
 import {selectIsCancelling} from '../../machines/bleShare/commonSelectors';
 import {ScanEvents} from '../../machines/bleShare/scan/scanMachine';
-import {selectFlowType, selectIsSendingVPError,} from '../../machines/bleShare/scan/scanSelectors';
+import {
+  selectFlowType,
+  selectIsSendingVPError,
+} from '../../machines/bleShare/scan/scanSelectors';
 import {
   selectAreAllVCsChecked,
   selectCredentials,
@@ -15,6 +18,7 @@ import {
   selectIsGetVCsSatisfyingAuthRequest,
   selectIsGetVPSharingConsent,
   selectIsInvalidIdentity,
+  selectIsOVPViaDeeplink,
   selectIsSelectingVcs,
   selectIsSharingVP,
   selectIsShowLoadingScreen,
@@ -40,7 +44,7 @@ import {VCMetadata} from '../../shared/VCMetadata';
 import {VPShareOverlayProps} from './VPShareOverlay';
 import {ActivityLogEvents} from '../../machines/activityLog';
 import {VPShareActivityLog} from '../../components/VPShareActivityLogEvent';
-import {SelectedCredentialsForVPSharing} from "../../machines/VerifiableCredential/VCMetaMachine/vc";
+import {SelectedCredentialsForVPSharing} from '../../machines/VerifiableCredential/VCMetaMachine/vc';
 
 type MyVcsTabNavigation = NavigationProp<RootRouteProps>;
 
@@ -101,17 +105,20 @@ export function useSendVPScreen() {
     const selectedVcsData: SelectedCredentialsForVPSharing = {};
     Object.entries(selectedVCKeys).map(([vcKey, inputDescriptorId]) => {
       const vcData = myVcs[vcKey];
-        const credentialFormat = vcData.format;
+      const credentialFormat = vcData.format;
       if (selectedVcsData.hasOwnProperty(inputDescriptorId)) {
-        let matchingVcsOfInputDescriptor = selectedVcsData[inputDescriptorId]
+        let matchingVcsOfInputDescriptor = selectedVcsData[inputDescriptorId];
         if (matchingVcsOfInputDescriptor.hasOwnProperty(credentialFormat)) {
-          matchingVcsOfInputDescriptor[credentialFormat] = [...matchingVcsOfInputDescriptor[credentialFormat], vcData]
+          matchingVcsOfInputDescriptor[credentialFormat] = [
+            ...matchingVcsOfInputDescriptor[credentialFormat],
+            vcData,
+          ];
         } else {
-          matchingVcsOfInputDescriptor[credentialFormat] = [vcData]
+          matchingVcsOfInputDescriptor[credentialFormat] = [vcData];
         }
-        selectedVcsData[inputDescriptorId] = matchingVcsOfInputDescriptor
+        selectedVcsData[inputDescriptorId] = matchingVcsOfInputDescriptor;
       } else {
-        selectedVcsData[inputDescriptorId] = {[credentialFormat]: [vcData]}
+        selectedVcsData[inputDescriptorId] = {[credentialFormat]: [vcData]};
       }
     });
     return selectedVcsData;
@@ -275,6 +282,7 @@ export function useSendVPScreen() {
       openID4VPService,
       selectIsFaceVerificationConsent,
     ),
+    isOVPViaDeepLink: useSelector(openID4VPService, selectIsOVPViaDeeplink),
     credentials: useSelector(openID4VPService, selectCredentials),
     verifiableCredentialsData: useSelector(
       openID4VPService,
