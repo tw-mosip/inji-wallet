@@ -18,6 +18,7 @@ const model = createModel(
     isOnboarding: true,
     isInitialDownload: true,
     isTourGuide: false,
+    isAppSetupComplete: false,
   },
   {
     events: {
@@ -123,11 +124,11 @@ export const authMachine = model.createMachine(
         on: {
           SETUP_PASSCODE: {
             target: 'authorized',
-            actions: ['setPasscode', 'setLanguage', 'storeContext'],
+            actions: ['setPasscode', 'setLanguage', 'setAppSetupComplete', 'storeContext'],
           },
           SETUP_BIOMETRICS: {
             target: 'authorized',
-            actions: ['setBiometrics', 'setLanguage', 'storeContext'],
+            actions: ['setBiometrics', 'setLanguage', 'setAppSetupComplete', 'storeContext'],
           },
         },
       },
@@ -158,6 +159,10 @@ export const authMachine = model.createMachine(
   },
   {
     actions: {
+      setAppSetupComplete: assign({
+        isAppSetupComplete: context => true,
+      }),
+
       requestStoredContext: send(StoreEvents.GET('auth'), {
         to: context => context.serviceRefs.store,
       }),
@@ -299,4 +304,8 @@ export function selectIsBiometricToggleFromSettings(state: State) {
     return state.context.toggleFromSettings;
   }
   return false;
+}
+
+export function selectAppSetupComplete(state: State) {
+  return state.context.isAppSetupComplete;
 }
