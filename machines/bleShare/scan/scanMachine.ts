@@ -51,6 +51,7 @@ export const scanMachine =
             'resetFlowType',
             'resetSelectedVc',
             'resetIsQrLoginViaDeepLink',
+            'resetIsOVPViaDeepLink'
           ],
           target: '.checkStorage',
         },
@@ -122,7 +123,7 @@ export const scanMachine =
           on: {
             START_PERMISSION_CHECK: [
               {
-                cond: 'isOVPViaDeepLink',
+                cond: 'isFlowTypeDeepLink',
                 target: '#scan.checkFaceAuthConsent',
               },
               {
