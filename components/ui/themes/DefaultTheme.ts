@@ -1557,6 +1557,15 @@ export const DefaultTheme = {
       marginHorizontal: 26,
       color: Colors.mediumDarkGrey,
     },
+    additionalMessage: {
+      color: Colors.Black,
+      fontFamily: 'Inter_600SemiBold',
+      fontSize: 18,
+      lineHeight: 21,
+      paddingTop: 4,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
   }),
   SetupLanguageScreenStyle: StyleSheet.create({
     columnStyle: {

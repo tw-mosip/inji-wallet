@@ -6,6 +6,7 @@ import {Pressable, Dimensions, BackHandler} from 'react-native';
 import {Button, Column, Row, Text} from '../../components/ui';
 import testIDProps from '../../shared/commonUtil';
 import {SvgImage} from '../../components/ui/svg';
+import { isIOS } from '../../shared/constants';
 
 export const SharingStatusModal: React.FC<SharingStatusModalProps> = props => {
   const {t} = useTranslation('ScanScreen');
@@ -20,7 +21,7 @@ export const SharingStatusModal: React.FC<SharingStatusModalProps> = props => {
     if (props.isVisible && props.hidebutton === true) {
       timeoutId = setTimeout(() => {
         resetAndExit();
-      }, 2000);
+      }, isIOS() ? 4000 : 2000);
     }
     return () => {
       if (timeoutId) {
@@ -53,6 +54,13 @@ export const SharingStatusModal: React.FC<SharingStatusModalProps> = props => {
             style={Theme.TextStyles.regular}
             color={Theme.Colors.statusMessage}>
             {props.message}
+          </Text>
+          <Text
+            testID="sharingStatusAdditionalMessage"
+            margin="20 0"
+            style={Theme.TextStyles.bold}
+            size={'large'}>
+            {props.additionalMessage}
           </Text>
         </Column>
         {props.buttonStatus === 'homeAndHistoryIcons' && !props.hidebutton ? (
@@ -119,6 +127,7 @@ interface SharingStatusModalProps {
   buttonStatus?: String;
   title: String;
   message: String;
+  additionalMessage?: String;
   image: React.ReactElement;
   gradientButtonTitle?: String;
   clearButtonTitle?: String;
