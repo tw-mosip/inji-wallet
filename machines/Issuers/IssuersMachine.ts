@@ -406,7 +406,7 @@ export const IssuersMachine = model.createMachine(
               'sendSuccessEndEvent',
               'setVerificationResult', // to be modified after verification is implemented for external issuers
             ],
-            target: 'storing',
+            target: 'verifyingCredential',
           },
         },
       },

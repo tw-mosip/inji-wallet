@@ -103,7 +103,9 @@ class VciClient {
       trustIssuerListener.remove();
     }
 
-    return JSON.parse(response) as VerifiableCredential;
+    const verifiableCredentialResponse = JSON.parse(response) as VerifiableCredential;
+    console.log("Credential response from credential offer flow:", verifiableCredentialResponse);
+    return verifiableCredentialResponse;
   }
 
   async requestCredentialFromTrustedIssuer(
@@ -141,7 +143,9 @@ class VciClient {
       authListener.remove();
     }
 
-    return JSON.parse(response) as VerifiableCredential;
+    const credentialResponse = JSON.parse(response) as VerifiableCredential;
+    console.log("Credential response from trusted issuer flow:", credentialResponse);
+    return credentialResponse;
   }
 }
 
