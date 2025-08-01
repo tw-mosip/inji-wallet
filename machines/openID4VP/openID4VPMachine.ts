@@ -282,10 +282,14 @@ export const openID4VPMachine = model.createMachine(
           FACE_INVALID: [
             {
               cond: 'isFaceVerificationRetryAttempt',
-              actions: send({
+              actions: [send({
                 type: 'LOG_ACTIVITY',
                 logType: 'FACE_VERIFICATION_FAILED_AFTER_RETRY_ATTEMPT',
               }),
+                // add delay of 1 second before retrying
+                  // setTimeout(() => {
+                  // }, 1000)
+                ],
               target: 'invalidIdentity',
             },
             {
@@ -330,6 +334,7 @@ export const openID4VPMachine = model.createMachine(
             target: 'verifyingIdentity',
           },
         },
+        // exit:
       },
       sendingVP: {
         entry: sendParent('IN_PROGRESS'),

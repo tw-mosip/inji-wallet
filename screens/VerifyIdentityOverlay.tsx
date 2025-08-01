@@ -14,6 +14,8 @@ export const VerifyIdentityOverlay: React.FC<
   const {t} = useTranslation('VerifyIdentityOverlay');
   const credential = props.credential;
 
+  console.warn("INJIMOB-3464 isInvalidIdentity in VerifyIdentityOverlay:", props.isInvalidIdentity);
+
   const modalProps = {
     isVisible: props.isVerifyingIdentity,
     onDismiss: props.onCancel,
@@ -63,10 +65,16 @@ export const VerifyIdentityOverlay: React.FC<
         image={SvgImage.PermissionDenied()}
         primaryButtonTestID={'retry'}
         primaryButtonText={t('ScanScreen:status.retry')}
-        primaryButtonEvent={props.onRetryVerification}
+        primaryButtonEvent={()=>{
+            console.warn("INJIMOB-3464 Retry verification triggered");
+            props.onRetryVerification();
+        }}
         textButtonTestID={'home'}
         textButtonText={t('ScanScreen:status.accepted.home')}
-        textButtonEvent={props.onNavigateHome}
+        textButtonEvent={()=>{
+            console.warn("INJIMOB-3464 Navigate to home triggered");
+            props.onNavigateHome();
+        }}
         customImageStyles={{paddingBottom: 0, marginBottom: -6}}
         customStyles={{marginTop: '20%'}}
         testID={'shareWithSelfieError'}

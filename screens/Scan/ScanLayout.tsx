@@ -182,7 +182,7 @@ export const ScanLayout: React.FC = () => {
 
       {controller.errorStatusOverlay && (
         <SharingStatusModal
-          isVisible={controller.errorStatusOverlay !== null}
+          isVisible={!!controller.errorStatusOverlay}
           testId={'walletSideSharingErrorModal'}
           image={SvgImage.ErrorLogo()}
           title={controller.errorStatusOverlay.title}

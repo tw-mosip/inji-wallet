@@ -777,8 +777,12 @@ export const scanMachine =
                   ],
                 },
                 FACE_INVALID: {
-                  target: 'invalidIdentity',
-                  actions: 'logFailedVerification',
+                  target: 'invalidFaceIntermediate',
+                  actions: ['logFailedVerification'/*,
+                    send({
+                    type: 'DISCONNECT',
+                  }),*/
+                  ]
                 },
                 CANCEL: [
                   {
@@ -791,7 +795,13 @@ export const scanMachine =
                 ],
               },
             },
-
+            invalidFaceIntermediate: {
+              after: {
+                1000: {
+                  target: 'invalidIdentity',
+                },
+              }
+            },
             invalidIdentity: {
               on: {
                 DISMISS: [

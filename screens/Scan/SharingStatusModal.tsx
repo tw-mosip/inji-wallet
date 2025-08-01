@@ -26,6 +26,8 @@ export const SharingStatusModal: React.FC<SharingStatusModalProps> = props => {
         isIOS() ? 4000 : 2000,
       );
     }
+    console.warn("INJIMOB-3464 SharingStatusModal: useEffect called with isVisible:", props.isVisible, "buttonStatus:", props.buttonStatus);
+
     return () => {
       if (timeoutId) {
         clearTimeout(timeoutId);

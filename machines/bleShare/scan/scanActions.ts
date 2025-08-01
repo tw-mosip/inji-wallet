@@ -388,6 +388,11 @@ export const ScanActions = (model: any) => {
     },
 
     sendBLEConnectionErrorEvent: (_context, event) => {
+      console.warn("INJIMOB-3464 event ",event)
+        console.error(
+            `INJIMOB-3464 BLE Connection Error: ${event.bleError.code} - ${event.bleError.message}`,
+        );
+
       sendErrorEvent(
         getErrorEventData(
           TelemetryConstants.FlowType.senderVcShare,

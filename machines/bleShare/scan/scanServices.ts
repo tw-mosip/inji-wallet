@@ -69,6 +69,8 @@ export const ScanServices = (model: any) => {
     monitorConnection: () => callback => {
       const walletErrorCodePrefix = 'TVW';
       const subscription = wallet.handleDataEvents(event => {
+        console.warn("INJIMOB-3464 BLE Event Received: ", event.type, event);
+        console.error("INJIMOB-3464 BLE Event Received: ", event.type, event);
         if (event.type === EventTypes.onDisconnected) {
           callback({type: 'DISCONNECT'});
         }
