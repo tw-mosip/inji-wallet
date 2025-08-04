@@ -120,7 +120,7 @@ export function useScanLayout() {
     console.warn("INJIMOB-3464 GOTO_HOME in controller");
     setTimeout(() => {
       navigation.navigate(BOTTOM_TAB_ROUTES.home)
-    }, 10);
+    }, 1);
   };
   const GOTO_HISTORY = () => {
     scanService.send(ScanEvents.GOTO_HISTORY());

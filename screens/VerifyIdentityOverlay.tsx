@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {FaceScanner} from '../components/FaceScanner/FaceScanner';
 import {Column} from '../components/ui';
 import {Theme} from '../components/ui/styleUtils';
