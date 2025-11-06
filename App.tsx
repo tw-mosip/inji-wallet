@@ -16,7 +16,7 @@ import {
 } from './machines/app';
 import {DualMessageOverlay} from './components/DualMessageOverlay';
 import {useApp} from './screens/AppController';
-import {Alert, AppState} from 'react-native';
+import {Alert, AppState, NativeModules} from 'react-native';
 import {
   configureTelemetry,
   getErrorEventData,
@@ -24,7 +24,6 @@ import {
 } from './shared/telemetry/TelemetryUtils';
 import {TelemetryConstants} from './shared/telemetry/TelemetryConstants';
 import {MessageOverlay} from './components/MessageOverlay';
-import {NativeModules} from 'react-native';
 import {isHardwareKeystoreExists} from './shared/cryptoutil/cryptoUtil';
 import i18n from './i18n';
 import {CopilotProvider} from 'react-native-copilot';
@@ -59,7 +58,8 @@ const AppLayoutWrapper: React.FC = () => {
   const authService = appService.children.get('auth');
   const isAppSetupComplete = useSelector(authService, selectAppSetupComplete);
 
-  const [isDeepLinkOverlayVisible, setDeepLinkOverlayVisible] = useState(isDeepLinkFlow);
+  const [isDeepLinkOverlayVisible, setIsDeepLinkOverlayVisible] =
+    useState(isDeepLinkFlow);
 
   useEffect(() => {
     if (AppState.currentState === 'active') {
@@ -70,7 +70,7 @@ const AppLayoutWrapper: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setDeepLinkOverlayVisible(isDeepLinkFlow);
+    setIsDeepLinkOverlayVisible(isDeepLinkFlow);
   }, [isDeepLinkFlow]);
 
   if (isDecryptError) {
@@ -86,7 +86,7 @@ const AppLayoutWrapper: React.FC = () => {
         title={t('errors.appSetupIncomplete.title')}
         message={t('errors.appSetupIncomplete.message')}
         onButtonPress={() => {
-          setDeepLinkOverlayVisible(false);
+          setIsDeepLinkOverlayVisible(false);
         }}
         buttonText={t('common:ok')}
         minHeight={'auto'}

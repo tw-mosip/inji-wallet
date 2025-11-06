@@ -4,9 +4,9 @@ import forge from 'node-forge';
 import {
   BIOMETRIC_CANCELLED,
   DEBUG_MODE_ENABLED,
-  SUPPORTED_KEY_TYPES,
   isAndroid,
   isIOS,
+  SUPPORTED_KEY_TYPES,
 } from '../constants';
 import {NativeModules} from 'react-native';
 import {BiometricCancellationError} from '../error/BiometricCancellationError';
@@ -24,10 +24,6 @@ import {KeyTypes} from './KeyTypes';
 import convertDerToRsFormat from './signFormatConverter';
 import {hasKeyPair} from '../openId4VCI/Utils';
 import {TelemetryConstants} from '../telemetry/TelemetryConstants';
-import {
-  sendImpressionEvent,
-  getImpressionEventData,
-} from '../telemetry/TelemetryUtils';
 
 //polyfills setup
 secp.etc.hmacSha256Sync = (k, ...m) =>
@@ -367,13 +363,12 @@ function encryptWithForge(text: string, key: string): EncryptedOutput {
   cipher.start({iv: iv});
   cipher.update(forge.util.createBuffer(text, 'utf8'));
   cipher.finish();
-  var cipherText = forge.util.encode64(cipher.output.getBytes());
-  const encryptedData = new EncryptedOutput(
+  const cipherText = forge.util.encode64(cipher.output.getBytes());
+  return new EncryptedOutput(
     cipherText,
     forge.util.encode64(iv),
     forge.util.encode64(salt),
   );
-  return encryptedData;
 }
 
 function decryptWithForge(encryptedData: string, key: string): string {
@@ -386,16 +381,14 @@ function decryptWithForge(encryptedData: string, key: string): string {
     forge.util.createBuffer(forge.util.decode64(encryptedOutput.encryptedData)),
   );
   decipher.finish();
-  const decryptedData = decipher.output.toString();
-  return decryptedData;
+  return decipher.output.toString();
 }
 
 export function hmacSHA(encryptionKey: string, data: string) {
   const hmac = forge.hmac.create();
   hmac.start('sha256', encryptionKey);
   hmac.update(data);
-  const resultBytes = hmac.digest().getBytes().toString();
-  return resultBytes;
+  return hmac.digest().getBytes().toString();
 }
 
 export async function fetchKeyPair(keyType: any) {

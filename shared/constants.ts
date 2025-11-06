@@ -35,13 +35,6 @@ export const RECEIVED_VCS_STORE_KEY = 'receivedVCs';
 
 export const MY_LOGIN_STORE_KEY = 'myLogins';
 
-export const BACKUP_ENC_KEY = 'backupEncKey';
-
-export const BACKUP_ENC_KEY_TYPE = 'backupEncKeyType';
-
-export const BACKUP_ENC_TYPE_VAL_PASSWORD = 'password';
-
-export const BACKUP_ENC_TYPE_VAL_PHONE = 'phone';
 export const UPLOAD_MAX_RETRY = 2;
 
 export let individualId = {id: '', idType: 'UIN' as VcIdType};
@@ -121,33 +114,6 @@ export const argon2iConfig: Argon2iConfig = {
   mode: 'argon2i',
 };
 
-export const argon2iConfigForUinVid: Argon2iConfig = {
-  iterations: 5,
-  memory: 16 * 1024,
-  parallelism: 2,
-  hashLength: 5,
-  mode: 'argon2i',
-};
-
-export const argon2iConfigForBackupFileName: Argon2iConfig = {
-  iterations: 5,
-  memory: 16 * 1024,
-  parallelism: 2,
-  hashLength: 8,
-  mode: 'argon2id',
-};
-export const argon2iConfigForPasswordAndPhoneNumber: Argon2iConfig = {
-  // TODO: expected iterations for hashing password and phone Number is 600000
-  iterations: 500,
-  memory: 16 * 1024,
-  parallelism: 2,
-  hashLength: 30,
-  mode: 'argon2id',
-};
-
-export const argon2iSalt =
-  '1234567891011121314151617181920212223242526272829303132333435363';
-
 export type IndividualId = {
   id: string;
   idType: VcIdType;
@@ -189,8 +155,6 @@ export const FACE_SDK_MODEL_CHECKSUM =
   '797b4d99794965749635352d55da38d4748c28c659ee1502338badee4614ed06';
 
 export const EXPIRED_VC_ERROR_CODE = 'ERR_VC_EXPIRED';
-
-export const BASE_36 = 36;
 
 export const OVP_ERROR_MESSAGES = {
   NO_MATCHING_VCS: 'No matching credentials found to fulfill the request.',

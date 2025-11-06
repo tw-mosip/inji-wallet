@@ -1,12 +1,7 @@
 import {request} from '../../shared/request';
 import getAllConfigurations, {API_URLS} from '../../shared/api';
 import {ESIGNET_BASE_URL} from '../../shared/constants';
-import {
-  isHardwareKeystoreExists,
-  getJWT,
-  fetchKeyPair,
-} from '../../shared/cryptoutil/cryptoUtil';
-import {getPrivateKey} from '../../shared/keystore/SecureKeystore';
+import {fetchKeyPair, getJWT} from '../../shared/cryptoutil/cryptoUtil';
 
 export const QrLoginServices = {
   linkTransaction: async context => {
@@ -25,17 +20,11 @@ export const QrLoginServices = {
   },
 
   sendAuthenticate: async context => {
-    let privateKey;
     const individualId = context.selectedVc.vcMetadata.mosipIndividualId;
     const keyType = context.selectedVc.vcMetadata.downloadKeyType;
-    if (!isHardwareKeystoreExists) {
-      privateKey = await getPrivateKey(
-        context.selectedVc.walletBindingResponse?.walletBindingId,
-      );
-    }
     const keyPair = await fetchKeyPair(keyType);
-    privateKey = keyPair.privateKey;
-    var config = await getAllConfigurations();
+    const privateKey = keyPair.privateKey;
+    const config = await getAllConfigurations();
     const jwtHeader = {
       alg: keyType,
       'x5t#S256': context.thumbprint,
@@ -80,15 +69,9 @@ export const QrLoginServices = {
   },
 
   sendConsent: async context => {
-    let privateKey;
     const keyType = context.selectedVc.vcMetadata.downloadKeyType;
-    if (!isHardwareKeystoreExists) {
-      privateKey = await getPrivateKey(
-        context.selectedVc.walletBindingResponse?.walletBindingId,
-      );
-    }
     const keyPair = await fetchKeyPair(keyType);
-    privateKey = keyPair.privateKey;
+    const privateKey = keyPair.privateKey;
 
     const header = {
       alg: keyType,
@@ -105,7 +88,7 @@ export const QrLoginServices = {
     const jwtComponents = JWT.split('.');
     const detachedSignature = jwtComponents[0] + '.' + jwtComponents[2];
 
-    const resp = await request(
+    await request(
       API_URLS.sendConsent.method,
       API_URLS.sendConsent.buildURL(),
       {

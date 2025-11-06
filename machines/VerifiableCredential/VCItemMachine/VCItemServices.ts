@@ -17,7 +17,7 @@ import {
 import {CredentialDownloadResponse, request} from '../../../shared/request';
 import {WalletBindingResponse} from '../VCMetaMachine/vc';
 import {getVerifiableCredential} from './VCItemSelectors';
-import { VERIFICATION_TIMEOUT_IN_MS } from '../../../shared/vcjs/verifyCredential';
+import {VERIFICATION_TIMEOUT_IN_MS} from '../../../shared/vcjs/verifyCredential';
 
 const {RNSecureKeystoreModule} = NativeModules;
 export const VCItemServices = model => {
@@ -26,8 +26,8 @@ export const VCItemServices = model => {
       return await Cloud.isSignedInAlready();
     },
 
-    loadDownloadLimitConfig: async context => {
-      var resp = await getAllConfigurations();
+    loadDownloadLimitConfig: async () => {
+      const resp = await getAllConfigurations();
       const maxLimit: number = resp.vcDownloadMaxRetry;
       const vcDownloadPoolInterval: number = resp.vcDownloadPoolInterval;
 
@@ -197,33 +197,30 @@ export const VCItemServices = model => {
 
     verifyCredential: async (context: any) => {
       try {
-    
         if (!context.verifiableCredential) {
           throw new Error('Missing verifiable credential in context');
         }
-    
-        const credential = getVerifiableCredential(context.verifiableCredential);
-        const format = context.selectedCredentialType?.format ?? context.format;
-    
 
-        
+        const credential = getVerifiableCredential(
+          context.verifiableCredential,
+        );
+        const format = context.selectedCredentialType?.format ?? context.format;
+
         const verificationResult = await withTimeout(
           verifyCredentialData(credential, format),
-          VERIFICATION_TIMEOUT_IN_MS
+          VERIFICATION_TIMEOUT_IN_MS,
         );
-    
+
         if (!verificationResult.isVerified) {
           throw new Error(verificationResult.verificationErrorCode);
         }
-    
-         return verificationResult;
-    
+
+        return verificationResult;
       } catch (error) {
         console.error('Credential verification failed:', error);
         throw error;
       }
-    }
-    
+    },
   };
 };
 
@@ -235,4 +232,3 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     ),
   ]);
 }
-

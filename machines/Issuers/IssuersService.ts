@@ -13,11 +13,11 @@ import {
   verifyCredentialData,
 } from '../../shared/openId4VCI/Utils';
 import VciClient from '../../shared/vciClient/VciClient';
-import { displayType, issuerType } from './IssuersMachine';
-import { setItem } from '../store';
-import { API_CACHED_STORAGE_KEYS } from '../../shared/constants';
-import { createCacheObject } from '../../shared/Utils';
-import { VerificationResult } from '../../shared/vcjs/verifyCredential';
+import {displayType, issuerType} from './IssuersMachine';
+import {setItem} from '../store';
+import {API_CACHED_STORAGE_KEYS} from '../../shared/constants';
+import {createCacheObject} from '../../shared/Utils';
+import {VerificationResult} from '../../shared/vcjs/verifyCredential';
 
 export const IssuersService = () => {
   return {
@@ -308,7 +308,11 @@ export const IssuersService = () => {
     },
 
     verifyCredential: async (context: any): Promise<VerificationResult> => {
-      const { isCredentialOfferFlow, verifiableCredential, selectedCredentialType } = context;
+      const {
+        isCredentialOfferFlow,
+        verifiableCredential,
+        selectedCredentialType,
+      } = context;
       if (isCredentialOfferFlow) {
         const configurations = await getAllConfigurations();
         if (configurations.disableCredentialOfferVcVerification) {
@@ -323,15 +327,22 @@ export const IssuersService = () => {
         verifiableCredential?.credential,
         selectedCredentialType.format,
       );
+      console.log(
+        ' Credential itself ',
+        JSON.stringify(verifiableCredential?.credential, null, 2),
+      );
       if (!verificationResult.isVerified) {
+        console.error(
+          'Credential verification failed:',
+          JSON.stringify(verificationResult, null, 2),
+        );
         throw new Error(verificationResult.verificationErrorCode);
       }
-    
+
       return verificationResult;
-    }
-    
-}
-}
+    },
+  };
+};
 async function sendTokenRequest(
   tokenRequestObject: any,
   proxyTokenEndpoint: any = null,

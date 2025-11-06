@@ -1,9 +1,8 @@
 import React from 'react';
 import {useBackupScreen} from '../screens/backupAndRestore/BackupController';
-import {BannerNotification} from './BannerNotification';
+import {BannerNotification, BannerStatusType} from './BannerNotification';
 import {useTranslation} from 'react-i18next';
 import {useBackupRestoreScreen} from '../screens/Settings/BackupRestoreController';
-import {BannerStatusType} from './BannerNotification';
 
 export const BackupAndRestoreBannerNotification: React.FC = () => {
   const backUpController = useBackupScreen();
