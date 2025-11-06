@@ -10,11 +10,13 @@ import {
 import {authRoutes, baseRoutes} from '../routes';
 import {useAppLayout} from './AppLayoutController';
 import {StatusBar} from 'react-native';
-import {GestureHandlerRootView} from "react-native-gesture-handler";
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 export const AppLayout: React.FC = () => {
   const navigationRef = useNavigationContainerRef();
+  // Listen to isTabready, post that render the UI for home screen
+  const [isTabReady, setIsTabReady] = React.useState(false);
 
   const controller = useAppLayout();
   const options: NativeStackNavigationOptions = {
@@ -25,17 +27,21 @@ export const AppLayout: React.FC = () => {
   };
 
   return (
-      <GestureHandlerRootView>
-        <NavigationContainer ref={navigationRef}>
-          <StatusBar animated={true} barStyle="dark-content" />
-          <Navigator initialRouteName={baseRoutes[0].name} screenOptions={options}>
-            {baseRoutes.map(route => (
-              <Screen key={route.name} {...route} />
-            ))}
-            {controller.isAuthorized &&
-              authRoutes.map(route => <Screen key={route.name} {...route} />)}
-          </Navigator>
-        </NavigationContainer>
-      </GestureHandlerRootView>
+    <GestureHandlerRootView>
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() => setIsTabReady(true)}>
+        <StatusBar animated={true} barStyle="dark-content" />
+        <Navigator
+          initialRouteName={baseRoutes[0].name}
+          screenOptions={options}>
+          {baseRoutes.map(route => (
+            <Screen key={route.name} {...route} />
+          ))}
+          {controller.isAuthorized &&
+            authRoutes.map(route => <Screen key={route.name} {...route} />)}
+        </Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 };

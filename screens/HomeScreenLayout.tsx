@@ -32,6 +32,7 @@ export const HomeScreenLayout: React.FC<RootRouteProps> = props => {
           fontFamily: 'Inter_600SemiBold',
         },
         tabBarStyle: {
+          display: 'flex',
           height: 75,
           paddingHorizontal: 10,
         },
@@ -101,7 +102,7 @@ export const HomeScreenLayout: React.FC<RootRouteProps> = props => {
   };
 
   return (
-    <Navigator>
+    <Navigator screenOptions={{freezeOnBlur: true}}>
       <Screen
         key={'HomeScreen'}
         name={'HomeScreen'}
@@ -113,6 +114,7 @@ export const HomeScreenLayout: React.FC<RootRouteProps> = props => {
         name={'IssuersScreen'}
         component={IssuersScreen}
         options={{
+          animation: 'none',
           header: props => (
             <Header
               goBack={props.navigation.goBack}

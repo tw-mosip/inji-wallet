@@ -11,17 +11,19 @@ import {TabRef} from './HomeScreenMachine';
 import {ActorRefFrom} from 'xstate';
 import LinearGradient from 'react-native-linear-gradient';
 import {ErrorMessageOverlay} from '../../components/MessageOverlay';
-import {Pressable} from 'react-native';
+import {Pressable, View} from 'react-native';
 import testIDProps from '../../shared/commonUtil';
 import {BannerNotificationContainer} from '../../components/BannerNotificationContainer';
 import {VCItemMachine} from '../../machines/VerifiableCredential/VCItemMachine/VCItemMachine';
 import {VerifiableCredential} from '../../machines/VerifiableCredential/VCMetaMachine/vc';
 import {useTranslation} from 'react-i18next';
 import {Copilot} from '../../components/ui/Copilot';
+import {useWaitForTabBarReady} from '../../shared/hooks/useWaitForTabBarReady';
 
 export const HomeScreen: React.FC<HomeRouteProps> = props => {
   const controller = useHomeScreen(props);
   const {t} = useTranslation();
+  const {isReady, onTabBarLayout} = useWaitForTabBarReady();
 
   useEffect(() => {
     if (controller.IssuersService) {
@@ -34,6 +36,10 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
       service: controller.IssuersService,
     });
   };
+
+  if (!isReady) {
+    return null;
+  }
 
   const DownloadFABIcon: React.FC = () => {
     const plusIcon = (
@@ -70,7 +76,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
   };
 
   return (
-    <React.Fragment>
+    <View onLayout={onTabBarLayout}>
       <BannerNotificationContainer />
       <Column fill backgroundColor={Theme.Colors.lightGreyBackgroundColor}>
         {controller.haveTabsLoaded && (
@@ -80,7 +86,6 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
               service={controller.tabRefs.myVcs}
               vcItemActor={controller.selectedVc}
               isViewingVc={controller.isViewingVc}
-              
             />
             <ReceivedVcsTab
               isVisible={controller.activeTab === 1}
@@ -114,7 +119,7 @@ export const HomeScreen: React.FC<HomeRouteProps> = props => {
           flow="downloadedVc"
         />
       )}
-    </React.Fragment>
+    </View>
   );
 };
 
