@@ -181,10 +181,12 @@ classDiagram
     class PresentationInteraction {
         + constructor(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>,signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
         + handle(ovpRequest: Any) Map<String, Any>
+        + type() String // returns openid4vp_presentation
     }
     class Interaction {
         <<interface>>
-        +handle() Map<String, Any>
+        + type() String
+        +handle(...) Map<String, Any>
     }
 
     Interaction <|.. PresentationInteraction
@@ -232,16 +234,45 @@ Note:
    - Update requestCredentialFromTrustedIssuer and requestCredentialFromOffer methods to accept interactionCallbacks map to handle different interaction types during issuance.
    - Implement logic to handle openid4vp_presentation interaction type, including invoking the appropriate callback in the Wallet.
    - Add logic to share VP response to Issuer's /iar endpoint after receiving it from Wallet.
+   - Change in public method
+   ```kotlin
+   downloadCredentials(
+        credentialIssuer: String,
+        credentialConfigurationId: String,
+        clientMetadata: ClientMetadata,
+        getTokenResponse: TokenResponseCallback,
+        authorizeUser: AuthorizeUserCallback,
+        getProofJwt: ProofJwtCallback,
+        downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
+    ): CredentialResponse 
+   ```
+   Transforms to
+    ```kotlin
+   downloadCredentials(
+        credentialIssuer: String,
+        credentialConfigurationId: String,
+        clientMetadata: ClientMetadata,
+        getTokenResponse: TokenResponseCallback,
+        authorizeUser: AuthorizeUserCallback,
+        getProofJwt: ProofJwtCallback,
+        downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
+        interactions: List<Interaction>? = null // new
+    ): CredentialResponse 
+   ```
+   Note: 
+   1. Here the interactionCallbacks holds the interactions supported by the wallet
+   2. PresentationInteraction class will be exposed by the library which can be used by consumer Wallet
+   3. Only the interaction types available in this will be added for the `interaction_types_supported` param in request body during initial interactive authorization request
+ 
 2. Inji OpenID4VP Library
    - Add support to validate openid4vp request with response_mode as iar-post or iar-post.jwt by skipping response_uri check.
    - Add support to create VP response for openid4vp request with response_mode as iar-post or iar-post.jwt.
    - Add method `constructVPResponse` to create VP response and return it as Map<String, Any> to Wallet.
 3. Inji Wallet
-
-- Implement the openid4vp interaction callback to handle the presentation request, display it to the user, and obtain user consent.
-- Use inji-openid4vp library to process the openid4vp request and create the VP response.
-- Handle error scenarios and propagate errors to the user appropriately.
-- Integrate with the updated inji-vci-client library to support the new interaction flow during credential issuance.
+   - Implement the openid4vp interaction callback to handle the presentation request, display it to the user, and obtain user consent.
+   - Use PresentationInteraction exposed from Inji VCI Client library
+   - Handle error scenarios and propagate errors to the user appropriately.
+   - Integrate with the updated inji-vci-client library to support the new interaction flow during credential issuance.
 
 ## References
 
