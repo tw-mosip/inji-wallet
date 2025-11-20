@@ -172,21 +172,28 @@ sequenceDiagram
 
 **Class diagram for Presentation Interaction**
 
+
 ```mermaid
 ---
 config:
   layout: elk
 ---
 classDiagram
-    class PresentationInteraction {
+    class PresentationInteraction~PresentationRequest-PresentatnResponse~ {
         + constructor(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>,signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
-        + handle(ovpRequest: Any) Map<String, Any> // map of openid4vp_presentation to authResponse
+        + handle(ovpRequest: PresentationRequest) PresentationResponse 
         + type() String // returns openid4vp_presentation
+        - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void
+        - handlePresentation(authRequest: Map<String,Any>) : PresentationResponse
     }
-    class AuthorizationInteraction {
+    class AuthorizationInteraction~I-O~ {
         <<interface>>
-        + type() String // returns the interaction type name, which is used in interaction_types_supported param
-        +handle(...) Map<String, Any> // returns the actual response to be added to /iar request body
+        + type() String
+        + handle(input: I) O
+    }
+    
+    class PresentationResponse {
+        openid4vp_response: Map<String, Any>
     }
 
     AuthorizationInteraction <|.. PresentationInteraction
@@ -199,6 +206,57 @@ classDiagram
         - exchangeToken(authorizationCode: String) : TokenResponse
     }
 ```
+**AuthorizationInteraction interface**
+- This interface defines the contract for different interaction types supported during interactive authorization request.
+- It has two methods
+  - type() : String
+    - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
+  - handle(...) : Map<String, Any>
+    - This method is responsible for handling the entire interaction flow.
+    - It takes the interaction request as input and returns the interaction response to be sent to /iar endpoint.
+    - The input and output types can vary based on the interaction type.
+    - For example, in presentation interaction, input is ovpRequest and output is map of {openid4vp_presentation: authResponse}.
+    - Note that the exact output for the interaction response expect auth_session is returned as output. The auth_session addition to the request body is handled in InteractiveAuthorizationRequestService class.
+
+**PresentationInteraction class implements AuthorizationInteraction interface.**
+-  Requirements of the Presentation interaction from Wallet
+  - handlePresentationRequest callback
+    - handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>> 
+    - This callback is responsible for 
+      - displaying the presentation request to the user and obtaining user consent, 
+      - filtering the credentials in Wallet which satisfies the presentation request criteria, showing the filtered credentials to the user for selection
+      - obtaining user consent for sharing the selected credentials.
+  - signVerifiablePresentation callback 
+    - signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>
+    - This callback is responsible for signing the data for VP creation.
+  - trustedVerifiers
+    - List of trusted verifiers to validate the openid4vp request.
+  - signatureSuite
+    - Signature suite to be used for VP creation. (optional) // used internally for ldp_vc
+  - holderId
+    - Holder ID to be used for VP creation. (optional) // used internally for ldp_vc
+- Methods
+  - handle(ovpRequest: PresentationRequest) : Map<String, Any> 
+    - Here VPRequest is a simple type alias for Map<String, Any>
+    - This method is responsible for handling the entire presentation interaction flow.
+    - It takes the ovpRequest as input and returns the VP response to be sent to /iar endpoint. Output is map of {openid4vp_presentation: authResponse} // authResponse can be success / error response
+    - Responsibilities include
+      - validate auth request
+      - handle presentation (display request, obtain consent, filter credentials, select credentials)
+      - sign and create VP response (success / error)
+    - Has a try-catch block to catch any exceptions thrown during the process and create error VP response using inji-openid4vp library.
+  - type() : String
+    - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
+    - For presentation interaction, it returns "openid4vp_presentation".
+  - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void
+    - This method is responsible for validating the openid4vp request received from Issuer.
+    - It uses inji-openid4vp library's authenticateVerifier method to validate the request.
+    - In case of any error (no matching credentials / consent rejected), it throws an exception which is caught in handle method to create error VP response.
+  - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any>
+    - This method is responsible for handling the presentation request. This callback the handlePresentationRequest callback provided by Wallet.
+    - In case of any error (no matching credentials / consent rejected), it throws an exception which is caught in handle method to create error VP response.
+    - For successful scenario, it creates the VP response using inji-openid4vp library by calling constructUnsignedVPToken and then using signVerifiablePresentation callback to get the signed data, pass the signed data to constructVPResponse method of inji-openid4vp library to get the final VP response.
+    - 
 
 **Responsibilities - Presentation Interaction**
 
@@ -281,3 +339,12 @@ Note:
 - [OpenID for Verifiable Presentations - Draft 23](https://openid.github.io/openid4vp/draft-23.html)
 - [RFC 9126 - Pushed Authorization Requests (PAR)](https://datatracker.ietf.org/doc/html/rfc9126)
 - [Spike card](https://mosip.atlassian.net/browse/INJIMOB-3601)
+
+## Questions
+1. In the current PresentationInteraction design wallet takes the responsibility of 
+   1. Displaying the presentation request to the user and obtaining user consent 
+   2. Filtering the credentials in Wallet which satisfies the presentation request criteria
+   3. Showing the filtered credentials to the user for selection, Obtaining user consent for sharing the selected credentials
+Should these consent as well be exposed as callbacks to wallet from inji-vci-client library rather than handling it completely in wallet?
+   - presentationConsentCallback: (ovpRequest: AuthorizationRequest) -> boolean // to obtain user consent for presentation request
+   - credentialsShareConsentCallback: (selectedCredentials: Map<String, Map<FormatType, List<Any>>>) -> boolean // to obtain user consent for sharing selected credentials
