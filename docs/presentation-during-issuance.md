@@ -180,22 +180,23 @@ config:
 classDiagram
     class PresentationInteraction {
         + constructor(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>,signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
-        + handle(ovpRequest: Any) Map<String, Any>
+        + handle(ovpRequest: Any) Map<String, Any> // map of openid4vp_presentation to authResponse
         + type() String // returns openid4vp_presentation
     }
-    class Interaction {
+    class AuthorizationInteraction {
         <<interface>>
-        + type() String
-        +handle(...) Map<String, Any>
+        + type() String // returns the interaction type name, which is used in interaction_types_supported param
+        +handle(...) Map<String, Any> // returns the actual response to be added to /iar request body
     }
 
-    Interaction <|.. PresentationInteraction
+    AuthorizationInteraction <|.. PresentationInteraction
     
     class InteractiveAuthorizationRequestService {
         + handle(endpoint: String) : String
         - initialAuthorizationRequest(endpoint: String) : InteractionResponse
         - handleInteractionResponse(interactionResponse: InteractionResponse) : void
-        - submitInteractionResponse(interactionResponseBody: Map<String, Any>) : String // returns authorization code / error
+        - submitInteractionResponse(interactionResponseBody: Map<String, Any>) : String // submits the entire request body returns, authorization code / error
+        - exchangeToken(authorizationCode: String) : TokenResponse
     }
 ```
 
@@ -256,7 +257,7 @@ Note:
         authorizeUser: AuthorizeUserCallback,
         getProofJwt: ProofJwtCallback,
         downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
-        interactions: List<Interaction>? = null // new
+        interactions: List<AuthorizationInteraction>? = null // new
     ): CredentialResponse 
    ```
    Note: 
