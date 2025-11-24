@@ -90,7 +90,7 @@ sequenceDiagram
     participant openid4vp as 📚 Inji OpenID4VP Library (inji-openid4vp)
     participant issuer as 🛡️ Inji Certify<br/>(OAuth AS + VCI)
     Note over user, vciClient: User initiates credential download in the wallet (via Credential offer or Trusted Issuer flow)
-    wallet ->> vciClient: 0. requests for Credential download <br/> requestCredentialFromTrustedIssuer(<br/>"<credentialIssuer>",<br/><credentialConfigurationId>,<br/>ClientMetadata("client-id", "https://sampleApp/redirect-uri", supportedInteractionTypesOfWallet),<br/>authorizeUser: authorizeUserCallback,<br/>getTokenResponse: tokenResponseCallback, <br/>getProofJwt: proofJwtCallback,<br/> interactionCallbacks: mapOf(InteractionCallback(type=InteractionType.OPENID4VP_PRESENTATION, callback=openid4vpInteractionCallback))<br/>)
+    wallet ->> vciClient: 0. requests for Credential download <br/> requestCredentialFromTrustedIssuer(<br/>"<credentialIssuer>",<br/><credentialConfigurationId>,<br/>ClientMetadata("client-id", "https://sampleApp/redirect-uri", supportedInteractionTypesOfWallet),<br/>authorizeUser: authorizeUserCallback,<br/>getTokenResponse: tokenResponseCallback, <br/>getProofJwt: proofJwtCallback,<br/> authorizationInteractions: listOf(PresentationInteraction(...),..)<br/>)
     Note over vciClient, issuer: 1. Discovery of Issuer and Authorization Server metadata
     vciClient->>issuer: 1.1. GET /.well-known/openid-credential-issuer
     issuer->>vciClient: 1.2. Credential Issuer metadata
@@ -105,7 +105,10 @@ sequenceDiagram
             Note over wallet, issuer: The response body has the structure<br/>{status:"require_interaction", type:"openid4vp_presentation", auth_session:"..random string",<br/>//Presentation request<br/>openid4vp_request: {standard ovp request by value with response_mode as "iar-post" or "iar-post.jwt"}}
             vciClient ->> openid4vp: 4. Validating the openid4vp request received from Issuer
             openid4vp ->> vciClient: Return AuthorizationRequest (ovpRequest)
-            vciClient ->> wallet : 5. Handle presentation request callback to Wallet <br/>(Displaying the presentation request to the user and obtaining user consent, <br/>Filtering the credentials in Wallet which satisfies the presentation request criteria,<br/> Showing the filtered credentials to the user for selection,<br/> Obtaining user consent for sharing the selected credentials)
+            vciClient ->> wallet: 5.0 Presentation consent callback to Wallet <br/>(Obtaining user consent for presentation request)
+            wallet ->> vciClient: Return consent result (boolean)
+            alt User consent given for presentation 
+            vciClient ->> wallet : 5.1 Handle presentation request callback to Wallet <br/>(Displaying the presentation request to the user and obtaining user consent, <br/>Filtering the credentials in Wallet which satisfies the presentation request criteria,<br/> Showing the filtered credentials to the user for selection,<br/> Obtaining user consent for sharing the selected credentials)
             wallet ->> vciClient: Return selected credentials or error for consent rejection
             note over wallet, openid4vp: Create VP response
             alt Successful (consent given + selected credentials)
@@ -130,6 +133,10 @@ sequenceDiagram
                 vciClient ->> wallet: Propagate interaction error to wallet
                 wallet ->> user: Show error to user
             end
+            else User consent rejected for presentation
+            vciClient ->> openid4vp: Create VP response (error)
+            openid4vp ->> vciClient: Return VP error response as Map<String, Any>
+            vciClient ->> vciClient: Prepare the response to be sent to /
         else Error interaction response
             issuer ->> vciClient: interaction error response<br/>4xx Bad Request {error:"missing_interaction_type", error_description:"interaction_types_supported in the request is missing the required interaction type 'openid4vp_presentation'"}
             vciClient ->> wallet: Propagate interaction error to wallet
@@ -180,7 +187,7 @@ config:
 ---
 classDiagram
     class PresentationInteraction~PresentationRequest-PresentatnResponse~ {
-        + constructor(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>,signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
+        + constructor(presentationConsent : (ovpRequest: AuthorizationRequest) -> Boolean, handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, shareConsent : (selectedCredentials : Map<String, Map<FormatType, List<Any>>>) -> Boolean ,signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
         + handle(ovpRequest: PresentationRequest) PresentationResponse 
         + type() String // returns openid4vp_presentation
         - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void
@@ -219,14 +226,26 @@ classDiagram
     - Note that the exact output for the interaction response expect auth_session is returned as output. The auth_session addition to the request body is handled in InteractiveAuthorizationRequestService class.
 
 **PresentationInteraction class implements AuthorizationInteraction interface.**
--  Requirements of the Presentation interaction from Wallet
+-  Requirements of the Presentation interaction from Wallet (got as constructor params)
+  - presentationConsent callback
+    - input: presentation request | output: boolean indicating user consent
+    - To obtain user consent for presentation request
+    - use case - Get consent from user that the Issuer is requesting for presentation of credentials and user agrees to proceed.
+    - When? After wallet receives the request from the Issuer for Presentation interaction and before displaying the matching credentials to the user.
+    - If user rejects consent, an error VP response is created and sent to Issuer.
   - handlePresentationRequest callback
+    - input: presentation request | output: selected credentials - map of {credential_type: {format_type: list of credentials}}
     - handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>> 
     - This callback is responsible for 
-      - displaying the presentation request to the user and obtaining user consent, 
       - filtering the credentials in Wallet which satisfies the presentation request criteria, showing the filtered credentials to the user for selection
-      - obtaining user consent for sharing the selected credentials.
+  - shareConsent callback
+    - input: selected credentials | output: boolean indicating user consent
+    - To obtain user consent for sharing selected credentials
+    - use case - Get consent from user that the user agrees to share the selected credentials with the Issuer.
+    - When? After user selects the credentials to be shared and before creating the VP response.
+    - If user rejects consent, an error VP response is created and sent to Issuer.
   - signVerifiablePresentation callback 
+    - input: unsigned VP token | output: signed VP token - map of {format_type: signed data}
     - signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>
     - This callback is responsible for signing the data for VP creation.
   - trustedVerifiers
@@ -242,21 +261,30 @@ classDiagram
     - It takes the ovpRequest as input and returns the VP response to be sent to /iar endpoint. Output is map of {openid4vp_presentation: authResponse} // authResponse can be success / error response
     - Responsibilities include
       - validate auth request
-      - handle presentation (display request, obtain consent, filter credentials, select credentials)
-      - sign and create VP response (success / error)
+      - handle presentation (display request, obtain consent, filter credentials, select credentials, create authorization response)
+    - Order of operations
+      - validateAuthorizationRequest (private method)
+      - handlePresentation (private method)
     - Has a try-catch block to catch any exceptions thrown during the process and create error VP response using inji-openid4vp library.
+
   - type() : String
     - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
     - For presentation interaction, it returns "openid4vp_presentation".
-  - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void
+
+  - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void [private]
     - This method is responsible for validating the openid4vp request received from Issuer.
     - It uses inji-openid4vp library's authenticateVerifier method to validate the request.
-    - In case of any error (no matching credentials / consent rejected), it throws an exception which is caught in handle method to create error VP response.
-  - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any>
-    - This method is responsible for handling the presentation request. This callback the handlePresentationRequest callback provided by Wallet.
+    - In case of any error (eg - request signature validation failure), it throws an exception which is caught in handle method to create error VP response.
+
+  - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any> [private]
+    - This method is responsible for consent and creating the VP response based on selected credentials or creating VP error response on any consent rejection or error.
     - In case of any error (no matching credentials / consent rejected), it throws an exception which is caught in handle method to create error VP response.
     - For successful scenario, it creates the VP response using inji-openid4vp library by calling constructUnsignedVPToken and then using signVerifiablePresentation callback to get the signed data, pass the signed data to constructVPResponse method of inji-openid4vp library to get the final VP response.
-    - 
+    - Order of operations
+      - Call presentationConsent callback to get user consent for presentation request
+      - Call handlePresentationRequest callback to get selected credentials from Wallet
+      - Call shareConsent callback to get user consent for sharing selected credentials
+      - Create VP response (success / error) using inji-openid4vp library methods
 
 **Responsibilities - Presentation Interaction**
 
@@ -293,35 +321,64 @@ Note:
    - Update requestCredentialFromTrustedIssuer and requestCredentialFromOffer methods to accept interactionCallbacks map to handle different interaction types during issuance.
    - Implement logic to handle openid4vp_presentation interaction type, including invoking the appropriate callback in the Wallet.
    - Add logic to share VP response to Issuer's /iar endpoint after receiving it from Wallet.
-   - Change in public method
+   - Change in public method 
+ 
+(1) trusted offer flow method
+  ```kotlin
+  requestCredentialFromTrustedIssuer(
+       credentialIssuer: String,
+       credentialConfigurationId: String,
+       clientMetadata: ClientMetadata,
+       getTokenResponse: TokenResponseCallback,
+       authorizeUser: AuthorizeUserCallback,
+       getProofJwt: ProofJwtCallback,
+       downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
+   ): CredentialResponse 
+  ```
+  Transforms to
    ```kotlin
-   downloadCredentials(
-        credentialIssuer: String,
-        credentialConfigurationId: String,
+  requestCredentialFromTrustedIssuer(
+       credentialIssuer: String,
+       credentialConfigurationId: String,
+       clientMetadata: ClientMetadata,
+       getTokenResponse: TokenResponseCallback,
+       authorizeUser: AuthorizeUserCallback,
+       getProofJwt: ProofJwtCallback,
+       downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
+       authorizationInteractions: List<AuthorizationInteraction>? = null // new
+   ): CredentialResponse 
+  ```
+(2) Credential offer flow method
+   ```kotlin
+    requestCredentialByCredentialOffer(
+        credentialOffer: String,
         clientMetadata: ClientMetadata,
-        getTokenResponse: TokenResponseCallback,
+        getTxCode: TxCodeCallback?,
         authorizeUser: AuthorizeUserCallback,
+        getTokenResponse: TokenResponseCallback,
         getProofJwt: ProofJwtCallback,
-        downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
-    ): CredentialResponse 
+        onCheckIssuerTrust: CheckIssuerTrustCallback? = null,
+        downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS
+    ): CredentialResponse
    ```
    Transforms to
-    ```kotlin
-   downloadCredentials(
-        credentialIssuer: String,
-        credentialConfigurationId: String,
+ ```kotlin
+    requestCredentialByCredentialOffer(
+        credentialOffer: String,
         clientMetadata: ClientMetadata,
-        getTokenResponse: TokenResponseCallback,
+        getTxCode: TxCodeCallback?,
         authorizeUser: AuthorizeUserCallback,
+        getTokenResponse: TokenResponseCallback,
         getProofJwt: ProofJwtCallback,
+        onCheckIssuerTrust: CheckIssuerTrustCallback? = null,
         downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
-        interactions: List<AuthorizationInteraction>? = null // new
-    ): CredentialResponse 
+        authorizationInteractions: List<AuthorizationInteraction>? = null // new
+    ): CredentialResponse
    ```
-   Note: 
-   1. Here the interactionCallbacks holds the interactions supported by the wallet
-   2. PresentationInteraction class will be exposed by the library which can be used by consumer Wallet
-   3. Only the interaction types available in this will be added for the `interaction_types_supported` param in request body during initial interactive authorization request
+  Note: 
+  1. Here the authorizationInteractions holds the interactions supported by the wallet
+  2. PresentationInteraction class will be exposed by the library which can be used by consumer Wallet
+  3. Only the interaction types available in this will be added for the `interaction_types_supported` param in request body during initial interactive authorization request
  
 2. Inji OpenID4VP Library
    - Add support to validate openid4vp request with response_mode as iar-post or iar-post.jwt by skipping response_uri check.
