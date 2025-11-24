@@ -88,25 +88,19 @@ sequenceDiagram
     Note over Wallet,VCIClient: Note: VCIClient exposes the PresentationAuthorization class.<br/>When consumers use this class, all OVP-related processing is handled internally by using inji-openid4vp library.<br/>The wallet only needs to supply the required wallet communications via callbacks for user consent, credential selection, and signing data during VP creation.
     
     Note over VCIClient,Issuer: Discovery & Authorization
-    VCIClient->>Issuer: Discover metadata & initiate interactive authorization request to /iar<br/>(interaction_types_supported=listOf(authorizationInteractions.type..))
-    Issuer->>VCIClient: Interactive auth required (presentation)
+    VCIClient->>Issuer: Discover metadata & initiate interactive authorization request to /iar<br/>POST Content-Type: application/x-www-form-urlencoded /iar<br/>{response_type="code", client_id, code_challenge, code_challenge_method:"S256", redirect_uri, interaction_types_supported=openid4vp_presentation, <br/>authorization_details=[{"type": "openid_credential", "locations": [ "https://credential-issuer.example.com" ], "credential_configuration_id": "UniversityDegreeCredential" }]}
+    Issuer->>VCIClient: Interactive auth required (presentation)<br/>{status:"require_interaction", type:"openid4vp_presentation", auth_session:"..random string",<br/>//Presentation request<br/>openid4vp_request: {standard ovp request by value with response_mode as "iar-post" or "iar-post.jwt"}}
     
     Note over Wallet,VCIClient: Presentation Flow
     VCIClient ->> VCIClient: Validate openid4vp request using openid4vp library
-    VCIClient->>Wallet: consent for presentation interaction
-    Wallet->>User: Show presentation interaction consent
-    Wallet ->> VCIClient: Return presentation interaction consent
-    User->>Wallet: credential selection: Select credentials
-    Wallet->>VCIClient: Return selected credentials
-    VCIClient->>Wallet: Consent for sharing the selected credentials
-    Wallet->>User: Show sharing credentials consent
-    Wallet ->> VCIClient: Return sharing credentials consent
+    VCIClient -->> wallet : Handle Presentation request<br/>input = vp request, output = selected credentials / error for consent rejection or no matching credentials. Internally wallet takes care of any consent as per need
+    wallet ->> VCIClient: Return selected credentials or error
     
     Note over Wallet,VCIClient: VP Creation & Submission  
     VCIClient->>Wallet: Prepares the data for signing using openid4vp library for the signed credentials & ask wallet to sign data
     Wallet->>VCIClient: Return signed data
     VCIClient->>VCIClient: Create VP response using openid4vp library
-    VCIClient->>Issuer: Send openid4vp_response to /iar endpoint
+    VCIClient->>Issuer: Share VP response to the Issuer /iar endpoint<br/>POST /iar<br/>Content-Type - application/x-www-form-urlencoded<br/>{auth_session=...&openid4vp_presentation=...}
     
     alt VP Valid
         Issuer->>VCIClient: Authorization code
@@ -141,10 +135,10 @@ sequenceDiagram
     Note over user, vciClient: User initiates credential download in the wallet (via Credential offer or Trusted Issuer flow)
     wallet ->> vciClient: 0. requests for Credential download <br/> requestCredentialFromTrustedIssuer(<br/>"<credentialIssuer>",<br/><credentialConfigurationId>,<br/>ClientMetadata("client-id", "https://sampleApp/redirect-uri", supportedInteractionTypesOfWallet),<br/>authorizeUser: authorizeUserCallback,<br/>getTokenResponse: tokenResponseCallback, <br/>getProofJwt: proofJwtCallback,<br/> authorizationInteractions: listOf(PresentationInteraction(...),..)<br/>)
     Note over vciClient, issuer: 1. Discovery of Issuer and Authorization Server metadata
-    vciClient->>issuer: 1.1. GET /.well-known/openid-credential-issuer
-    issuer->>vciClient: 1.2. Credential Issuer metadata
-    vciClient->>issuer: 1.3. GET /.well-known/oauth-authorization-server
-    issuer->>vciClient: 1.4. OAuth Authorization server(AS) metadata
+    vciClient ->> issuer: 1.1. GET /.well-known/openid-credential-issuer
+    issuer ->> vciClient: 1.2. Credential Issuer metadata
+    vciClient ->> issuer: 1.3. GET /.well-known/oauth-authorization-server
+    issuer ->> vciClient: 1.4. OAuth Authorization server(AS) metadata
     Note over wallet, issuer: Authorization to download credential
     alt Authorization server supports interactive interaction <br/>(`interactive_authorization_endpoint` available in Authorization Server metadata)
         vciClient ->> issuer: 2. Initial request to interaction endpoint (Happens in PAR mode)<br/>POST Content-Type: application/x-www-form-urlencoded /iar<br/>{response_type="code", client_id, code_challenge, code_challenge_method:"S256", redirect_uri, interaction_types_supported=openid4vp_presentation, <br/>authorization_details=[{"type": "openid_credential", "locations": [ "https://credential-issuer.example.com" ], "credential_configuration_id": "UniversityDegreeCredential" }]}
@@ -154,11 +148,8 @@ sequenceDiagram
             Note over wallet, issuer: The response body has the structure<br/>{status:"require_interaction", type:"openid4vp_presentation", auth_session:"..random string",<br/>//Presentation request<br/>openid4vp_request: {standard ovp request by value with response_mode as "iar-post" or "iar-post.jwt"}}
             vciClient ->> openid4vp: 4. Validating the openid4vp request received from Issuer
             openid4vp ->> vciClient: Return AuthorizationRequest (ovpRequest)
-            vciClient ->> wallet: 5.0 Presentation consent callback to Wallet <br/>(Obtaining user consent for presentation request)
-            wallet ->> vciClient: Return consent result (boolean)
-            alt User consent given for presentation 
-            vciClient ->> wallet : 5.1 Handle presentation request callback to Wallet <br/>(Displaying the presentation request to the user and obtaining user consent, <br/>Filtering the credentials in Wallet which satisfies the presentation request criteria,<br/> Showing the filtered credentials to the user for selection,<br/> Obtaining user consent for sharing the selected credentials)
-            wallet ->> vciClient: Return selected credentials or error for consent rejection
+            vciClient ->> wallet: 5 Handle presentation request callback to Wallet <br/>(Displaying the presentation request to the user and obtaining user consent, <br/>Filtering the credentials in Wallet which satisfies the presentation request criteria,<br/> Showing the filtered credentials to the user for selection,<br/> Obtaining user consent for sharing the selected credentials<br/>Note: The consent is a business context here<br/>TODO: checkout on consent details)
+            wallet ->> vciClient: Return selected credentials or error for consent rejection / no matching credentials
             note over wallet, openid4vp: Create VP response
             alt Successful (consent given + selected credentials)
                 vciClient ->> openid4vp: 6. prepare the data for signing as per the selected credentials
@@ -182,37 +173,29 @@ sequenceDiagram
                 vciClient ->> wallet: Propagate interaction error to wallet
                 wallet ->> user: Show error to user
             end
-            else User consent rejected for presentation
-            vciClient ->> openid4vp: Create VP response (error)
-            openid4vp ->> vciClient: Return VP error response as Map<String, Any>
-            vciClient ->> vciClient: Prepare the response to be sent to /
         else Error interaction response
             issuer ->> vciClient: interaction error response<br/>4xx Bad Request {error:"missing_interaction_type", error_description:"interaction_types_supported in the request is missing the required interaction type 'openid4vp_presentation'"}
             vciClient ->> wallet: Propagate interaction error to wallet
             wallet ->> user: Show error to user
+        else non Interactive Authorization Request flow
+            vciClient ->> issuer: i. Metadata discovery
+            issuer ->> vciClient: ii. Authorization Server and Issuer metadata
+            vciClient ->> issuer: iii. Authorization Request to /authorize endpoint
+            issuer ->> vciClient: iv. Authorization Response with authorization code
+            Note over wallet, issuer: Usual authorization Code Flow continuation
+            vciClient ->> issuer: v. Token exchange occurs
+            vciClient ->> issuer: vi. Credential request and issuance occurs
+            issuer ->> vciClient: vii. Credential issuance response
+            vciClient ->> wallet: viii. Propagate successful credential issuance response to wallet
+            wallet ->> user: Show successful credential download to user 🪪
         end
-    else non Interactive Authorization Request flow
-        vciClient ->> issuer: i. Metadata discovery
-        issuer ->> vciClient: ii. Authorization Server and Issuer metadata
-        vciClient ->> issuer: iii. Authorization Request to /authorize endpoint
-        issuer ->> vciClient: iv. Authorization Response with authorization code
-        Note over wallet, issuer: Usual authorization Code Flow continuation
-        vciClient ->> issuer: v. Token exchange occurs
-        vciClient ->> issuer: vi. Credential request and issuance occurs
-        issuer ->> vciClient: vii. Credential issuance response
-        vciClient ->> wallet: viii. Propagate successful credential issuance response to wallet
-        wallet ->> user: Show successful credential download to user 🪪
     end
-end
 ```
 
 #### Notes
 
 - In Step 0, why is it authorizationInteractions rather than just presentationRequestInteraction?
   - Because in the future, there can be other interaction types (eg - `redirect_to_web` or any custom interaction) supported during issuance as well. Hence, to keep it extensible, we have designed it this way.
-- In Step 4, why is ovp request validation or any other processing propogated to Wallet rather than being handled in inji-openid4vp library?
-  - Because the Wallet is responsible for user interactions, including displaying requests and obtaining user consent. Hence, the Wallet needs to validate the request and process it accordingly.
-  - This also allows the Wallet to have control over how it wants to handle the presentation request and which library to use for VP response creation.
 - After step 5, why is it Create VP response rather than send VP response
   - Because in this flow, the VP response needs to be sent to the Issuer (/iar) which is known to vci client library.
   - The method `sendAuthorizationResponseToVerifier` is designed to send the VP response directly to the verifier endpoint, which is not applicable in this case.
@@ -235,24 +218,32 @@ config:
   layout: elk
 ---
 classDiagram
-    class PresentationInteraction~PresentationRequest-PresentatnResponse~ {
-        + constructor(presentationConsent : (ovpRequest: AuthorizationRequest) -> Boolean, handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, shareConsent : (selectedCredentials : Map<String, Map<FormatType, List<Any>>>) -> Boolean ,signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
-        + handle(ovpRequest: PresentationRequest) PresentationResponse 
+    class PresentationInteraction~PresentationRequest~ {
+        + constructor(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
+        + handle(ovpRequest: PresentationRequest, authSession) PresentationRequestData 
         + type() String // returns openid4vp_presentation
         - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void
-        - handlePresentation(authRequest: Map<String,Any>) : PresentationResponse
+        - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any>
     }
-    class AuthorizationInteraction~I-O~ {
+    class AuthorizationInteraction~I~ {
         <<interface>>
         + type() String
-        + handle(input: I) O
+        + handle(input: I, authSession: String) InteractiveAuthorizationRequestData
     }
     
-    class PresentationResponse {
-        openid4vp_response: Map<String, Any>
+    class InteractiveAuthorizationRequestData {
+        <<interface>>
+        - authSession: String
+        + toMap() : Map<String, Any>
+    }
+    
+    class PresentationRequestData {
+        - openid4vp_response: Map<String, Any> or String
+        + toMap() : Map<String, Any>
     }
 
     AuthorizationInteraction <|.. PresentationInteraction
+    InteractiveAuthorizationRequestData <|.. PresentationRequestData
     
     class InteractiveAuthorizationRequestService {
         + handle(endpoint: String) : String
@@ -275,33 +266,22 @@ classDiagram
     - Note that the exact output for the interaction response expect auth_session is returned as output. The auth_session addition to the request body is handled in InteractiveAuthorizationRequestService class.
 
 **PresentationInteraction class implements AuthorizationInteraction interface.**
--  Requirements of the Presentation interaction from Wallet (got as constructor params)
-  - presentationConsent callback
-    - input: presentation request | output: boolean indicating user consent
-    - To obtain user consent for presentation request
-    - use case - Get consent from user that the Issuer is requesting for presentation of credentials and user agrees to proceed.
-    - When? After wallet receives the request from the Issuer for Presentation interaction and before displaying the matching credentials to the user.
-    - If user rejects consent, an error VP response is created and sent to Issuer.
-  - handlePresentationRequest callback
+- Requirements of the Presentation interaction from Wallet (got as constructor params)
+  - `handlePresentationRequest` callback
     - input: presentation request | output: selected credentials - map of {credential_type: {format_type: list of credentials}}
     - handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>> 
     - This callback is responsible for 
+      - Obtaining any user consent for presentation request
       - filtering the credentials in Wallet which satisfies the presentation request criteria, showing the filtered credentials to the user for selection
-  - shareConsent callback
-    - input: selected credentials | output: boolean indicating user consent
-    - To obtain user consent for sharing selected credentials
-    - use case - Get consent from user that the user agrees to share the selected credentials with the Issuer.
-    - When? After user selects the credentials to be shared and before creating the VP response.
-    - If user rejects consent, an error VP response is created and sent to Issuer.
-  - signVerifiablePresentation callback 
+  - `signVerifiablePresentation` callback 
     - input: unsigned VP token | output: signed VP token - map of {format_type: signed data}
     - signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>
     - This callback is responsible for signing the data for VP creation.
-  - trustedVerifiers
+  - `trustedVerifiers`
     - List of trusted verifiers to validate the openid4vp request.
-  - signatureSuite
+  - `signatureSuite`
     - Signature suite to be used for VP creation. (optional) // used internally for ldp_vc
-  - holderId
+  - `holderId`
     - Holder ID to be used for VP creation. (optional) // used internally for ldp_vc
 - Methods
   - handle(ovpRequest: PresentationRequest) : Map<String, Any> 
@@ -330,10 +310,24 @@ classDiagram
     - In case of any error (no matching credentials / consent rejected), it throws an exception which is caught in handle method to create error VP response.
     - For successful scenario, it creates the VP response using inji-openid4vp library by calling constructUnsignedVPToken and then using signVerifiablePresentation callback to get the signed data, pass the signed data to constructVPResponse method of inji-openid4vp library to get the final VP response.
     - Order of operations
-      - Call presentationConsent callback to get user consent for presentation request
       - Call handlePresentationRequest callback to get selected credentials from Wallet
-      - Call shareConsent callback to get user consent for sharing selected credentials
       - Create VP response (success / error) using inji-openid4vp library methods
+
+**InteractiveAuthorizationRequestData interface**
+
+- This interface defines the contract for different interaction response data types returned by various interaction types.
+- It has one method
+  - toMap() : Map<String, Any>
+    - This method returns the interaction response data as a map to be sent to /iar endpoint.
+- Field: Common field to be submitted for any interaction type
+  - authSession: String
+    - This field holds the auth_session value received from Issuer in the initial interactive authorization response.
+
+**PresentationRequestData implemented by InteractiveAuthorizationRequestData**
+
+- Fields
+  - openid4vp_response: Map<String, Any> or String
+    - This field holds the VP response (success / error) created for the presentation request to be sent to /iar endpoint.
 
 **Responsibilities - Presentation Interaction**
 
@@ -447,10 +441,29 @@ Note:
 - [Spike card](https://mosip.atlassian.net/browse/INJIMOB-3601)
 
 ## Questions
-1. In the current PresentationInteraction design wallet takes the responsibility of 
-   1. Displaying the presentation request to the user and obtaining user consent 
-   2. Filtering the credentials in Wallet which satisfies the presentation request criteria
-   3. Showing the filtered credentials to the user for selection, Obtaining user consent for sharing the selected credentials
-Should these consent as well be exposed as callbacks to wallet from inji-vci-client library rather than handling it completely in wallet?
-   - presentationConsentCallback: (ovpRequest: AuthorizationRequest) -> boolean // to obtain user consent for presentation request
-   - credentialsShareConsentCallback: (selectedCredentials: Map<String, Map<FormatType, List<Any>>>) -> boolean // to obtain user consent for sharing selected credentials
+1. should OVP library know the context of “iar_post.jwt / iar_post” 
+
+**Context:**
+
+   openid4vp library takes care of validating auth request, construction auth response (success/ error) based on response_mode
+   We want to make use of the exisiting functionalities in OVP library for PDI flow’s VP response submission
+   
+**Doubt**
+
+   We have a question on this - should OVP library know the context of “iar_post.jwt / iar_post”
+
+**Proposal**
+
+   - OVP library know the context of iar_post or iar_post.jwt 
+     - Validation: consider  iar_post or iar_post.jwt  as supported response modes and proceed 
+     - VP response creation: Inside the library, just add some conditions for mapping iar_post to response creation logic of direct_post, etc
+   - OVP library does not know any response modes outside of OVP context (direct_post or dc_api)
+     - consumer of the library gives the mapping of flow specific response_mode to the OVP context response mode 
+     - For example,
+     ```responseModeAlias = mapOf("iar_post" to "direct_post" , "iar_post.jwt" to "direct_post.jwt")```
+     - Validation: if responseModeAlias available take it for response mode validation else proceed with OVP context 
+     - VP response creation: if responseModeAlias available take it for response creation else proceed with OVP context 
+     - This affects (not breaking changes) the methods - authenticateVerifier & sendVPResponseToVerifier (Optional - considering whether we store the responseModeAlias in context or not)
+
+2. Business context of the user consent during presentation interaction
+   1. How is user consent managed in the wallet during presentation interaction?
