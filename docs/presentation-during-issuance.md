@@ -74,7 +74,56 @@ sequenceDiagram
 
 ## Sequence of interactions between entities via inji-\* Libraries
 
-### Actors involved
+### High-level interaction flow
+
+```mermaid
+sequenceDiagram
+    participant User as 👤 User
+    participant Wallet as 👜 Wallet
+    participant VCIClient as 📚 VCI Client
+    participant Issuer as 🛡️ Issuer + Authorization Server
+
+    User->>Wallet: Request credential download
+    Wallet->>VCIClient: downloadCredential(...issuer, ...config, authorizationInteractions: listOf(presentationInteraction))
+    Note over Wallet,VCIClient: Note: VCIClient exposes the PresentationAuthorization class.<br/>When consumers use this class, all OVP-related processing is handled internally by using inji-openid4vp library.<br/>The wallet only needs to supply the required wallet communications via callbacks for user consent, credential selection, and signing data during VP creation.
+    
+    Note over VCIClient,Issuer: Discovery & Authorization
+    VCIClient->>Issuer: Discover metadata & initiate interactive authorization request to /iar<br/>(interaction_types_supported=listOf(authorizationInteractions.type..))
+    Issuer->>VCIClient: Interactive auth required (presentation)
+    
+    Note over Wallet,VCIClient: Presentation Flow
+    VCIClient ->> VCIClient: Validate openid4vp request using openid4vp library
+    VCIClient->>Wallet: consent for presentation interaction
+    Wallet->>User: Show presentation interaction consent
+    Wallet ->> VCIClient: Return presentation interaction consent
+    User->>Wallet: credential selection: Select credentials
+    Wallet->>VCIClient: Return selected credentials
+    VCIClient->>Wallet: Consent for sharing the selected credentials
+    Wallet->>User: Show sharing credentials consent
+    Wallet ->> VCIClient: Return sharing credentials consent
+    
+    Note over Wallet,VCIClient: VP Creation & Submission  
+    VCIClient->>Wallet: Prepares the data for signing using openid4vp library for the signed credentials & ask wallet to sign data
+    Wallet->>VCIClient: Return signed data
+    VCIClient->>VCIClient: Create VP response using openid4vp library
+    VCIClient->>Issuer: Send openid4vp_response to /iar endpoint
+    
+    alt VP Valid
+        Issuer->>VCIClient: Authorization code
+        VCIClient->>Issuer: Exchange token & request credential
+        Issuer->>VCIClient: Issue credential
+        VCIClient->>Wallet: Credential download success
+        Wallet->>User: Show success
+    else VP Invalid  
+        Issuer->>VCIClient: Error response
+        VCIClient->>Wallet: Propagate error
+        Wallet->>User: Show error
+    end
+```
+
+### Detailed interaction flow with inji-\* Libraries
+
+#### Actors involved
 
 1. **User**: The individual requesting the credential.
 2. **Wallet - Inji Wallet**: The digital wallet application used by the user to manage credentials.
@@ -154,12 +203,12 @@ sequenceDiagram
         vciClient ->> wallet: viii. Propagate successful credential issuance response to wallet
         wallet ->> user: Show successful credential download to user 🪪
     end
-
+end
 ```
 
 #### Notes
 
-- In Step 0, why is it interactionCallbacks rather than just presentationRequestCallback?
+- In Step 0, why is it authorizationInteractions rather than just presentationRequestInteraction?
   - Because in the future, there can be other interaction types (eg - `redirect_to_web` or any custom interaction) supported during issuance as well. Hence, to keep it extensible, we have designed it this way.
 - In Step 4, why is ovp request validation or any other processing propogated to Wallet rather than being handled in inji-openid4vp library?
   - Because the Wallet is responsible for user interactions, including displaying requests and obtaining user consent. Hence, the Wallet needs to validate the request and process it accordingly.
@@ -318,7 +367,7 @@ Note:
 
 1. Inji VCI Client Library
    - Add support for client metadata to accept supported interaction types of Wallet. (interactionTypesSupported field)
-   - Update requestCredentialFromTrustedIssuer and requestCredentialFromOffer methods to accept interactionCallbacks map to handle different interaction types during issuance.
+   - Update requestCredentialFromTrustedIssuer and requestCredentialFromOffer methods to accept authorizationInteractions map to handle different interaction types during issuance.
    - Implement logic to handle openid4vp_presentation interaction type, including invoking the appropriate callback in the Wallet.
    - Add logic to share VP response to Issuer's /iar endpoint after receiving it from Wallet.
    - Change in public method 
