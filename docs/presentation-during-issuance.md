@@ -469,22 +469,16 @@ Note:
 openid4vp library takes care of validating auth request, construction auth response (success/ error) based on response_mode
 We want to make use of the exisiting functionalities in OVP library for PDI flow’s VP response submission
 
-**Doubt**
+**Answer:** Yes, OVP library can know about `iar_post.jwt / iar_post` as these are response modes and creating VP response is related to response mode.
 
-We have a question on this - should OVP library know the context of “iar_post.jwt / iar_post”
+2. Should consent be handled in VCI client or Wallet?
 
-**Proposal**
+**Context:**
+Consent is a business context and wallet is the one which interacts with user. So ideally consent should be handled in Wallet.
 
-- OVP library know the context of iar_post or iar_post.jwt
-  - Validation: consider iar_post or iar_post.jwt as supported response modes and proceed
-  - VP response creation: Inside the library, just add some conditions for mapping iar_post to response creation logic of direct_post, etc
-- OVP library does not know any response modes outside of OVP context (direct_post or dc_api)
-  - consumer of the library gives the mapping of flow specific response_mode to the OVP context response mode
-  - For example,
-    `responseModeAlias = mapOf("iar_post" to "direct_post" , "iar_post.jwt" to "direct_post.jwt")`
-  - Validation: if responseModeAlias available take it for response mode validation else proceed with OVP context
-  - VP response creation: if responseModeAlias available take it for response creation else proceed with OVP context
-  - This affects (not breaking changes) the methods - authenticateVerifier & sendVPResponseToVerifier (Optional - considering whether we store the responseModeAlias in context or not)
+**Answer:** Consent should be handled in Wallet as it is a business context and Wallet interacts with the user.
 
-2. Business context of the user consent during presentation interaction
-   1. How is user consent managed in the wallet during presentation interaction?
+## Improvements required:
+
+1. authorizeUser and authorizationInteractions are related to authorization step. So ideally both should be part of a common interface or class.
+   1. Currently, authorizeUser is a separate callback. Can we think of grouping the authorization related callbacks together?
