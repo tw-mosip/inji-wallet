@@ -154,7 +154,7 @@ sequenceDiagram
             Note over wallet, issuer: The response body has the structure<br/>{status:"require_interaction", type:"openid4vp_presentation", auth_session:"..random string",<br/>//Presentation request<br/>openid4vp_request: {standard ovp request by value with response_mode as "iar-post" or "iar-post.jwt"}}
             vciClient ->> openid4vp: 4. Validating the openid4vp request received from Issuer
             openid4vp ->> vciClient: Return AuthorizationRequest (ovpRequest)
-            vciClient ->> wallet: 5 Handle presentation request callback to Wallet <br/>(Displaying the presentation request to the user and obtaining user consent, <br/>Filtering the credentials in Wallet which satisfies the presentation request criteria,<br/> Showing the filtered credentials to the user for selection,<br/> Obtaining user consent for sharing the selected credentials<br/>Note: The consent is a business context here<br/>TODO: checkout on consent details)
+            vciClient ->> wallet: 5 Handle presentation request callback to Wallet <br/>(Displaying the presentation request to the user and obtaining user consent, <br/>Filtering the credentials in Wallet which satisfies the presentation request criteria,<br/> Showing the filtered credentials to the user for selection,<br/> Obtaining user consent for sharing the selected credentials<br/>Note: The consent is a business context here<br/>)
             wallet ->> vciClient: Return selected credentials or error for consent rejection / no matching credentials
             note over wallet, openid4vp: Create VP response
             alt Successful (consent given + selected credentials)
@@ -217,65 +217,107 @@ sequenceDiagram
 **Class diagram for Presentation Interaction**
 
 ```mermaid
+classDiagram
+    class AuthorizationHandler {
+        <<interface>>
+        +AuthorizationResponse authorizeUser(AuthorizationRequestData requestData)
+        +String type()
+    }
+
+    class AuthorizationRequestData {
+        <<abstract>>
+    }
+
+    class PresentationAuthorizationRequestData {
+        ovpRequest
+        authSession
+        iar
+    }
+
+    class RedirectToWebAuthorizationRequestData {
+        requestUri
+        expiresIn
+        authSession
+        authorizeUrl
+        clientConfig // all details like client_id, code_challenge, redirect_uri etc.
+    }
+
+    class StandardAuthorizationRequestData {
+        authorizeUrl
+        clientConfig // all details like client_id, code_challenge, redirect_uri etc.
+    }
+
+
+    AuthorizationHandler <|.. PresentationAuthorizationHandler
+    AuthorizationHandler <|.. WebAuthorizationHandler
+
+  class PresentationAuthorizationHandler {
+    + constructor(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
+    + authorizeUser(requestData: PresentationAuthorizationRequestData) AuthorizationResponse
+    + type() String // returns openid4vp_presentation
+    - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void
+    - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any>
+    - sendOVPAuthorizationResponseToIssuer(iar: String, authSession: String, vpResponse: VPResponse) : AuthorizationResponse
+  }
+  
+  class WebAuthorizationHandler {
+    + constructor(openWebPage: (url: String)) -> AuthorizationResponse)
+    + authorizeUser(requestData: AuthorizationRequestData) AuthorizationResponse
+    + type() String // returns redirect_to_web
+  }
+  
+  class AuthorizationResponse {
+    status // success
+    authorizationCode // success
+    error // error
+    errorDescription // error
+    authSession // Authorization process not complete - just auth session returned for scenarios from redirect_to_web scenario where wallet makes follow up request
+  }
+
+    AuthorizationRequestData <|-- PresentationAuthorizationRequestData
+    AuthorizationRequestData <|-- RedirectToWebAuthorizationRequestData
+    AuthorizationRequestData <|-- StandardAuthorizationRequestData
+```
+
+```mermaid
 ---
 config:
   layout: elk
 ---
 classDiagram
-    class PresentationInteraction~PresentationRequest~ {
-        + constructor(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
-        + handle(ovpRequest: PresentationRequest, authSession) PresentationRequestData
-        + type() String // returns openid4vp_presentation
-        - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void
-        - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any>
-    }
-    class RedirectToWebInteraction~String~ {
-        + handle(input: RedirectToWebRequest, authSession: String) RedirectToWebRequestData
-        + type() String
-    }
-    class AuthorizationInteraction~I~ {
-        <<interface>>
-        + type() String
-        + handle(input: I, authSession: String) InteractiveAuthorizationRequestData
-    }
-
-    class InteractiveAuthorizationRequestData {
-        <<interface>>
-        - authSession: String
-        + toMap() : Map<String, Any>
-    }
-
-    class PresentationRequestData {
-        - openid4vp_response: Map<String, Any> or String
-        + toMap() : Map<String, Any>
-    }
-
-    AuthorizationInteraction <|.. PresentationInteraction
-    InteractiveAuthorizationRequestData <|.. PresentationRequestData
 
     class InteractiveAuthorizationRequestService {
         + handle(endpoint: String) : String
         - initialAuthorizationRequest(endpoint: String) : InteractionResponse
-        - handleInteractionResponse(interactionResponse: InteractionResponse) : void
-        - submitInteractionResponse(interactionResponseBody: Map<String, Any>) : String // submits the entire request body returns, authorization code / error
+        - handleInteractionResponse(interactionResponse: InteractionResponse) : AuthorizationResponse
         - exchangeToken(authorizationCode: String) : TokenResponse
     }
 ```
 
-**AuthorizationInteraction interface**
-
-- This interface defines the contract for different interaction types supported during interactive authorization request.
-- It has two methods
-  - type() : String
+interface AuthorizationHandler
+- Responsibility: 
+  - This interface defines the contract for different authorization interaction handlers.
+  - It takes care of making the Authorization Request based on the interaction type and returning the Authorization Response.
+- Methods:
+  - authorizeUser(requestData: AuthorizationRequestData): AuthorizationResponse
+    - responsibility: Handle authorization with the provided data by making authorization request and returning the response.
+    - input: Data to initiate Authorization Request - AuthorizationRequestData
+      - Presentation interaction -> i) ovpRequest (auth request for the credential presentation), ii) authSession (value to be attached in the API call), iii) iar (endpoint to make the API call)
+      - Redirect to web interaction -> i) requestUri ii) expiresIn iii) authSession (value to be attached in the API call), iv) authorizeUrl (endpoint to make the API call) v) configurations to attach in API requests
+      - Usual auth flow -> i) authorizeUrl (endpoint to make the API call) ii) configurations to attach in API request
+      - Note: Redirect to web interaction and usual auth flow can be merged as one as both are similar in nature and for consumer wallet, both will be redirecting to web flow.
+    - output: User authorization result - AuthorizationResponse
+      - Successful response containing authorization_code, status etc.
+      - Error response containing error_description and error_code or only auth_session to be attached in the subsequent API call
+  - type(): String
     - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
-  - handle(...) : Map<String, Any>
-    - This method is responsible for handling the entire interaction flow.
-    - It takes the interaction request as input and returns the interaction response to be sent to /iar endpoint.
-    - The input and output types can vary based on the interaction type.
-    - For example, in presentation interaction, input is ovpRequest and output is map of {openid4vp_presentation: authResponse}.
-    - Note that the exact output for the interaction response expect auth_session is returned as output. The auth_session addition to the request body is handled in InteractiveAuthorizationRequestService class.
+    - For presentation interaction, it returns "openid4vp_presentation".
+    - For redirect to web interaction, it returns "redirect_to_web".
 
-**PresentationInteraction class implements AuthorizationInteraction interface.**
+
+**Presentation Interaction**
+
+- Class PresentationAuthorizationHandler implements AuthorizationHandler
 
 - Requirements of the Presentation interaction from Wallet (got as constructor params)
   - `handlePresentationRequest` callback
@@ -296,22 +338,18 @@ classDiagram
     - Holder ID to be used for VP creation. (optional) // used internally for ldp_vc
 - Methods
 
-  - handle(ovpRequest: PresentationRequest) : Map<String, Any>
-
-    - Here VPRequest is a simple type alias for Map<String, Any>
+  - authorizeUser(requestData: PresentationRequestData) : AuthorizationResponse
     - This method is responsible for handling the entire presentation interaction flow.
-    - It takes the ovpRequest as input and returns the VP response to be sent to /iar endpoint. Output is map of {openid4vp_presentation: authResponse} // authResponse can be success / error response
+    - It takes the ovpRequest, auth_session, interactive_authorization_endpoint (iar) as input and submits the VP response to the Issuer's /iar endpoint. Then returns back the AuthorizationResponse to the caller.
     - Responsibilities include
       - validate auth request
-      - handle presentation (display request, obtain consent, filter credentials, select credentials, create authorization response)
-    - Order of operations
-      - validateAuthorizationRequest (private method)
-      - handlePresentation (private method)
-    - Has a try-catch block to catch any exceptions thrown during the process and create error VP response using inji-openid4vp library.
+      - handle presentation (create authorization response by invoking handlePresentationRequest callback and creating VP response)
+      - submit VP response to Issuer's /iar endpoint
+      - return AuthorizationResponse to caller
 
   - type() : String
 
-    - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
+    - This method returns the interaction type name, which is used in interaction_types_supported param as one of the element  during initial /iar request.
     - For presentation interaction, it returns "openid4vp_presentation".
 
   - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void [private]
@@ -328,26 +366,76 @@ classDiagram
       - Call handlePresentationRequest callback to get selected credentials from Wallet
       - Create VP response (success / error) using inji-openid4vp library methods
 
-**InteractiveAuthorizationRequestData interface**
+  - sendOVPAuthorizationResponseToIssuer(iar: String, authSession: String, vpResponse: VPResponse) : AuthorizationResponse [private]
+    - This method is responsible for sharing the VP response to Issuer's /iar endpoint.
+    - It creates the final request body by attaching auth_session to the VP response received from handlePresentation method and makes the API call to Issuer's /iar endpoint.
+    - It processes the response received from Issuer and creates the AuthorizationResponse to be returned to caller.
 
-- This interface defines the contract for different interaction response data types returned by various interaction types.
-- It has one method
-  - toMap() : Map<String, Any>
-    - This method returns the interaction response data as a map to be sent to /iar endpoint.
-- Field: Common field to be submitted for any interaction type
-  - authSession: String
-    - This field holds the auth_session value received from Issuer in the initial interactive authorization response.
+**Web Interaction**
+- Class WebAuthorizationHandler implements AuthorizationHandler
+- Responsibilities:
+  - This class is responsible for handling the redirect to web interaction type.
+  - It takes care of invoking wallet's openWebPage callback to open the authorizeUrl in web browser for user authorization and returning the AuthorizationResponse to caller.
+- methods
+  - authorizeUser(requestData: AuthorizationRequestData) : AuthorizationResponse
+    - This method is responsible for handling the redirect to web interaction flow.
+    - Construct authorize URL with required query params using the configurations received in requestData for both redirect_to_web interaction and usual auth flow.
+    - It returns back a placeholder AuthorizationResponse indicating that the authorization process is not complete and auth_session needs to be attached in subsequent API call.
+  - type() : String
+    - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
+    - For redirect to web interaction, it returns "redirect_to_web".
 
-**PresentationRequestData implemented by InteractiveAuthorizationRequestData**
+**Notes:**
+The key difference between standard authorization flow and redirect to web is that
+
+- In standard authorization flow, the VCI client constructs the authorization URL with configurations and asks Wallet to open the web view with that URL.
+- In redirect to web flow, the VCI client would have pushed the authorization request to the authorization server and received an request_uri for it. The authorization URL is constructed using that request_uri and some major configurations. The VCI client then asks Wallet to open the web view with that URL.
+
+- The part where VCI client asks Wallet to open the web view is common in both flows.
+- This means that the consumer will behave the same way for both flows.
+
+For the consumer of VCI client, the spec terms - interaction `redirect_to_web` and `standard authorization` is same flow (web based user authorization). So they can use the same WebAuthorizationHandler class for both flows.
+1. For the VCI client library, both flows are similar (not same) as the request construction differs but using an authorization endpoint to open webview is same.
+2. But for the consumer wallet, both flows will be handled in the same way (open web view for user authorization).
+3. So we have merged both flows into one class - WebAuthorizationHandler.
+
+**AuthorizationRequestData interface**
+
+- This interface defines the contract for different interaction request data types returned by various interaction types.
+
+**PresentationRequestData implemented by AuthorizationData**
 
 - Fields
-  - openid4vp_response: Map<String, Any> or String
-    - This field holds the VP response (success / error) created for the presentation request to be sent to /iar endpoint.
+  - ovpRequest: AuthorizationRequest
+    - The openid4vp request received from Issuer to be presented by Wallet.
+  - authSession: String
+    - The auth_session value received from Issuer to be attached in the /iar request while sharing VP response.
+  - interactiveAuthorizationEndpoint: String
+    - The endpoint URL of Issuer's /iar to which the VP response needs to be shared.
+
+**RedirectToWebAuthorizationRequestData implemented by AuthorizationRequestData**
+
+- Fields
+  - requestUri: String
+    - The request_uri received from Issuer to be used in authorize URL.
+  - expiresIn: Long
+    - The expiry time of request_uri received from Issuer.
+  - authSession: String
+    - The auth_session value received from Issuer to be attached in the /iar request while sharing VP response.
+  - Other configurations like client_id, code_challenge, redirect_uri etc.
+
+**StandardAuthorizationRequestData implemented by AuthorizationRequestData**
+
+- Fields
+  - authorizeUrl: String
+    - The authorize URL endpoint received from Issuer to be used in authorize URL.
+  - Other configurations like client_id, code_challenge, redirect_uri etc.
+
 
 **Responsibilities - Presentation Interaction**
 
 | Step                                                         | Task                                                                                  | Called by       | Responsibility handled by | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------- | --------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|--------------------------------------------------------------|---------------------------------------------------------------------------------------|-----------------|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1                                                            | Validating the openid4vp request received from Issuer                                 | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library to validate the request.<br/> - Method used: authenticateVerifier (openid4vp)<br/>- sample: `authenticateVerifer(urlEncodedAuthorizationRequest = null,authorizationRequest = ovpRequest,trustedVerifiers = trustedVerifiers,shouldValidateClient = true): AuthorizationRequest`                                                                                                                                                                                        |
 | 2                                                            | Displaying the presentation request to the user and obtaining user consent            | inji-vci-client | wallet (callback)         | - inji-vci-client does a callback to wallet passing the VP request and getting the matching credentials selected by user (selectedCredentials) in response.<br/>- The user consent are all handled by the callback. Basically step no 2,3,4,5 are handled and the matching credentials are returned or error for consent rejection is thrown<br/>- Method used: handlePresentationRequest (wallet)<br/>- sample: `handlePresentationRequest(ovpRequest: AuthorizationRequest) : Map<String, Map<FormatType, List<Any>>>` |
 | 3                                                            | Filtering the credentials in Wallet which satisfies the presentation request criteria | -               | wallet (callback)         | <same as before>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -360,15 +448,9 @@ classDiagram
 | 6 (failure - no matching credentials / no consent)           | Creating VP response based on error                                                   |                 |                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 6.1                                                          | Create the error VP response                                                          | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library to get the error VP response<br/>- Method: constructErrorInfo(exception: Exception): Map<String, Any><br/>sample return : {error: "access_denied", error_description: "user rejected consent"}                                                                                                                                                                                                                                                                          |
 | 7                                                            | Prepare the response to be sent to /iar                                               | N/A             | inji-vci-client           | - Prepare the data for response body of /iar<br/>- returns map of {openid4vp_response: <vp error / success response>}                                                                                                                                                                                                                                                                                                                                                                                                    |
-| 8                                                            | Sharing the VP response to Issuer                                                     | N/A             | inji-vci-client           | - Create the final response body for /iar request by attaching "auth_session" to the response body input provided by the specific interaction<br/> (Note: The above steps are handled in PresentationInteraction whereas this step will be handled by InteractiveAuthorizationRequestService)                                                                                                                                                                                                                            |
+| 8                                                            | Sharing the VP response to Issuer                                                     | N/A             | inji-vci-client           | - Create the final response body for /iar request by attaching "auth_session" to the response body input provided by the specific interaction<br/>                                                                                                                                                                                                                                                                                                                                                                       |
 
 Note:
-
-- Steps 1 to 7 are handled in the `PresentationInteraction` class of the `inji-vci-client` library, while step 8 is managed in the `InteractiveAuthorizationRequestService` class.
-- This separation exists because step 8 is common across all interaction types, whereas steps 1 to 7 are specific to the presentation interaction type.
-- Specific interaction classes provide the final response body for the `/iar` endpoint based on the interaction type only. For example:
-  - In the presentation interaction type, the response body includes `auth_session` and `openid4vp_presentation`.
-  - `openid4vp_presentation` is generated by the `PresentationInteraction` class, while `auth_session` is added by the `InteractiveAuthorizationRequestService` class, as it is common to all interaction types.
 - In step 1, why is authenticateVerifier called with urlEncodedAuthorizationRequest = null and authorizationRequest = ovpRequest?
   - Because in this flow, the openid4vp request is received by value (as JSON and not as a URL). Hence, we pass it as authorizationRequest.
 
@@ -376,26 +458,13 @@ Note:
 
 1. Inji VCI Client Library
    - Add support for client metadata to accept supported interaction types of Wallet. (interactionTypesSupported field)
-   - Update requestCredentialFromTrustedIssuer and requestCredentialFromOffer methods to accept authorizationInteractions map to handle different interaction types during issuance.
+   - Create new methods to accept authorizations to handle different authorization (interactions) types during issuance.
    - Implement logic to handle openid4vp_presentation interaction type, including invoking the appropriate callback in the Wallet.
    - Add logic to share VP response to Issuer's /iar endpoint after receiving it from Wallet.
    - Change in public method
 
 (1) trusted offer flow method
 
-```kotlin
-requestCredentialFromTrustedIssuer(
-     credentialIssuer: String,
-     credentialConfigurationId: String,
-     clientMetadata: ClientMetadata,
-     getTokenResponse: TokenResponseCallback,
-     authorizeUser: AuthorizeUserCallback,
-     getProofJwt: ProofJwtCallback,
-     downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
- ): CredentialResponse
-```
-
-Transforms to
 
 ```kotlin
 requestCredentialFromTrustedIssuer(
@@ -403,12 +472,14 @@ requestCredentialFromTrustedIssuer(
     credentialConfigurationId: String,
     clientMetadata: ClientMetadata,
     getTokenResponse: TokenResponseCallback,
-    authorizeUser: AuthorizeUserCallback,
+    authorizations: List<AuthorizationHandler>, // new
     getProofJwt: ProofJwtCallback,
     downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
-    authorizationInteractions: List<AuthorizationInteraction>? = null // new
 ): CredentialResponse
 ```
+
+//TODO: check on the naming of authorizations param
+//TODO: name check - requestCredentialFromTrustedIssuer and requestCredentialByCredentialOffer
 
 (2) Credential offer flow method
 
@@ -417,7 +488,7 @@ requestCredentialFromTrustedIssuer(
      credentialOffer: String,
      clientMetadata: ClientMetadata,
      getTxCode: TxCodeCallback?,
-     authorizeUser: AuthorizeUserCallback,
+    authorizations: List<AuthorizationHandler> // new
      getTokenResponse: TokenResponseCallback,
      getProofJwt: ProofJwtCallback,
      onCheckIssuerTrust: CheckIssuerTrustCallback? = null,
@@ -425,37 +496,27 @@ requestCredentialFromTrustedIssuer(
  ): CredentialResponse
 ```
 
-Transforms to
 
-```kotlin
-   requestCredentialByCredentialOffer(
-       credentialOffer: String,
-       clientMetadata: ClientMetadata,
-       getTxCode: TxCodeCallback?,
-       getTokenResponse: TokenResponseCallback,
-       getProofJwt: ProofJwtCallback,
-       onCheckIssuerTrust: CheckIssuerTrustCallback? = null,
-       downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
-       authorizations: List<AuthorizationInteraction>? = null // new
-   ): CredentialResponse
-```
+- Here authorizations hold the logic for presentation / web auth flow (redirect_to_web / standard auth)
+  
 
-- Here authorizations hold the logic for presentation / redirect to web
-  Note:
+Note:
 
-1. Here the authorizationInteractions holds the interactions supported by the wallet
-2. PresentationInteraction class will be exposed by the library which can be used by consumer Wallet
-3. Only the interaction types available in this will be added for the `interaction_types_supported` param in request body during initial interactive authorization request
+      1. Here the authorizations holds the authorization interactions supported by the wallet
+      2. PresentationAuthorizationHandler class will be exposed by the library which can be used by consumer Wallet
+      3. WebAuthorizationHandler class will be exposed by the library which can be used by consumer Wallet
+      4. Only the interaction types available in this will be added for the `interaction_types_supported` param in request body during initial interactive authorization request
 
-4. Inji OpenID4VP Library
+2. Inji OpenID4VP Library
    - Add support to validate openid4vp request with response_mode as iar-post or iar-post.jwt by skipping response_uri check.
    - Add support to create VP response for openid4vp request with response_mode as iar-post or iar-post.jwt.
    - Add method `constructVPResponse` to create VP response and return it as Map<String, Any> to Wallet.
-5. Inji Wallet
+3. Inji Wallet
    - Implement the openid4vp interaction callback to handle the presentation request, display it to the user, and obtain user consent.
    - Use PresentationInteraction exposed from Inji VCI Client library
    - Handle error scenarios and propagate errors to the user appropriately.
    - Integrate with the updated inji-vci-client library to support the new interaction flow during credential issuance.
+   - Align with the new changes of VCI client library public methods.
 
 ## References
 
@@ -482,121 +543,6 @@ Consent is a business context and wallet is the one which interacts with user. S
 
 **Answer:** Consent should be handled in Wallet as it is a business context and Wallet interacts with the user.
 
-## Improvements required:
-
-1. authorizeUser and authorizationInteractions are related to authorization step. So ideally both should be part of a common interface or class.
-   1. Currently, authorizeUser is a separate callback. Can we think of grouping the authorization related callbacks together?
-
-## Proposal
-
-authorizeUser and authorizationInteractions are related to authorization step, can it be merged?
-
-**Notes:**
-The key difference between standard authorization flow and redirect to web is that
-
-- In standard authorization flow, the VCI client constructs the authorization URL with client configurations and asks Wallet to open the web view with that URL.
-- In redirect to web flow, the VCI client would have pushed the authorization request to the authorization server and received an request_uri for it. The authorization URL is constructed using that request_uri and some major client configurations. The VCI client then asks Wallet to open the web view with that URL.
-
-- The part where VCI client asks Wallet to open the web view is common in both flows.
-- This means that the consumer will behave the same way for both flows.
-
-**Proposal:**
-
-- Create an interface AuthorizationHandler
-- Methods:
-
-  - authorizeUser(requestData: AuthorizationRequestData): AuthorizationResponse
-    - responsibility: Handle authorization with the provided data by making authorization request and returning the response.
-    - input: Data to initiate Authorization Request - AuthorizationRequestData
-      - Presentation interaction -> i) ovpRequest (auth request for the credential presentation), ii) authSession (value to be attached in the API call), iii) iar (endpoint to make the API call)
-      - Redirect to web interaction -> i) requestUri ii) expiresIn iii) authSession (value to be attached in the API call), iv) authorizeUrl (endpoint to make the API call) v) client configurations to attach in API requests
-      - Usual auth flow -> i) authorizeUrl (endpoint to make the API call) ii) client configurations to attach in API request
-      - Note: Redirect to web interaction and usual auth flow can be merged as one as both are similar in nature and for consumer wallet, both will be redirecting to web flow.
-    - output: User authorization result - AuthorizationResponse
-      - Successful response containing authorization_code, status etc.
-      - Error response containing error_description and error_code or only auth_session to be attached in the subsequent API call
-  - type(): String
-    - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
-    - For presentation interaction, it returns "openid4vp_presentation".
-    - For redirect to web interaction, it returns "redirect_to_web".
-
-- Presentation Interaction
-
-  - Class PresentationAuthorizationHandler implements AuthorizationHandler
-    - Implements authorizeUser method to handle presentation interaction flow.
-    - Implements type method to return "openid4vp_presentation".
-    - Constructor params (inputs from wallet consumer):
-      - handlePresentationRequest callback
-      - signVerifiablePresentation callback
-      - trustedVerifiers
-      - holderId
-      - signatureSuite
-      - shouldValidateClient
-
-- Redirect to web Interaction
-  - Class RedirectToWebAuthorizationHandler implements AuthorizationHandler
-    - Implements authorizeUser method to handle redirect to web interaction flow.
-    - Implements type method to return "redirect_to_web".
-    - Constructor params (inputs from wallet consumer):
-      - openWebView callback
-- Standard Authorization Flow
-  - Class StandardAuthorizationHandler implements AuthorizationHandler
-    - Implements authorizeUser method to handle standard authorization flow.
-    - Implements type method to return "standard_authorization".
-    - Constructor params (inputs from wallet consumer):
-      - openWebView callback
-
-If we see here the StandardAuthorizationHandler and RedirectToWebAuthorizationHandler are similar in nature.
-So we can merge both into one class called WebAuthorizationHandler which can handle both standard and redirect to web flows based on the input provided by wallet consumer.
-
-- WebAuthorizationHandler implements AuthorizationHandler
-  - Implements authorizeUser method to handle web authorization flow. The input differs based on the type of web flow (standard / redirect to web). The VCI client uses the input accordingly to handle the flow.
-  - Implements type method to return "redirect_to_Web".
-  - Constructor params (inputs from wallet consumer):
-    - openWebView callback: takes the input of authorization URL to open web view and returns back all the response received after user authorization.
-
-```mermaid
-classDiagram
-    class AuthorizationHandler {
-        <<interface>>
-        +AuthorizationResponse authorizeUser(AuthorizationRequestData requestData)
-        +String type()
-    }
-
-    class AuthorizationRequestData {
-        <<abstract>>
-    }
-
-    class PresentationAuthorizationRequestData {
-        ovpRequest
-        authSession
-        iar
-    }
-
-    class RedirectToWebAuthorizationRequestData {
-        requestUri
-        expiresIn
-        authSession
-        authorizeUrl
-        clientConfig
-    }
-
-    class StandardAuthorizationRequestData {
-        authorizeUrl
-        clientConfig
-    }
-
-
-    AuthorizationHandler <|.. PresentationAuthorizationHandler
-    AuthorizationHandler <|.. WebAuthorizationHandler
-
-    AuthorizationRequestData <|-- PresentationAuthorizationRequestData
-    AuthorizationRequestData <|-- RedirectToWebAuthorizationRequestData
-    AuthorizationRequestData <|-- StandardAuthorizationRequestData
-```
-
-**Questions on the proposal:**
-
-1. Will there be any case where a consumer Wallet wants to support only standard auth flow and not redirect to web flow or vice versa?
+3. Will there be any case where a consumer Wallet wants to support only standard auth flow and not redirect to web flow or vice versa?
    - If yes, then we can accept one more param in the constructor to indicate if redirect to web flow is to be supported or not. (isRedirectToWebInteractionSupported: Boolean = true)
    - If no, then we can merge both into one class as mentioned above.
