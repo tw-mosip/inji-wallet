@@ -229,6 +229,10 @@ classDiagram
         - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void
         - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any>
     }
+    class RedirectToWebInteraction~String~ {
+        + handle(input: RedirectToWebRequest, authSession: String) RedirectToWebRequestData
+        + type() String
+    }
     class AuthorizationInteraction~I~ {
         <<interface>>
         + type() String
@@ -428,16 +432,16 @@ Transforms to
        credentialOffer: String,
        clientMetadata: ClientMetadata,
        getTxCode: TxCodeCallback?,
-       authorizeUser: AuthorizeUserCallback,
        getTokenResponse: TokenResponseCallback,
        getProofJwt: ProofJwtCallback,
        onCheckIssuerTrust: CheckIssuerTrustCallback? = null,
        downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
-       authorizationInteractions: List<AuthorizationInteraction>? = null // new
+       authorizations: List<AuthorizationInteraction>? = null // new
    ): CredentialResponse
 ```
 
-Note:
+- Here authorizations hold the logic for presentation / redirect to web
+  Note:
 
 1. Here the authorizationInteractions holds the interactions supported by the wallet
 2. PresentationInteraction class will be exposed by the library which can be used by consumer Wallet
@@ -482,3 +486,117 @@ Consent is a business context and wallet is the one which interacts with user. S
 
 1. authorizeUser and authorizationInteractions are related to authorization step. So ideally both should be part of a common interface or class.
    1. Currently, authorizeUser is a separate callback. Can we think of grouping the authorization related callbacks together?
+
+## Proposal
+
+authorizeUser and authorizationInteractions are related to authorization step, can it be merged?
+
+**Notes:**
+The key difference between standard authorization flow and redirect to web is that
+
+- In standard authorization flow, the VCI client constructs the authorization URL with client configurations and asks Wallet to open the web view with that URL.
+- In redirect to web flow, the VCI client would have pushed the authorization request to the authorization server and received an request_uri for it. The authorization URL is constructed using that request_uri and some major client configurations. The VCI client then asks Wallet to open the web view with that URL.
+
+- The part where VCI client asks Wallet to open the web view is common in both flows.
+- This means that the consumer will behave the same way for both flows.
+
+**Proposal:**
+
+- Create an interface AuthorizationHandler
+- Methods:
+
+  - authorizeUser(requestData: AuthorizationRequestData): AuthorizationResponse
+    - responsibility: Handle authorization with the provided data by making authorization request and returning the response.
+    - input: Data to initiate Authorization Request - AuthorizationRequestData
+      - Presentation interaction -> i) ovpRequest (auth request for the credential presentation), ii) authSession (value to be attached in the API call), iii) iar (endpoint to make the API call)
+      - Redirect to web interaction -> i) requestUri ii) expiresIn iii) authSession (value to be attached in the API call), iv) authorizeUrl (endpoint to make the API call) v) client configurations to attach in API requests
+      - Usual auth flow -> i) authorizeUrl (endpoint to make the API call) ii) client configurations to attach in API request
+      - Note: Redirect to web interaction and usual auth flow can be merged as one as both are similar in nature and for consumer wallet, both will be redirecting to web flow.
+    - output: User authorization result - AuthorizationResponse
+      - Successful response containing authorization_code, status etc.
+      - Error response containing error_description and error_code or only auth_session to be attached in the subsequent API call
+  - type(): String
+    - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
+    - For presentation interaction, it returns "openid4vp_presentation".
+    - For redirect to web interaction, it returns "redirect_to_web".
+
+- Presentation Interaction
+
+  - Class PresentationAuthorizationHandler implements AuthorizationHandler
+    - Implements authorizeUser method to handle presentation interaction flow.
+    - Implements type method to return "openid4vp_presentation".
+    - Constructor params (inputs from wallet consumer):
+      - handlePresentationRequest callback
+      - signVerifiablePresentation callback
+      - trustedVerifiers
+      - holderId
+      - signatureSuite
+      - shouldValidateClient
+
+- Redirect to web Interaction
+  - Class RedirectToWebAuthorizationHandler implements AuthorizationHandler
+    - Implements authorizeUser method to handle redirect to web interaction flow.
+    - Implements type method to return "redirect_to_web".
+    - Constructor params (inputs from wallet consumer):
+      - openWebView callback
+- Standard Authorization Flow
+  - Class StandardAuthorizationHandler implements AuthorizationHandler
+    - Implements authorizeUser method to handle standard authorization flow.
+    - Implements type method to return "standard_authorization".
+    - Constructor params (inputs from wallet consumer):
+      - openWebView callback
+
+If we see here the StandardAuthorizationHandler and RedirectToWebAuthorizationHandler are similar in nature.
+So we can merge both into one class called WebAuthorizationHandler which can handle both standard and redirect to web flows based on the input provided by wallet consumer.
+
+- WebAuthorizationHandler implements AuthorizationHandler
+  - Implements authorizeUser method to handle web authorization flow. The input differs based on the type of web flow (standard / redirect to web). The VCI client uses the input accordingly to handle the flow.
+  - Implements type method to return "redirect_to_Web".
+  - Constructor params (inputs from wallet consumer):
+    - openWebView callback: takes the input of authorization URL to open web view and returns back all the response received after user authorization.
+
+```mermaid
+classDiagram
+    class AuthorizationHandler {
+        <<interface>>
+        +AuthorizationResponse authorizeUser(AuthorizationRequestData requestData)
+        +String type()
+    }
+
+    class AuthorizationRequestData {
+        <<abstract>>
+    }
+
+    class PresentationAuthorizationRequestData {
+        ovpRequest
+        authSession
+        iar
+    }
+
+    class RedirectToWebAuthorizationRequestData {
+        requestUri
+        expiresIn
+        authSession
+        authorizeUrl
+        clientConfig
+    }
+
+    class StandardAuthorizationRequestData {
+        authorizeUrl
+        clientConfig
+    }
+
+
+    AuthorizationHandler <|.. PresentationAuthorizationHandler
+    AuthorizationHandler <|.. WebAuthorizationHandler
+
+    AuthorizationRequestData <|-- PresentationAuthorizationRequestData
+    AuthorizationRequestData <|-- RedirectToWebAuthorizationRequestData
+    AuthorizationRequestData <|-- StandardAuthorizationRequestData
+```
+
+**Questions on the proposal:**
+
+1. Will there be any case where a consumer Wallet wants to support only standard auth flow and not redirect to web flow or vice versa?
+   - If yes, then we can accept one more param in the constructor to indicate if redirect to web flow is to be supported or not. (isRedirectToWebInteractionSupported: Boolean = true)
+   - If no, then we can merge both into one class as mentioned above.
