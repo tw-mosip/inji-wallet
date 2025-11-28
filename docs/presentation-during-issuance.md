@@ -259,13 +259,13 @@ classDiagram
     - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any>
     - sendOVPAuthorizationResponseToIssuer(iar: String, authSession: String, vpResponse: VPResponse) : AuthorizationResponse
   }
-  
+
   class WebAuthorizationHandler {
     + constructor(openWebPage: (url: String)) -> AuthorizationResponse)
     + authorizeUser(requestData: AuthorizationRequestData) AuthorizationResponse
     + type() String // returns redirect_to_web
   }
-  
+
   class AuthorizationResponse {
     status // success
     authorizationCode // success
@@ -295,7 +295,8 @@ classDiagram
 ```
 
 interface AuthorizationHandler
-- Responsibility: 
+
+- Responsibility:
   - This interface defines the contract for different authorization interaction handlers.
   - It takes care of making the Authorization Request based on the interaction type and returning the Authorization Response.
 - Methods:
@@ -313,7 +314,6 @@ interface AuthorizationHandler
     - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
     - For presentation interaction, it returns "openid4vp_presentation".
     - For redirect to web interaction, it returns "redirect_to_web".
-
 
 **Presentation Interaction**
 
@@ -339,6 +339,7 @@ interface AuthorizationHandler
 - Methods
 
   - authorizeUser(requestData: PresentationRequestData) : AuthorizationResponse
+
     - This method is responsible for handling the entire presentation interaction flow.
     - It takes the ovpRequest, auth_session, interactive_authorization_endpoint (iar) as input and submits the VP response to the Issuer's /iar endpoint. Then returns back the AuthorizationResponse to the caller.
     - Responsibilities include
@@ -349,7 +350,7 @@ interface AuthorizationHandler
 
   - type() : String
 
-    - This method returns the interaction type name, which is used in interaction_types_supported param as one of the element  during initial /iar request.
+    - This method returns the interaction type name, which is used in interaction_types_supported param as one of the element during initial /iar request.
     - For presentation interaction, it returns "openid4vp_presentation".
 
   - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void [private]
@@ -359,6 +360,7 @@ interface AuthorizationHandler
     - In case of any error (eg - request signature validation failure), it throws an exception which is caught in handle method to create error VP response.
 
   - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any> [private]
+
     - This method is responsible for consent and creating the VP response based on selected credentials or creating VP error response on any consent rejection or error.
     - In case of any error (no matching credentials / consent rejected), it throws an exception which is caught in handle method to create error VP response.
     - For successful scenario, it creates the VP response using inji-openid4vp library by calling constructUnsignedVPToken and then using signVerifiablePresentation callback to get the signed data, pass the signed data to constructVPResponse method of inji-openid4vp library to get the final VP response.
@@ -372,6 +374,7 @@ interface AuthorizationHandler
     - It processes the response received from Issuer and creates the AuthorizationResponse to be returned to caller.
 
 **Web Interaction**
+
 - Class WebAuthorizationHandler implements AuthorizationHandler
 - Responsibilities:
   - This class is responsible for handling the redirect to web interaction type.
@@ -395,6 +398,7 @@ The key difference between standard authorization flow and redirect to web is th
 - This means that the consumer will behave the same way for both flows.
 
 For the consumer of VCI client, the spec terms - interaction `redirect_to_web` and `standard authorization` is same flow (web based user authorization). So they can use the same WebAuthorizationHandler class for both flows.
+
 1. For the VCI client library, both flows are similar (not same) as the request construction differs but using an authorization endpoint to open webview is same.
 2. But for the consumer wallet, both flows will be handled in the same way (open web view for user authorization).
 3. So we have merged both flows into one class - WebAuthorizationHandler.
@@ -431,11 +435,10 @@ For the consumer of VCI client, the spec terms - interaction `redirect_to_web` a
     - The authorize URL endpoint received from Issuer to be used in authorize URL.
   - Other configurations like client_id, code_challenge, redirect_uri etc.
 
-
 **Responsibilities - Presentation Interaction**
 
 | Step                                                         | Task                                                                                  | Called by       | Responsibility handled by | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|--------------------------------------------------------------|---------------------------------------------------------------------------------------|-----------------|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------- | --------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1                                                            | Validating the openid4vp request received from Issuer                                 | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library to validate the request.<br/> - Method used: authenticateVerifier (openid4vp)<br/>- sample: `authenticateVerifer(urlEncodedAuthorizationRequest = null,authorizationRequest = ovpRequest,trustedVerifiers = trustedVerifiers,shouldValidateClient = true): AuthorizationRequest`                                                                                                                                                                                        |
 | 2                                                            | Displaying the presentation request to the user and obtaining user consent            | inji-vci-client | wallet (callback)         | - inji-vci-client does a callback to wallet passing the VP request and getting the matching credentials selected by user (selectedCredentials) in response.<br/>- The user consent are all handled by the callback. Basically step no 2,3,4,5 are handled and the matching credentials are returned or error for consent rejection is thrown<br/>- Method used: handlePresentationRequest (wallet)<br/>- sample: `handlePresentationRequest(ovpRequest: AuthorizationRequest) : Map<String, Map<FormatType, List<Any>>>` |
 | 3                                                            | Filtering the credentials in Wallet which satisfies the presentation request criteria | -               | wallet (callback)         | <same as before>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -451,6 +454,7 @@ For the consumer of VCI client, the spec terms - interaction `redirect_to_web` a
 | 8                                                            | Sharing the VP response to Issuer                                                     | N/A             | inji-vci-client           | - Create the final response body for /iar request by attaching "auth_session" to the response body input provided by the specific interaction<br/>                                                                                                                                                                                                                                                                                                                                                                       |
 
 Note:
+
 - In step 1, why is authenticateVerifier called with urlEncodedAuthorizationRequest = null and authorizationRequest = ovpRequest?
   - Because in this flow, the openid4vp request is received by value (as JSON and not as a URL). Hence, we pass it as authorizationRequest.
 
@@ -465,9 +469,8 @@ Note:
 
 (1) trusted offer flow method
 
-
 ```kotlin
-requestCredentialFromTrustedIssuer(
+fetchCredentialFromTrustedIssuer(
     credentialIssuer: String,
     credentialConfigurationId: String,
     clientMetadata: ClientMetadata,
@@ -478,17 +481,14 @@ requestCredentialFromTrustedIssuer(
 ): CredentialResponse
 ```
 
-//TODO: check on the naming of authorizations param
-//TODO: name check - requestCredentialFromTrustedIssuer and requestCredentialByCredentialOffer
-
 (2) Credential offer flow method
 
 ```kotlin
- requestCredentialByCredentialOffer(
+ fetchCredentialUsingCredentialOffer(
      credentialOffer: String,
      clientMetadata: ClientMetadata,
      getTxCode: TxCodeCallback?,
-    authorizations: List<AuthorizationHandler> // new
+     authorizations: List<AuthorizationHandler> // new
      getTokenResponse: TokenResponseCallback,
      getProofJwt: ProofJwtCallback,
      onCheckIssuerTrust: CheckIssuerTrustCallback? = null,
@@ -496,9 +496,7 @@ requestCredentialFromTrustedIssuer(
  ): CredentialResponse
 ```
 
-
 - Here authorizations hold the logic for presentation / web auth flow (redirect_to_web / standard auth)
-  
 
 Note:
 
