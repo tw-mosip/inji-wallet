@@ -214,7 +214,7 @@ sequenceDiagram
 
 #### Implementation details - Presentation Interaction
 
-**Class diagram for Presentation Interaction**
+\*_Class diagram - Authorizations_
 
 ```mermaid
 classDiagram
