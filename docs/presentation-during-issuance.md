@@ -508,13 +508,14 @@ Note:
 2. Inji OpenID4VP Library
    - Add support to validate openid4vp request with response_mode as iar-post or iar-post.jwt by skipping response_uri check.
    - Add support to create VP response for openid4vp request with response_mode as iar-post or iar-post.jwt.
-   - Add method `constructVPResponse` to create VP response and return it as Map<String, Any> to Wallet.
+   - Add method `constructVPResponse` to create VP response & `constructErrorInfo` for creating error response and return it as Map<String, Any> to Wallet.
 3. Inji Wallet
    - Implement the openid4vp interaction callback to handle the presentation request, display it to the user, and obtain user consent.
    - Use PresentationInteraction exposed from Inji VCI Client library
    - Handle error scenarios and propagate errors to the user appropriately.
    - Integrate with the updated inji-vci-client library to support the new interaction flow during credential issuance.
    - Align with the new changes of VCI client library public methods.
+   - Adapt to WebAuthorizationHandler related changes
 
 ## References
 
