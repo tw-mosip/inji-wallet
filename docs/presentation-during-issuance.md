@@ -383,7 +383,8 @@ interface AuthorizationHandler
   - authorizeUser(requestData: AuthorizationRequestData) : AuthorizationResponse
     - This method is responsible for handling the redirect to web interaction flow.
     - Construct authorize URL with required query params using the configurations received in requestData for both redirect_to_web interaction and usual auth flow.
-    - It returns back a placeholder AuthorizationResponse indicating that the authorization process is not complete and auth_session needs to be attached in subsequent API call.
+    - invokes the wallet callback of openWebPage to open the constructed URL in web browser for user authorization.
+    - Waits for the response from wallet (Map<String, Any> - {authorization_code=...}) and processes it to create AuthorizationResponse to be returned to caller.
   - type() : String
     - This method returns the interaction type name, which is used in interaction_types_supported param during initial /iar request.
     - For redirect to web interaction, it returns "redirect_to_web".
