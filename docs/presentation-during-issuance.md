@@ -239,12 +239,12 @@ classDiagram
         expiresIn
         authSession
         authorizeUrl
-        clientConfig // all details like client_id, code_challenge, redirect_uri etc.
+        ...clientConfig // all details like client_id, code_challenge, redirect_uri etc.
     }
 
     class StandardAuthorizationRequestData {
         authorizeUrl
-        clientConfig // all details like client_id, code_challenge, redirect_uri etc.
+        ...clientConfig // all details like client_id, code_challenge, redirect_uri etc.
     }
 
 
@@ -261,7 +261,7 @@ classDiagram
   }
 
   class WebAuthorizationHandler {
-    + constructor(openWebPage: (url: String)) -> AuthorizationResponse)
+    + constructor(openWebPage: (url: String)) -> Map<String,Any>)
     + authorizeUser(requestData: AuthorizationRequestData) AuthorizationResponse
     + type() String // returns redirect_to_web
   }
@@ -378,7 +378,7 @@ interface AuthorizationHandler
 - Class WebAuthorizationHandler implements AuthorizationHandler
 - Responsibilities:
   - This class is responsible for handling the redirect to web interaction type.
-  - It takes care of invoking wallet's openWebPage callback to open the authorizeUrl in web browser for user authorization and returning the AuthorizationResponse to caller.
+  - It takes care of invoking wallet's openWebPage callback to open the authorizeUrl in web browser for user authorization and returns the response received from the authorization server.
 - methods
   - authorizeUser(requestData: AuthorizationRequestData) : AuthorizationResponse
     - This method is responsible for handling the redirect to web interaction flow.
