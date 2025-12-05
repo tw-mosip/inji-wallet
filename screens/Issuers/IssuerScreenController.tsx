@@ -19,7 +19,7 @@ import {
   selectIsConsentRequested,
   selectIssuerLogo,
   selectIssuerName,
-  selectTxCodeDisplayDetails
+  selectTxCodeDisplayDetails, selectIsPresentationAuthorization
 } from '../../machines/Issuers/IssuersSelectors';
 import { ActorRefFrom } from 'xstate';
 import { BOTTOM_TAB_ROUTES } from '../../routes/routesConstants';
@@ -36,6 +36,7 @@ export function useIssuerScreenController({ route, navigation }) {
   service.subscribe(logState);
 
   return {
+    isPresentationAuthorizationInProgress: useSelector(service, selectIsPresentationAuthorization),
     issuers: useSelector(service, selectIssuers),
     issuerLogo: useSelector(service, selectIssuerLogo),
     issuerName: useSelector(service, selectIssuerName),

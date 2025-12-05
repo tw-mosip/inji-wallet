@@ -35,4 +35,5 @@ export const IssuersEvents = {
   ON_CONSENT_GIVEN: () => ({}),
   TRUST_ISSUER_CONSENT_REQUEST: (issuerMetadata: object) => ({issuerMetadata}),
   TOKEN_REQUEST: (tokenRequest: object) => ({tokenRequest}),
+  PRESENTATION_REQUEST: (presentationRequest: object) => ({presentationRequest}),
 };

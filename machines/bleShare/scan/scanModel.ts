@@ -62,6 +62,7 @@ const ScanEvents = {
   TIMEOUT: () => ({}),
   QRLOGIN_VIA_DEEP_LINK: (linkCode: string) => ({linkCode}),
   OVP_VIA_DEEP_LINK: (authorizationRequest: string) => ({authorizationRequest}),
+  PRESENTATION_AUTHORIZATION_FLOW: (authorizationRequest: object) => ({authorizationRequest}),
 };
 
 export const ScanModel = createModel(
@@ -83,6 +84,7 @@ export const ScanModel = createModel(
     showQuickShareSuccessBanner: false,
     linkCode: '',
     authorizationRequest: '',
+    presentationRequest: {} as object,
     quickShareData: {},
     isQrLoginViaDeepLink: false,
     isOVPViaDeepLink: false,

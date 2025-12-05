@@ -39,6 +39,7 @@ import { AUTH_ROUTES } from '../../routes/routesConstants';
 import { TransactionCodeModal } from './TransactionCodeScreen';
 import { TrustModal } from '../../components/TrustModal';
 import i18next from 'i18next';
+import {ScanLayout} from "../Scan/ScanLayout";
 export const IssuersScreen: React.FC<
   HomeRouteProps | RootRouteProps
 > = props => {
@@ -272,7 +273,7 @@ export const IssuersScreen: React.FC<
       />
     );
   }
- 
+
 
   if (controller.isQrScanning) {
     return qrScannerComponent();
@@ -286,13 +287,16 @@ export const IssuersScreen: React.FC<
       </Column>
     );
   }
-  
+
   function issuerTrustConsentComponent() {
     return <TrustModal isVisible={true} logo={controller.issuerLogo} name={controller.issuerName} onConfirm={controller.ON_CONSENT_GIVEN} onCancel={controller.CANCEL} />
   }
 
   return (
     <React.Fragment>
+      {controller.isPresentationAuthorizationInProgress && (
+        <ScanLayout/>
+      )}
       <BannerNotificationContainer />
       {controller.issuers.length > 0 && (
         <Column style={Theme.IssuersScreenStyles.issuerListOuterContainer}>

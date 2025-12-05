@@ -62,6 +62,7 @@ class VciClient {
       credentialIssuer: string,
       issuerDisplay: object[],
     ) => void,
+    handlePresentationRequest: (presentationRequest: object) => void,
   ): Promise<any> {
 
     const proofListener = emitter.addListener(
@@ -70,6 +71,21 @@ class VciClient {
         getProofJwt(credentialIssuer, cNonce, JSON.parse(proofSigningAlgorithmsSupported));
       },
     );
+
+    const presentationRequestListener = emitter.addListener(
+      'onPresentationRequest',
+      ({presentationRequest}) => {
+        //TODO: Handle presentation request
+        handlePresentationRequest(JSON.parse(presentationRequest));
+      },
+    );
+
+    const signVPListener = emitter.addListener(
+        'onRequestSignedVPToken',
+        ({vpTokenSigningRequest}) => {
+          //Handle signed VP token request
+        }
+    )
 
     const authListener = emitter.addListener(
       'onRequestAuthCode',
@@ -118,6 +134,8 @@ class VciClient {
       txCodeListener.remove();
       tokenResponseListener.remove();
       trustIssuerListener.remove();
+      presentationRequestListener.remove();
+      signVPListener.remove();
     }
 
     const parsedResponse = JSON.parse(response);

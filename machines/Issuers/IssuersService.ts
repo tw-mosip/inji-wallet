@@ -155,6 +155,12 @@ export const IssuersService = () => {
           authEndpoint: authorizationEndpoint,
         });
       };
+      const handlePresentationRequest = (presentationRequest: object) => {
+        sendBack({
+          type: 'PRESENTATION_REQUEST',
+          presentationRequest: presentationRequest,
+        });
+      }
       const getSignedProofJwt = async (
         credentialIssuer: string,
         cNonce: string | null,
@@ -208,6 +214,7 @@ export const IssuersService = () => {
           navigateToAuthView,
           getTokenResponse,
           requesTrustIssuerConsent,
+          handlePresentationRequest
         );
       return credentialResponse;
     },

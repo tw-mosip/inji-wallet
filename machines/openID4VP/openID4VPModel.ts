@@ -11,6 +11,12 @@ const openID4VPEvents = {
     selectedVC: any,
     isOVPViaDeepLink: boolean,
   ) => ({encodedAuthRequest, flowType, selectedVC, isOVPViaDeepLink}),
+    AUTHENTICATE_VIA_PRESENTATION: (
+    presentationRequest: string,
+    flowType: string,
+    selectedVC: any,
+    isOVPViaDeepLink: boolean,
+  ) => ({presentationRequest, flowType, selectedVC, isOVPViaDeepLink}),
   DOWNLOADED_VCS: (vcs: VC[]) => ({vcs}),
   SELECT_VC: (vcKey: string, inputDescriptorId: any) => ({
     vcKey,
@@ -51,6 +57,7 @@ export const openID4VPModel = createModel(
   {
     serviceRefs: {} as AppServices,
     urlEncodedAuthorizationRequest: '' as string,
+    presentationRequest: {} as object,
     authenticationResponse: {},
     vcsMatchingAuthRequest: {} as Record<string, VC[]>,
     checkedAll: false as boolean,
@@ -73,6 +80,7 @@ export const openID4VPModel = createModel(
     showLoadingScreen: false as boolean,
     isOVPViaDeepLink: false,
     showTrustConsentModal: false as boolean,
+    isAuthenticateFlow: false as boolean,
   },
   {events: openID4VPEvents},
 );

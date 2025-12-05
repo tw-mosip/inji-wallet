@@ -1,9 +1,14 @@
-import {EventFrom, sendParent} from 'xstate';
+import {EventFrom, send, sendParent} from 'xstate';
 import {IssuersModel} from './IssuersModel';
 import {IssuersActions} from './IssuersActions';
 import {IssuersService} from './IssuersService';
 import {IssuersGuards} from './IssuersGuards';
 import {CredentialTypes} from '../VerifiableCredential/VCMetaMachine/vc';
+import {openID4VPMachine} from "../openID4VP/openID4VPMachine";
+import {MIMOTO_BASE_URL} from "../../shared/constants";
+import {StoreEvents} from "../store";
+import {VCMetadata} from "../../shared/VCMetadata";
+import {ScanEvents} from "../bleShare/scan/scanMachine";
 
 const model = IssuersModel;
 
@@ -152,6 +157,22 @@ export const IssuersMachine = model.createMachine(
               }),
             ],
           },
+          PRESENTATION_REQUEST: {
+            actions: [
+              (_, event) => console.debug("RECEIVED PRESENTATION_REQUEST EVENT:", event),
+              send(
+                (_: any, event) => {
+                  return ScanEvents.PRESENTATION_AUTHORIZATION_FLOW(
+                    event.data,
+                  )
+                },
+                {
+                  to: context => context.serviceRefs.scan,
+                },
+              ),
+            ],
+            target: 'presentationAuthorization'
+          },
           TX_CODE_REQUEST: {
             actions: ['setRequestTxCode', 'setTxCodeDisplayDetails'],
             target: '.waitingForTxCode',
@@ -167,6 +188,21 @@ export const IssuersMachine = model.createMachine(
         },
         states: {
           idle: {},
+          presentationAuthorization: {
+            entry: [
+              // send event to scan machine
+              // send(
+              //   (_: any, event) => {
+              //     return ScanEvents.PRESENTATION_AUTHORIZATION_FLOW(
+              //       event.data,
+              //     )
+              //   },
+              //   {
+              //     to: context => context.serviceRefs.scan,
+              //   },
+              // ),
+            ]
+          },
           tokenRequest: {
             invoke: {
               src: 'sendTokenRequest',

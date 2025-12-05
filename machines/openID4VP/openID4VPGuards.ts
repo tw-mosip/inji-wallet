@@ -18,6 +18,8 @@ export const openID4VPGuards = () => {
     isFlowTypeSimpleShare: context =>
       context.flowType === VCShareFlowType.SIMPLE_SHARE,
 
+    isAuthenticateFlow: context => context.isAuthenticateFlow,
+
     hasKeyPair: (context: any) => {
       return !!context.publicKey;
     },
