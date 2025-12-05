@@ -4,11 +4,11 @@ import {IssuersActions} from './IssuersActions';
 import {IssuersService} from './IssuersService';
 import {IssuersGuards} from './IssuersGuards';
 import {CredentialTypes} from '../VerifiableCredential/VCMetaMachine/vc';
-import {openID4VPMachine} from "../openID4VP/openID4VPMachine";
-import {MIMOTO_BASE_URL} from "../../shared/constants";
-import {StoreEvents} from "../store";
-import {VCMetadata} from "../../shared/VCMetadata";
-import {ScanEvents} from "../bleShare/scan/scanMachine";
+import {openID4VPMachine} from '../openID4VP/openID4VPMachine';
+import {MIMOTO_BASE_URL} from '../../shared/constants';
+import {StoreEvents} from '../store';
+import {VCMetadata} from '../../shared/VCMetadata';
+import {ScanEvents} from '../bleShare/scan/scanMachine';
 
 const model = IssuersModel;
 
@@ -159,19 +159,12 @@ export const IssuersMachine = model.createMachine(
           },
           PRESENTATION_REQUEST: {
             actions: [
-              (_, event) => console.debug("RECEIVED PRESENTATION_REQUEST EVENT:", event),
-              send(
-                (_: any, event) => {
-                  return ScanEvents.PRESENTATION_AUTHORIZATION_FLOW(
-                    event.data,
-                  )
-                },
-                {
-                  to: context => context.serviceRefs.scan,
-                },
-              ),
+              'setOpenId4VPRef',
+              (_, event) =>
+                console.debug('RECEIVED PRESENTATION_REQUEST EVENT:', event),
+              'sendVPScanData',
             ],
-            target: 'presentationAuthorization'
+            target: 'presentationAuthorization',
           },
           TX_CODE_REQUEST: {
             actions: ['setRequestTxCode', 'setTxCodeDisplayDetails'],
@@ -190,18 +183,87 @@ export const IssuersMachine = model.createMachine(
           idle: {},
           presentationAuthorization: {
             entry: [
-              // send event to scan machine
-              // send(
-              //   (_: any, event) => {
-              //     return ScanEvents.PRESENTATION_AUTHORIZATION_FLOW(
-              //       event.data,
-              //     )
-              //   },
-              //   {
-              //     to: context => context.serviceRefs.scan,
-              //   },
-              // ),
-            ]
+              //TODO: telemetry for vp sharing
+              // () =>
+              //   sendStartEvent(
+              //     getStartEventData(TelemetryConstants.FlowType.vpSharing),
+              //   ),
+            ],
+            invoke: {
+              id: 'OpenId4VP',
+              src: openID4VPMachine,
+              onDone: {},
+            },
+            on: {
+              IN_PROGRESS: {
+                target: '.inProgress',
+              },
+              // TIMEOUT: {
+              //   target: '.timeout',
+              // },
+              //TODO: is it required to have separate events for consent reject and dismiss?
+              VP_CONSENT_REJECT: [
+                {
+                  actions: 'setConsentRejectedInOpenID4VP',
+                },
+              ],
+              DISMISS: [
+                {
+                  actions: 'setConsentRejectedInOpenID4VP',
+                },
+              ],
+              // SHOW_ERROR: {
+              //   target: '.showError',
+              // },
+              // SUCCESS: {
+              //   target: '.success',
+              // },
+            },
+            states: {
+              success: {},
+              showError: {},
+              inProgress: {
+                on: {
+                  // CANCEL: [
+                  //   {
+                  //     cond: 'isFlowTypeSimpleShare',
+                  //     actions: 'resetOpenID4VPFlowType',
+                  //     target: '#scan.checkStorage',
+                  //   },
+                  //   {
+                  //     target: '#scan.checkStorage',
+                  //   },
+                  // ],
+                },
+              },
+              timeout: {
+                on: {
+                  STAY_IN_PROGRESS: {
+                    target: 'inProgress',
+                  },
+                  CANCEL: [
+                    {
+                      cond: 'isFlowTypeSimpleShare',
+                      actions: 'resetOpenID4VPFlowType',
+                      target: '#scan.checkStorage',
+                    },
+                    {
+                      target: '#scan.checkStorage',
+                    },
+                  ],
+                  RETRY: [
+                    {
+                      cond: 'isFlowTypeSimpleShare',
+                      actions: 'resetOpenID4VPFlowType',
+                      target: '#scan.checkStorage',
+                    },
+                    {
+                      target: '#scan.checkStorage',
+                    },
+                  ],
+                },
+              },
+            },
           },
           tokenRequest: {
             invoke: {
@@ -473,10 +535,7 @@ export const IssuersMachine = model.createMachine(
         invoke: {
           src: 'updateCredential',
           onDone: {
-            actions: [
-              'setVerifiableCredential',
-              'setCredentialWrapper',
-            ],
+            actions: ['setVerifiableCredential', 'setCredentialWrapper'],
             target: 'verifyingCredential',
           },
         },
@@ -744,7 +803,11 @@ export const IssuersMachine = model.createMachine(
         invoke: {
           src: 'verifyCredential',
           onDone: {
-            actions: ['sendSuccessEndEvent', 'setVerificationResult','resetCredentialOfferFlowType',],
+            actions: [
+              'sendSuccessEndEvent',
+              'setVerificationResult',
+              'resetCredentialOfferFlowType',
+            ],
             target: 'storing',
           },
           onError: [

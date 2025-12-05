@@ -108,7 +108,7 @@ export const ScanActions = (model: any) => {
 
     sendVPScanData: context =>
       context.OpenId4VPRef.send({
-        type: context.presentationRequest? 'AUTHENTICATE_VIA_PRESENTATION' : 'AUTHENTICATE',
+        type: 'AUTHENTICATE',
         encodedAuthRequest: context.authorizationRequest,
         presentationRequest: context.presentationRequest,
         flowType: context.openID4VPFlowType,
@@ -298,12 +298,6 @@ export const ScanActions = (model: any) => {
     setAuthRequestFromDeepLink: assign({
       authorizationRequest: (_, event) => {
         return event.params ?? event.authorizationRequest;
-      },
-    }),
-
-    setPresentationRequest: assign({
-      presentationRequest: (_, event) => {
-        return event.authorizationRequest;
       },
     }),
 

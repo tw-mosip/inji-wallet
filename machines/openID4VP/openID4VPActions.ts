@@ -37,10 +37,6 @@ export const openID4VPActions = (model: any) => {
       presentationRequest: (_, event) => event.presentationRequest,
     }),
 
-    setIsAuthenticateFlow: model.assign({
-      isAuthenticateFlow: () => true,
-    }),
-
     setFlowType: model.assign({
       flowType: (_, event) => event.flowType,
     }),

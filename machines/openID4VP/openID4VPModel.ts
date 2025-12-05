@@ -11,7 +11,7 @@ const openID4VPEvents = {
     selectedVC: any,
     isOVPViaDeepLink: boolean,
   ) => ({encodedAuthRequest, flowType, selectedVC, isOVPViaDeepLink}),
-    AUTHENTICATE_VIA_PRESENTATION: (
+  AUTHENTICATE_VIA_PRESENTATION: (
     presentationRequest: string,
     flowType: string,
     selectedVC: any,
@@ -22,14 +22,20 @@ const openID4VPEvents = {
     vcKey,
     inputDescriptorId,
   }),
-  ACCEPT_REQUEST: (selectedVCs: Record<string, VC[]>,selectedDisclosuresByVc: any) => ({
+  ACCEPT_REQUEST: (
+    selectedVCs: Record<string, VC[]>,
+    selectedDisclosuresByVc: any,
+  ) => ({
     selectedVCs,
-    selectedDisclosuresByVc
+    selectedDisclosuresByVc,
   }),
   VERIFIER_TRUST_CONSENT_GIVEN: () => ({}),
-  VERIFY_AND_ACCEPT_REQUEST: (selectedVCs: Record<string, VC[]>,selectedDisclosuresByVc) => ({
+  VERIFY_AND_ACCEPT_REQUEST: (
+    selectedVCs: Record<string, VC[]>,
+    selectedDisclosuresByVc,
+  ) => ({
     selectedVCs,
-    selectedDisclosuresByVc
+    selectedDisclosuresByVc,
   }),
   CONFIRM: () => ({}),
   CANCEL: () => ({}),
@@ -51,6 +57,7 @@ const openID4VPEvents = {
   RESET_ERROR: () => ({}),
   CLOSE_BANNER: () => ({}),
   LOG_ACTIVITY: (logType: VPActivityLogType) => ({logType}),
+  SIGN_VP: (data: any) => ({data}),
 };
 
 export const openID4VPModel = createModel(

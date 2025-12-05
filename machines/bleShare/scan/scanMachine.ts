@@ -34,14 +34,6 @@ export const scanMachine =
       id: 'scan',
       initial: 'inactive',
       on: {
-        PRESENTATION_AUTHORIZATION_FLOW: {
-          actions: [
-            'setPresentationRequest',
-            'setIsOVPViaDeepLink', //TODO: change this to set is just for authorization flow
-            'setOpenId4VPFlowType',
-          ],
-          target: '#scan.checkStorage',
-        },
         SCREEN_BLUR: {
           actions: 'resetOpenID4VPFlowType',
           target: '#scan.disconnectDevice',
