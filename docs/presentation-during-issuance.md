@@ -30,7 +30,7 @@ This document focuses on the tech design to support presentations during the iss
 
 1. **User**: The individual requesting the credential.
 2. **Wallet - Inji Wallet**: The digital wallet application used by the user to manage credentials.
-3. **Issuer - Inji Certify (OAuth AS + VCI)**: The entity responsible for issuing the credential, which also acts as an OAuth Authorization Server and Verifiable Credential Issuer.
+3. **Issuer (OAuth AS + VCI)**: The entity responsible for issuing the credential, which also acts as an OAuth Authorization Server and Verifiable Credential Issuer.
 
 ### Sequence of interactions between entities
 
@@ -38,7 +38,7 @@ This document focuses on the tech design to support presentations during the iss
 sequenceDiagram
     participant user as 👤 User
     participant wallet as 👜 Wallet
-    participant issuer as 🛡️ Inji Certify<br/>(OAuth AS + VCI)
+    participant issuer as 🛡️ Issuer<br/>(OAuth AS + VCI)
 
     user->>wallet: Opens the wallet
     user->>wallet: Open Download Card Screen
@@ -127,7 +127,7 @@ sequenceDiagram
 
 1. **User**: The individual requesting the credential.
 2. **Wallet - Inji Wallet**: The digital wallet application used by the user to manage credentials.
-3. **Issuer - Inji Certify (OAuth AS + VCI)**: The entity responsible for issuing the credential, which also acts as an OAuth Authorization Server and Verifiable Credential Issuer.
+3. **Issuer (OAuth AS + VCI)**: The entity responsible for issuing the credential, which also acts as an OAuth Authorization Server and Verifiable Credential Issuer.
 4. **Inji VCI Client Library**: The library used by the wallet to handle OpenID for VC issuance. (Download of credential into Wallet)
 5. **Inji OpenID4VP Library**: The library used by the wallet to handle OpenID for Verifiable Presentations. (Wallet presenting of the credential to a Verifier)
 
@@ -137,9 +137,9 @@ sequenceDiagram
     participant wallet as 👜 Wallet
     participant vciClient as 📚 Inji VCI Client Library (inji-vci-client)
     participant openid4vp as 📚 Inji OpenID4VP Library (inji-openid4vp)
-    participant issuer as 🛡️ Inji Certify<br/>(OAuth AS + VCI)
+    participant issuer as 🛡️ Issuer<br/>(OAuth AS + VCI)
     Note over user, vciClient: User initiates credential download in the wallet (via Credential offer or Trusted Issuer flow)
-    wallet ->> vciClient: 0. requests for Credential download <br/> requestCredentialFromTrustedIssuer(<br/>"<credentialIssuer>",<br/><credentialConfigurationId>,<br/>ClientMetadata("client-id", "https://sampleApp/redirect-uri", supportedInteractionTypesOfWallet),<br/>authorizeUser: authorizeUserCallback,<br/>getTokenResponse: tokenResponseCallback, <br/>getProofJwt: proofJwtCallback,<br/> authorizationInteractions: listOf(PresentationInteraction(...),..)<br/>)
+    wallet ->> vciClient: 0. requests for Credential download <br/> requestCredentialFromTrustedIssuer(<br/>"<credentialIssuer>",<br/><credentialConfigurationId>,<br/>ClientMetadata("client-id", "https://sampleApp/redirect-uri"),<br/>authorizeUser: authorizeUserCallback,<br/>getTokenResponse: tokenResponseCallback, <br/>getProofJwt: proofJwtCallback,<br/> authorizationInteractions: listOf(PresentationInteraction(...),..)<br/>)
     Note over vciClient, issuer: 1. Discovery of Issuer and Authorization Server metadata
     vciClient ->> issuer: 1.1. GET /.well-known/openid-credential-issuer
     issuer ->> vciClient: 1.2. Credential Issuer metadata
@@ -147,7 +147,7 @@ sequenceDiagram
     issuer ->> vciClient: 1.4. OAuth Authorization server(AS) metadata
     Note over wallet, issuer: Authorization to download credential
     alt Authorization server supports interactive interaction <br/>(`interactive_authorization_endpoint` available in Authorization Server metadata)
-        vciClient ->> issuer: 2. Initial request to interaction endpoint (Happens in PAR mode)<br/>POST Content-Type: application/x-www-form-urlencoded /iar<br/>{response_type="code", client_id, code_challenge, code_challenge_method:"S256", redirect_uri, interaction_types_supported=openid4vp_presentation, <br/>authorization_details=[{"type": "openid_credential", "locations": [ "https://credential-issuer.example.com" ], "credential_configuration_id": "UniversityDegreeCredential" }]}
+        vciClient ->> issuer: 2. Initial request to interaction endpoint <br/>POST Content-Type: application/x-www-form-urlencoded /iar<br/>{response_type="code", client_id, code_challenge, code_challenge_method:"S256", redirect_uri, interaction_types_supported=openid4vp_presentation, <br/>authorization_details=[{"type": "openid_credential", "locations": [ "https://credential-issuer.example.com" ], "credential_configuration_id": "UniversityDegreeCredential" }]}
         alt Successful interaction response
             issuer ->> vciClient: 3. 200 Interactive Authorization Response
             Note over wallet, issuer: Presentation Flow with Issuer
@@ -184,15 +184,13 @@ sequenceDiagram
             vciClient ->> wallet: Propagate interaction error to wallet
             wallet ->> user: Show error to user
         else non Interactive Authorization Request flow
-            vciClient ->> issuer: i. Metadata discovery
-            issuer ->> vciClient: ii. Authorization Server and Issuer metadata
-            vciClient ->> issuer: iii. Authorization Request to /authorize endpoint
-            issuer ->> vciClient: iv. Authorization Response with authorization code
+            vciClient ->> issuer: 2. Authorization Request to /authorize endpoint
+            issuer ->> vciClient: 3. Authorization Response with authorization code
             Note over wallet, issuer: Usual authorization Code Flow continuation
-            vciClient ->> issuer: v. Token exchange occurs
-            vciClient ->> issuer: vi. Credential request and issuance occurs
-            issuer ->> vciClient: vii. Credential issuance response
-            vciClient ->> wallet: viii. Propagate successful credential issuance response to wallet
+            vciClient ->> issuer: 4. Token exchange occurs
+            vciClient ->> issuer: 5. Credential request and issuance occurs
+            issuer ->> vciClient: 6. Credential issuance response
+            vciClient ->> wallet: 7. Propagate successful credential issuance response to wallet
             wallet ->> user: Show successful credential download to user 🪪
         end
     end
@@ -214,7 +212,7 @@ sequenceDiagram
 
 #### Implementation details - Presentation Interaction
 
-\*_Class diagram - Authorizations_
+\*_Class diagram - authorizationMethods_
 
 ```mermaid
 classDiagram
@@ -463,7 +461,7 @@ Note:
 
 1. Inji VCI Client Library
    - Add support for client metadata to accept supported interaction types of Wallet. (interactionTypesSupported field)
-   - Create new methods to accept authorizations to handle different authorization (interactions) types during issuance.
+   - Create new methods to accept authorizationMethods to handle different authorization (interactions) types during issuance.
    - Implement logic to handle openid4vp_presentation interaction type, including invoking the appropriate callback in the Wallet.
    - Add logic to share VP response to Issuer's /iar endpoint after receiving it from Wallet.
    - Change in public method
@@ -476,7 +474,7 @@ fetchCredentialFromTrustedIssuer(
     credentialConfigurationId: String,
     clientMetadata: ClientMetadata,
     getTokenResponse: TokenResponseCallback,
-    authorizations: List<AuthorizationHandler>, // new
+    authorizationMethods: List<AuthorizationHandler>, // new
     getProofJwt: ProofJwtCallback,
     downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
 ): CredentialResponse
@@ -489,7 +487,7 @@ fetchCredentialFromTrustedIssuer(
      credentialOffer: String,
      clientMetadata: ClientMetadata,
      getTxCode: TxCodeCallback?,
-     authorizations: List<AuthorizationHandler> // new
+     authorizationMethods: List<AuthorizationHandler> // new
      getTokenResponse: TokenResponseCallback,
      getProofJwt: ProofJwtCallback,
      onCheckIssuerTrust: CheckIssuerTrustCallback? = null,
@@ -497,11 +495,11 @@ fetchCredentialFromTrustedIssuer(
  ): CredentialResponse
 ```
 
-- Here authorizations hold the logic for presentation / web auth flow (redirect_to_web / standard auth)
+- Here authorizationMethods hold the logic for presentation / web auth flow (redirect_to_web / standard auth)
 
 Note:
 
-      1. Here the authorizations holds the authorization interactions supported by the wallet
+      1. Here the authorizationMethods holds the authorization interactions supported by the wallet
       2. PresentationAuthorizationHandler class will be exposed by the library which can be used by consumer Wallet
       3. WebAuthorizationHandler class will be exposed by the library which can be used by consumer Wallet
       4. Only the interaction types available in this will be added for the `interaction_types_supported` param in request body during initial interactive authorization request
