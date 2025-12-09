@@ -244,6 +244,13 @@ classDiagram
         authorizeUrl
         ...clientConfig // all details like client_id, code_challenge, redirect_uri etc.
     }
+    
+    note for AuthorizationMethod "presentationDuringIssuance returns PresentationAuthorizationHandler instance\nredirectToWeb returns WebAuthorizationHandler instance"
+    class AuthorizationMethod {
+        <<object>>
+        + presentationDuringIssuance(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true) AuthorizationHandler
+        + redirectToWeb(openWebPage: (url: String)) -> Map<String,Any>) AuthorizationHandler
+    }
 
 
     AuthorizationHandler <|.. PresentationAuthorizationHandler
@@ -544,3 +551,122 @@ Consent is a business context and wallet is the one which interacts with user. S
 3. Will there be any case where a consumer Wallet wants to support only standard auth flow and not redirect to web flow or vice versa?
    - If yes, then we can accept one more param in the constructor to indicate if redirect to web flow is to be supported or not. (isRedirectToWebInteractionSupported: Boolean = true)
    - If no, then we can merge both into one class as mentioned above.
+
+
+1. abstract - AuthorizationMethod - exposed to consumers -> consumer wants to use as AuthorizationMethod.RedirectToWeb
+2. internal - AuthorizationMethodHandler - library maps to the respective handler and call authorizeUser based on 
+
+
+# Proposal for AuthorizationMethod abstraction
+
+⭐ Public API (What user sees)
+
+```kotlin
+sealed class AuthorizationMethod {
+
+    class RedirectToWeb(
+        val openWebPage: (String) -> Map<String, Any>
+    ) : AuthorizationMethod()
+
+    class PresentationDuringIssuance(
+      private val handlePresentationRequest: suspend (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>,
+      private val signVerifiablePresentation: suspend (
+        payload: Map<FormatType, UnsignedVPToken>,
+      ) -> Map<FormatType, VPTokenSigningResult>,
+      private val trustedVerifiers: List<Verifier>,
+      private val holderId: String? = null,
+      private val signatureSuite: String? = null,
+      private val shouldValidateClient: Boolean = true,
+    ) : AuthorizationMethod()
+}
+```
+
+⭐ Internal: Your existing handlers
+
+```kotlin
+interface AuthorizationMethodHandler {
+  fun type(): String
+  suspend fun authorizeUser(requestData: AuthorizationRequestData): AuthorizationResponse
+  }
+
+class RedirectToWebHandler(
+  private val openWebPage: (String) -> Map<String, Any>
+  ) : AuthorizationMethodHandler {
+  override fun type() = "redirect_web"
+  override suspend fun authorizeUser(requestData: AuthorizationRequestData): AuthorizationResponse { TODO() }
+}
+
+class PresentationDuringIssuanceHandler(
+  private val handlePresentationRequest: suspend (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>,
+  private val signVerifiablePresentation: suspend (
+    payload: Map<FormatType, UnsignedVPToken>,
+  ) -> Map<FormatType, VPTokenSigningResult>,
+  private val trustedVerifiers: List<Verifier>,
+  private val holderId: String? = null,
+  private val signatureSuite: String? = null,
+  private val shouldValidateClient: Boolean = true,
+  ) : AuthorizationMethodHandler {
+  override fun type() = "presentation_during_issuance"
+  override suspend fun authorizeUser(requestData: AuthorizationRequestData): AuthorizationResponse { TODO() }
+}
+```
+⭐ Convert AuthorizationMethod → AuthorizationHandler to use internally in the library
+
+```kotlin
+fun AuthorizationMethod.toHandler(): AuthorizationHandler {
+  return when (this) {
+    is AuthorizationMethod.RedirectToWeb -> RedirectToWebHandler(openWebPage)
+    
+   is AuthorizationMethod.PresentationDuringIssuance -> PresentationDuringIssuanceHandler(handlePresentationRequest, signVerifiablePresentation)
+  }
+}
+```
+
+
+## downloadCredential methods - library
+
+```kotlin
+fetchCredentialUsingCredentialOffer(
+     credentialOffer: String,
+     clientMetadata: ClientMetadata,
+     getTxCode: TxCodeCallback?,
+     authorizationMethods: List<AuthorizationMethod> // new
+     getTokenResponse: TokenResponseCallback,
+     getProofJwt: ProofJwtCallback,
+     onCheckIssuerTrust: CheckIssuerTrustCallback? = null,
+     downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS
+ ): CredentialResponse
+```
+
+### consumer usage example:
+
+```kotlin
+val authorizationMethods = listOf(
+    AuthorizationMethod.RedirectToWeb(
+        openWebPage = { url ->
+            // Wallet logic to open web page and return response 
+        }
+    ),
+    AuthorizationMethod.PresentationDuringIssuance(
+        handlePresentationRequest = { ovpRequest ->
+            // Wallet logic to handle presentation request and return selected credentials
+        },
+        signVerifiablePresentation = { payload ->
+            // Wallet logic to sign verifiable presentation and return signed data
+        },
+        trustedVerifiers = listOf(/* List of trusted verifiers */),
+        holderId = "holder-id",
+        signatureSuite = "signature-suite",
+        shouldValidateClient = true
+    )
+)
+
+fetchCredentialUsingCredentialOffer(
+    credentialOffer = credentialOffer,
+    clientMetadata = clientMetadata,
+    getTxCode = getTxCode,
+    authorizationMethods = authorizationMethods,
+    getTokenResponse = getTokenResponse,
+    getProofJwt = getProofJwt
+)
+```
