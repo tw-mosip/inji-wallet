@@ -244,12 +244,19 @@ classDiagram
         authorizeUrl
         ...clientConfig // all details like client_id, code_challenge, redirect_uri etc.
     }
-    
+
     note for AuthorizationMethod "presentationDuringIssuance returns PresentationAuthorizationHandler instance\nredirectToWeb returns WebAuthorizationHandler instance"
     class AuthorizationMethod {
         <<object>>
-        + presentationDuringIssuance(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true) AuthorizationHandler
+        + presentationDuringIssuance(selectCredentialsForPresentation: (ovpRequest: AuthorizationRequest) -> PresentationSelectionResult, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>) AuthorizationHandler
         + redirectToWeb(openWebPage: (url: String)) -> Map<String,Any>) AuthorizationHandler
+    }
+
+    note for PresentationSelectionResult "holderId and signatureSuite are optional fields as its only applicable for ldp_vc"
+    class PresentationSelectionResult {
+      selectedCredentials Map<String, Map<FormatType, List<Any>>>,
+      holderId String? = null,
+      signatureSuite String = "Ed25519Signature2020"
     }
 
 
@@ -257,7 +264,7 @@ classDiagram
     AuthorizationHandler <|.. WebAuthorizationHandler
 
   class PresentationAuthorizationHandler {
-    + constructor(handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>,trustedVerifiers: List<Verifier>,holderId: String? = null,signatureSuite: String? = null,shouldValidateClient: Boolean = true)
+    + constructor(selectCredentialsForPresentation: (ovpRequest: AuthorizationRequest) -> PresentationSelectionResult, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>)
     + authorizeUser(requestData: PresentationAuthorizationRequestData) AuthorizationResponse
     + type() String // returns openid4vp_presentation
     - validateAuthorizationRequest(authorizationRequest: Map<String,Any>) : void
@@ -325,9 +332,10 @@ interface AuthorizationHandler
 - Class PresentationAuthorizationHandler implements AuthorizationHandler
 
 - Requirements of the Presentation interaction from Wallet (got as constructor params)
-  - `handlePresentationRequest` callback
-    - input: presentation request | output: selected credentials - map of {credential_type: {format_type: list of credentials}}
-    - handlePresentationRequest: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>
+
+  - `selectCredentialsForPresentation` callback
+    - input: presentation request | output: PresentationSelectionResult holding selected credentials - map of {credential_type: {format_type: list of credentials}}, holderId (optional - public key to be attached to ldp_vp), signatureSuite (default param - signature suite to be used for ldp_vp)
+    - selectCredentialsForPresentation: (ovpRequest: AuthorizationRequest) -> PresentationSelectionResult
     - This callback is responsible for
       - Obtaining any user consent for presentation request
       - filtering the credentials in Wallet which satisfies the presentation request criteria, showing the filtered credentials to the user for selection
@@ -335,12 +343,7 @@ interface AuthorizationHandler
     - input: unsigned VP token | output: signed VP token - map of {format_type: signed data}
     - signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>
     - This callback is responsible for signing the data for VP creation.
-  - `trustedVerifiers`
-    - List of trusted verifiers to validate the openid4vp request.
-  - `signatureSuite`
-    - Signature suite to be used for VP creation. (optional) // used internally for ldp_vc
-  - `holderId`
-    - Holder ID to be used for VP creation. (optional) // used internally for ldp_vc
+
 - Methods
 
   - authorizeUser(requestData: PresentationRequestData) : AuthorizationResponse
@@ -349,7 +352,7 @@ interface AuthorizationHandler
     - It takes the ovpRequest, auth_session, interactive_authorization_endpoint (iar) as input and submits the VP response to the Issuer's /iar endpoint. Then returns back the AuthorizationResponse to the caller.
     - Responsibilities include
       - validate auth request
-      - handle presentation (create authorization response by invoking handlePresentationRequest callback and creating VP response)
+      - handle presentation (create authorization response by invoking selectCredentialsForPresentation callback and creating VP response)
       - submit VP response to Issuer's /iar endpoint
       - return AuthorizationResponse to caller
 
@@ -370,7 +373,7 @@ interface AuthorizationHandler
     - In case of any error (no matching credentials / consent rejected), it throws an exception which is caught in handle method to create error VP response.
     - For successful scenario, it creates the VP response using inji-openid4vp library by calling constructUnsignedVPToken and then using signVerifiablePresentation callback to get the signed data, pass the signed data to constructVPResponse method of inji-openid4vp library to get the final VP response.
     - Order of operations
-      - Call handlePresentationRequest callback to get selected credentials from Wallet
+      - Call selectCredentialsForPresentation callback to get selected credentials and other data - signatureSuite (default param), holderId (Optional) from Wallet
       - Create VP response (success / error) using inji-openid4vp library methods
 
   - sendOVPAuthorizationResponseToIssuer(iar: String, authSession: String, vpResponse: VPResponse) : AuthorizationResponse [private]
@@ -443,21 +446,21 @@ For the consumer of VCI client, the spec terms - interaction `redirect_to_web` a
 
 **Responsibilities - Presentation Interaction**
 
-| Step                                                         | Task                                                                                  | Called by       | Responsibility handled by | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------- | --------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1                                                            | Validating the openid4vp request received from Issuer                                 | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library to validate the request.<br/> - Method used: authenticateVerifier (openid4vp)<br/>- sample: `authenticateVerifer(urlEncodedAuthorizationRequest = null,authorizationRequest = ovpRequest,trustedVerifiers = trustedVerifiers,shouldValidateClient = true): AuthorizationRequest`                                                                                                                                                                                        |
-| 2                                                            | Displaying the presentation request to the user and obtaining user consent            | inji-vci-client | wallet (callback)         | - inji-vci-client does a callback to wallet passing the VP request and getting the matching credentials selected by user (selectedCredentials) in response.<br/>- The user consent are all handled by the callback. Basically step no 2,3,4,5 are handled and the matching credentials are returned or error for consent rejection is thrown<br/>- Method used: handlePresentationRequest (wallet)<br/>- sample: `handlePresentationRequest(ovpRequest: AuthorizationRequest) : Map<String, Map<FormatType, List<Any>>>` |
-| 3                                                            | Filtering the credentials in Wallet which satisfies the presentation request criteria | -               | wallet (callback)         | <same as before>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 4                                                            | Showing the filtered credentials to the user for selection                            | -               | wallet (callback)         | <same as before>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 5                                                            | Obtaining user consent for sharing the selected credentials                           | -               | wallet (callback)         | <same as before>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 6 (success - matching credentials available + consent given) | Creating the VP response based on selected credentials                                |                 |                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| 6.1                                                          | prepare the data for signing as per the selected credentials                          | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library with the selected credentials (return of handlePresentationRequest callback)<br/>- returns the unsigned data<br/>- Method used: constructUnsignedVPToken (openid4vp)<br/>- sample: `constructUnsignedVPToken(verifiableCredentials = selectedCredentials, holderId = holderId, signatureSuite = signatureSuite) :  Map<FormatType, UnsignedVPToken>`                                                                                                                    |
-| 6.2                                                          | sign the data for VP creation                                                         | inji-vci-client | wallet (callback)         | - vci-client does a callback to wallet with the unsigned data (unsignedVPToken) to get the signed data (vpTokenSigningResults)<br/>- Method: signVerifiablePresentation(payload: unsignedVPToken) : Map<FormatType, VPTokenSigningResult><br/>- sample: `signVerifiablePresentation(payload = unsignedVPToken): Map<FormatType, VPTokenSigningResult {//sign the data // return signed data}`                                                                                                                            |
-| 6.3                                                          | Create the successful VP response                                                     | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library to get the VP response<br/>- Method: constructVPResponse(vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>) : Map<String,Any> <br/>- sample return: {vp_token: "...", presentation_submission: "..."} or {response: "..."} (encrypted - iar-post.jwt)                                                                                                                                                                                                        |
-| 6 (failure - no matching credentials / no consent)           | Creating VP response based on error                                                   |                 |                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| 6.1                                                          | Create the error VP response                                                          | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library to get the error VP response<br/>- Method: constructErrorInfo(exception: Exception): Map<String, Any><br/>sample return : {error: "access_denied", error_description: "user rejected consent"}                                                                                                                                                                                                                                                                          |
-| 7                                                            | Prepare the response to be sent to /iar                                               | N/A             | inji-vci-client           | - Prepare the data for response body of /iar<br/>- returns map of {openid4vp_response: <vp error / success response>}                                                                                                                                                                                                                                                                                                                                                                                                    |
-| 8                                                            | Sharing the VP response to Issuer                                                     | N/A             | inji-vci-client           | - Create the final response body for /iar request by attaching "auth_session" to the response body input provided by the specific interaction<br/>                                                                                                                                                                                                                                                                                                                                                                       |
+| Step                                                         | Task                                                                                  | Called by       | Responsibility handled by | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------- | --------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1                                                            | Validating the openid4vp request received from Issuer                                 | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library to validate the request.<br/> - Method used: authenticateVerifier (openid4vp)<br/>- sample: `authenticateVerifer(urlEncodedAuthorizationRequest = null,authorizationRequest = ovpRequest,trustedVerifiers = emptyList()): AuthorizationRequest`                                                                                                                                                                                                                                                                                      |
+| 2                                                            | Displaying the presentation request to the user and obtaining user consent            | inji-vci-client | wallet (callback)         | - inji-vci-client does a callback to wallet passing the VP request and getting the matching credentials selected by user (selectedCredentials), holderId and signatureSuite (PresentationSelectionResult) in response.<br/>- The user consent are all handled by the callback. Basically step no 2,3,4,5 are handled and the matching credentials are returned or error for consent rejection is thrown<br/>- Method used: selectCredentialsForPresentation (wallet)<br/>- sample: `selectCredentialsForPresentation(ovpRequest: AuthorizationRequest) : PresentationSelectionResult` |
+| 3                                                            | Filtering the credentials in Wallet which satisfies the presentation request criteria | -               | wallet (callback)         | <same as before>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 4                                                            | Showing the filtered credentials to the user for selection                            | -               | wallet (callback)         | <same as before>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 5                                                            | Obtaining user consent for sharing the selected credentials                           | -               | wallet (callback)         | <same as before>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 6 (success - matching credentials available + consent given) | Creating the VP response based on selected credentials                                |                 |                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 6.1                                                          | prepare the data for signing as per the selected credentials                          | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library with the selected credentials (return of selectCredentialsForPresentation callback)<br/>- returns the unsigned data<br/>- Method used: constructUnsignedVPToken (openid4vp)<br/>- sample: `constructUnsignedVPToken(verifiableCredentials = selectedCredentials, holderId = holderId, signatureSuite = signatureSuite) :  Map<FormatType, UnsignedVPToken>`                                                                                                                                                                          |
+| 6.2                                                          | sign the data for VP creation                                                         | inji-vci-client | wallet (callback)         | - vci-client does a callback to wallet with the unsigned data (unsignedVPToken) to get the signed data (vpTokenSigningResults)<br/>- Method: signVerifiablePresentation(payload: unsignedVPToken) : Map<FormatType, VPTokenSigningResult><br/>- sample: `signVerifiablePresentation(payload = unsignedVPToken): Map<FormatType, VPTokenSigningResult {//sign the data // return signed data}`                                                                                                                                                                                         |
+| 6.3                                                          | Create the successful VP response                                                     | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library to get the VP response<br/>- Method: constructVPResponse(vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>) : Map<String,Any> <br/>- sample return: {vp_token: "...", presentation_submission: "..."} or {response: "..."} (encrypted - iar-post.jwt)                                                                                                                                                                                                                                                                     |
+| 6 (failure - no matching credentials / no consent)           | Creating VP response based on error                                                   |                 |                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 6.1                                                          | Create the error VP response                                                          | inji-vci-client | inji-openid4vp            | - vci-client communicates with openid4vp library to get the error VP response<br/>- Method: constructErrorInfo(exception: Exception): Map<String, Any><br/>sample return : {error: "access_denied", error_description: "user rejected consent"}                                                                                                                                                                                                                                                                                                                                       |
+| 7                                                            | Prepare the response to be sent to /iar                                               | N/A             | inji-vci-client           | - Prepare the data for response body of /iar<br/>- returns map of {openid4vp_response: <vp error / success response>}                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 8                                                            | Sharing the VP response to Issuer                                                     | N/A             | inji-vci-client           | - Create the final response body for /iar request by attaching "auth_session" to the response body input provided by the specific interaction<br/>                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 Note:
 
@@ -549,13 +552,12 @@ Consent is a business context and wallet is the one which interacts with user. S
 **Answer:** Consent should be handled in Wallet as it is a business context and Wallet interacts with the user.
 
 3. Will there be any case where a consumer Wallet wants to support only standard auth flow and not redirect to web flow or vice versa?
+
    - If yes, then we can accept one more param in the constructor to indicate if redirect to web flow is to be supported or not. (isRedirectToWebInteractionSupported: Boolean = true)
    - If no, then we can merge both into one class as mentioned above.
 
-
 1. abstract - AuthorizationMethod - exposed to consumers -> consumer wants to use as AuthorizationMethod.RedirectToWeb
-2. internal - AuthorizationMethodHandler - library maps to the respective handler and call authorizeUser based on 
-
+1. internal - AuthorizationMethodHandler - library maps to the respective handler and call authorizeUser based on
 
 # Proposal for AuthorizationMethod abstraction
 
@@ -569,14 +571,10 @@ sealed class AuthorizationMethod {
     ) : AuthorizationMethod()
 
     class PresentationDuringIssuance(
-      private val handlePresentationRequest: suspend (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>,
+      private val selectCredentialsForPresentation: suspend (ovpRequest: AuthorizationRequest) -> PresentationSelectionResult,
       private val signVerifiablePresentation: suspend (
         payload: Map<FormatType, UnsignedVPToken>,
       ) -> Map<FormatType, VPTokenSigningResult>,
-      private val trustedVerifiers: List<Verifier>,
-      private val holderId: String? = null,
-      private val signatureSuite: String? = null,
-      private val shouldValidateClient: Boolean = true,
     ) : AuthorizationMethod()
 }
 ```
@@ -597,31 +595,33 @@ class RedirectToWebHandler(
 }
 
 class PresentationDuringIssuanceHandler(
-  private val handlePresentationRequest: suspend (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>,
+  private val selectCredentialsForPresentation: suspend (ovpRequest: AuthorizationRequest) -> PresentationSelectionResult,
   private val signVerifiablePresentation: suspend (
     payload: Map<FormatType, UnsignedVPToken>,
   ) -> Map<FormatType, VPTokenSigningResult>,
-  private val trustedVerifiers: List<Verifier>,
-  private val holderId: String? = null,
-  private val signatureSuite: String? = null,
-  private val shouldValidateClient: Boolean = true,
   ) : AuthorizationMethodHandler {
   override fun type() = "presentation_during_issuance"
   override suspend fun authorizeUser(requestData: AuthorizationRequestData): AuthorizationResponse { TODO() }
 }
+
+data class PresentationSelectionResult(
+  val selectedCredentials: Map<String, Map<FormatType, List<Any>>>,
+  val holderId: String? = null,
+  val signatureSuite: String = "Ed25519Signature2020"
+)
 ```
+
 ⭐ Convert AuthorizationMethod → AuthorizationHandler to use internally in the library
 
 ```kotlin
 fun AuthorizationMethod.toHandler(): AuthorizationHandler {
   return when (this) {
     is AuthorizationMethod.RedirectToWeb -> RedirectToWebHandler(openWebPage)
-    
-   is AuthorizationMethod.PresentationDuringIssuance -> PresentationDuringIssuanceHandler(handlePresentationRequest, signVerifiablePresentation)
+
+   is AuthorizationMethod.PresentationDuringIssuance -> PresentationDuringIssuanceHandler(selectCredentialsForPresentation, signVerifiablePresentation)
   }
 }
 ```
-
 
 ## downloadCredential methods - library
 
@@ -644,20 +644,16 @@ fetchCredentialUsingCredentialOffer(
 val authorizationMethods = listOf(
     AuthorizationMethod.RedirectToWeb(
         openWebPage = { url ->
-            // Wallet logic to open web page and return response 
+            // Wallet logic to open web page and return response
         }
     ),
     AuthorizationMethod.PresentationDuringIssuance(
-        handlePresentationRequest = { ovpRequest ->
+        selectCredentialsForPresentation = { ovpRequest ->
             // Wallet logic to handle presentation request and return selected credentials
         },
         signVerifiablePresentation = { payload ->
             // Wallet logic to sign verifiable presentation and return signed data
         },
-        trustedVerifiers = listOf(/* List of trusted verifiers */),
-        holderId = "holder-id",
-        signatureSuite = "signature-suite",
-        shouldValidateClient = true
     )
 )
 
