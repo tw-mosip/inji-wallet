@@ -216,47 +216,37 @@ sequenceDiagram
 
 ```mermaid
 classDiagram
-    class AuthorizationHandler {
+    note for AuthorizationMethod "Exposed to consumer of library"
+  class AuthorizationMethod {
+    <<sealed>>
+  }
+
+  class RedirectToWeb {
+    +openWebPage(url: String) Map~String, Any~
+  }
+
+  class PresentationDuringIssuance {
+    -selectCredentialsForPresentation(ovpRequest: AuthorizationRequest) Map~String, Map~FormatType, List~Any~~~
+    -signVerifiablePresentation(payload: Map~FormatType, UnsignedVPToken~) Map~FormatType, VPTokenSigningResult~
+  }
+
+  AuthorizationMethod <|-- RedirectToWeb
+  AuthorizationMethod <|-- PresentationDuringIssuance
+
+```
+
+```mermaid
+classDiagram
+    class AuthorizationMethodHandler {
         <<interface>>
         +AuthorizationResponse authorizeUser(AuthorizationRequestData requestData)
         +String type()
     }
 
-    class AuthorizationRequestData {
-        <<abstract>>
-    }
+    AuthorizationMethodHandler <|.. PresentationDuringIssuanceHandler
+    AuthorizationMethodHandler <|.. RedirectToWebHandler
 
-    class PresentationAuthorizationRequestData {
-        ovpRequest
-        authSession
-        iar
-    }
-
-    class RedirectToWebAuthorizationRequestData {
-        requestUri
-        expiresIn
-        authSession
-        authorizeUrl
-        ...clientConfig // all details like client_id, code_challenge, redirect_uri etc.
-    }
-
-    class StandardAuthorizationRequestData {
-        authorizeUrl
-        ...clientConfig // all details like client_id, code_challenge, redirect_uri etc.
-    }
-
-    note for AuthorizationMethod "presentationDuringIssuance returns PresentationAuthorizationHandler instance\nredirectToWeb returns WebAuthorizationHandler instance"
-    class AuthorizationMethod {
-        <<object>>
-        + presentationDuringIssuance(selectCredentialsForPresentation: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>) AuthorizationHandler
-        + redirectToWeb(openWebPage: (url: String)) -> Map<String,Any>) AuthorizationHandler
-    }
-
-
-    AuthorizationHandler <|.. PresentationAuthorizationHandler
-    AuthorizationHandler <|.. WebAuthorizationHandler
-
-  class PresentationAuthorizationHandler {
+  class PresentationDuringIssuanceHandler {
     + constructor(selectCredentialsForPresentation: (ovpRequest: AuthorizationRequest) -> Map<String, Map<FormatType, List<Any>>>, signVerifiablePresentation: (payload: unsignedVPToken) -> Map<FormatType, VPTokenSigningResult>)
     + authorizeUser(requestData: PresentationAuthorizationRequestData) AuthorizationResponse
     + type() String // returns openid4vp_presentation
@@ -265,12 +255,44 @@ classDiagram
     - sendOVPAuthorizationResponseToIssuer(iar: String, authSession: String, vpResponse: VPResponse) : AuthorizationResponse
   }
 
-  class WebAuthorizationHandler {
+  class RedirectToWebHandler {
     + constructor(openWebPage: (url: String)) -> Map<String,Any>)
     + authorizeUser(requestData: AuthorizationRequestData) AuthorizationResponse
     + type() String // returns redirect_to_web
   }
+```
 
+```mermaid
+classDiagram
+  class AuthorizationRequestData {
+    <<abstract>>
+  }
+
+  class PresentationAuthorizationRequestData {
+    ovpRequest
+    authSession
+    iar
+  }
+
+  class RedirectToWebAuthorizationRequestData {
+    requestUri
+    expiresIn
+    authSession
+    ...clientConfig // all details like client_id, code_challenge, redirect_uri etc.
+  }
+
+  class StandardAuthorizationRequestData {
+    authorizeUrl
+    ...clientConfig // all details like client_id, code_challenge, redirect_uri etc.
+  }
+
+  AuthorizationRequestData <|-- PresentationAuthorizationRequestData
+  AuthorizationRequestData <|-- RedirectToWebAuthorizationRequestData
+  AuthorizationRequestData <|-- StandardAuthorizationRequestData
+```
+
+```mermaid
+classDiagram
   class AuthorizationResponse {
     status // success
     authorizationCode // success
@@ -278,10 +300,6 @@ classDiagram
     errorDescription // error
     authSession // Authorization process not complete - just auth session returned for scenarios from redirect_to_web scenario where wallet makes follow up request
   }
-
-    AuthorizationRequestData <|-- PresentationAuthorizationRequestData
-    AuthorizationRequestData <|-- RedirectToWebAuthorizationRequestData
-    AuthorizationRequestData <|-- StandardAuthorizationRequestData
 ```
 
 ```mermaid
@@ -299,7 +317,7 @@ classDiagram
     }
 ```
 
-interface AuthorizationHandler
+interface AuthorizationMethodHandler
 
 - Responsibility:
   - This interface defines the contract for different authorization interaction handlers.
@@ -322,7 +340,7 @@ interface AuthorizationHandler
 
 **Presentation Interaction**
 
-- Class PresentationAuthorizationHandler implements AuthorizationHandler
+- Class PresentationDuringIssuanceHandler implements AuthorizationMethodHandler
 
 - Requirements of the Presentation interaction from Wallet (got as constructor params)
 
@@ -358,6 +376,13 @@ interface AuthorizationHandler
 
     - This method is responsible for validating the openid4vp request received from Issuer.
     - It uses inji-openid4vp library's authenticateVerifier method to validate the request.
+    - authenticateVerifier is called with
+      - trustedVerifiers is passed as empty list and shouldValidateClient is false
+        - Considering when we reach the Presentation interaction, the Issuer (now the Verifier in Presentation interaction) is already trusted as part of earlier steps
+        - TrustedVerifiers is empty list because we are skipping the client validation of pre-registered Verifiers in this flow
+        - shouldValidateClient is false
+        - Additionally, In OVP library, if shouldValidateClient is false, unsigned VP request from pre-registered verifiers will be allowed. Note that, Pre-registered verifiers with signed VP request is still not possible here.
+        - TODO: (later) To support pre-registered client id with signed request in the VP request, get the jwks_uri from the issuer metadata (issuer host) to get the public key for verifying signed VP request
     - In case of any error (eg - request signature validation failure), it throws an exception which is caught in handle method to create error VP response.
 
   - handlePresentation(authRequest: Map<String,Any>) : Map<String, Any> [private]
@@ -365,6 +390,8 @@ interface AuthorizationHandler
     - This method is responsible for consent and creating the VP response based on selected credentials or creating VP error response on any consent rejection or error.
     - In case of any error (no matching credentials / consent rejected), it throws an exception which is caught in handle method to create error VP response.
     - For successful scenario, it creates the VP response using inji-openid4vp library by calling constructUnsignedVPToken and then using signVerifiablePresentation callback to get the signed data, pass the signed data to constructVPResponse method of inji-openid4vp library to get the final VP response.
+    - constructUnsignedVPToken method is used with
+      - signature suite and holderId - extracted from the selected credentials by taking the very first credential's details
     - Order of operations
       - Call selectCredentialsForPresentation callback to get selected credentials
       - Create VP response (success / error) using inji-openid4vp library methods
@@ -376,7 +403,7 @@ interface AuthorizationHandler
 
 **Web Interaction**
 
-- Class WebAuthorizationHandler implements AuthorizationHandler
+- Class RedirectToWebHandler implements AuthorizationMethodHandler
 - Responsibilities:
   - This class is responsible for handling the redirect to web interaction type.
   - It takes care of invoking wallet's openWebPage callback to open the authorizeUrl in web browser for user authorization and returns the response received from the authorization server.
@@ -399,11 +426,11 @@ The key difference between standard authorization flow and redirect to web is th
 - The part where VCI client asks Wallet to open the web view is common in both flows.
 - This means that the consumer will behave the same way for both flows.
 
-For the consumer of VCI client, the spec terms - interaction `redirect_to_web` and `standard authorization` is same flow (web based user authorization). So they can use the same WebAuthorizationHandler class for both flows.
+For the consumer of VCI client, the spec terms - interaction `redirect_to_web` and `standard authorization` is same flow (web based user authorization). So they can use the same RedirectToWebHandler class for both flows.
 
 1. For the VCI client library, both flows are similar (not same) as the request construction differs but using an authorization endpoint to open webview is same.
 2. But for the consumer wallet, both flows will be handled in the same way (open web view for user authorization).
-3. So we have merged both flows into one class - WebAuthorizationHandler.
+3. So we have merged both flows into one class - RedirectToWebHandler.
 
 **AuthorizationRequestData interface**
 
@@ -477,7 +504,7 @@ fetchCredentialFromTrustedIssuer(
     credentialConfigurationId: String,
     clientMetadata: ClientMetadata,
     getTokenResponse: TokenResponseCallback,
-    authorizationMethods: List<AuthorizationHandler>, // new
+    authorizationMethods: List<AuthorizationMethod>, // new
     getProofJwt: ProofJwtCallback,
     downloadTimeoutInMillis: Long = Constants.DEFAULT_NETWORK_TIMEOUT_IN_MILLIS,
 ): CredentialResponse
@@ -490,7 +517,7 @@ fetchCredentialFromTrustedIssuer(
      credentialOffer: String,
      clientMetadata: ClientMetadata,
      getTxCode: TxCodeCallback?,
-     authorizationMethods: List<AuthorizationHandler> // new
+     authorizationMethods: List<AuthorizationMethod> // new
      getTokenResponse: TokenResponseCallback,
      getProofJwt: ProofJwtCallback,
      onCheckIssuerTrust: CheckIssuerTrustCallback? = null,
@@ -503,8 +530,7 @@ fetchCredentialFromTrustedIssuer(
 Note:
 
       1. Here the authorizationMethods holds the authorization interactions supported by the wallet
-      2. PresentationAuthorizationHandler class will be exposed by the library which can be used by consumer Wallet
-      3. WebAuthorizationHandler class will be exposed by the library which can be used by consumer Wallet
+      2. AuthorizationMethod class exposes PresentationDuringIssuance and RedirectToWeb which can be used by consumer wallet
       4. Only the interaction types available in this will be added for the `interaction_types_supported` param in request body during initial interactive authorization request
 
 2. Inji OpenID4VP Library
@@ -517,7 +543,7 @@ Note:
    - Handle error scenarios and propagate errors to the user appropriately.
    - Integrate with the updated inji-vci-client library to support the new interaction flow during credential issuance.
    - Align with the new changes of VCI client library public methods.
-   - Adapt to WebAuthorizationHandler related changes
+   - Adapt to RedirectToWebHandler related changes for the standard authorization flow.
 
 ## References
 
@@ -526,7 +552,7 @@ Note:
 - [RFC 9126 - Pushed Authorization Requests (PAR)](https://datatracker.ietf.org/doc/html/rfc9126)
 - [Spike card](https://mosip.atlassian.net/browse/INJIMOB-3601)
 
-## Questions
+## Decisions / Q&A
 
 1. should OVP library know the context of “iar_post.jwt / iar_post”
 
@@ -544,17 +570,39 @@ Consent is a business context and wallet is the one which interacts with user. S
 
 **Answer:** Consent should be handled in Wallet as it is a business context and Wallet interacts with the user.
 
-3. Will there be any case where a consumer Wallet wants to support only standard auth flow and not redirect to web flow or vice versa?
+1. Will there be any case where a consumer Wallet wants to support only standard auth flow and not redirect to web flow or vice versa?
 
    - If yes, then we can accept one more param in the constructor to indicate if redirect to web flow is to be supported or not. (isRedirectToWebInteractionSupported: Boolean = true)
    - If no, then we can merge both into one class as mentioned above.
 
-1. abstract - AuthorizationMethod - exposed to consumers -> consumer wants to use as AuthorizationMethod.RedirectToWeb
-1. internal - AuthorizationMethodHandler - library maps to the respective handler and call authorizeUser based on
+2. Why PresentationDuringIssuanceHandler takes only selectCredentialsForPresentation and signVerifiablePresentation callbacks only in constructor? what about holderId, signatureSuite, trustedVerifiers and shouldValidateClient?
 
-# Proposal for AuthorizationMethod abstraction
+   - Because these are the only 2 wallet specific callbacks required for presentation interaction.
+   - signature suite and holderId will be extracted from the selected credentials by taking the very first credential's details
+   - TrusterVerifiers and shouldValidateClient inputs are removed now
+   - In VCI client library - When calling authenticateVerifier method of OVP library, trustedVerifiers is passed as empty list and shouldValidateClient is false
+   - Considering when we reach the Presentation interaction, the Issuer (now the Verifier in Presentation interaction) is already trusted as part of earlier steps
+     - TrustedVerifiers is empty list because we are skipping the client validation of pre-registered Verifiers in this flow
+     - shouldValidateClient is false
+     - Additionally, In OVP library, if shouldValidateClient is false, unsigned VP request from pre-registered verifiers will be allowed. Note that, Pre-registered verifiers with signed VP request is still not possible here.
+   - TODO: (later) To support pre-registered client id with signed request in the VP request, get the jwks_uri from the issuer metadata (issuer host) to get the public key for verifying signed VP request
+
+3. Why is AuthorizationMethod exposed to consumer wallet and not AuthorizationMethodHandler?
+
+   - Because AuthorizationMethod is the abstraction which holds the wallet specific callbacks required for different interaction types.
+   - AuthorizationMethodHandler is internal to the library which maps to the respective handler and calls authorizeUser based on the interaction type.
+   - abstract - AuthorizationMethod - exposed to consumers -> consumer wants to use as AuthorizationMethod.RedirectToWeb
+   - internal - AuthorizationMethodHandler - library maps to the respective handler and call authorizeUser based on
+   - This way, we are hiding the internal implementation details from consumer wallet and making the interface simpler for them.
+
+4. Other scenarios (not part of this PDI scope)
+   - In credential offer - Issuer initiated issuance flow (QR code) - show issuer host as well in consent shown to user. Credential offer + trusted issuer - no consent required again
+
+# Tech details for AuthorizationMethod abstraction
 
 ⭐ Public API (What user sees)
+
+kotlin:
 
 ```kotlin
 sealed class AuthorizationMethod {
@@ -572,7 +620,29 @@ sealed class AuthorizationMethod {
 }
 ```
 
-⭐ Internal: Your existing handlers
+swift:
+
+```swift
+enum AuthorizationMethod {
+    case redirectToWeb(openWebPage: (String) -> [String: Any])
+    case presentationDuringIssuance(
+        handlePresentationRequest: (AuthorizationRequest) async -> [String: [FormatType: [Any]]],
+        signVerifiablePresentation: ([FormatType: UnsignedVPToken]) async -> [FormatType: VPTokenSigningResult]
+    )
+
+    var type: String {
+        switch self {
+        case .redirectToWeb: return "redirect_web"
+        case .presentationDuringIssuance: return "presentation_during_issuance"
+        }
+    }
+}
+
+```
+
+⭐ Internal: Library handlers
+
+kotlin:
 
 ```kotlin
 interface AuthorizationMethodHandler {
@@ -600,8 +670,10 @@ class PresentationDuringIssuanceHandler(
 
 ⭐ Convert AuthorizationMethod → AuthorizationHandler to use internally in the library
 
+kotlin:
+
 ```kotlin
-fun AuthorizationMethod.toHandler(): AuthorizationHandler {
+fun AuthorizationMethod.toHandler(): AuthorizationMethodHandler {
   return when (this) {
     is AuthorizationMethod.RedirectToWeb -> RedirectToWebHandler(openWebPage)
 
@@ -610,7 +682,28 @@ fun AuthorizationMethod.toHandler(): AuthorizationHandler {
 }
 ```
 
+swift:
+
+```swift
+extension AuthorizationMethod {
+    func toHandler() -> AuthorizationHandler {
+        switch self {
+        case .redirectToWeb(let open):
+            return RedirectToWebHandler(openWebPage: open)
+
+        case .presentationDuringIssuance(let handleReq, let signVp):
+            return PresentationDuringIssuanceHandler(
+                handlePresentationRequest: handleReq,
+                signVerifiablePresentation: signVp
+            )
+        }
+    }
+}
+```
+
 ## downloadCredential methods - library
+
+kotlin:
 
 ```kotlin
 fetchCredentialUsingCredentialOffer(
@@ -626,6 +719,8 @@ fetchCredentialUsingCredentialOffer(
 ```
 
 ### consumer usage example:
+
+kotlin:
 
 ```kotlin
 val authorizationMethods = listOf(
@@ -653,19 +748,3 @@ fetchCredentialUsingCredentialOffer(
     getProofJwt = getProofJwt
 )
 ```
-
-## Changes Highlights
-
-1. PresentationDuringIssuance accepts only 2 inputs now -> selectCredentialsForPresentation callback (input - OVPRequest, output - selected credentials) and signVerifiablePresentation callback (input - unsigned VP token, output - signed VP token)
-2. signature suite and holderId will be extracted from the selected credentials by taking the very first credential's details
-3. TrusterVerifiers and shouldValidateClient inputs are removed now
-   1. In VCI client library - When calling authenticateVerifier method of OVP library, trustedVerifiers is passed as empty list and shouldValidateClient is false
-   2. Considering when we reach the Presentation interaction, the Issuer (now the Verifier in Presentation interaction) is already trusted as part of earlier steps
-      1. TrustedVerifiers is empty list because we are skipping the client validation of pre-registered Verifiers in this flow
-      2. shouldValidateClient is false
-      3. Additionally, In OVP library, if shouldValidateClient is false, unsigned VP request from pre-registered verifiers will be allowed. Note that, Pre-registered verifiers with signed VP request is still not possible here.
-
-TODO
-
-1. Issuer initiated issuance flow (QR code) - show issuer host as well in consent shown to user. Credential offer + trusted issuer - no consent required again
-2. TODO: get the jwks_uri for the pre-registered verifier from issuer metadata during /iar request
