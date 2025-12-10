@@ -664,3 +664,8 @@ fetchCredentialUsingCredentialOffer(
       1. TrustedVerifiers is empty list because we are skipping the client validation of pre-registered Verifiers in this flow
       2. shouldValidateClient is false
       3. Additionally, In OVP library, if shouldValidateClient is false, unsigned VP request from pre-registered verifiers will be allowed. Note that, Pre-registered verifiers with signed VP request is still not possible here.
+
+TODO
+
+1. Issuer initiated issuance flow (QR code) - show issuer host as well in consent shown to user. Credential offer + trusted issuer - no consent required again
+2. TODO: get the jwks_uri for the pre-registered verifier from issuer metadata during /iar request
