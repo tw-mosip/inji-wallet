@@ -15,7 +15,7 @@ import {ListItem} from 'react-native-elements';
 import getAllConfigurations from '../../shared/api';
 import {CopyButton} from '../../components/CopyButton';
 import testIDProps from '../../shared/commonUtil';
-import {__InjiVersion, __TuvaliVersion} from '../../shared/GlobalVariables';
+import {__InjiVersion} from '../../shared/GlobalVariables';
 import {BannerNotificationContainer} from '../../components/BannerNotificationContainer';
 import {SvgImage} from '../../components/ui/svg';
 import LinearGradient from 'react-native-linear-gradient';
@@ -136,21 +136,30 @@ export const AboutInji: React.FC<AboutInjiProps> = ({appId}) => {
                 {__InjiVersion.getValue()}
               </Text>
             </Row>
-            {__TuvaliVersion.getpackageVersion() != 'unknown' && (
+            <View style={Theme.AboutInjiScreenStyle.horizontalLineStyle} />
+            <Column
+              crossAlign="center"
+              style={Theme.AboutInjiScreenStyle.footerContainer}>
+              <Row style={Theme.AboutInjiScreenStyle.poweredByRow}>
+                <View style={Theme.AboutInjiScreenStyle.logoStyle}>
+                  {SvgImage.logoIcon(40, 40)}
+                </View>
+
+                <Text
+                  weight="semibold"
+                  style={Theme.AboutInjiScreenStyle.poweredByTextStyle}
+                  color="black">
+                  {t('poweredBy')}
+                </Text>
+              </Row>
+
               <Text
                 weight="semibold"
-                style={Theme.AboutInjiScreenStyle.tuvaliVerisonStyle}
-                color={Theme.Colors.aboutVersion}>
-                {t('tuvaliVersion')}: {__TuvaliVersion.getValue()}
+                style={Theme.AboutInjiScreenStyle.infoTextStyle}
+                color={Theme.Colors.GrayText}>
+                {t('copyright')}
               </Text>
-            )}
-            <View style={Theme.AboutInjiScreenStyle.horizontalLineStyle} />
-            <Text
-              weight="semibold"
-              style={Theme.AboutInjiScreenStyle.poweredByTextStyle}
-              color="black">
-              {t('poweredBy')}
-            </Text>
+            </Column>
           </Column>
         </Column>
       </Modal>

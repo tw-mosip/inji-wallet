@@ -15,6 +15,12 @@
     "WALLET_BINDING_FAILURE": "Activation of {{idType}} has failed.",
     "VC_REMOVED": "{{idType}} is removed from wallet.",
     "TAMPERED_VC_REMOVED": "{{idType}} is removed from from wallet due to tampering.",
+    "VC_STATUS_CHANGED": {
+      "VALID": "Status check completed. The status of {{idType}} is Valid.",
+      "REVOKED": "Status check completed. The status of {{idType}} is Revoked.",
+      "EXPIRED": "Status check completed. The status of {{idType}} is Expired.",
+      "PENDING": "Status check completed. The status of {{idType}} is Pending Verification."
+    },
     "vpSharing": {
       "SHARED_SUCCESSFULLY": "Credential Presentation is shared successfully.",
       "SHARED_WITH_FACE_VERIFIACTION": "Face verification is successful, and the Credential Presentation is shared successfully.",
@@ -35,7 +41,8 @@
       "INVALID_AUTH_REQUEST": "Credential sharing failed — The request had missing or incorrect information.",
       "REQUEST_COULD_NOT_BE_PROCESSED": "Credential not shared — Request couldn’t be processed due to a technical issue.",
       "INVALID_PRESENTATION_DEFINITION_URI": "Credential not shared — The verifier’s request had incorrect data format.",
-      "SEND_VP_ERROR": "Credential sharing failed due to a technical issue."
+      "SEND_VP_ERROR": "Credential sharing failed due to a technical issue.",
+      "INVALID_TRANSACTION_DATA": "The verification request could not be processed due to unsupported data"
     }
   },
   "DeviceInfoList": {
@@ -72,7 +79,9 @@
   "VcDetails": {
     "generatedOn": "Generated On",
     "status": "Status",
+    "lastChecked": "Last Checked",
     "valid": "Valid",
+    "revoked": "Revoked",
     "pending": "Pending",
     "expired": "Expired",
     "photo": "Photo",
@@ -115,15 +124,17 @@
     "shareQRCode": "Share QR Code",
     "disclosureNote": "Your card includes specific details marked by the issuer as selectively shareable. These can be shared independently during credential presentation. Other fields not listed here can only be shared as part of the full credential, if requested by the verifier.",
     "disclosureNoteTitle": "Please note",
-    "disclosedFieldsDescription":"Your card includes the following selectively shareable details listed below.",
-    "disclosedFieldsTitle":"Information you choose to share",
-    "disclosureInfoNote":"Fields next to this icon indicate that the information can be shared selectively."
+    "disclosedFieldsDescription": "Your card includes the following selectively shareable details listed below.",
+    "disclosedFieldsTitle": "Information you choose to share",
+    "disclosureInfoNote": "Fields next to this icon indicate that the information can be shared selectively."
   },
   "HomeScreenKebabPopUp": {
     "title": "More Options",
     "unPinCard": "Unpin",
     "pinCard": "Pin",
     "share": "Share",
+    "reverify": "Check Card Status",
+    "new": "NEW",
     "shareWithSelfie": "Share with Selfie",
     "offlineAuthDisabledMessage": "Click here to enable this credentials to be used for online authentication.",
     "viewActivityLog": "View Activity Log",
@@ -152,6 +163,8 @@
     "Description": "To unlock the app securely, you can set up either biometric authentication, such as fingerprint or facial recognition or opt for a 6-digit Passcode for quick access.",
     "PasswordTypeDescription": "Choose ‘Use Biometrics’ to enable biometric authentication or ‘I’ll Do Later’ to set up a 6-digit passcode.",
     "useBiometrics": "Use Biometrics",
+    "useFaceId": "Use Face ID",
+    "useTouchId": "Use Touch ID",
     "usePasscode": "I'll Do Later",
     "errors": {
       "unavailable": "Device does not support Biometrics",
@@ -161,7 +174,10 @@
     }
   },
   "BiometricScreen": {
-    "unlock": "Unlock with biometrics"
+    "unlock": "Unlock with Biometrics",
+    "unlockBiometrics": "Unlock with Biometrics",
+    "unlockFaceId": "Unlock with Face ID",
+    "unlockTouchId": "Unlock with Touch ID"
   },
   "HistoryScreen": {
     "noHistory": "No history available yet",
@@ -176,7 +192,10 @@
     "injiAsVerifierApp": "Inji as verifier app",
     "receiveCard": "Receive Card",
     "basicSettings": "Basic settings",
-    "bioUnlock": "Unlock with Biometric",
+    "bioUnlock": "Unlock with Biometrics",
+    "bioUnlockBiometrics": "Unlock with Biometrics",
+    "bioUnlockFaceId": "Unlock with Face ID",
+    "bioUnlockTouchId": "Unlock with Touch ID",
     "language": "Language",
     "aboutInji": "About Inji",
     "credentialRegistry": "Credential Registry",
@@ -191,37 +210,196 @@
     "alternateBiometricSuccess": "Success! You can now use biometrics to unlock Inji app.",
     "activated": "Credentials are enabled for online authentication.",
     "keyPreferenceSuccess": "Your key preferences have been saved successfully!",
-    "keyPreferenceError": "Sorry! Error setting your key preferences"
+    "keyPreferenceError": "Sorry! Error setting your key preferences",
+    "reverifiedSuccessfully": {
+      "VALID": "Status check successful. The status of your {{vcType}} is Valid.",
+      "REVOKED": "Status check successful. The status of your {{vcType}} is Revoked.",
+      "PENDING": "Status check successful. The status of your {{vcType}} is Pending Verification.",
+      "EXPIRED": "Status check successful. The status of your {{vcType}} is Expired."
+    },
+    "reverificationFailed": {
+      "PENDING": "Status check failed. Unable to verify your {{vcType}}, please try again later"
+    }
   },
   "AboutInji": {
     "aboutInji": "About Inji Wallet",
-    "header": "ABOUT INJI WALLET",
+    "header": "About Inji Wallet",
     "appID": "App ID",
     "aboutDetails": "Inji Wallet makes data trustworthy and portable, featuring two main interfaces that cater to diverse user needs, with Inji Mobile being one of them. As a mobile-based wallet app, Inji Mobile is a secure, decentralized solution that allows users to download, manage, share, and verify verifiable credentials directly from their smartphones, providing a seamless and trustworthy way to handle credentials on the go.",
     "forMoreDetails": "For more details",
     "clickHere": "Click here",
     "version": "Version",
-    "tuvaliVersion": "Tuvali-version",
-    "poweredBy": "Powered by Inji, A MOSIP Product"
+    "poweredBy": "A MOSIP Product",
+    "copyright": "© 2022 MOSIP. All rights reserved."
   },
   "IssuersScreen": {
+    "selectCard": "Select Card",
     "title": "Add new card",
     "description": "Please choose your preferred issuer from the options below to add a new card.",
     "searchByIssuersName": "Search by Issuer’s name",
     "credentialTypeDescription": "Please select a credential",
     "help": "Help?",
     "loaders": {
+      "processing": "Processing...",
       "loading": "Loading...",
+      "preparingRequest": "Processing your request",
       "subTitle": {
         "displayIssuers": "Fetching Issuers",
         "settingUp": "Setting up",
-        "downloadingCredentials": "Downloading Credentials"
+        "downloadingCredentials": "Downloading Credentials",
+        "preparingRequest": "Please wait while we load the details",
+        "inProgress": "This will only take a moment"
+      },
+      "progressIndicators": {
+        "sharingCard": "Sharing card/cards",
+        "downloadingCard": "Downloading card",
+        "sharedCard": "Shared card/cards",
+        "downloadedCard": "Downloaded card",
+        "redirectToHome": "Returning to home in {{remainingTime}} seconds"
       }
     },
     "offerTitle": "Scan & Download Card",
     "offerDescription": "Scan a QR code to instantly download your card.",
     "download": " Download Card",
+    "downloadSuccess": "Card Downloaded Successfully",
+    "goHome": "Go to Home",
     "errors": {
+      "invalid_request": {
+        "title": "We couldn’t complete your request",
+        "message": "Something didn’t look right with this request. Please try again."
+      },
+      "unauthorized_client": {
+        "title": "This action isn’t allowed",
+        "message": "Your account isn’t authorized to use this feature."
+      },
+      "access_denied": {
+        "title": "Access was denied",
+        "message": "The request was declined. You can try again if needed."
+      },
+      "unsupported_response_type": {
+        "title": "This login method isn’t supported",
+        "message": "Please try a different method to continue."
+      },
+      "invalid_scope": {
+        "title": "Permission not available",
+        "message": "You don’t have permission for this action."
+      },
+      "server_error": {
+        "title": "Server issue",
+        "message": "We’re having trouble right now. Please try again shortly."
+      },
+      "temporarily_unavailable": {
+        "title": "Service temporarily unavailable",
+        "message": "Please try again in a few minutes."
+      },
+      "invalid_request_session_expired": {
+        "title": "Session expired",
+        "message": "Your session is no longer valid. Please log in again."
+      },
+      "invalid_client": {
+        "title": "Session expired",
+        "message": "Please log in again to continue."
+      },
+      "invalid_grant": {
+        "title": "We couldn’t verify your request",
+        "message": "Please try again."
+      },
+      "unauthorized_client_waiting": {
+        "title": "Waiting for approval",
+        "message": "Please wait while we complete your request."
+      },
+      "unsupported_grant_type": {
+        "title": "Please wait a moment",
+        "message": "We’re still processing your request."
+      },
+      "invalid_scope_credential": {
+        "title": "Credential not available",
+        "message": "This credential can’t be issued right now."
+      },
+      "authorization_pending": {
+        "title": "Almost there",
+        "message": "We’re waiting for confirmation. Please hold on."
+      },
+      "slow_down": {
+        "title": "Still processing",
+        "message": "Please wait a little longer before trying again."
+      },
+      "invalid_credential_request": {
+        "title": "This request has expired",
+        "message": "Please scan the QR code again to continue."
+      },
+      "unsupported_credential_type": {
+        "title": "Credential not supported",
+        "message": "This type of credential isn’t available."
+      },
+      "unsupported_credential_format": {
+        "title": "Format not supported",
+        "message": "This credential format can’t be processed."
+      },
+      "invalid_proof": {
+        "title": "Verification failed",
+        "message": "We couldn’t confirm your request. Please try again."
+      },
+      "invalid_encryption_parameters": {
+        "title": "Secure connection failed",
+        "message": "Please try again."
+      },
+      "invalid_request_bearer": {
+        "title": "Credential couldn’t be verified",
+        "message": "Please try again or contact support."
+      },
+      "invalid_token": {
+        "title": "Session expired",
+        "message": "Please log in again to continue."
+      },
+      "insufficient_scope": {
+        "title": "Permission required",
+        "message": "You don’t have access to request this credential."
+      },
+      "invalid_credential_offer": {
+        "title": "Invalid request link",
+        "message": "This link isn’t valid. Please check and try again."
+      },
+      "credential_offer_fetch_failed": {
+        "title": "Unable to load request",
+        "message": "Please check your internet connection."
+      },
+      "unsupported_grant": {
+        "title": "Request not supported",
+        "message": "This method isn’t supported by your wallet."
+      },
+      "biometric_cancelled": {
+        "title": "Verification cancelled",
+        "message": "You cancelled identity verification."
+      },
+      "user_cancelled": {
+        "title": "Request cancelled",
+        "message": "You stopped the process. No changes were made."
+      },
+      "network_error": {
+        "title": "No internet connection",
+        "message": "Please check your connection and try again."
+      },
+      "timeout_error": {
+        "title": "Request timed out",
+        "message": "The server took too long to respond."
+      },
+      "parsing_error": {
+        "title": "Unexpected response",
+        "message": "We couldn’t read the response. Please try again."
+      },
+      "verification_failed": {
+        "title": "Credential verification failed",
+        "message": "We couldn’t confirm this credential’s authenticity."
+      },
+      "storage_error": {
+        "title": "Unable to save credential",
+        "message": "Please check device storage and try again."
+      },
+      "unknown_error": {
+        "title": "Something went wrong",
+        "message": "Please try again."
+      },
       "noInternetConnection": {
         "title": "No internet connection",
         "message": "Please check your connection and retry"
@@ -504,23 +682,30 @@
   "VcVerificationBanner": {
     "inProgress": "We are validating your card, this may take sometime. Once verified, you’ll be able to activate your card.",
     "success": "{{vcDetails}} is verified successfully and now available for activation.",
-    "error": "Sorry, we are unable to verify the {{vcDetails}} right now. Please try again later. Until then, you won't be able to activate or share your card."
+    "error": "Sorry, we are unable to verify the {{vcDetails}} right now. Please try again later. Until then, you won't be able to activate or share your card.",
+    "revoked": "{{vcDetails}} has been revoked by the issuer and is no longer valid. Please contact the issuer for more information.",
+    "expired": "{{vcDetails}} has expired and is no longer valid. Please contact the issuer for more information."
   },
   "ViewVcModal": {
     "title": "ID Details",
     "inProgress": "In Progress",
+    "statusInfoTitle": "Status Information",
     "statusToolTipContent": {
       "valid": {
-        "title": "Valid Status:",
-        "description": "The credential has been successfully verified."
+        "title": "Valid",
+        "description": "The card is active and can be used or shared."
       },
       "pending": {
-        "title": "Pending Status:",
-        "description": "Verification is currently pending due to technical issues."
+        "title": "Pending",
+        "description": "The card status cannot be verified right now."
       },
       "expired": {
-        "title": "Expired Status:",
-        "description": "The credential has expired."
+        "title": "Expired",
+        "description": "The card is no longer valid because its validity period has ended."
+      },
+      "revoked": {
+        "title": "Revoked",
+        "description": "The card has been revoked by the issuer and cannot be used or shared."
       }
     }
   },
@@ -695,7 +880,7 @@
   "ScanScreen": {
     "shareWithSelfie": "Share with Selfie",
     "shareWithSelfieQrLogin": "QR Code Login",
-    "shareWithSelfieMessage": "To share your Verifiable Credentials, we’ll verify your identity using face authentication. By continuing, you consent to Inji Wallet using your phone camera for this purpose. Your facial data will be used only for authentication and will not be stored or shared with any third parties.",
+    "shareWithSelfieMessage": "To share your Verifiable Credentials, we’ll securely verify your identity using face authentication. By continuing, you consent to Inji using your camera for this purpose. Your facial data will only be used for verification and will not be shared with any third parties.",
     "shareWithSelfieMessageQrLogin": "In order to access the portal, you’ll need to share your Verifiable Credentials and verify your identity securely using face verification. By continuing, you consent to Inji using your camera for this purpose. \n\n Your facial data will only be used for verification and will not be shared. After successful verification, you can choose which details to share.",
     "ConfirmButton": "I Understand",
     "doNotAskMessage": "Don't ask me again",
@@ -844,12 +1029,12 @@
   "SendVcScreen": {
     "reasonForSharing": "Reason for sharing (optional)",
     "introTitle": "Requester",
-    "requestMessage": "is requesting your digital ID for the purpose",
+    "requestMessage": "is requesting your digital ID for the purpose of ",
     "acceptRequest": "Share",
     "acceptRequestAndVerify": "Share with Selfie",
     "reject": "Reject",
     "consentToPhotoVerification": "I give consent to have my photo taken for authentication",
-    "pleaseSelectAnId": "Please select an ID",
+    "pleaseSelectAnId": "Select one or more cards as requested.",
     "status": {
       "sharing": {
         "title": "Sharing",
@@ -867,15 +1052,17 @@
     }
   },
   "SendVPScreen": {
+    "authorizationPurpose": "Select the requested card(s) to get verified and receive your new card from the trusted issuer.",
+    "consentShare": "I consent and share",
     "requester": "Verification Entity",
     "cardsSelected": "cards selected",
     "cardSelected": "card selected",
     "unCheck": "Uncheck",
     "checkAll": "Check All",
-    "selectedFieldsTitle":"Information you choose to share",
-    "selectedFieldsSubtitle":"Your card includes the following selectively shareable details listed below.",
-    "unselectAll":"Unselect All",
-    "selectAll":"Select All",
+    "selectedFieldsTitle": "Information you choose to share",
+    "selectedFieldsSubtitle": "Your card includes the following selectively shareable details listed below.",
+    "unselectAll": "Unselect All",
+    "selectAll": "Select All",
     "consentDialog": {
       "title": "Consent Required",
       "message": "We require your consent to share your verifiable credentials with {{verifierName}}. This will enable us to verify your identity and fulfil your service requests. Choose \"Yes, Proceed\" to consent or \"Decline\" if you do not wish to share your credentials with {{verifierName}}.",
@@ -925,6 +1112,10 @@
         "title": "Oops! An Error Occured.",
         "message": "There was a technical issue while processing your request. You can try again in a moment."
       },
+      "invalidTransactionData": {
+        "title": "Verification Request Not Supported",
+        "message": "This verification request includes data that is not supported by your wallet."
+      },
       "invalidQrCode": {
         "title": "Request can’t be processed",
         "message": "The QR code is invalid because some required information is missing. Please ask the verifier to provide a valid QR code to share your credentials."
@@ -932,6 +1123,10 @@
       "sendVPError": {
         "title": "Something Went Wrong",
         "message": "There was a technical issue while sharing your card. Tap \"Retry\" to try again or go back to \"Home\"."
+      },
+      "verifierResponseError": {
+        "title": "Verifier could not process the credential",
+        "message": "There was an issue while the verifier was processing your credential."
       },
       "noImage": {
         "title": "An Error Occured!",
@@ -1026,7 +1221,7 @@
     "successBanner": "Your backup was successful!",
     "backupFailed": "Backup Failed",
     "ok": "OK",
-    "help": "Help?"
+    "help": "?"
   },
   "WelcomeScreen": {
     "title": "Open Source Identity Solution",
@@ -1065,6 +1260,7 @@
     "card": "card",
     "cards": "cards",
     "cancel": "Cancel",
+    "goHome": "Home",
     "accept": "Accept",
     "save": "Save",
     "ok": "OK",
@@ -1132,14 +1328,15 @@
     "TransactionCode": "Transasction Code"
   },
   "trustScreen": {
-    "description": "Make sure you recognize or trust this issuer. Once you trust this issuer:",
+    "Description": "Make sure you recognize or trust this issuer. Once you trust this issuer:",
+    "pdiDescription": "To proceed with downloading the requested card, you will need to present another credential as part of the verification process.",
     "verifierDescription": "Make sure you recognize or trust this verifier. Once you do:",
     "infoPoints": [
       "The card will be securely saved in your wallet.",
       "This issuer will be added to your trusted list.",
       "You won't need to review trust again when downloading from them next time."
     ],
-    "verifierInfoPoints":[
+    "verifierInfoPoints": [
       "The card will be securely shared with the verifier.",
       "The verifier will be added to your trusted list.",
       "You won’t need to review trust again when sharing with them in the future."
@@ -1147,5 +1344,20 @@
     "confirm": "Yes, I Trust This Issuer",
     "verifierConfirm": "Yes, I Trust This Verifier",
     "cancel": "No, Take Me Back"
+  },
+  "issuerTrustScreen": {
+    "successfullyTrusted": "Issuer successfully trusted",
+    "successfullyTrustedSubtitle": "You can now safely receive cards from this issuer.\nRedirecting in {{seconds}} seconds…",
+    "confirm": "Yes, I Trust This Issuer",
+    "cancel": "No, Take Me Back",
+    "inProgress": "In Progress…",
+    "infoPoints": [
+      "The card will be securely saved in your wallet.",
+      "This issuer will be added to your trusted list.",
+      "You won't need to review trust again when downloading from them next time."
+    ],
+    "description": "Make sure you recognize or trust this issuer. Once you trust this issuer:",
+    "title": "Quick Check",
+    "subTitle": "Before proceeding, confirm you recognize this issuer"
   }
 }

@@ -45,6 +45,15 @@ class OpenID4VP {
     return JSON.parse(authenticationResponse);
   }
 
+  static async prepareCredentialsForVPSharing(
+    selectedVCs: Record<string, VC[]>,
+    selectedDisclosuresByVc: any,
+  ) {
+    const openID4VP = await OpenID4VP.getInstance();
+
+    return openID4VP.processSelectedVCs(selectedVCs, selectedDisclosuresByVc);
+  }
+
   static async constructUnsignedVPToken(
     selectedVCs: Record<string, VC[]>,
     selectedDisclosuresByVc: any,
@@ -71,15 +80,17 @@ class OpenID4VP {
   ) {
     const openID4VP = await OpenID4VP.getInstance();
 
-    return await openID4VP.InjiOpenID4VP.shareVerifiablePresentation(
-      vpTokenSigningResultMap,
-    );
+    const verifierResponse =
+      await openID4VP.InjiOpenID4VP.shareVerifiablePresentation(
+        vpTokenSigningResultMap,
+      );
+    return parseJSON(verifierResponse);
   }
 
-  static sendErrorToVerifier(errorMessage: string, errorCode: string) {
-    OpenID4VP.getInstance().then(openID4VP => {
-      openID4VP.InjiOpenID4VP.sendErrorToVerifier(errorMessage, errorCode);
-    });
+  static async sendErrorToVerifier(errorMessage: string, errorCode: string) {
+    const openID4VP = await OpenID4VP.getInstance();
+
+    return openID4VP.InjiOpenID4VP.sendErrorToVerifier(errorMessage, errorCode);
   }
 
   private processSelectedVCs(
@@ -154,7 +165,7 @@ class OpenID4VP {
       disclosureSet.size > 0
         ? [jwt, ...disclosureSet].join('~') + '~'
         : jwt + '~';
- 
+
     return finalSdJwt;
   }
 }

@@ -1,61 +1,132 @@
 package io.mosip.residentapp
 
 import com.facebook.react.bridge.ReactApplicationContext
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPTokenV2
 import io.mosip.vciclient.VCIClient
+import io.mosip.vciclient.authorizationCodeFlow.AuthorizationMethod
 import io.mosip.vciclient.authorizationCodeFlow.clientMetadata.ClientMetadata
+import com.google.gson.JsonObject
+import io.mosip.vciclient.constants.OpenWebPageCallback
+import io.mosip.vciclient.constants.ProofsCallback
+import io.mosip.vciclient.constants.SelectCredentialsForPresentationCallback
+import io.mosip.vciclient.constants.SignVerifiablePresentationCallback
 import io.mosip.vciclient.credential.response.CredentialResponse
+import io.mosip.vciclient.exception.DownloadFailedException
+import io.mosip.vciclient.proof.CredentialRequestProofs
 import io.mosip.vciclient.token.TokenRequest
 import io.mosip.vciclient.token.TokenResponse
-import io.mosip.vciclient.constants.AuthorizeUserCallback
-import io.mosip.vciclient.constants.ProofJwtCallback
 import kotlinx.coroutines.runBlocking
 
 object VCIClientBridge {
 
-    // Must be set by the Java side (InjiVciClientModule) to emit events to JS
     lateinit var reactContext: ReactApplicationContext
+
+
+
+    @JvmStatic
+    fun getIssuerMetadataSync(
+            client: VCIClient,
+            credentialIssuer: String
+    ): Map<String, Any?> = runBlocking {
+        client.getIssuerMetadata(credentialIssuer)
+    }
 
     @JvmStatic
     fun requestCredentialByOfferSync(
             client: VCIClient,
             offer: String,
-            clientMetaData: ClientMetadata
-    ): CredentialResponse = runBlocking {
-        client.requestCredentialByCredentialOffer(
+            clientMetaData: ClientMetadata,
+            signatureSuite: String?
+    ): String = runBlocking {
+       val response = client.fetchCredentialsUsingCredentialOffer(
                 credentialOffer = offer,
                 clientMetadata = clientMetaData,
                 getTxCode = getTxCodeCallback(),
-                authorizeUser = authorizeUserCallback(),
+                authorizations = authorizationMethods(signatureSuite),
                 getTokenResponse = getTokenResponseCallback(),
-                getProofJwt = getProofJwtCallback(),
+                getProofs = getProofsCallback(),
                 onCheckIssuerTrust = onCheckIssuerTrustCallback()
         )
+        response.toSingleCredentialResponseJson()
     }
+
+
 
     @JvmStatic
     fun requestCredentialFromTrustedIssuerSync(
             client: VCIClient,
             credentialIssuer: String,
             credentialConfigurationId: String,
-            clientMetaData: ClientMetadata
-    ): CredentialResponse = runBlocking {
-        client.requestCredentialFromTrustedIssuer(
-                credentialIssuer,
-                credentialConfigurationId,
-                clientMetaData,
-                authorizeUser = authorizeUserCallback(),
+            clientMetaData: ClientMetadata,
+            signatureSuite: String?
+    ): String = runBlocking {
+        client.fetchCredentialsFromTrustedIssuer(
+                credentialIssuer = credentialIssuer,
+                credentialConfigurationId = credentialConfigurationId,
+                clientMetadata = clientMetaData,
                 getTokenResponse = getTokenResponseCallback(),
-                getProofJwt = getProofJwtCallback(),
+                authorizations = authorizationMethods(signatureSuite),
+                getProofs = getProofsCallback(),
+        ).toSingleCredentialResponseJson()
+    }
+
+    private fun authorizationMethods(signatureSuite: String?): List<AuthorizationMethod> =
+            listOf(
+                    AuthorizationMethod.PresentationDuringIssuance(
+                            selectCredentialsForPresentation =
+                                    selectCredentialsForPresentationCallback(),
+                            signVerifiablePresentation = signVerifiablePresentationCallback(),
+                            ldpVpSignatureSuite = signatureSuite
+                    ),
+                    // Uncomment when you want redirect-to-web to be enabled in V2 flow
+                    AuthorizationMethod.RedirectToWeb(openWebPage = openWebPageCallback())
+            )
+
+    private fun selectCredentialsForPresentationCallback(): SelectCredentialsForPresentationCallback =
+            { authorizationRequest: AuthorizationRequest ->
+                VCIClientCallbackBridge.createPresentationRequestDeferred()
+                VCIClientCallbackBridge.emitPresentationRequest(reactContext, authorizationRequest)
+                VCIClientCallbackBridge.awaitSelectedCredentialsForPresentationRequest()
+            }
+
+    private fun signVerifiablePresentationCallback(): SignVerifiablePresentationCallback =
+            { payload: List<UnsignedVPTokenV2> ->
+                VCIClientCallbackBridge.createSignedVPTokenDeferred()
+                VCIClientCallbackBridge.emitSignedVPTokenRequest(reactContext, payload)
+                VCIClientCallbackBridge.awaitSignedVPToken()
+            }
+
+    private fun openWebPageCallback(): OpenWebPageCallback =
+    openWeb@{ endpoint: String ->
+
+        VCIClientCallbackBridge.createAuthCodeDeferred()
+        VCIClientCallbackBridge.emitRequestAuthCode(reactContext, endpoint)
+
+        val authCode = try {
+            VCIClientCallbackBridge.awaitAuthCode()
+        } catch (ex: Exception) {
+            return@openWeb mapOf(
+                "error" to "authorization_failed",
+                "errorDescription" to
+                    (ex.message ?: "Failed to receive authorization code")
+            )
+        }
+
+        if (authCode.isBlank()) {
+            return@openWeb mapOf(
+                "error" to "access_denied",
+                "errorDescription" to "Authorization code not received"
+            )
+        }
+
+        mapOf(
+            "code" to authCode
         )
     }
 
-    private fun authorizeUserCallback(): AuthorizeUserCallback = { endpoint ->
-        VCIClientCallbackBridge.createAuthCodeDeferred()
-        VCIClientCallbackBridge.emitRequestAuthCode(reactContext, endpoint)
-        VCIClientCallbackBridge.awaitAuthCode()
-    }
 
-    private fun getProofJwtCallback(): ProofJwtCallback =
+    private fun getProofsCallback(): ProofsCallback =
             {
                     credentialIssuer: String,
                     cNonce: String?,
@@ -67,10 +138,10 @@ object VCIClientBridge {
                         cNonce,
                         proofSigningAlgorithmsSupported
                 )
-                VCIClientCallbackBridge.awaitProof()
+                CredentialRequestProofs(proofs = listOf(VCIClientCallbackBridge.awaitProof()))
             }
 
-    private fun getTokenResponseCallback(): suspend (tokenRequest: TokenRequest) -> TokenResponse =
+    private fun getTokenResponseCallback(): suspend (TokenRequest) -> TokenResponse =
             { tokenRequest ->
                 val payload: Map<String, Any?> =
                         mapOf(
@@ -83,6 +154,7 @@ object VCIClientBridge {
                                 "redirectUri" to tokenRequest.redirectUri,
                                 "codeVerifier" to tokenRequest.codeVerifier
                         )
+
                 VCIClientCallbackBridge.createTokenResponseDeferred()
                 VCIClientCallbackBridge.emitTokenRequest(reactContext, payload)
                 VCIClientCallbackBridge.awaitTokenResponse()
@@ -110,4 +182,17 @@ object VCIClientBridge {
                 )
                 VCIClientCallbackBridge.awaitIssuerTrustResponse()
             }
+
+        private fun CredentialResponse.toSingleCredentialResponseJson(): String {
+
+        val firstItem = credentials?.firstOrNull()
+                ?: throw DownloadFailedException("No credential returned from issuer")
+
+        val json = JsonObject().apply {
+            add("credential", firstItem.credential)
+            credentialIssuer?.let { addProperty("credentialIssuer", it) }
+            credentialConfigurationId?.let { addProperty("credentialConfigurationId", it) }
+        }
+        return json.toString()
+    }
 }

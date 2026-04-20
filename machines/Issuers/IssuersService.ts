@@ -1,7 +1,7 @@
 import NetInfo from '@react-native-community/netinfo';
-import {NativeModules} from 'react-native';
+import { NativeModules } from 'react-native';
 import Cloud from '../../shared/CloudBackupAndRestoreUtils';
-import getAllConfigurations, {CACHED_API} from '../../shared/api';
+import getAllConfigurations, { CACHED_API } from '../../shared/api';
 import {
   fetchKeyPair,
   generateKeyPair,
@@ -12,12 +12,17 @@ import {
   updateCredentialInformation,
   verifyCredentialData,
 } from '../../shared/openId4VCI/Utils';
-import VciClient from '../../shared/vciClient/VciClient';
+import VciClient, { VciClientErrorResponse } from '../../shared/vciClient/VciClient';
 import { displayType, issuerType } from './IssuersMachine';
 import { setItem } from '../store';
-import { API_CACHED_STORAGE_KEYS } from '../../shared/constants';
+import {
+  API_CACHED_STORAGE_KEYS,
+  AuthorizationType,
+} from '../../shared/constants';
 import { createCacheObject } from '../../shared/Utils';
 import { VerificationResult } from '../../shared/vcjs/verifyCredential';
+import { sign } from '@noble/secp256k1';
+import { ca } from 'date-fns/locale';
 
 export const IssuersService = () => {
   return {
@@ -25,7 +30,13 @@ export const IssuersService = () => {
       return await Cloud.isSignedInAlready();
     },
     downloadIssuersList: async () => {
-      const trustedIssuersList = await CACHED_API.fetchIssuers();
+      let trustedIssuersList: issuerType[] = [];
+      try { trustedIssuersList = await CACHED_API.fetchIssuers(); }
+      catch (error) {
+        console.error('Error fetching issuers list:', error);
+       trustedIssuersList = [];
+      }
+      
       return trustedIssuersList;
     },
     checkInternet: async () => await NetInfo.fetch(),
@@ -48,7 +59,7 @@ export const IssuersService = () => {
       return wellknownResponse;
     },
     getCredentialTypes: async (context: any) => {
-      const credentialTypes: Array<{id: string; [key: string]: any}> = [];
+      const credentialTypes: Array<{ id: string;[key: string]: any }> = [];
       const selectedIssuer = context.selectedIssuer;
 
       const keys = Object.keys(
@@ -97,7 +108,21 @@ export const IssuersService = () => {
           tokenRequest: tokenRequest,
         });
       };
-      const {credential} =
+      const handlePresentationRequest = (presentationRequest: object) => {
+        sendBack({
+          type: 'PRESENTATION_REQUEST',
+          presentationRequest: presentationRequest,
+        });
+      };
+
+      const signPresentation = (presentationRequest: object) => {
+        sendBack({
+          type: 'SIGN_PRESENTATION',
+          presentationRequest: presentationRequest,
+        });
+      };
+
+      const { credential } =
         await VciClient.getInstance().requestCredentialFromTrustedIssuer(
           context.selectedIssuer.credential_issuer_host,
           context.selectedCredentialType.id,
@@ -108,6 +133,8 @@ export const IssuersService = () => {
           getProofJwt,
           navigateToAuthView,
           getTokenResponse,
+          handlePresentationRequest,
+          signPresentation,
         );
       return updateCredentialInformation(context, credential);
     },
@@ -124,7 +151,7 @@ export const IssuersService = () => {
     },
 
     checkIssuerIdInStoredTrustedIssuers: async (context: any) => {
-      const {RNSecureKeystoreModule} = NativeModules;
+      const { RNSecureKeystoreModule } = NativeModules;
       try {
         return await RNSecureKeystoreModule.hasAlias(
           context.credentialOfferCredentialIssuer,
@@ -137,8 +164,14 @@ export const IssuersService = () => {
         return false;
       }
     },
+
+    sendSignedVP: async (_, event) => {
+      const vpTokenSigningResult = event.signedVPToken.data;
+      await VciClient.getInstance().sendSignedVP(vpTokenSigningResult);
+    },
+
     addIssuerToTrustedIssuers: async (context: any) => {
-      const {RNSecureKeystoreModule} = NativeModules;
+      const { RNSecureKeystoreModule } = NativeModules;
       try {
         await RNSecureKeystoreModule.storeData(
           context.credentialOfferCredentialIssuer,
@@ -146,6 +179,7 @@ export const IssuersService = () => {
         );
       } catch {
         console.error('Error updating issuer trust in keystore');
+        throw new Error('Error adding issuer to trusted issuers');
       }
     },
     downloadCredentialFromOffer: (context: any) => async (sendBack: any) => {
@@ -200,6 +234,20 @@ export const IssuersService = () => {
         });
       };
 
+      const handlePresentationRequest = (presentationRequest: object) => {
+        sendBack({
+          type: 'PRESENTATION_REQUEST',
+          presentationRequest: presentationRequest,
+        });
+      };
+
+      const signPresentation = (presentationRequest: object) => {
+        sendBack({
+          type: 'SIGN_PRESENTATION',
+          presentationRequest: presentationRequest,
+        });
+      };
+
       const credentialResponse =
         await VciClient.getInstance().requestCredentialByOffer(
           context.qrData,
@@ -208,6 +256,8 @@ export const IssuersService = () => {
           navigateToAuthView,
           getTokenResponse,
           requesTrustIssuerConsent,
+          handlePresentationRequest,
+          signPresentation,
         );
       return credentialResponse;
     },
@@ -215,7 +265,9 @@ export const IssuersService = () => {
       const tokenRequestObject = context.tokenRequestObject;
       return await sendTokenRequest(
         tokenRequestObject,
-        context.selectedIssuer?.token_endpoint,
+        context.authorizationType === AuthorizationType.IMPLICIT
+          ? context.selectedIssuer?.token_endpoint
+          : null,
       );
     },
     sendTokenResponse: async (context: any) => {
@@ -283,7 +335,7 @@ export const IssuersService = () => {
     },
 
     getKeyOrderList: async () => {
-      const {RNSecureKeystoreModule} = NativeModules;
+      const { RNSecureKeystoreModule } = NativeModules;
       const keyOrder = JSON.parse(
         (await RNSecureKeystoreModule.getData('keyPreference'))[1],
       );
@@ -308,7 +360,11 @@ export const IssuersService = () => {
     },
 
     verifyCredential: async (context: any): Promise<VerificationResult> => {
-      const { isCredentialOfferFlow, verifiableCredential, selectedCredentialType } = context;
+      const {
+        isCredentialOfferFlow,
+        verifiableCredential,
+        selectedCredentialType,
+      } = context;
       if (isCredentialOfferFlow) {
         const configurations = await getAllConfigurations();
         if (configurations.disableCredentialOfferVcVerification) {
@@ -326,12 +382,11 @@ export const IssuersService = () => {
       if (!verificationResult.isVerified) {
         throw new Error(verificationResult.verificationErrorCode);
       }
-    
+
       return verificationResult;
-    }
-    
-}
-}
+    },
+  };
+};
 async function sendTokenRequest(
   tokenRequestObject: any,
   proxyTokenEndpoint: any = null,
@@ -381,7 +436,18 @@ async function sendTokenRequest(
       response.status,
       errorText,
     );
-    throw new Error(`Token request failed: ${response.status} ${errorText}`);
+    let parsedError: any;
+    try {
+      parsedError = JSON.parse(errorText);
+    } catch {
+      parsedError = {};
+    }
+    //have to throw error in vci error respons eformat
+    const errorResponse: VciClientErrorResponse = {
+      serverErrorCode: parsedError.error ?? 'UNKNOWN_ERROR',
+      serverErrorMessage: parsedError.error_description,
+    }
+    throw errorResponse;
   }
   const tokenResponse = await response.json();
   return tokenResponse;

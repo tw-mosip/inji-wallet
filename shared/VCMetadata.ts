@@ -9,6 +9,7 @@ import {getMosipIdentifier} from './commonUtil';
 import {VCFormat} from './VCFormat';
 import {isMosipVC, UUID} from './Utils';
 import {getCredentialType} from '../components/VC/common/VCUtils';
+import {RevocationStatus, RevocationStatusType} from './vcVerifier/VcVerifier';
 
 const VC_KEY_PREFIX = 'VC';
 const VC_ITEM_STORE_KEY_REGEX = '^VC_[a-zA-Z0-9_-]+$';
@@ -31,10 +32,12 @@ export class VCMetadata {
   mosipIndividualId: string = '';
   format: string = '';
   isExpired: boolean = false;
+  isRevoked: RevocationStatusType = RevocationStatus.FALSE;
 
   downloadKeyType: string = '';
   credentialType: string = '';
   issuerHost: string = '';
+  lastKnownStatusTimestamp?: string = '';
 
   constructor({
     idType = '',
@@ -49,8 +52,10 @@ export class VCMetadata {
     format = '',
     downloadKeyType = '',
     isExpired = false,
+    isRevoked = RevocationStatus.FALSE,
     credentialType = '',
     issuerHost = '',
+    lastKnownStatusTimestamp = '',
   } = {}) {
     this.idType = idType;
     this.requestId = requestId;
@@ -64,8 +69,10 @@ export class VCMetadata {
     this.format = format;
     this.downloadKeyType = downloadKeyType;
     this.isExpired = isExpired;
+    this.isRevoked = isRevoked;
     this.credentialType = credentialType;
     this.issuerHost = issuerHost;
+    this.lastKnownStatusTimestamp = lastKnownStatusTimestamp;
   }
 
   //TODO: Remove any typing and use appropriate typing
@@ -81,6 +88,7 @@ export class VCMetadata {
       timestamp: vc.vcMetadata ? vc.vcMetadata.timestamp : vc.timestamp,
       isVerified: vc.isVerified,
       isExpired: vc.isExpired,
+      isRevoked: vc.isRevoked,
       mosipIndividualId: vc.mosipIndividualId
         ? vc.mosipIndividualId
         : vc.vcMetadata
@@ -89,6 +97,7 @@ export class VCMetadata {
       downloadKeyType: vc.downloadKeyType,
       credentialType: vc.credentialType,
       issuerHost: vc.issuerHost,
+      lastKnownStatusTimestamp: vc.lastKnownStatusTimestamp,
     });
   }
 
@@ -142,7 +151,7 @@ export const getVCMetadata = (context: object, keyType: string) => {
     try {
       const url = new URL(issuerHost);
       return url.hostname.split('.')[0];
-    }catch (error) {
+    } catch (error) {
       // Fallback to issuerHost if URL parsing fails
       return issuerHost;
     }
@@ -156,6 +165,8 @@ export const getVCMetadata = (context: object, keyType: string) => {
     timestamp: context.timestamp ?? '',
     isVerified: context.vcMetadata.isVerified ?? false,
     isExpired: context.vcMetadata.isExpired ?? false,
+    isRevoked: context.vcMetadata.isRevoked ?? RevocationStatus.FALSE,
+    lastKnownStatusTimestamp: context.vcMetadata.lastKnownStatusTimestamp ?? '',
     mosipIndividualId: getMosipIndividualId(
       context['verifiableCredential'] as VerifiableCredential,
       issuer,

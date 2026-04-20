@@ -2,8 +2,8 @@ import {StateFrom} from 'xstate';
 import {VCMetadata} from '../../../shared/VCMetadata';
 import {VCItemMachine} from './VCItemMachine';
 import {
-  getFaceField,
   getMosipLogo,
+  getFaceAttribute,
 } from '../../../components/VC/common/VCUtils';
 import {
   Credential,
@@ -48,30 +48,8 @@ export function selectVerifiableCredentialData(
   state: State,
 ): VerifiableCredentialData {
   const vcMetadata = new VCMetadata(state.context.vcMetadata);
-  const verifiableCredential = state.context.verifiableCredential;
-  let credentialSubject = {};
-  if (state.context?.format === VCFormat.ldp_vc) {
-    credentialSubject =
-      verifiableCredential?.credential?.credentialSubject ?? {};
-  } else if (state.context?.format === VCFormat.mso_mdoc) {
-    const nameSpaces =
-      verifiableCredential?.processedCredential?.issuerSigned?.nameSpaces ??
-      verifiableCredential?.processedCredential?.nameSpaces ??
-      {};
-    credentialSubject = Object.values(nameSpaces)
-      .flat()
-      .reduce((acc, item) => {
-        const key = item.elementIdentifier;
-        const value = item.elementValue;
-        acc[key] = value;
-        return acc;
-      }, {} as Record<string, any>);
-  } else if (state.context?.format === VCFormat.vc_sd_jwt || state.context?.format === VCFormat.dc_sd_jwt) {
-    credentialSubject =
-      verifiableCredential?.processedCredential?.fullResolvedPayload ?? {};
-  }
   const faceField =
-    getFaceField(credentialSubject) ??
+    getFaceAttribute(state.context.verifiableCredential,state.context.format) ??
     state.context.credential?.biometrics?.face;
 
   return {
@@ -156,6 +134,18 @@ export function selectShowWalletBindingError(state: State) {
   return state.matches(
     'vcUtilitiesState.walletBinding.showingWalletBindingError',
   );
+}
+
+export function isReverifyingVc(state: State) {
+  return state.matches('vcUtilitiesState.reverificationState');
+}
+
+export function showReverificationSuccessBanner(state: State) {
+  return state.context.showReverificationSuccessBanner;
+}
+
+export function showVerificationFailureBanner(state: State) {
+  return state.context.showVerificationFailureBanner;
 }
 
 export function selectVc(state: State) {

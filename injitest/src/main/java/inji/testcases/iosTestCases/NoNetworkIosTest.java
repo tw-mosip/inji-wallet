@@ -82,7 +82,7 @@ public class NoNetworkIosTest extends IosBaseTest {
         OtpVerificationPage otpVerification = retrieveIdPage.setEnterIdTextBox(getUIN()).clickOnGenerateCardButton();
 
 //        assertTrue(otpVerification.isOtpVerificationPageLoaded(), "Verify if otp verification page is displayed");
-        otpVerification.enterOtp(InjiWalletUtil.getOtp(), PlatformType.IOS);
+        otpVerification.enterOtp(uinGetOtp(), PlatformType.IOS);
 
         addNewCardPage.clickOnDoneButton();
 //        assertTrue(homePage.isCredentialTypeValueDisplayed(), "Verify if credential type value is displayed");
@@ -124,7 +124,7 @@ public class NoNetworkIosTest extends IosBaseTest {
         OtpVerificationPage otpVerification = retrieveIdPage.setEnterIdTextBox(getUIN()).clickOnGenerateCardButton();
 
 //        assertTrue(otpVerification.isOtpVerificationPageLoaded(), "Verify if otp verification page is displayed");
-        otpVerification.enterOtp(InjiWalletUtil.getOtp(), PlatformType.IOS);
+        otpVerification.enterOtp(uinGetOtp(), PlatformType.IOS);
 
         addNewCardPage.clickOnDoneButton();
         assertTrue(homePage.isCredentialTypeValueDisplayed(), "Verify if credential type value is displayed");
@@ -203,7 +203,7 @@ public class NoNetworkIosTest extends IosBaseTest {
         assertTrue(helpPage.isHelpPageLoaded(), "Verify if help page is displayed");
         helpPage.exitHelpPage();
 
-        homePage.clickOnNextButtonForInjiTour();
+//        homePage.clickOnNextButtonForInjiTour();
         assertTrue(homePage.isHomePageLoaded(), "Verify if home page is displayed");
     }
 
@@ -238,7 +238,7 @@ public class NoNetworkIosTest extends IosBaseTest {
         OtpVerificationPage otpVerification = retrieveIdPage.setEnterIdTextBox(getUIN()).clickOnGenerateCardButton();
 
 //        assertTrue(otpVerification.isOtpVerificationPageLoaded(), "Verify if otp verification page is displayed");
-        otpVerification.enterOtp(InjiWalletUtil.getOtp(), PlatformType.IOS);
+        otpVerification.enterOtp(uinGetOtp(), PlatformType.IOS);
 
         addNewCardPage.clickOnDoneButton();
         assertTrue(homePage.isCredentialTypeValueDisplayed(), "Verify if credential type value is displayed");
@@ -290,7 +290,7 @@ public class NoNetworkIosTest extends IosBaseTest {
         OtpVerificationPage otpVerification = esignetLoginPage.setEnterIdTextBox(getUIN());
 
         esignetLoginPage.clickOnGetOtpButton();
-        otpVerification.enterOtpForeSignet(InjiWalletUtil.getOtp(), PlatformType.IOS);
+        otpVerification.enterOtpForeSignet(uinGetOtp(), PlatformType.IOS);
         esignetLoginPage.clickOnVerifyButtonIos();
 
         addNewCardPage.clickOnDoneButton();
@@ -383,34 +383,26 @@ public class NoNetworkIosTest extends IosBaseTest {
     public void DownloadVcWithEsignetWithoutNetwork() throws InterruptedException {
         ChooseLanguagePage chooseLanguagePage = new ChooseLanguagePage(getDriver());
 
-//        assertTrue(chooseLanguagePage.isChooseLanguagePageLoaded(), "Verify if choose language page is displayed");
         WelcomePage welcomePage = chooseLanguagePage.clickOnSavePreference();
-
-//        assertTrue(welcomePage.isWelcomePageLoaded(), "Verify if welcome page is loaded");
         AppUnlockMethodPage appUnlockMethodPage = welcomePage.clickOnSkipButton();
 
-//        assertTrue(appUnlockMethodPage.isAppUnlockMethodPageLoaded(), "Verify if app unlocked page is displayed");
         SetPasscode setPasscode = appUnlockMethodPage.clickOnUsePasscode();
 
-//        assertTrue(setPasscode.isSetPassCodePageLoaded(), "Verify if set passcode page is displayed");
         ConfirmPasscode confirmPasscode = setPasscode.enterPasscode(TestDataReader.readData("passcode"), PlatformType.IOS);
 
-//        assertTrue(confirmPasscode.isConfirmPassCodePageLoaded(), "Verify if confirm passcode page is displayed");
         HomePage homePage = confirmPasscode.enterPasscodeInConfirmPasscodePage(TestDataReader.readData("passcode"), PlatformType.IOS);
 
         homePage.clickOnNextButtonForInjiTour();
-//        assertTrue(homePage.isHomePageLoaded(), "Verify if home page is displayed");
 
         AddNewCardPage addNewCardPage = homePage.downloadCard();
 
-//        assertTrue(addNewCardPage.isAddNewCardPageLoaded(), "Verify if add new card page is displayed");
         String sessionId = getDriver().getSessionId().toString();
         UpdateNetworkSettings.setNoNetworkProfile(sessionId);
+
+        
         addNewCardPage.clickOnBack();
 
         homePage.downloadCard();
-//        assertTrue(addNewCardPage.isIssuerDescriptionMosipDisplayed(), "Verify if issuer description  mosip displayed");
-//        assertTrue(addNewCardPage.isIssuerDescriptionEsignetDisplayed(), "Verify if issuer description  esignet displayed");
 
         addNewCardPage.clickOnMosipIssuer();
         assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
@@ -419,6 +411,110 @@ public class NoNetworkIosTest extends IosBaseTest {
         assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
     }
 
+    
+    @Test
+    public void DownloadVcWithMockWithoutNetwork() throws InterruptedException {
+        ChooseLanguagePage chooseLanguagePage = new ChooseLanguagePage(getDriver());
+        WelcomePage welcomePage = chooseLanguagePage.clickOnSavePreference();
+        AppUnlockMethodPage appUnlockMethodPage = welcomePage.clickOnSkipButton();
+        SetPasscode setPasscode = appUnlockMethodPage.clickOnUsePasscode();
+        ConfirmPasscode confirmPasscode = setPasscode.enterPasscode(TestDataReader.readData("passcode"), PlatformType.IOS);
+        HomePage homePage = confirmPasscode.enterPasscodeInConfirmPasscodePage(TestDataReader.readData("passcode"), PlatformType.IOS);
+
+        homePage.clickOnNextButtonForInjiTour();
+        AddNewCardPage addNewCardPage = homePage.downloadCard();
+        String sessionId = getDriver().getSessionId().toString();
+        UpdateNetworkSettings.setNoNetworkProfile(sessionId);
+        
+        addNewCardPage.clickOnBack();
+
+        homePage.downloadCard();
+        addNewCardPage.clickOnMockIssuer();
+        assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
+        homePage.clickOnTryAgainButton();
+
+        assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
+    }
+    
+    @Test
+    public void DownloadVcWithMdlWithoutNetwork() throws InterruptedException {
+        ChooseLanguagePage chooseLanguagePage = new ChooseLanguagePage(getDriver());
+        WelcomePage welcomePage = chooseLanguagePage.clickOnSavePreference();
+        AppUnlockMethodPage appUnlockMethodPage = welcomePage.clickOnSkipButton();
+        SetPasscode setPasscode = appUnlockMethodPage.clickOnUsePasscode();
+        ConfirmPasscode confirmPasscode = setPasscode.enterPasscode(TestDataReader.readData("passcode"), PlatformType.IOS);
+        HomePage homePage = confirmPasscode.enterPasscodeInConfirmPasscodePage(TestDataReader.readData("passcode"), PlatformType.IOS);
+
+        homePage.clickOnNextButtonForInjiTour();
+        AddNewCardPage addNewCardPage = homePage.downloadCard();
+        String sessionId = getDriver().getSessionId().toString();
+        UpdateNetworkSettings.setNoNetworkProfile(sessionId);
+        
+        addNewCardPage.clickOnBack();
+
+        homePage.downloadCard();
+
+        addNewCardPage.clickOnMdlIssuer();
+        assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
+        
+        homePage.clickOnTryAgainButton();
+
+        assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
+    }
+    
+    @Test
+    public void DownloadVcWithLandRegistryWithoutNetwork() throws InterruptedException {
+        ChooseLanguagePage chooseLanguagePage = new ChooseLanguagePage(getDriver());
+        WelcomePage welcomePage = chooseLanguagePage.clickOnSavePreference();
+        AppUnlockMethodPage appUnlockMethodPage = welcomePage.clickOnSkipButton();
+        SetPasscode setPasscode = appUnlockMethodPage.clickOnUsePasscode();
+        ConfirmPasscode confirmPasscode = setPasscode.enterPasscode(TestDataReader.readData("passcode"), PlatformType.IOS);
+        HomePage homePage = confirmPasscode.enterPasscodeInConfirmPasscodePage(TestDataReader.readData("passcode"), PlatformType.IOS);
+
+        homePage.clickOnNextButtonForInjiTour();
+
+        AddNewCardPage addNewCardPage = homePage.downloadCard();
+        String sessionId = getDriver().getSessionId().toString();
+        UpdateNetworkSettings.setNoNetworkProfile(sessionId);
+        addNewCardPage.clickOnBack();
+
+        homePage.downloadCard();
+
+        addNewCardPage.clickOnLandRegistryIssuer();
+        assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
+        homePage.clickOnTryAgainButton();
+
+        assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
+    }
+    
+    
+    @Test
+    public void DownloadVcWithStayProtectedWithoutNetwork() throws InterruptedException {
+        ChooseLanguagePage chooseLanguagePage = new ChooseLanguagePage(getDriver());
+
+        WelcomePage welcomePage = chooseLanguagePage.clickOnSavePreference();
+        AppUnlockMethodPage appUnlockMethodPage = welcomePage.clickOnSkipButton();
+
+        SetPasscode setPasscode = appUnlockMethodPage.clickOnUsePasscode();
+        ConfirmPasscode confirmPasscode = setPasscode.enterPasscode(TestDataReader.readData("passcode"), PlatformType.IOS);
+        HomePage homePage = confirmPasscode.enterPasscodeInConfirmPasscodePage(TestDataReader.readData("passcode"), PlatformType.IOS);
+
+        homePage.clickOnNextButtonForInjiTour();
+        AddNewCardPage addNewCardPage = homePage.downloadCard();
+
+        String sessionId = getDriver().getSessionId().toString();
+        UpdateNetworkSettings.setNoNetworkProfile(sessionId);
+        addNewCardPage.clickOnBack();
+
+        homePage.downloadCard();
+
+        addNewCardPage.clickOnStayProtectedIssuer();
+        assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
+        homePage.clickOnTryAgainButton();
+
+        assertTrue(homePage.verifyLanguageForTryAgainButtonDisplayed("English"), "Verify if Try again button displayed");
+    }
+    
     @Test
     public void verifyGetUinHeaderOffline() {
         ChooseLanguagePage chooseLanguagePage = new ChooseLanguagePage(getDriver());

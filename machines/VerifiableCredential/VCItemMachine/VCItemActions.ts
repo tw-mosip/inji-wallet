@@ -1,8 +1,16 @@
 import {assign, send} from 'xstate';
-import {CommunicationDetails, UUID} from '../../../shared/Utils';
+import {
+  CommunicationDetails,
+  UUID,
+  VerificationStatus,
+} from '../../../shared/Utils';
 import {StoreEvents} from '../../store';
 import {VCMetadata} from '../../../shared/VCMetadata';
-import {MIMOTO_BASE_URL, MY_VCS_STORE_KEY} from '../../../shared/constants';
+import {
+  EXPIRED_VC_ERROR_CODE,
+  MIMOTO_BASE_URL,
+  MY_VCS_STORE_KEY,
+} from '../../../shared/constants';
 import i18n from '../../../i18n';
 import {getHomeMachineService} from '../../../screens/Home/HomeScreenController';
 import {DownloadProps} from '../../../shared/api';
@@ -27,22 +35,46 @@ import {VcMetaEvents} from '../VCMetaMachine/VCMetaMachine';
 import {WalletBindingResponse} from '../VCMetaMachine/vc';
 import {BannerStatusType} from '../../../components/BannerNotification';
 import {VCActivityLog} from '../../../components/ActivityLogEvent';
+import {RevocationStatus} from '../../../shared/vcVerifier/VcVerifier';
 
 export const VCItemActions = model => {
   return {
-    setIsVerified: assign({
-      vcMetadata: (context: any) =>
-        new VCMetadata({
-          ...context.vcMetadata,
-          isVerified: true,
-        }),
+    setIsVerified: assign((context: any, event: any) => {
+      const previous = context.vcMetadata;
+      const next = new VCMetadata({
+        ...previous,
+        isVerified: true,
+        isRevoked: event.data.isRevoked,
+        isExpired: event.data.verificationErrorCode == EXPIRED_VC_ERROR_CODE,
+        lastKnownStatusTimestamp: new Date().toISOString(),
+      });
+
+      const statusChanged =
+        previous.isVerified !== next.isVerified ||
+        previous.isRevoked !== next.isRevoked ||
+        previous.isExpired !== next.isExpired;
+      return {
+        ...context,
+        vcMetadata: next,
+        statusChangedDuringVerification: statusChanged,
+      };
     }),
-    resetIsVerified: assign({
-      vcMetadata: (context: any) =>
-        new VCMetadata({
-          ...context.vcMetadata,
+
+    resetIsVerified: assign((context: any) => {
+      const previous = context.vcMetadata;
+      const statusChanged = previous.isVerified;
+
+      return {
+        ...context,
+        vcMetadata: new VCMetadata({
+          ...previous,
           isVerified: false,
+          isRevoked: RevocationStatus.FALSE,
+          isExpired: false,
+          lastKnownStatusTimestamp: new Date().toISOString(),
         }),
+        statusChangedDuringVerification: statusChanged,
+      };
     }),
 
     setVerificationStatus: assign({
@@ -53,7 +85,6 @@ export const VCItemActions = model => {
             : event.response.vcMetadata.isVerified
             ? BannerStatusType.SUCCESS
             : BannerStatusType.ERROR;
-
         return getVcVerificationDetails(
           statusType,
           context.vcMetadata,
@@ -62,6 +93,73 @@ export const VCItemActions = model => {
         );
       },
     }),
+
+    sendReverificationSuccessToVcMeta: send(
+      (context: any) => ({
+        type:
+          context.vcMetadata.isRevoked === RevocationStatus.UNDETERMINED
+            ? 'REVERIFY_VC_FAILED'
+            : 'REVERIFY_VC_SUCCESS',
+        statusValue:
+          context.vcMetadata.isRevoked === RevocationStatus.TRUE
+            ? VerificationStatus.REVOKED
+            : context.vcMetadata.isExpired
+            ? VerificationStatus.EXPIRED
+            : context.vcMetadata.isVerified &&
+              context.vcMetadata.isRevoked === RevocationStatus.FALSE
+            ? VerificationStatus.VALID
+            : VerificationStatus.PENDING,
+        vcKey: context.vcMetadata.getVcKey(),
+        vcType: context.vcMetadata.credentialType,
+      }),
+      {
+        to: (context: any) => context.serviceRefs.vcMeta,
+      },
+    ),
+
+    resetStatusChangedFlag: assign({
+      statusChangedDuringVerification: () => false,
+    }),
+
+    sendReverificationFailureToVcMeta: send(
+      (context: any) => ({
+        type: 'REVERIFY_VC_FAILED',
+        statusValue: VerificationStatus.PENDING,
+        vcKey: context.vcMetadata.getVcKey(),
+        vcType: context.vcMetadata.credentialType,
+      }),
+      {
+        to: (context: any) => context.serviceRefs.vcMeta,
+      },
+    ),
+
+    logStatusChangedOnReverification: send(
+      (context: any) => {
+        const status =
+          context.vcMetadata.isRevoked === RevocationStatus.TRUE
+            ? VerificationStatus.REVOKED
+            : context.vcMetadata.isExpired
+            ? VerificationStatus.EXPIRED
+            : context.vcMetadata.isVerified
+            ? VerificationStatus.VALID
+            : VerificationStatus.PENDING;
+        return ActivityLogEvents.LOG_ACTIVITY(
+          VCActivityLog.getLogFromObject({
+            _vcKey: context.vcMetadata.getVcKey(),
+            type: 'VC_STATUS_CHANGED',
+            issuer: context.vcMetadata.issuerHost!!,
+            credentialConfigurationId:
+              context.verifiableCredential.credentialConfigurationId,
+            timestamp: Date.now(),
+            deviceName: '',
+            vcStatus: status,
+          }),
+        );
+      },
+      {
+        to: (context: any) => context.serviceRefs.activityLog,
+      },
+    ),
 
     resetVerificationStatus: assign({
       verificationStatus: (context: any) => {
@@ -462,7 +560,7 @@ export const VCItemActions = model => {
           VCActivityLog.getLogFromObject({
             _vcKey: context.vcMetadata.getVcKey(),
             type: 'VC_DOWNLOADED',
-            issuer: context.vcMetadata.issuer!!,
+            issuer: context.vcMetadata.issuerHost!!,
             credentialConfigurationId:
               context.verifiableCredential.credentialConfigurationId,
             timestamp: Date.now(),
@@ -481,7 +579,7 @@ export const VCItemActions = model => {
           VCActivityLog.getLogFromObject({
             credentialConfigurationId:
               context.verifiableCredential.credentialConfigurationId,
-            issuer: vcMetadata.issuer!!,
+            issuer: vcMetadata.issuerHost!!,
             _vcKey: vcMetadata.getVcKey(),
             type: 'VC_REMOVED',
             timestamp: Date.now(),
@@ -502,7 +600,7 @@ export const VCItemActions = model => {
             type: 'WALLET_BINDING_SUCCESSFULL',
             credentialConfigurationId:
               context.verifiableCredential.credentialConfigurationId,
-            issuer: vcMetadata.issuer!!,
+            issuer: vcMetadata.issuerHost!!,
             timestamp: Date.now(),
             deviceName: '',
           }),
@@ -522,7 +620,7 @@ export const VCItemActions = model => {
             type: 'WALLET_BINDING_FAILURE',
             credentialConfigurationId:
               context.verifiableCredential.credentialConfigurationId,
-            issuer: vcMetadata.issuer!!,
+            issuer: vcMetadata.issuerHost!!,
             timestamp: Date.now(),
             deviceName: '',
           }),

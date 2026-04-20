@@ -3,26 +3,28 @@ import {useTranslation} from 'react-i18next';
 import {Column, Text, Button} from '../../components/ui';
 import {Theme} from '../../components/ui/styleUtils';
 import {SvgImage} from '../../components/ui/svg';
-import { View, ScrollView } from 'react-native';
+import {View, ScrollView} from 'react-native';
+import {useBiometricType} from '../../shared/hooks/useBiometricType';
 
 export const StaticAuthScreen: React.FC = () => {
   const {t} = useTranslation('AuthScreen');
+  const {biometricType, isBiometricsLoading, translationSuffix} =
+    useBiometricType();
 
   return (
     <Column
       fill
       padding={[0, 5, 0, 5]}
       backgroundColor={Theme.Colors.whiteBackgroundColor}
-      style={Theme.IntroSliderStyles.biometricIntroOuterColumn}
-    >
-      <View 
+      style={Theme.IntroSliderStyles.biometricIntroOuterColumn}>
+      <View
         testID="notchView"
         style={Theme.IntroSliderStyles.biometricIntroNotch}></View>
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
-        contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{flexGrow: 1}}>
         <Column
-          align='space-between'
+          align="space-between"
           fill
           padding={[0, 20, 0, 20]}
           backgroundColor={Theme.Colors.whiteBackgroundColor}
@@ -31,7 +33,8 @@ export const StaticAuthScreen: React.FC = () => {
             overflow: 'hidden',
           }}>
           <Column crossAlign="center">
-            {SvgImage.fingerprintIcon(66)}
+            {!isBiometricsLoading &&
+              SvgImage.adaptiveBiometricIcon(biometricType, 66)}
             <Column margin="30 0 0 0">
               <Text
                 testID="header"
@@ -57,29 +60,27 @@ export const StaticAuthScreen: React.FC = () => {
               </Text>
             </Column>
           </Column>
-          <View 
-            testID="spacerView"
-            style={{ height: 100 }}></View>
+          <View testID="spacerView" style={{height: 100}}></View>
           <Column>
             <Button
               testID="useBiometricsButton"
-              title={t('useBiometrics')}
+              title={t(`use${translationSuffix}` as any, {
+                defaultValue: t('useBiometrics'),
+              })}
               type="gradient"
               margin="0 0 8 0"
-              onPress={() => { }}
+              onPress={() => {}}
             />
             <Button
               testID="usePasscodeButton"
               type="clear"
               title={t('usePasscode')}
               disabled={false}
-              onPress={() => { }}
+              onPress={() => {}}
             />
           </Column>
           {/* height increased to enable force scroll */}
-          <View 
-            testID="footerSpacerView"
-            style={{ height: 200 }}></View>
+          <View testID="footerSpacerView" style={{height: 200}}></View>
         </Column>
       </ScrollView>
     </Column>

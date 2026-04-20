@@ -1,6 +1,8 @@
 import React from 'react';
 import Svg, {Image} from 'react-native-svg';
 import {Theme} from './styleUtils';
+import {BiometricType} from '../../shared/hooks/useBiometricType';
+import {isAndroid} from '../../shared/constants';
 import Home from '../../assets/Home_tab_icon.svg';
 import History from '../../assets/History_tab_icon.svg';
 import ShareWithSelfie from '../../assets/Share_with_selfie.svg';
@@ -9,10 +11,6 @@ import UnCheckedIcon from '../../assets/UnCheckedIcon.svg';
 import Share from '../../assets/Scan_tab_icon.svg';
 import Settings from '../../assets/Settings.svg';
 import PinICon from '../../assets/Pin_Icon.svg';
-import WalletActivatedIcon from '../../assets/Wallet_Activated_Icon.svg';
-import WalletActivatedLargeIcon from '../../assets/Wallet_Activated_Large_Icon.svg';
-import WalletUnActivatedIcon from '../../assets/Wallet_UnActivated_Icon.svg';
-import WalletUnActivatedLargeIcon from '../../assets/Wallet_UnActivated_Large_Icon.svg';
 import LockIcon from '../../assets/Lock_Icon1.svg';
 import DigitalIdentity from '../../assets/Digital_Identity_Icon1.svg';
 import ReceiveCard from '../../assets/Receive_Card.svg';
@@ -52,6 +50,7 @@ import Search from '../../assets/Search.svg';
 import CloudUploadDoneIcon from '../../assets/Cloud_Upload_Done_Icon.svg';
 import SettingsLanguage from '../../assets/Language_Icon.svg';
 import SettingsBiometric from '../../assets/biometric_unlock.svg';
+import FaceIdIcon from '../../assets/Face_ID_Icon.svg';
 import SettingsAboutInji from '../../assets/about_inji.svg';
 import SettingsBackup from '../../assets/cloud_upload.svg';
 import SettingsLogOut from '../../assets/logout_icon.svg';
@@ -60,6 +59,19 @@ import QuestionIcon from '../../assets/questionIcon.svg';
 import CopyIcon from '../../assets/file_copy.svg';
 import StarIcon from '../../assets/credentialRegestryStar.svg';
 import SelectedCheckBox from '../../assets/Selected_Check_Box.svg';
+import ReverifyIcon from '../../assets/Reverify.svg';
+import Logomark from '../../assets/Logomark.svg';
+import StatusValidIcon from '../../assets/Status_Valid_Icon.svg';
+import StatusPendingIcon from '../../assets/Status_Pending_Icon.svg';
+import StatusExpiredIcon from '../../assets/Status_Expired_Icon.svg';
+import StatusRevokedIcon from '../../assets/Status_Revoked_Icon.svg';
+import WalletActivatedIcon from '../../assets/Wallet_Activated_Icon.svg';
+import WalletUnActivatedIcon from '../../assets/Wallet_UnActivated_Icon.svg';
+import WalletActivatedLargeIcon from '../../assets/Wallet_Activated_Large_Icon.svg';
+import WalletUnActivatedLargeIcon from '../../assets/Wallet_UnActivated_Large_Icon.svg';
+import DoneIcon from '../../assets/done-icon.svg';
+import CircleArrowRight from '../../assets/arrow-circle-broken-right.svg';
+
 export class SvgImage {
   static selectedCheckBox() {
     return <SelectedCheckBox />;
@@ -99,8 +111,8 @@ export class SvgImage {
   }
 
   static defaultIssuerLogo(defaultLogo: any) {
-    const DefaultLogo=defaultLogo
-    return <DefaultLogo/>
+    const DefaultLogo = defaultLogo;
+    return <DefaultLogo />;
   }
 
   static starIcon() {
@@ -127,24 +139,22 @@ export class SvgImage {
     );
   }
 
-  static walletActivatedIcon() {
+  static walletUnActivatedIcon(width = 16, height = 20) {
     return (
-      <WalletActivatedIcon
-        {...testIDProps('wallet-activated-icon')}
-        style={{
-          marginLeft: 10,
-        }}
+      <WalletUnActivatedIcon
+        width={width}
+        height={height}
+        {...testIDProps('wallet-unactivated-icon')}
       />
     );
   }
 
-  static walletUnActivatedIcon() {
+  static walletActivatedIcon(width = 16, height = 20) {
     return (
-      <WalletUnActivatedIcon
-        {...testIDProps('wallet-unactivated-icon')}
-        style={{
-          marginLeft: 10,
-        }}
+      <WalletActivatedIcon
+        width={width}
+        height={height}
+        {...testIDProps('wallet-activated-icon')}
       />
     );
   }
@@ -162,6 +172,12 @@ export class SvgImage {
       <WalletActivatedLargeIcon
         {...testIDProps('wallet-activated-large-icon')}
       />
+    );
+  }
+
+  static walletActivatedLargeIcon() {
+    return (
+      <WalletActivatedLargeIcon {...testIDProps('walletActivatedLargeIcon')} />
     );
   }
 
@@ -246,6 +262,10 @@ export class SvgImage {
         }}
       />
     );
+  }
+
+  static ReverifyIcon() {
+    return <ReverifyIcon />;
   }
 
   static OutlinedPinIcon() {
@@ -493,8 +513,8 @@ export class SvgImage {
     return (
       <Info
         color1={Theme.Colors.tooltipIcon}
-        width={16}
-        height={16}
+        width={14}
+        height={14}
         {...testIDProps('infoIcon')}
       />
     );
@@ -576,6 +596,35 @@ export class SvgImage {
     );
   }
 
+  static faceIdIcon(size?: number | undefined) {
+    return (
+      <FaceIdIcon
+        height={size}
+        width={size}
+        color1={Theme.Colors.linearIconGradientStart}
+        color2={Theme.Colors.linearIconGradientEnd}
+      />
+    );
+  }
+
+  static adaptiveBiometricIcon(
+    biometricType: string,
+    size?: number | undefined,
+  ) {
+    if (isAndroid()) {
+      return SvgImage.fingerprintIcon(size);
+    }
+    switch (biometricType) {
+      case BiometricType.FACE:
+        return SvgImage.faceIdIcon(size);
+      case BiometricType.FINGERPRINT:
+        return SvgImage.fingerprintIcon(size);
+      case BiometricType.NONE:
+      default:
+        return SvgImage.fingerprintIcon(size);
+    }
+  }
+
   static abotInjiIcon() {
     return (
       <SettingsAboutInji
@@ -592,6 +641,81 @@ export class SvgImage {
         width={width}
         color1={Theme.Colors.linearIconGradientStart}
         color2={Theme.Colors.linearIconGradientEnd}
+      />
+    );
+  }
+  static logoIcon(height: number, width: number) {
+    return <Logomark height={height} width={width} />;
+  }
+
+  static statusValidIcon(width = 24, height = 24) {
+    return (
+      <StatusValidIcon
+        width={width}
+        height={height}
+        {...testIDProps('statusValidIcon')}
+      />
+    );
+  }
+
+  static statusPendingIcon(width = 24, height = 24) {
+    return (
+      <StatusPendingIcon
+        width={width}
+        height={height}
+        {...testIDProps('statusPendingIcon')}
+      />
+    );
+  }
+
+  static statusExpiredIcon(width = 24, height = 24) {
+    return (
+      <StatusExpiredIcon
+        width={width}
+        height={height}
+        {...testIDProps('statusExpiredIcon')}
+      />
+    );
+  }
+
+  static statusRevokedIcon(width = 24, height = 24) {
+    return (
+      <StatusRevokedIcon
+        width={width}
+        height={height}
+        {...testIDProps('statusRevokedIcon')}
+      />
+    );
+  }
+
+  static doneIcon(
+    color = Theme.Colors.disabled,
+    height = 16,
+    width = 16,
+    testID = 'doneIcon',
+  ) {
+    return (
+      <DoneIcon
+        color={color}
+        {...testIDProps(testID)}
+        height={height}
+        width={width}
+      />
+    );
+  }
+
+  static circleArrowRight(
+    color = Theme.Colors.disabled,
+    height = 16,
+    width = 16,
+    testID = 'circleArrowRightIcon',
+  ) {
+    return (
+      <CircleArrowRight
+        width={width}
+        height={height}
+        color={color}
+        {...testIDProps(testID)}
       />
     );
   }

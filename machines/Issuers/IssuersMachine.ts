@@ -1,10 +1,11 @@
-import {EventFrom, sendParent} from 'xstate';
-import {IssuersModel} from './IssuersModel';
-import {IssuersActions} from './IssuersActions';
-import {IssuersService} from './IssuersService';
-import {IssuersGuards} from './IssuersGuards';
-import {CredentialTypes} from '../VerifiableCredential/VCMetaMachine/vc';
-
+import { EventFrom, send, sendParent } from 'xstate';
+import { IssuersModel } from './IssuersModel';
+import { IssuersActions } from './IssuersActions';
+import { IssuersService } from './IssuersService';
+import { IssuersGuards } from './IssuersGuards';
+import { CredentialTypes } from '../VerifiableCredential/VCMetaMachine/vc';
+import { OpenID4VPEvents, openID4VPMachine } from '../openID4VP/openID4VPMachine';
+import NetInfo from '@react-native-community/netinfo';
 const model = IssuersModel;
 
 export const IssuerScreenTabEvents = model.events;
@@ -23,6 +24,24 @@ export const IssuersMachine = model.createMachine(
       context: model.initialContext,
       events: {} as EventFrom<typeof model>,
     },
+    on: {
+      NETWORK_STATUS_CHANGED: {
+        actions: ['setIsInternetAvailable'],
+      },
+    },
+    invoke: {
+      id: "networkListener",
+      src: () => (sendBack) => {
+        const networkListener = NetInfo.addEventListener(state => {
+          sendBack({
+            type: "NETWORK_STATUS_CHANGED",
+            isInternetAvailable: state.isConnected ?? true,
+          });
+        });
+
+        return networkListener;
+      },
+    },
     states: {
       displayIssuers: {
         description: 'displays the issuers downloaded from the server',
@@ -38,37 +57,45 @@ export const IssuersMachine = model.createMachine(
           },
           onError: {
             actions: ['setError'],
-            target: 'error',
+            target: '#issuersMachine.error',
           },
         },
       },
 
       error: {
         description: 'reaches here when any error happens',
+        entry: ['resetAuthorization'],
+        exit: ['resetError', 'resetCredentialOfferFlowType'],
         on: {
           TRY_AGAIN: [
             {
               cond: 'shouldFetchIssuersAgain',
-              actions: ['setLoadingReasonAsDisplayIssuers', 'resetError'],
+              actions: ['setLoadingReasonAsDisplayIssuers'],
               target: 'displayIssuers',
             },
             {
-              cond: 'canSelectIssuerAgain',
-              actions: 'resetError',
+              cond: 'shouldGoBackHomeOnError',
+              target: 'done',
+            },
+            {
+              cond: 'shouldGoBack',
               target: 'selectingIssuer',
             },
             {
-              cond: 'isCredentialOfferFlow',
-              actions: ['resetError', 'resetCredentialOfferFlowType'],
+              cond: 'shouldRetryOnErrorAndCredentialOfferFlow',
+              actions: send('SCAN_CREDENTIAL_OFFER_QR_CODE'),
               target: 'selectingIssuer',
             },
             {
-              actions: ['setLoadingReasonAsSettingUp', 'resetError'],
+              cond: 'shouldRetryOnError',
+              target: 'downloadIssuerWellknown',
+            },
+            {
+              actions: ['setLoadingReasonAsSettingUp'],
               target: 'downloadIssuerWellknown',
             },
           ],
           RESET_ERROR: {
-            actions: ['resetError', 'resetCredentialOfferFlowType'],
             target: 'selectingIssuer',
           },
         },
@@ -100,7 +127,7 @@ export const IssuersMachine = model.createMachine(
         description: 'waits for the user to scan the QR code',
         on: {
           QR_CODE_SCANNED: {
-            actions: ['setLoadingReasonAsDownloadingCredentials', 'setQrData'],
+            actions: ['setLoadingReasonAsPreparingRequest', 'setQrData'],
             target: 'credentialDownloadFromOffer',
           },
           CANCEL: {
@@ -127,13 +154,25 @@ export const IssuersMachine = model.createMachine(
           onError: [
             {
               actions: ['setError', 'resetLoadingReason'],
-              target: 'error',
+              target: '#issuersMachine.error',
             },
           ],
         },
         on: {
+          PRESENTATION_REQUEST: {
+            actions: [
+              'sendPresentationAuthorizationImpressionEvent',
+              'setOpenId4VPRef',
+              'setAuthorizationTypeAsPresentation',
+              'sendVPScanData',
+            ],
+            target: '.presentationAuthorization',
+          },
           TOKEN_REQUEST: {
-            actions: ['setTokenRequestObject'],
+            actions: [
+              'setTokenRequestObject',
+              'setLoadingReasonAsDownloadingCredentials',
+            ],
             target: '.tokenRequest',
           },
           PROOF_REQUEST: {
@@ -150,6 +189,7 @@ export const IssuersMachine = model.createMachine(
                 authEndpointToOpen: () => true,
                 authEndpoint: (_, event) => event.authEndpoint,
               }),
+              'setLoadingReasonAsDownloadingCredentials',
             ],
           },
           TX_CODE_REQUEST: {
@@ -161,12 +201,79 @@ export const IssuersMachine = model.createMachine(
             target: '.checkingIssuerTrust',
           },
           CANCEL: {
-            actions: ['resetLoadingReason'],
-            target: '#issuersMachine.selectingIssuer',
+            actions: ['resetLoadingReason','setError'],
+            target: '#issuersMachine.error',
           },
         },
         states: {
           idle: {},
+          presentationAuthorization: {
+            invoke: {
+              id: 'Presentation_During_Issuance_OpenID4VP_Service',
+              src: openID4VPMachine,
+              onDone: {},
+              onError: {
+                actions: ['setError', 'resetLoadingReason'],
+                target: '#issuersMachine.error',
+              },
+            },
+            on: {
+              IN_PROGRESS: {
+                target: '.inProgress',
+              },
+              VP_CONSENT_REJECT: [
+                {
+                  actions: ['sendVPConsentReject'],
+                },
+              ],
+              SHOW_ERROR: {
+                actions: ['sendPresentationAuthorizationError'],
+              },
+              SIGN_PRESENTATION: [
+                {
+                  actions: [
+                    send(
+                      (_, event) =>
+                        OpenID4VPEvents.SIGN_VP(event.presentationRequest),
+                      {
+                        to: (context: any) => context.OpenId4VPRef,
+                      },
+                    ),
+                  ],
+                },
+              ],
+              SIGNED_DATA_FOR_VP: [
+                {
+                  target: '.signedVpPosting',
+                },
+              ],
+            },
+            states: {
+              signedVpPosting: {
+                invoke: {
+                  src: 'sendSignedVP',
+                  onDone: {
+                    target: 'success'
+                  },
+                  onError: {
+                    actions: ['setError', 'resetLoadingReason'],
+                    target: '#issuersMachine.error'
+                  }
+                }
+              },
+              success: {
+                always: [
+                  {
+                    actions: ['setPresentationAuthorizationSuccess'],
+                    target: '#issuersMachine.credentialDownloadFromOffer.idle',
+                  },
+                ],
+              },
+              inProgress: {
+                on: {},
+              },
+            },
+          },
           tokenRequest: {
             invoke: {
               src: 'sendTokenRequest',
@@ -206,7 +313,7 @@ export const IssuersMachine = model.createMachine(
               onDone: [
                 {
                   cond: 'isIssuerIdInTrustedIssuers',
-                  target: 'sendConsentGiven',
+                  target: 'sendConsentGiven.sending',
                 },
                 {
                   actions: ['setRequestConsentToTrustIssuer'],
@@ -218,6 +325,7 @@ export const IssuersMachine = model.createMachine(
           credentialOfferDownloadConsent: {
             description:
               'waits for the user to give consent to download the credential offer',
+            entry: ['resetTrustedIssuerConsentStatus'],
             on: {
               CANCEL: {
                 actions: [
@@ -229,10 +337,10 @@ export const IssuersMachine = model.createMachine(
               },
               ON_CONSENT_GIVEN: {
                 actions: [
+                  'setTrustedIssuerConsentInProgress',
                   'setLoadingReasonAsDownloadingCredentials',
-                  'resetRequestConsentToTrustIssuer',
                 ],
-                target: 'sendConsentGiven',
+                target: 'consentGivenDelay',
               },
             },
           },
@@ -244,49 +352,63 @@ export const IssuersMachine = model.createMachine(
               },
             },
           },
-          sendConsentGiven: {
-            invoke: {
-              src: 'sendConsentGiven',
-              onDone: {
-                target: '.updatingTrustedIssuerList',
-              },
-              onError: {
-                actions: [
-                  'resetLoadingReason',
-                  'setError',
-                  'resetRequestConsentToTrustIssuer',
-                ],
-                target: '#issuersMachine.error',
-              },
+          consentGivenDelay: {
+            after: {
+              2000: 'sendConsentGiven',
             },
+          },
+          sendConsentGiven: {
+            initial: 'addingIssuerToTrustedIssuers',
+
             states: {
-              updatingTrustedIssuerList: {
-                invoke: {
-                  src: 'checkIssuerIdInStoredTrustedIssuers',
-                  onDone: [
-                    {
-                      cond: 'isIssuerIdInTrustedIssuers',
-                      target:
-                        '#issuersMachine.credentialDownloadFromOffer.idle',
-                    },
-                    {
-                      target: 'addingIssuerToTrustedIssuers',
-                    },
-                  ],
-                  onError: {
-                    target: 'addingIssuerToTrustedIssuers',
-                  },
-                },
-              },
               addingIssuerToTrustedIssuers: {
                 invoke: {
                   src: 'addIssuerToTrustedIssuers',
                   onDone: {
-                    target: '#issuersMachine.credentialDownloadFromOffer.idle',
+                    target: 'trustedIssuerConsentSuccessDelay',
+                    actions: ['setTrustedIssuerConsentSuccess'],
                   },
                   onError: {
-                    target: '#issuersMachine.credentialDownloadFromOffer.idle',
+                    actions: [
+                      'resetLoadingReason',
+                      'setIssuerConsentStoreError',
+                      'resetRequestConsentToTrustIssuer',
+                      'resetTrustedIssuerConsentStatus',
+                    ],
+                    target: '#issuersMachine.error',
                   },
+                },
+              },
+              trustedIssuerConsentSuccessDelay: {
+                after: {
+                  4000: 'sending',
+                },
+              },
+              sending: {
+                invoke: {
+                  src: 'sendConsentGiven',
+                  onDone: {
+                    target: 'trustedIssuerConsentSuccess',
+                  },
+                  onError: {
+                    actions: [
+                      'resetLoadingReason',
+                      'setGenericError',
+                      'resetRequestConsentToTrustIssuer',
+                      'resetTrustedIssuerConsentStatus',
+                    ],
+                    target: '#issuersMachine.error',
+                  },
+                },
+              },
+
+              trustedIssuerConsentSuccess: {
+                entry: [
+                  'resetTrustedIssuerConsentStatus',
+                  'resetRequestConsentToTrustIssuer',
+                ],
+                always: {
+                  target: '#issuersMachine.credentialDownloadFromOffer.idle',
                 },
               },
             },
@@ -336,7 +458,7 @@ export const IssuersMachine = model.createMachine(
                   },
                   onError: {
                     actions: [
-                      'setError',
+                      'setKeyManagementError',
                       'resetLoadingReason',
                       'sendDownloadingFailedToVcMeta',
                     ],
@@ -359,7 +481,7 @@ export const IssuersMachine = model.createMachine(
                     {
                       cond: 'isKeyTypeNotFound',
                       actions: [
-                        'setError',
+                        'setKeyManagementError',
                         'resetLoadingReason',
                         'sendDownloadingFailedToVcMeta',
                       ],
@@ -394,6 +516,14 @@ export const IssuersMachine = model.createMachine(
                     ],
                     target: 'constructProof',
                   },
+                  onError: {
+                    actions: [
+                      'setKeyManagementError',
+                      'resetLoadingReason',
+                      'sendDownloadingFailedToVcMeta',
+                    ],
+                    target: '#issuersMachine.error',
+                  },
                 },
               },
               constructProof: {
@@ -404,7 +534,7 @@ export const IssuersMachine = model.createMachine(
                   },
                   onError: {
                     actions: [
-                      'setError',
+                      'setGenericError',
                       'resetLoadingReason',
                       'sendDownloadingFailedToVcMeta',
                     ],
@@ -428,8 +558,8 @@ export const IssuersMachine = model.createMachine(
             target: 'proccessingCredential',
           },
           onError: {
-            actions: ['resetLoadingReason'],
-            target: 'error',
+            actions: ['resetLoadingReason', 'setGenericError'],
+            target: '#issuersMachine.error',
           },
         },
       },
@@ -437,12 +567,17 @@ export const IssuersMachine = model.createMachine(
         invoke: {
           src: 'updateCredential',
           onDone: {
-            actions: [
-              'setVerifiableCredential',
-              'setCredentialWrapper',
-            ],
+            actions: ['setVerifiableCredential', 'setCredentialWrapper'],
             target: 'verifyingCredential',
           },
+          onError: {
+            actions: [
+              'setParsingError',
+              'resetLoadingReason',
+              'sendDownloadingFailedToVcMeta',
+            ],
+            target: '#issuersMachine.error',
+          }
         },
       },
       downloadIssuerWellknown: {
@@ -454,7 +589,7 @@ export const IssuersMachine = model.createMachine(
           },
           onError: {
             actions: ['setError', 'resetLoadingReason'],
-            target: 'error',
+            target: '#issuersMachine.error',
           },
         },
       },
@@ -469,10 +604,10 @@ export const IssuersMachine = model.createMachine(
           },
           onError: {
             actions: [
-              'setCredentialTypeListDownloadFailureError',
+              'setError',
               'resetLoadingReason',
             ],
-            target: 'error',
+            target: '#issuersMachine.error',
           },
         },
       },
@@ -494,7 +629,7 @@ export const IssuersMachine = model.createMachine(
       },
 
       downloadCredentials: {
-        entry: ['setLoadingReasonAsDownloadingCredentials'],
+        entry: ['setLoadingReasonAsPreparingRequest'],
         invoke: {
           src: 'downloadCredential',
           onDone: {
@@ -514,17 +649,27 @@ export const IssuersMachine = model.createMachine(
             },
             {
               actions: ['setError', 'resetLoadingReason'],
-              target: 'error',
+              target: '#issuersMachine.error',
             },
           ],
         },
         on: {
+          PRESENTATION_REQUEST: {
+            actions: [
+              'sendPresentationAuthorizationImpressionEvent',
+              'setAuthorizationTypeAsPresentation',
+              'setOpenId4VPRef',
+              'sendVPScanData',
+            ],
+            target: '.presentationAuthorization',
+          },
           AUTH_ENDPOINT_RECEIVED: {
             actions: [
               model.assign({
                 authEndpointToOpen: () => true,
                 authEndpoint: (_, event) => event.authEndpoint,
               }),
+              'setLoadingReasonAsDownloadingCredentials',
             ],
           },
           TOKEN_REQUEST: {
@@ -535,14 +680,82 @@ export const IssuersMachine = model.createMachine(
             actions: ['setCNonce', 'setWellknwonKeyTypes'],
             target: '.keyManagement',
           },
-          CANCEL: {
-            target: 'selectingIssuer',
-            actions: ['resetSelectedCredentialType', 'resetLoadingReason'],
+          CANCEL: { // auth errors
+            target: 'error',
+            actions: ['resetSelectedCredentialType', 'resetLoadingReason', 'setError'],
           },
         },
         initial: 'idle',
         states: {
           idle: {},
+          presentationAuthorization: {
+            invoke: {
+              id: 'Presentation_During_Issuance_OpenID4VP_Service',
+              src: openID4VPMachine,
+              onDone: {},
+              onError: {
+                actions: ['setError', 'resetLoadingReason'],
+                target: '#issuersMachine.error',
+              },
+            },
+            on: {
+              IN_PROGRESS: {
+                target: '.inProgress',
+              },
+              VP_CONSENT_REJECT: [
+                {
+                  actions: ['sendVPConsentReject'],
+                },
+              ],
+              SIGN_PRESENTATION: [
+                {
+                  actions: [
+                    send(
+                      (_, event) =>
+                        OpenID4VPEvents.SIGN_VP(event.presentationRequest),
+                      {
+                        to: (context: any) => context.OpenId4VPRef,
+                      },
+                    ),
+                  ],
+                },
+              ],
+              SIGNED_DATA_FOR_VP: [
+                {
+                  target: '.signedVpPosting',
+                },
+              ],
+              SHOW_ERROR: {
+                actions: ['sendPresentationAuthorizationError'],
+              },
+            },
+            states: {
+              signedVpPosting: {
+                invoke: {
+                  src: 'sendSignedVP',
+                  onDone: {
+                    target: 'success'
+                  },
+                  onError: {
+                    actions: ['setError', 'resetLoadingReason'],
+                    target: '#issuersMachine.error'
+                  }
+                }
+              },
+              success: {
+                always: [
+                  {
+                    actions: ['setPresentationAuthorizationSuccess'],
+                    target: '#issuersMachine.downloadCredentials.idle',
+                  },
+                ],
+              },
+              showError: {},
+              inProgress: {
+                on: {},
+              },
+            },
+          },
           tokenRequest: {
             invoke: {
               src: 'sendTokenRequest',
@@ -597,7 +810,7 @@ export const IssuersMachine = model.createMachine(
                 },
                 {
                   actions: [
-                    'setError',
+                    'setGenericError',
                     'resetLoadingReason',
                     'sendDownloadingFailedToVcMeta',
                   ],
@@ -629,7 +842,7 @@ export const IssuersMachine = model.createMachine(
                   },
                   onError: {
                     actions: [
-                      'setError',
+                      'setKeyManagementError',
                       'resetLoadingReason',
                       'sendDownloadingFailedToVcMeta',
                     ],
@@ -653,7 +866,7 @@ export const IssuersMachine = model.createMachine(
                     {
                       cond: 'isKeyTypeNotFound',
                       actions: [
-                        'setError',
+                        'setKeyManagementError',
                         'resetLoadingReason',
                         'sendDownloadingFailedToVcMeta',
                       ],
@@ -691,7 +904,7 @@ export const IssuersMachine = model.createMachine(
                   },
                   onError: {
                     actions: [
-                      'setError',
+                      'setKeyManagementError',
                       'resetLoadingReason',
                       'sendDownloadingFailedToVcMeta',
                     ],
@@ -708,7 +921,11 @@ export const IssuersMachine = model.createMachine(
         invoke: {
           src: 'verifyCredential',
           onDone: {
-            actions: ['sendSuccessEndEvent', 'setVerificationResult','resetCredentialOfferFlowType',],
+            actions: [
+              'sendSuccessEndEvent',
+              'setVerificationResult',
+              'resetCredentialOfferFlowType',
+            ],
             target: 'storing',
           },
           onError: [
@@ -755,6 +972,10 @@ export const IssuersMachine = model.createMachine(
             actions: ['sendBackupEvent'],
             target: 'done',
           },
+          onError: {
+            actions: ['setStorageError', 'resetLoadingReason'],
+            target: '#issuersMachine.error',
+          },
         },
       },
 
@@ -770,6 +991,7 @@ export const IssuersMachine = model.createMachine(
       },
 
       done: {
+        id: 'done',
         type: 'final',
       },
     },
@@ -794,7 +1016,7 @@ export interface displayType {
   language: string;
   logo: logoType;
   background_color: string;
-  background_image: {uri: string};
+  background_image: { uri: string };
   text_color: string;
   title: string;
   description: string;

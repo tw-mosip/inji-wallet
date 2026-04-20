@@ -5,7 +5,17 @@ import {Row} from './Layout';
 import {Theme} from './styleUtils';
 import {SvgImage} from './svg';
 
-export const SearchBar = ({ isVcSearch = false, searchIconTestID, searchBarTestID, placeholder, search, onFocus, onChangeText, onLayout, editable = true }: SearchBarProps) => {
+export const SearchBar = ({
+  isVcSearch = false,
+  searchIconTestID,
+  searchBarTestID,
+  placeholder,
+  search,
+  onFocus,
+  onChangeText,
+  onLayout,
+  editable = true,
+}: SearchBarProps) => {
   return (
     <Row>
       {isVcSearch ? (
@@ -38,7 +48,7 @@ export const SearchBar = ({ isVcSearch = false, searchIconTestID, searchBarTestI
 };
 
 interface SearchBarProps {
-  isVcSearch: Boolean;
+  isVcSearch?: boolean;
   searchIconTestID: string;
   searchBarTestID: string;
   search: string;

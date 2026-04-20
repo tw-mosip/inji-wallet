@@ -23,6 +23,7 @@ export enum VCShareFlowType {
   MINI_VIEW_SHARE_WITH_SELFIE = 'mini view share with selfie',
   MINI_VIEW_QR_LOGIN = 'mini view qr login',
   OPENID4VP = 'OpenID4VP',
+  OPENID4VP_AUTHORIZATION = 'OpenID4VP authorization',
   MINI_VIEW_SHARE_OPENID4VP = 'OpenID4VP share from mini view',
   MINI_VIEW_SHARE_WITH_SELFIE_OPENID4VP = 'OpenID4VP share with selfie from mini view',
 }
@@ -68,7 +69,7 @@ export class UUID {
   }
 }
 
-export const formatTextWithGivenLimit = (value: string, limit: number = 15) => {
+export const formatTextWithGivenLimit = (value: string, limit = 15) => {
   if (value.length > limit) {
     return value.substring(0, limit) + '...';
   }
@@ -107,12 +108,12 @@ export async function canonicalize(unsignedVp: any) {
       delete jsonldObjectClone.proof;
     }
     const expandedJsonldObject = await jsonld.expand(jsonldObjectClone);
-    let normalizedJsonldObject = await jsonld.canonize(expandedJsonldObject, {
+    const normalizedJsonldObject = await jsonld.canonize(expandedJsonldObject, {
       algorithm: 'URDNA2015',
     });
 
     const expandedJsonldProof = await jsonld.expand(jsonldProof);
-    let normalizedJsonldProof = await jsonld.canonize(expandedJsonldProof, {
+    const normalizedJsonldProof = await jsonld.canonize(expandedJsonldProof, {
       algorithm: 'URDNA2015',
     });
 
@@ -142,4 +143,11 @@ export const isCacheExpired = (timestamp: number) => {
 
 export function getVerifierKey(verifier: string): string {
   return `trusted_verifier_${verifier}`;
+}
+
+export const enum VerificationStatus {
+  VALID = 'VALID',
+  REVOKED = 'REVOKED',
+  PENDING = 'PENDING',
+  EXPIRED = 'EXPIRED',
 }

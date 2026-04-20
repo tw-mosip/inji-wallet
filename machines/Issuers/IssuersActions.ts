@@ -1,36 +1,41 @@
 import {
   ErrorMessage,
   getDisplayObjectForCurrentLanguage,
-  Issuers_Key_Ref,
-  OIDCErrors,
-  selectCredentialRequestKey,
+  Issuers_Key_Ref, selectCredentialRequestKey,
+  VCIServerErrorCode
 } from '../../shared/openId4VCI/Utils';
 import {
   EXPIRED_VC_ERROR_CODE,
-  MY_VCS_STORE_KEY,
-  NO_INTERNET,
-  REQUEST_TIMEOUT,
-  isIOS,
+  MY_VCS_STORE_KEY, isIOS,
+  AuthorizationType,
+  OVP_ERROR_CODE,
+  OVP_ERROR_MESSAGES
 } from '../../shared/constants';
-import {assign, send} from 'xstate';
-import {StoreEvents} from '../store';
-import {BackupEvents} from '../backupAndRestore/backup/backupMachine';
-import {getVCMetadata, VCMetadata} from '../../shared/VCMetadata';
-import {isHardwareKeystoreExists} from '../../shared/cryptoutil/cryptoUtil';
-import {ActivityLogEvents} from '../activityLog';
+import { assign, send, spawn } from 'xstate';
+import { StoreEvents } from '../store';
+import { BackupEvents } from '../backupAndRestore/backup/backupMachine';
+import { getVCMetadata, VCMetadata } from '../../shared/VCMetadata';
+import { isHardwareKeystoreExists } from '../../shared/cryptoutil/cryptoUtil';
+import { ActivityLogEvents } from '../activityLog';
 import {
   getEndEventData,
   getImpressionEventData,
   sendEndEvent,
   sendImpressionEvent,
 } from '../../shared/telemetry/TelemetryUtils';
-import {TelemetryConstants} from '../../shared/telemetry/TelemetryConstants';
-import {NativeModules} from 'react-native';
-import {VCActivityLog} from '../../components/ActivityLogEvent';
-import {isNetworkError, parseJSON} from '../../shared/Utils';
-import {issuerType} from './IssuersMachine';
+import { TelemetryConstants } from '../../shared/telemetry/TelemetryConstants';
+import { NativeModules } from 'react-native';
+import { VCActivityLog } from '../../components/ActivityLogEvent';
+import { isNetworkError, parseJSON, VCShareFlowType } from '../../shared/Utils';
+import { issuerType } from './IssuersMachine';
+import { RevocationStatus } from '../../shared/vcVerifier/VcVerifier';
+import { logState } from '../../shared/commonUtil';
+import { createOpenID4VPMachine } from '../openID4VP/openID4VPMachine';
+import VciClient, { VciClientErrorResponse } from '../../shared/vciClient/VciClient';
 
-const {RNSecureKeystoreModule} = NativeModules;
+const { RNSecureKeystoreModule } = NativeModules;
+
+const OPENID4VP_REF_ID = 'Presentation_During_Issuance_OpenID4VP_Service';
 export const IssuersActions = (model: any) => {
   return {
     setVerificationResult: assign({
@@ -39,6 +44,8 @@ export const IssuersActions = (model: any) => {
           ...context.vcMetadata,
           isVerified: true,
           isExpired: event.data.verificationErrorCode == EXPIRED_VC_ERROR_CODE,
+          isRevoked: event.data.isRevoked,
+          lastKnownStatusTimestamp: new Date().toISOString(),
         }),
     }),
     resetVerificationResult: assign({
@@ -47,6 +54,7 @@ export const IssuersActions = (model: any) => {
           ...context.vcMetadata,
           isVerified: false,
           isExpired: false,
+          isRevoked: RevocationStatus.FALSE,
         }),
     }),
     setIssuers: model.assign({
@@ -58,11 +66,18 @@ export const IssuersActions = (model: any) => {
     setLoadingReasonAsDownloadingCredentials: model.assign({
       loadingReason: 'downloadingCredentials',
     }),
+    setLoadingReasonAsPreparingRequest: model.assign({
+      loadingReason: 'preparingRequest',
+    }),
     setLoadingReasonAsSettingUp: model.assign({
       loadingReason: 'settingUp',
     }),
     resetLoadingReason: model.assign({
       loadingReason: null,
+    }),
+    resetAuthorization: model.assign({
+      authorizationType: AuthorizationType.IMPLICIT,
+      authorizationSuccess: false,
     }),
     setSelectedCredentialType: model.assign({
       selectedCredentialType: (_: any, event: any) => event.credType,
@@ -91,32 +106,47 @@ export const IssuersActions = (model: any) => {
       },
     }),
 
+    setIsInternetAvailable: model.assign({
+      isInternetAvailable: (_: any, event: any) => event.isInternetAvailable,
+    }),
+
+    setParsingError: model.assign({
+      errorMessage: () => ErrorMessage.PARSING_ERROR,
+    }),
+
+    setStorageError: model.assign({
+      errorMessage: () => ErrorMessage.STORAGE_ERROR,
+    }),
     setError: model.assign({
-      errorMessage: (_: any, event: any) => {
-        console.error(`Error occurred while ${event} -> `, event.data.message);
-        const error = event.data.message;
-        if (error.includes(NO_INTERNET)) {
-          return ErrorMessage.NO_INTERNET;
+      errorMessage: (context: any, event: any) => {
+        const error = (event.data ?? event) as VciClientErrorResponse;
+        console.error(`Error occurred while ${event} -> `, error);
+        if (error.serverErrorCode)
+          return error.serverErrorCode as VCIServerErrorCode;
+        if (!context.isInternetAvailable) {
+          return ErrorMessage.NO_INTERNET
         }
-        if (isNetworkError(error)) {
-          return ErrorMessage.NETWORK_REQUEST_FAILED;
+        else if (error.sourceErrorCode === 'VCI-008') {
+          return VCIServerErrorCode.INVALID_CREDENTIAL_OFFER
         }
-        if (error.includes(REQUEST_TIMEOUT)) {
-          return ErrorMessage.REQUEST_TIMEDOUT;
+        else if(error.sourceErrorCode === 'VCI-007') {
+          return VCIServerErrorCode.TIMEOUT_ERROR
         }
-        if (
-          error.includes(
-            OIDCErrors.AUTHORIZATION_ENDPOINT_DISCOVERY
-              .GRANT_TYPE_NOT_SUPPORTED,
-          )
-        ) {
-          return ErrorMessage.AUTHORIZATION_GRANT_TYPE_NOT_SUPPORTED;
-        }
-        return ErrorMessage.GENERIC;
-      },
+        else if (error.code)
+          return VCIServerErrorCode.SERVER_ERROR
+        else return VCIServerErrorCode.UNKNOWN_ERROR;
+      }
     }),
     resetError: model.assign({
       errorMessage: '',
+    }),
+
+    setKeyManagementError: model.assign({
+      errorMessage: (_: any, event: any) => ErrorMessage.KEY_MANAGEMENT_ERROR,
+    }),
+
+    setGenericError: model.assign({
+      errorMessage: (_: any, event: any) => ErrorMessage.WALLET_GENERIC_ERROR,
     }),
 
     loadKeyPair: assign({
@@ -231,7 +261,7 @@ export const IssuersActions = (model: any) => {
         credential_endpoint: event.data.credential_endpoint,
         credential_configurations_supported:
           event.data.credential_configurations_supported,
-        display: event.data.display,
+        display: context.selectedIssuer.display ?? event.data.display,
         authorization_servers: event.data.authorization_servers,
       }),
       selectedIssuerWellknownResponse: (_: any, event: any) => {
@@ -266,23 +296,29 @@ export const IssuersActions = (model: any) => {
     }),
     setCredentialOfferCredentialType: model.assign({
       selectedCredentialType: (context: any, event: any) => {
-        let credentialTypes: Array<{id: string; [key: string]: any}> = [];
+        let credentialTypes: Array<{ id: string;[key: string]: any }> = [];
         const credentialConfigurationId = context.credentialConfigurationId;
         const issuerMetadata = context.selectedIssuerWellknownResponse;
         if (
           issuerMetadata.credential_configurations_supported[
-            credentialConfigurationId
+          credentialConfigurationId
           ]
         ) {
           credentialTypes.push({
             id: credentialConfigurationId,
             ...issuerMetadata.credential_configurations_supported[
-              credentialConfigurationId
+            credentialConfigurationId
             ],
           });
           return credentialTypes[0];
         }
       },
+    }),
+    setAuthorizationTypeAsPresentation: model.assign({
+      authorizationType: AuthorizationType.OPENID4VP_PRESENTATION,
+    }),
+    setPresentationAuthorizationSuccess: model.assign({
+      authorizationSuccess: true,
     }),
     supportedCredentialTypes: (context: any, event: any) => {
       return event.credentialTypes;
@@ -344,6 +380,21 @@ export const IssuersActions = (model: any) => {
     setRequestConsentToTrustIssuer: model.assign({
       isConsentRequested: (_: any, event: any) => {
         return true;
+      },
+    }),
+    resetTrustedIssuerConsentStatus: model.assign({
+      trustedIssuerConsentStatus: () => {
+        return 'idle';
+      },
+    }),
+    setTrustedIssuerConsentInProgress: model.assign({
+      trustedIssuerConsentStatus: () => {
+        return 'loading';
+      },
+    }),
+    setTrustedIssuerConsentSuccess: model.assign({
+      trustedIssuerConsentStatus: () => {
+        return 'success';
       },
     }),
     setTxCodeDisplayDetails: model.assign({
@@ -435,7 +486,7 @@ export const IssuersActions = (model: any) => {
         getEndEventData(
           TelemetryConstants.FlowType.vcDownload,
           TelemetryConstants.EndEventStatus.success,
-          {'VC Key': context.keyType},
+          { 'VC Key': context.keyType },
         ),
       );
     },
@@ -445,14 +496,24 @@ export const IssuersActions = (model: any) => {
         getEndEventData(
           TelemetryConstants.FlowType.vcDownload,
           TelemetryConstants.EndEventStatus.failure,
-          {'VC Key': context.keyType},
+          { 'VC Key': context.keyType },
         ),
       );
     },
+
     sendImpressionEvent: () => {
       sendImpressionEvent(
         getImpressionEventData(
           TelemetryConstants.FlowType.vcDownload,
+          TelemetryConstants.Screens.issuerList,
+        ),
+      );
+    },
+
+    sendPresentationAuthorizationImpressionEvent: () => {
+      sendImpressionEvent(
+        getImpressionEventData(
+          TelemetryConstants.FlowType.presentationAuthorizationForVcDownload,
           TelemetryConstants.Screens.issuerList,
         ),
       );
@@ -480,5 +541,44 @@ export const IssuersActions = (model: any) => {
         to: context => context.serviceRefs.vcMeta,
       },
     ),
+
+    setOpenId4VPRef: assign({
+      OpenId4VPRef: (context: any) => {
+        const service = spawn(
+          createOpenID4VPMachine(context.serviceRefs),
+          OPENID4VP_REF_ID,
+        );
+        if (__DEV__) {
+          service.subscribe(logState);
+        }
+        return service;
+      },
+    }),
+
+    sendVPScanData: (context, event) => {
+      return context.OpenId4VPRef.send({
+        type: 'AUTHENTICATE_VIA_PRESENTATION',
+        presentationRequest: event.presentationRequest,
+        flowType: VCShareFlowType.OPENID4VP_AUTHORIZATION,
+      });
+    },
+
+    sendVPConsentReject: () => {
+      console.error('User declined to share VP for issuance authorization');
+      VciClient.getInstance().abortPresentationFlow({
+        code: OVP_ERROR_CODE.DECLINED,
+        message: OVP_ERROR_MESSAGES.DECLINED,
+      });
+    },
+
+    sendPresentationAuthorizationError: (_, event) => {
+      console.error(
+        'PRESENTATION_AUTHORIZATION_ERROR for issuance authorization',
+      );
+      VciClient.getInstance().abortPresentationFlow({
+        code: 'PRESENTATION_AUTHORIZATION_ERROR',
+        message: event.error,
+      });
+    },
   };
 };

@@ -7,7 +7,7 @@ import {
   View,
   ScrollView,
 } from 'react-native';
-import {Centered, Column, Row, Text, Button} from '../../components/ui';
+import {Column, Row, Text, Button} from '../../components/ui';
 import {Theme} from '../../components/ui/styleUtils';
 import {useTranslation} from 'react-i18next';
 import {RootRouteProps} from '../../routes';
@@ -66,8 +66,11 @@ export const IntroSlidersScreen: React.FC<RootRouteProps> = props => {
 
   const renderItem = ({item}) => {
     return (
-      <ImageBackground source={require('./IntroBg.png')}>
-        <Centered>
+      <ImageBackground
+        source={require('./IntroBg.png')}
+        style={{flex: 1, width: '100%'}}
+        resizeMode="cover">
+        <View style={{flex: 1}}>
           <Row align="space-between" style={Theme.Styles.introSliderHeader}>
             <Column style={{marginLeft: INTRO_SLIDER_LOGO_MARGIN}}>
               {SvgImage.InjiSmallLogo()}
@@ -84,11 +87,16 @@ export const IntroSlidersScreen: React.FC<RootRouteProps> = props => {
                 title={isPasscodeSet ? t('back') : t('skip')}
                 onPress={isPasscodeSet ? controller.BACK : controller.NEXT}
                 styles={{height: 40, maxWidth: 115}}
+                titleStyle={{color: '#FFFFFF', fontWeight: '600'}}
               />
             )}
           </Row>
-          <View style={{width: 300, height: 600}}>
-            <Centered fill>{item.component}</Centered>
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+            }}>
+            {item.component}
           </View>
           <Column
             testID={`introSlide-${item.key}`}
@@ -99,6 +107,7 @@ export const IntroSlidersScreen: React.FC<RootRouteProps> = props => {
             <Text
               testID={`introTitle-${item.key}`}
               style={{paddingTop: 3}}
+              size={'large'}
               weight="semibold"
               margin="0 0 18 0">
               {item.title}
@@ -108,7 +117,6 @@ export const IntroSlidersScreen: React.FC<RootRouteProps> = props => {
                 maxHeight: 60,
                 width: '100%',
                 paddingHorizontal: 10,
-                marginBottom: 400,
               }}
               showsVerticalScrollIndicator={true}
               persistentScrollbar={true}>
@@ -121,7 +129,7 @@ export const IntroSlidersScreen: React.FC<RootRouteProps> = props => {
               </Text>
             </ScrollView>
           </Column>
-        </Centered>
+        </View>
       </ImageBackground>
     );
   };

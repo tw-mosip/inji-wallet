@@ -103,10 +103,7 @@ export const QrConsent: React.FC<QrConsentProps> = props => {
                 <Switch
                   value={controller.isShare[claim]}
                   onValueChange={() =>
-                    controller.SELECT_CONSENT(
-                      controller.isShare[claim],
-                      claim,
-                    )
+                    controller.SELECT_CONSENT(controller.isShare[claim], claim)
                   }
                   color={Theme.Colors.Icon}
                 />

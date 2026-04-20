@@ -35,7 +35,7 @@ public class ShareVcTest extends IosBaseTest {
         assertTrue(homePage.isHomePageLoaded(), "Verify if home page is displayed");
         SharePage scanPage = homePage.clickOnShareButton();
         scanPage.acceptPermissionPopupBluetoothIos();
-        scanPage.acceptPermissionPopupCameraIos();
+//        scanPage.acceptPermissionPopupCameraIos();
         assertTrue(scanPage.isNoShareableCardsMessageDisplayed(), "Verify if no shareable cards are available message is displayed");
     }
 
@@ -102,7 +102,7 @@ public class ShareVcTest extends IosBaseTest {
 
         esignetLoginPage.clickOnGetOtpButton();
 
-        otpVerification.enterOtpForeSignet(InjiWalletUtil.getOtp(), PlatformType.IOS);
+        otpVerification.enterOtpForeSignet(uinGetOtp(), PlatformType.IOS);
         esignetLoginPage.clickOnVerifyButtonIos();
 
         addNewCardPage.clickOnDoneButton();

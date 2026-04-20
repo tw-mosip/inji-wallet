@@ -3,7 +3,6 @@ import {
   selectSupportedCredentialTypes,
   selectErrorMessageType,
   selectIsBiometricCancelled,
-  selectIsDone,
   selectIsDownloadCredentials,
   selectIsIdle,
   selectIssuers,
@@ -12,14 +11,22 @@ import {
   selectSelectedIssuer,
   selectSelectingCredentialType,
   selectStoring,
-  selectVerificationErrorMessage, selectIsQrScanning,
+  selectVerificationErrorMessage,
+  selectIsQrScanning,
   selectAuthWebViewStatus,
   selectAuthEndPoint,
   selectIsTxCodeRequested,
   selectIsConsentRequested,
   selectIssuerLogo,
   selectIssuerName,
-  selectTxCodeDisplayDetails
+  selectTxCodeDisplayDetails,
+  selectIsPresentationAuthorization,
+  selectOVPMachine,
+  selectIsPresentationAuthorizationInProgress,
+  selectAuthorizationType,
+  selectIsAuthorizationSuccess,
+  selectSelectedCredentialType,
+  selectTrustedIssuerConsentStatus,
 } from '../../machines/Issuers/IssuersSelectors';
 import { ActorRefFrom } from 'xstate';
 import { BOTTOM_TAB_ROUTES } from '../../routes/routesConstants';
@@ -30,34 +37,48 @@ import {
   IssuersMachine,
 } from '../../machines/Issuers/IssuersMachine';
 import { CredentialTypes } from '../../machines/VerifiableCredential/VCMetaMachine/vc';
+import { goHomeErrors } from '../../shared/openId4VCI/Utils';
 
 export function useIssuerScreenController({ route, navigation }) {
   const service = route.params.service;
-  service.subscribe(logState);
+  if (__DEV__) service.subscribe(logState);
 
   return {
+    isPresentationAuthorization: useSelector(
+      service,
+      selectIsPresentationAuthorization,
+    ),
+    isPresentationAuthorizationInProgress: useSelector(
+      service,
+      selectIsPresentationAuthorizationInProgress,
+    ),
+    authorizationType: useSelector(service, selectAuthorizationType),
+    isDownloadSuccess: useSelector(service, selectStoring),
+    isAuthorizationSuccess: useSelector(service, selectIsAuthorizationSuccess),
     issuers: useSelector(service, selectIssuers),
+    ovpMachine: useSelector(service, selectOVPMachine),
     issuerLogo: useSelector(service, selectIssuerLogo),
     issuerName: useSelector(service, selectIssuerName),
     isTxCodeRequested: useSelector(service, selectIsTxCodeRequested),
     txCodeDisplayDetails: useSelector(service, selectTxCodeDisplayDetails),
-    authEndpount: useSelector(service, selectAuthEndPoint),
+    authEndpoint: useSelector(service, selectAuthEndPoint),
     selectedIssuer: useSelector(service, selectSelectedIssuer),
+    selectedCredentialType: useSelector(service, selectSelectedCredentialType),
     errorMessageType: useSelector(service, selectErrorMessageType),
     isDownloadingCredentials: useSelector(service, selectIsDownloadCredentials),
     isBiometricsCancelled: useSelector(service, selectIsBiometricCancelled),
-    isDone: useSelector(service, selectIsDone),
     isIdle: useSelector(service, selectIsIdle),
     loadingReason: useSelector(service, selectLoadingReason),
-    isStoring: useSelector(service, selectStoring),
     isQrScanning: useSelector(service, selectIsQrScanning),
     isAuthEndpointToOpen: useSelector(service, selectAuthWebViewStatus),
     isSelectingCredentialType: useSelector(
       service,
       selectSelectingCredentialType,
     ),
-    isConsentRequested: useSelector(
-      service, selectIsConsentRequested
+    isConsentRequested: useSelector(service, selectIsConsentRequested),
+    trustedIssuerConsentStatus: useSelector(
+      service,
+      selectTrustedIssuerConsentStatus,
     ),
     supportedCredentialTypes: useSelector(
       service,
@@ -69,10 +90,22 @@ export function useIssuerScreenController({ route, navigation }) {
     ),
     isError: useSelector(service, selectIsError),
 
-    CANCEL: () => service.send(IssuerScreenTabEvents.CANCEL()),
+    CANCEL: ({
+      serverErrorCode = '',
+      serverErrorDescription = '',
+    } = {}) => service.send(IssuerScreenTabEvents.CANCEL({ serverErrorCode, serverErrorDescription })),
     SELECTED_ISSUER: id =>
       service.send(IssuerScreenTabEvents.SELECTED_ISSUER(id)),
-    TRY_AGAIN: () => service.send(IssuerScreenTabEvents.TRY_AGAIN()),
+    TRY_AGAIN: () => {
+      const state = service.getSnapshot();
+      if (
+        goHomeErrors.has(state.context.errorMessage)
+      ) {
+        navigation.navigate(BOTTOM_TAB_ROUTES.home, { screen: 'HomeScreen' });
+        return;
+      }
+      service.send(IssuerScreenTabEvents.TRY_AGAIN());
+    },
     RESET_ERROR: () => service.send(IssuerScreenTabEvents.RESET_ERROR()),
     DOWNLOAD_ID: () => {
       service.send(IssuerScreenTabEvents.DOWNLOAD_ID());
@@ -103,7 +136,7 @@ export function useIssuerScreenController({ route, navigation }) {
     },
     ON_CONSENT_GIVEN: () => {
       service.send(IssuerScreenTabEvents.ON_CONSENT_GIVEN());
-    }
+    },
   };
 }
 

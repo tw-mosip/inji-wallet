@@ -69,6 +69,12 @@ public class HomePage extends BasePage {
     @iOSXCUITFindBy(accessibility = "noInternetConnectionErrorTitle")
     private WebElement noInternetConnection;
 
+    @AndroidFindBy(accessibility = "networkRequestFailedErrorTitle")
+    @iOSXCUITFindBy(accessibility = "networkRequestFailedErrorTitle")
+    private WebElement netWorkRequestFailed;
+
+
+
     @AndroidFindBy(accessibility = "share")
     @iOSXCUITFindBy(accessibility = "share")
     private WebElement shareButton;
@@ -268,6 +274,19 @@ public class HomePage extends BasePage {
                 "English", "No internet connection",
                 "Tamil", "இணைய இணைப்பு இல்லை",
                 "Filipino", "Pakisuri ang iyong koneksyon at subukang muli"
+        );
+
+        String expectedText = expectedTexts.get(language);
+        return actualText.equalsIgnoreCase(expectedText);
+    }
+
+    public boolean verifyLanguageForNetWorkRequestFailedDisplayed(String language) {
+        String actualText = getText(netWorkRequestFailed, "Getting text from 'Network Request Failed' message");
+
+        Map<String, String> expectedTexts = Map.of(
+                "English", "Network request failed",
+                "Tamil", "நெட்வொர்க் கோரிக்கை தோல்வியடைந்தது",
+                "Filipino", "Nabigo ang kahilingan sa network"
         );
 
         String expectedText = expectedTexts.get(language);
@@ -605,4 +624,12 @@ public class HomePage extends BasePage {
         click(closeButton, "Clicking on the Close (cross) button");
     }
 
+    /*
+     * Scrolls to the download button and clicks it to download the card.
+     * Use this method when the download button may be off-screen and requires scrolling to become visible.
+     */
+    public  AddNewCardPage scrollanddownloadCard() {
+        scrollAndClickByAccessibilityId("downloadCardButton", 4, "scroll to downlaodbutton");
+        return new AddNewCardPage(driver);
+    }
 }

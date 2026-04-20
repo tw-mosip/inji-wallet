@@ -11,6 +11,7 @@ import {useTranslation} from 'react-i18next';
 import {useScanScreen} from '../screens/Scan/ScanScreenController';
 import {Theme} from './ui/styleUtils';
 import {useSettingsScreen} from '../screens/Settings/SettingScreenController';
+import {RevocationStatusType} from '../shared/vcVerifier/VcVerifier';
 
 export const BannerNotificationContainer: React.FC<
   BannerNotificationContainerProps
@@ -23,9 +24,14 @@ export const BannerNotificationContainer: React.FC<
 
   const bannerNotificationController = UseBannerNotification();
   const WalletBindingSuccess = bannerNotificationController.isBindingSuccess;
+  const reverificationSuccessObject =
+    bannerNotificationController.isReverificationSuccess;
+  const reverificationFailureObject =
+    bannerNotificationController.isReverificationFailed;
   const {t} = useTranslation('BannerNotification');
   const rt = useTranslation('RequestScreen').t;
-  const verificationStatus = bannerNotificationController.verificationStatus;
+  const verificationStatus =
+    bannerNotificationController.verificationStatus || null;
 
   return (
     <>
@@ -69,6 +75,23 @@ export const BannerNotificationContainer: React.FC<
         </View>
       )}
 
+      {reverificationSuccessObject.status && (
+        <View style={Theme.BannerStyles.topBanner}>
+          <BannerNotification
+            type={BannerStatusType.SUCCESS}
+            message={t(
+              `reverifiedSuccessfully.${reverificationSuccessObject.statusValue}`,
+              {vcType: reverificationSuccessObject.vcType},
+            )}
+            onClosePress={
+              bannerNotificationController.RESET_REVIRIFICATION_SUCCESS
+            }
+            key={'reverifiedSuccessfullyPopup'}
+            testId={'reverifiedSuccessfullyPopup'}
+          />
+        </View>
+      )}
+
       {showQuickShareSuccessBanner && (
         <View style={Theme.BannerStyles.topBanner}>
           <BannerNotification
@@ -101,18 +124,6 @@ export const BannerNotificationContainer: React.FC<
         />
       )}
 
-      {verificationStatus !== null && showVerificationStatusBanner && (
-        <BannerNotification
-          type={verificationStatus.statusType}
-          message={t(`VcVerificationBanner:${verificationStatus?.statusType}`, {
-            vcDetails: `${verificationStatus.vcType} ${verificationStatus.vcNumber}`,
-          })}
-          onClosePress={bannerNotificationController.RESET_VERIFICATION_STATUS}
-          key={'reVerificationInProgress'}
-          testId={'reVerificationInProgress'}
-        />
-      )}
-
       {bannerNotificationController.isDownloadingFailed && (
         <BannerNotification
           type={BannerStatusType.ERROR}
@@ -120,6 +131,21 @@ export const BannerNotificationContainer: React.FC<
           onClosePress={bannerNotificationController.RESET_DOWNLOADING_FAILED}
           key={'downloadingVcFailedPopup'}
           testId={'downloadingVcFailedPopup'}
+        />
+      )}
+
+      {reverificationFailureObject.status && (
+        <BannerNotification
+          type={BannerStatusType.ERROR}
+          message={t(
+            `reverificationFailed.${reverificationFailureObject.statusValue}`,
+            {vcType: reverificationFailureObject.vcType},
+          )}
+          onClosePress={
+            bannerNotificationController.RESET_REVERIFICATION_FAILURE
+          }
+          key={'reverificationFailedPopup'}
+          testId={'reverificationFailedPopup'}
         />
       )}
       {bannerNotificationController.isDownloadingSuccess && (
@@ -137,6 +163,8 @@ export const BannerNotificationContainer: React.FC<
 
 export type vcVerificationBannerDetails = {
   statusType: BannerStatus;
+  isRevoked: RevocationStatusType;
+  isExpired: boolean;
   vcType: string;
 };
 

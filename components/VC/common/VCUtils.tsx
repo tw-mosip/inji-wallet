@@ -5,24 +5,26 @@ import {
   IssuerWellknownResponse,
   VerifiableCredential,
 } from '../../../machines/VerifiableCredential/VCMetaMachine/vc';
-import i18n, { getLocalizedField } from '../../../i18n';
-import { Row } from '../../ui';
-import { Text } from 'react-native';
-import { VCItemField } from './VCItemField';
+import i18n, {getLocalizedField} from '../../../i18n';
+import {Column, Row} from '../../ui';
+import {Text} from 'react-native';
+import {VCItemField} from './VCItemField';
 import React from 'react';
-import { Theme } from '../../ui/styleUtils';
-import { CREDENTIAL_REGISTRY_EDIT } from 'react-native-dotenv';
-import { VCVerification } from '../../VCVerification';
-import { MIMOTO_BASE_URL } from '../../../shared/constants';
-import { VCItemDetailsProps } from '../Views/VCDetailView';
+import {Theme} from '../../ui/styleUtils';
+import {CREDENTIAL_REGISTRY_EDIT} from 'react-native-dotenv';
+import {VCVerification} from '../../VCVerification';
+import {MIMOTO_BASE_URL} from '../../../shared/constants';
+import {VCItemDetailsProps} from '../Views/VCDetailView';
 import {
   getDisplayObjectForCurrentLanguage,
   getMatchingCredentialIssuerMetadata,
+  serializeClaimPath,
 } from '../../../shared/openId4VCI/Utils';
-import { VCFormat } from '../../../shared/VCFormat';
-import { displayType } from '../../../machines/Issuers/IssuersMachine';
-import { Image } from 'react-native-elements/dist/image/Image';
+import {VCFormat} from '../../../shared/VCFormat';
+import {displayType} from '../../../machines/Issuers/IssuersMachine';
+import {Image} from 'react-native-elements/dist/image/Image';
 import Icon from 'react-native-vector-icons/FontAwesome';
+
 export const CARD_VIEW_DEFAULT_FIELDS = ['fullName'];
 export const DETAIL_VIEW_DEFAULT_FIELDS = [
   'fullName',
@@ -32,6 +34,9 @@ export const DETAIL_VIEW_DEFAULT_FIELDS = [
   'email',
   'address',
 ];
+
+export const STATUS_FIELD_NAME = 'Status';
+export const VC_STATUS_KEYS = ['valid', 'pending', 'expired', 'revoked'];
 
 //todo UIN & VID to be removed once we get the fields in the wellknown endpoint
 export const CARD_VIEW_ADD_ON_FIELDS = ['UIN', 'VID'];
@@ -59,12 +64,12 @@ function iterateMsoMdocFor(
   element: 'elementIdentifier' | 'elementValue',
   fieldName: string,
 ) {
-  const foundItem = credential['issuerSigned']['nameSpaces'][namespace].find(
+  const foundItem = credential['issuerSigned']['nameSpaces'][namespace]?.find(
     element => {
       return element.elementIdentifier === fieldName;
     },
   );
-  return foundItem[element];
+  return foundItem?.[element];
 }
 
 export const getFieldValue = (
@@ -93,24 +98,88 @@ export const getFieldValue = (
       );
     default: {
       if (format === VCFormat.ldp_vc) {
-        const fieldValue = verifiableCredential?.credentialSubject[field];
-        if (Array.isArray(fieldValue) && typeof fieldValue[0] !== 'object') {
-          return fieldValue.join(', ');
+        const fieldParts = field.split('.');
+        let value: any = verifiableCredential?.credentialSubject;
+
+        for (let i = 0; i < fieldParts.length; i++) {
+          const part = fieldParts[i];
+          if (value == null) break;
+          value = value[part];
+
+          if (Array.isArray(value) && i < fieldParts.length - 1) {
+            if (/^\d+$/.test(fieldParts[i + 1])) continue;
+            const remainingPath = fieldParts.slice(i + 1);
+            value = value.map(item => {
+              let inner = item;
+              for (const p of remainingPath) inner = inner?.[p];
+              return inner;
+            });
+            break;
+          }
         }
-        return getLocalizedField(fieldValue);
+
+        if (Array.isArray(value) && typeof value[0] !== 'object') {
+          return value.join(', ');
+        }
+        return getLocalizedField(value);
       } else if (format === VCFormat.mso_mdoc) {
         const splitField = field.split('~');
         if (splitField.length > 1) {
-          const [namespace, fieldName] = splitField;
-          return iterateMsoMdocFor(
+          const [namespace, fieldName, ...rest] = splitField;
+          let value: any = iterateMsoMdocFor(
             verifiableCredential,
             namespace,
             'elementValue',
             fieldName,
           );
+
+          for (let i = 0; i < rest.length; i++) {
+            if (value == null) break;
+            const part = rest[i];
+            if (Array.isArray(value)) {
+              if (/^\d+$/.test(part)) {
+                value = value[Number(part)];
+              } else {
+                const remainingPath = rest.slice(i);
+                value = value.map(item => {
+                  let inner = item;
+                  for (const p of remainingPath) inner = inner?.[p];
+                  return inner;
+                });
+                break;
+              }
+            } else if (typeof value === 'object') {
+              value = value[part];
+            } else {
+              value = undefined;
+              break;
+            }
+          }
+
+          if (Array.isArray(value) && typeof value[0] !== 'object') {
+            return value.join(', ');
+          }
+          if (value && typeof value === 'object') {
+            const leafKey = rest.length ? rest[rest.length - 1] : fieldName;
+            const elements = renderFieldRecursively(
+              leafKey,
+              value,
+              display.getTextColor(Theme.Colors.DetailsLabel),
+              display.getTextColor(Theme.Colors.Details),
+              namespace,
+              0,
+              new Set<string>(),
+              verifiableCredential.disclosedKeys || [],
+            );
+            // exclude the first element which is the namespace title
+            return <Column>{elements.slice(1)}</Column>;
+          }
+          return value;
         }
-      }
-      else if (format === VCFormat.vc_sd_jwt || format === VCFormat.dc_sd_jwt) {
+      } else if (
+        format === VCFormat.vc_sd_jwt ||
+        format === VCFormat.dc_sd_jwt
+      ) {
         const fieldParts = field.split('.');
         let value: any = verifiableCredential?.fullResolvedPayload;
 
@@ -123,6 +192,11 @@ export const getFieldValue = (
 
           // If we hit an array and we still have more path to go...
           if (Array.isArray(value) && i < fieldParts.length - 1) {
+            // Explicit non-negative integer index (Appendix C.1): bracket
+            // access on the next loop iteration handles it correctly.
+            if (/^\d+$/.test(fieldParts[i + 1])) continue;
+            // Otherwise iterate the remaining path across all elements
+            // (implicit null-wildcard behavior).
             const remainingPath = fieldParts.slice(i + 1);
             value = value.map(item => {
               let inner = item;
@@ -140,19 +214,30 @@ export const getFieldValue = (
         }
 
         if (Array.isArray(value) && typeof value[0] === 'object') {
-          if ('language' in value[0] &&
-            'value' in value[0]) {
-            return getLocalizedField(value)
-          }
-          else
-            return null;
+          if ('language' in value[0] && 'value' in value[0]) {
+            return getLocalizedField(value);
+          } else return null;
         }
 
         if (typeof value === 'object' && !Array.isArray(value)) {
           return null;
         }
         return getLocalizedField(value?.toString());
-      }      
+      } else if (format === VCFormat.jwt_vc_json) {
+        const fieldParts = field.split('.');
+        let value: any = verifiableCredential?.fullResolvedPayload;
+
+        for (const part of fieldParts) {
+          if (!value) break;
+          value = value[part];
+        }
+
+        if (Array.isArray(value) && typeof value[0] !== 'object') {
+          return value.join(', ');
+        }
+
+        return getLocalizedField(value);
+      }
     }
   }
 };
@@ -163,6 +248,24 @@ export const getFieldName = (
   format: string,
 ): string => {
   if (wellknown) {
+    // OpenID4VCI Final 1.0: claims is a flat array of {path, display}
+    // (Appendix B.2). Match by serialized path rather than tree-walk.
+    if (Array.isArray(wellknown.claims)) {
+      const match = wellknown.claims.find(
+        (c: any) => serializeClaimPath(c?.path, format) === field,
+      );
+      if (match?.display && Array.isArray(match.display)) {
+        const newFieldObj = match.display.map((obj: any) => ({
+          language: obj.locale,
+          value: obj.name,
+        }));
+        return getLocalizedField(newFieldObj);
+      }
+      const leaf = field.includes('~')
+        ? field.split('~').pop()!
+        : field.split('.').pop()!;
+      return formatKeyLabel(leaf);
+    }
     if (format === VCFormat.ldp_vc) {
       const credentialDefinition = wellknown.credential_definition;
       if (!credentialDefinition) {
@@ -170,7 +273,7 @@ export const getFieldName = (
           'Credential definition is not available for the selected credential type',
         );
       }
-      let fieldObj = credentialDefinition?.credentialSubject?.[field];
+      const fieldObj = credentialDefinition?.credentialSubject?.[field];
       if (fieldObj) {
         if (fieldObj.display && fieldObj.display.length > 0) {
           const newFieldObj = fieldObj.display.map(obj => ({
@@ -197,8 +300,7 @@ export const getFieldName = (
           return fieldName;
         }
       }
-    }
-    else if (format === VCFormat.vc_sd_jwt || format === VCFormat.dc_sd_jwt) {
+    } else if (format === VCFormat.vc_sd_jwt || format === VCFormat.dc_sd_jwt) {
       const pathParts = field.split('.');
       let currentObj = wellknown.claims;
       for (const part of pathParts) {
@@ -220,6 +322,27 @@ export const getFieldName = (
       }
 
       return formatKeyLabel(pathParts[pathParts.length - 1]);
+    } else if (format === VCFormat.jwt_vc_json) {
+      const pathParts = field.split('.');
+      const credentialSubject =
+        wellknown.credential_definition?.credentialSubject;
+
+      let currentObj = credentialSubject;
+      for (const part of pathParts) {
+        if (!currentObj || typeof currentObj !== 'object') break;
+        currentObj = currentObj[part];
+      }
+
+      if (currentObj?.display && Array.isArray(currentObj.display)) {
+        const newFieldObj = currentObj.display.map((obj: any) => ({
+          language: obj.locale,
+          value: obj.name,
+        }));
+
+        return getLocalizedField(newFieldObj);
+      }
+
+      return formatKeyLabel(pathParts[pathParts.length - 1]);
     }
   }
   return formatKeyLabel(field);
@@ -235,11 +358,11 @@ const shouldExcludeField = (field: string): boolean => {
   const normalized = field.includes('~')
     ? field.split('~')[1]
     : field.includes('.') || field.includes('[')
-      ? field
+    ? field
         .split('.')
         .pop()
         ?.replace(/\[\d+\]/g, '') ?? field
-      : field;
+    : field;
 
   return EXCLUDED_FIELDS_FOR_RENDERING.includes(normalized);
 };
@@ -345,7 +468,12 @@ const renderFieldRecursively = (
             • {label} {value.length > 1 ? index + 1 : ''}
           </Text>
           {showDisclosureIcon && (
-            <Icon name="share-square-o" size={14} color="#666" style={{marginLeft:2}} />
+            <Icon
+              name="share-square-o"
+              size={14}
+              color="#666"
+              style={{marginLeft: 2}}
+            />
           )}
         </Row>,
         ...renderFieldRecursively(
@@ -356,7 +484,7 @@ const renderFieldRecursively = (
           parentKey,
           depth + 1,
           renderedFields,
-          disclosedKeys
+          disclosedKeys,
         ),
       ];
     });
@@ -373,7 +501,7 @@ const renderFieldRecursively = (
         fullKey,
         depth + 1,
         renderedFields,
-        disclosedKeys
+        disclosedKeys,
       ),
     );
   }
@@ -385,8 +513,8 @@ const renderFieldRecursively = (
   if (typeof value === 'string' && value.startsWith('data:image')) {
     displayValue = (
       <Image
-        source={{ uri: value }}
-        style={{ width: 100, height: 100, borderRadius: 8 }}
+        source={{uri: value}}
+        style={{width: 100, height: 100, borderRadius: 8}}
         resizeMode="contain"
       />
     );
@@ -396,8 +524,8 @@ const renderFieldRecursively = (
   ) {
     displayValue = (
       <Image
-        source={{ uri: value }}
-        style={{ width: 100, height: 100, borderRadius: 8 }}
+        source={{uri: value}}
+        style={{width: 100, height: 100, borderRadius: 8}}
         resizeMode="contain"
       />
     );
@@ -411,13 +539,12 @@ const renderFieldRecursively = (
     /^\d+$/.test(value) &&
     ['iat', 'nbf', 'exp'].includes(shortKey.toLowerCase())
   ) {
-    const timestamp = parseInt(value, 10);
+    const timestamp = Number.parseInt(value, 10);
     displayValue = new Date(timestamp * 1000).toLocaleString();
   } else if (/^\d{4}-\d{2}-\d{2}T/.test(displayValue)) {
     const date = new Date(displayValue);
     displayValue = date.toLocaleString();
-  }
-  else if (displayValue.length > 100) {
+  } else if (displayValue.length > 100) {
     displayValue = displayValue.slice(0, 60) + '...';
   }
 
@@ -471,10 +598,15 @@ export const fieldItemIterator = (
 ): JSX.Element[] => {
   const fieldNameColor = display.getTextColor(Theme.Colors.DetailsLabel);
   const fieldValueColor = display.getTextColor(Theme.Colors.Details);
-  const disclosedKeys = verifiableCredential.disclosedKeys ||  [];
+  const disclosedKeys =
+    (verifiableCredential as {disclosedKeys?: string[]}).disclosedKeys || [];
   const renderedFields = new Set<string>();
 
   const renderedMainFields = fields.map(field => {
+    if (shouldExcludeField(field)) {
+      renderedFields.add(field);
+      return null;
+    }
     const fieldName = getFieldName(
       field,
       wellknown,
@@ -505,7 +637,7 @@ export const fieldItemIterator = (
     return (
       <Row
         key={field}
-        style={{ flexDirection: 'row', flex: 1 }}
+        style={{flexDirection: 'row', flex: 1}}
         align="space-between"
         margin="0 8 15 0">
         <VCItemField
@@ -523,16 +655,30 @@ export const fieldItemIterator = (
 
   let renderedExtraFields: JSX.Element[] = [];
   DETAIL_VIEW_BOTTOM_SECTION_FIELDS.forEach(item => renderedFields.add(item));
-  if (!wellknownFieldsFlag || verifiableCredential.fullResolvedPayload && !isBottomSectionFields) {
+  if (
+    !wellknownFieldsFlag ||
+    (verifiableCredential.fullResolvedPayload && !isBottomSectionFields)
+  ) {
     const renderedAll: JSX.Element[] = [];
 
     //  Extra fields from credentialSubject
     const credentialSubjectFields =
-      (verifiableCredential.credentialSubject as Record<string, any>) || verifiableCredential.fullResolvedPayload || {};
+      (verifiableCredential.credentialSubject as Record<string, any>) ||
+      verifiableCredential.fullResolvedPayload ||
+      {};
     const renderedSubjectFields = Object.entries(credentialSubjectFields)
       .filter(([key]) => !renderedFields.has(key))
       .flatMap(([key, value]) =>
-        renderFieldRecursively(key, value, fieldNameColor, fieldValueColor, '', 0, renderedFields, disclosedKeys),
+        renderFieldRecursively(
+          key,
+          value,
+          fieldNameColor,
+          fieldValueColor,
+          '',
+          0,
+          renderedFields,
+          disclosedKeys,
+        ),
       );
 
     renderedAll.push(...renderedSubjectFields);
@@ -566,7 +712,7 @@ export const fieldItemIterator = (
               namespace,
               1,
               renderedFields,
-              disclosedKeys
+              disclosedKeys,
             ),
           ),
         ];
@@ -580,9 +726,7 @@ export const fieldItemIterator = (
   return [...renderedMainFields, ...renderedExtraFields];
 };
 
-export const isVCLoaded = (
-  verifiableCredential: Credential | null
-) => {
+export const isVCLoaded = (verifiableCredential: Credential | null) => {
   return verifiableCredential != null;
 };
 
@@ -603,7 +747,7 @@ export const getMosipLogo = () => {
 export const getCredentialType = (
   supportedCredentialsWellknown: CredentialTypes,
 ): string => {
-  if (!!!supportedCredentialsWellknown) {
+  if (!supportedCredentialsWellknown) {
     return i18n.t('VcDetails:identityCard');
   }
   if (supportedCredentialsWellknown['display']) {
@@ -646,8 +790,8 @@ export const getCredentialTypeFromWellKnown = (
 
 export class Display {
   private readonly textColor: string | undefined = undefined;
-  private readonly backgroundColor: { backgroundColor: string };
-  private readonly backgroundImage: { uri: string } | undefined = undefined;
+  private readonly backgroundColor: {backgroundColor: string};
+  private readonly backgroundImage: {uri: string} | undefined = undefined;
 
   private defaultBackgroundColor = Theme.Colors.whiteBackgroundColor;
 
@@ -656,7 +800,7 @@ export class Display {
       ? getDisplayObjectForCurrentLanguage(wellknown.display)
       : {};
 
-    if (!!!Object.keys(wellknownDisplayProperty).length) {
+    if (!Object.keys(wellknownDisplayProperty).length) {
       this.backgroundColor = {
         backgroundColor: this.defaultBackgroundColor,
       };
@@ -676,7 +820,7 @@ export class Display {
     return this.textColor ?? defaultColor;
   }
 
-  getBackgroundColor(): { backgroundColor: string } {
+  getBackgroundColor(): {backgroundColor: string} {
     return this.backgroundColor;
   }
 
@@ -715,3 +859,34 @@ const ProtectedCurve = {
 const PROOF_TYPE_ALGORITHM_MAP = {
   [-7]: 'ES256',
 };
+
+export function getFaceAttribute(verifiableCredential, format) {
+  let credentialSubject = {};
+  if (format === VCFormat.ldp_vc) {
+    credentialSubject =
+      verifiableCredential?.credential?.credentialSubject ??
+      verifiableCredential?.verifiableCredential.credential.credentialSubject ??
+      {};
+  } else if (format === VCFormat.mso_mdoc) {
+    const nameSpaces =
+      verifiableCredential?.processedCredential?.issuerSigned?.nameSpaces ??
+      verifiableCredential?.processedCredential?.nameSpaces ??
+      {};
+    credentialSubject = Object.values(nameSpaces)
+      .flat()
+      .reduce((acc, item) => {
+        const key = item.elementIdentifier;
+        const value = item.elementValue;
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, any>);
+  } else if (format === VCFormat.vc_sd_jwt || format === VCFormat.dc_sd_jwt) {
+    credentialSubject =
+      verifiableCredential?.processedCredential?.fullResolvedPayload ?? {};
+  } else if (format === VCFormat.jwt_vc_json) {
+    credentialSubject = verifiableCredential?.fullResolvedPayload ?? {};
+  }
+  const faceField = getFaceField(credentialSubject);
+
+  return faceField;
+}

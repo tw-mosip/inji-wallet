@@ -1,3 +1,4 @@
+/* eslint-disable */
 // jest.config.js
 const {defaults: tsjPreset} = require('ts-jest/presets');
 module.exports = {
@@ -12,8 +13,8 @@ module.exports = {
     __DEV__: true,
   },
   transform: {
-    '^.+\\.jsx$': 'babel-jest',
-    '^.+\\.tsx?$': [
+    '^.+.jsx$': 'babel-jest',
+    '^.+.tsx?$': [
       'ts-jest',
       {
         // TODO: Remove this to log the type mismatch errors later.
@@ -33,11 +34,22 @@ module.exports = {
     'interfaces',
     'jestGlobalMocks.ts',
     '__mocks__/*',
+    '__snapshots__/',
+    '\\.snap$',
+    '/tools/',
+    'babel\\.config\\.js',
+    'metro\\.config\\.js',
+    'jest\\.config\\.js',
+    '\\.prettierrc\\.js',
+    'globals\\.js$',
+    'index\\.js$',
+    'react-native\\.config\\.js',
+    '\\.d\\.ts$',
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|react-native-vector-icons|jsonld|jsonld-signatures|@digitalbazaar/.*)',
-   'node_modules/(?!(@react-native|react-native|react-native-argon2|@react-navigation|react-native-elements|react-native-size-matters|react-native-ratings|expo-constants|base58-universal|@react-native-*|react-native-google-signin|react-native-linear-gradient|expo-camera|base58-universal/*|react-native-*|react-native-vector-icons|jsonld|jsonld-signatures|@digitalbazaar/.*)/).*/',
-  ],  
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|react-native-vector-icons|jsonld|jsonld-signatures|@digitalbazaar/.*|jsonpath-plus)',
+    'node_modules/(?!(@react-native|react-native|react-native-argon2|@react-navigation|react-native-elements|react-native-size-matters|react-native-ratings|expo-constants|base58-universal|@react-native-*|react-native-google-signin|react-native-linear-gradient|expo-camera|base58-universal/*|react-native-*|react-native-vector-icons|jsonld|jsonld-signatures|@digitalbazaar/.*|jsonpath-plus)/).*/',
+  ],
   setupFiles: [
     '<rootDir>/__mocks__/svg.mock.js',
     '<rootDir>/__mocks__/jest-init.js',
@@ -52,22 +64,23 @@ module.exports = {
     '<rootDir>/__mocks__/@noble/mock-secp256k1.js',
     '<rootDir>/__mocks__/@noble/mock-ed25519.js',
     '<rootDir>/__mocks__/react-native-base64.js',
-    '<rootDir>__mocks__/mockCrytoUtil.js',
-    '<rootDir>__mocks__/text-encoder.js',
+    '<rootDir>/__mocks__/mockCrytoUtil.js',
+    '<rootDir>/__mocks__/text-encoder.js',
     // https://github.com/react-native-google-signin/google-signin?tab=readme-ov-file#jest-module-mock
     '<rootDir>/node_modules/@react-native-google-signin/google-signin/jest/build/setup.js',
   ],
-  // TODO: enable this to also collect coverage
-  collectCoverage: false,
+  collectCoverage: true,
+  coverageProvider: 'v8',
   collectCoverageFrom: [
-    'routes/*.ts',
-    'screens/**',
-    'machines/**',
-    'lib/jsonld-signatures/**',
-    'components/**',
-    'machines/**',
-    'shared/**',
-    '**/*.{js,jsx}',
+    'routes/**/*.{ts,tsx,js,jsx}',
+    'screens/**/*.{ts,tsx,js,jsx}',
+    'machines/**/*.{ts,tsx,js,jsx}',
+    'lib/jsonld-signatures/**/*.{ts,tsx,js,jsx}',
+    'components/**/*.{ts,tsx,js,jsx}',
+    'shared/**/*.{ts,tsx,js,jsx}',
+    '!**/*.test.{ts,tsx,js,jsx}',
+    '!**/*.spec.{ts,tsx,js,jsx}',
+    '!**/__tests__/**',
     '!**/node_modules/**',
   ],
   coverageDirectory: 'coverage',

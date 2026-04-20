@@ -53,7 +53,7 @@ export const ReceiveVcScreen: React.FC = () => {
         setLoadingSvg(true);
 
         const vcJsonString = JSON.stringify(controller.credential.credential);
-        const result = await VcRenderer.getInstance().renderVC(
+        const result = await VcRenderer.getInstance().generateCredentialDisplayContent(
           verifiableCredentialData.vcMetadata.format,
           wellknown ?? null,
           vcJsonString,
@@ -87,7 +87,7 @@ export const ReceiveVcScreen: React.FC = () => {
       setWellknown(response.matchingCredentialIssuerMetadata);
       setFields(response.fields);
       controller.STORE_INCOMING_VC_WELLKNOWN_CONFIG(
-        verifiableCredentialData?.issuer,
+        verifiableCredentialData?.vcMetadata.issuerHost,
         response.wellknownResponse,
       );
     });

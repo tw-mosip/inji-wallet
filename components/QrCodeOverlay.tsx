@@ -32,14 +32,37 @@ export const QrCodeOverlay: React.FC<QrCodeOverlayProps> = props => {
         throw new Error('No key data found');
       }
     } catch {
-      const {credential} = props.verifiableCredential;
-      qrData = await RNPixelpassModule.generateQRData(
-        JSON.stringify(credential),
-        '',
-      );
+      const {isClaim169QrPresent, claim169QrData} = getClaim169Qr();
+      if (isClaim169QrPresent) {
+        qrData = claim169QrData;
+      } else {
+        const {credential} = props.verifiableCredential;
+        qrData = await RNPixelpassModule.generateQRData(
+          JSON.stringify(credential),
+          '',
+        );
+      }
       await RNSecureKeystoreModule.storeData(props.meta.id, qrData);
     }
     return qrData;
+  }
+
+  function getClaim169Qr(): {
+    isClaim169QrPresent: boolean;
+    claim169QrData: string;
+  } {
+    const credentialSubject =
+      props.verifiableCredential?.credential?.credentialSubject;
+    const claim169Qrs = (credentialSubject as any)?.claim169;
+    const qr =
+      claim169Qrs && typeof claim169Qrs === 'object'
+        ? claim169Qrs[Object.keys(claim169Qrs)[0]]
+        : undefined;
+
+    if (typeof qr === 'string' && qr.trim().length > 0) {
+      return {isClaim169QrPresent: true, claim169QrData: qr};
+    }
+    return {isClaim169QrPresent: false, claim169QrData: ''};
   }
 
   let qrRef = useRef(null);

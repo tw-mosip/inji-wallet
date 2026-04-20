@@ -1,43 +1,49 @@
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { BackHandler, I18nManager, View } from 'react-native';
-import { Button, Column, Row, Text } from '../../components/ui';
-import { Theme } from '../../components/ui/styleUtils';
-import { VcItemContainer } from '../../components/VC/VcItemContainer';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
+import {useTranslation} from 'react-i18next';
+import {BackHandler, I18nManager, View} from 'react-native';
+import {Button, Column, Row, Text} from '../../components/ui';
+import {Theme} from '../../components/ui/styleUtils';
+import {VcItemContainer} from '../../components/VC/VcItemContainer';
 import {
   isIOS,
   LIVENESS_CHECK,
   OVP_ERROR_MESSAGES,
   OVP_ERROR_CODE,
 } from '../../shared/constants';
-import { TelemetryConstants } from '../../shared/telemetry/TelemetryConstants';
+import {TelemetryConstants} from '../../shared/telemetry/TelemetryConstants';
 import {
   getImpressionEventData,
   sendImpressionEvent,
 } from '../../shared/telemetry/TelemetryUtils';
-import { VCItemContainerFlowType } from '../../shared/Utils';
-import { VCMetadata } from '../../shared/VCMetadata';
-import { VerifyIdentityOverlay } from '../VerifyIdentityOverlay';
-import { VPShareOverlay } from './VPShareOverlay';
-import { FaceVerificationAlertOverlay } from './FaceVerificationAlertOverlay';
-import { useSendVPScreen } from './SendVPScreenController';
+import {VCItemContainerFlowType} from '../../shared/Utils';
+import {VCMetadata} from '../../shared/VCMetadata';
+import {VerifyIdentityOverlay} from '../VerifyIdentityOverlay';
+import {VPShareOverlay} from './VPShareOverlay';
+import {FaceVerificationAlertOverlay} from './FaceVerificationAlertOverlay';
+import {useSendVPScreen} from './SendVPScreenController';
 import LinearGradient from 'react-native-linear-gradient';
-import { Error } from '../../components/ui/Error';
-import { SvgImage } from '../../components/ui/svg';
-import { Loader } from '../../components/ui/Loader';
-import { Icon } from 'react-native-elements';
-import { ScanLayoutProps } from '../../routes/routeTypes';
+import {ErrorView} from '../../components/ui/Error';
+import {SvgImage} from '../../components/ui/svg';
+import {Loader, LoaderSkeleton} from '../../components/ui/Loader';
+import {Icon} from 'react-native-elements';
+import {ScanLayoutProps} from '../../routes/routeTypes';
 import OpenID4VP from '../../shared/openID4VP/OpenID4VP';
-import { GlobalContext } from '../../shared/GlobalContext';
-import { APP_EVENTS } from '../../machines/app';
-import { useScanScreen } from './ScanScreenController';
-import { useOvpErrorModal } from '../../shared/hooks/useOvpErrorModal';
-import { TrustModal } from '../../components/TrustModal';
+import {GlobalContext} from '../../shared/GlobalContext';
+import {APP_EVENTS} from '../../machines/app';
+import {useScanScreen} from './ScanScreenController';
+import {useOvpErrorModal} from '../../shared/hooks/useOvpErrorModal';
+import {TrustModalVerifier} from '../../components/TrustModalVerifier';
 
 export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
-  const { t } = useTranslation('SendVPScreen');
-  const controller = useSendVPScreen();
+  const {t} = useTranslation('SendVPScreen');
+  const controller = useSendVPScreen(props);
   const scanScreenController = useScanScreen();
 
   const [errorModal, resetErrorModal] = useOvpErrorModal({
@@ -51,10 +57,11 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
 
   const vcsMatchingAuthRequest = controller.vcsMatchingAuthRequest;
 
-  const { appService } = useContext(GlobalContext);
+  const {appService} = useContext(GlobalContext);
   const [triggerExitFlow, setTriggerExitFlow] = useState(false);
-  const [selectedDisclosuresByVc, setSelectedDisclosuresByVc] =
-    useState<Record<string, string[]>>({});
+  const [selectedDisclosuresByVc, setSelectedDisclosuresByVc] = useState<
+    Record<string, string[]>
+  >({});
 
   const handleDisclosureChange = (vcKey: string, disclosures: string[]) => {
     setSelectedDisclosuresByVc(prev => ({
@@ -63,12 +70,12 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
     }));
   };
 
-
   useEffect(() => {
     if (errorModal.show && controller.isOVPViaDeepLink) {
       const timeout = setTimeout(
-        () => {
-          OpenID4VP.sendErrorToVerifier(
+        async () => {
+          // Send error to verifier is initiated and its response is not listened to here.
+          void OpenID4VP.sendErrorToVerifier(
             OVP_ERROR_MESSAGES.NO_MATCHING_VCS,
             OVP_ERROR_CODE.NO_MATCHING_VCS,
           );
@@ -131,11 +138,15 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
     resetErrorModal();
   };
 
-  const handleDismiss = () => {
-    OpenID4VP.sendErrorToVerifier(
-      OVP_ERROR_MESSAGES.DECLINED,
-      OVP_ERROR_CODE.DECLINED,
-    );
+  const handleDismiss = async () => {
+    // Send error to verifier is initiated and its response is not listened to here.
+    if (!controller.isAuthorizationFlow) {
+      void OpenID4VP.sendErrorToVerifier(
+        OVP_ERROR_MESSAGES.DECLINED,
+        OVP_ERROR_CODE.DECLINED,
+      );
+    }
+
     controller.generateAndStoreLogMessage('USER_DECLINED_CONSENT');
     if (controller.isOVPViaDeepLink) {
       controller.GO_TO_HOME();
@@ -145,11 +156,15 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
     }
   };
 
-  const handleRejectButtonEvent = () => {
-    OpenID4VP.sendErrorToVerifier(
-      OVP_ERROR_MESSAGES.DECLINED,
-      OVP_ERROR_CODE.DECLINED,
-    );
+  const handleRejectButtonEvent = async () => {
+    // Send error to verifier is initiated and its response is not listened to here.
+    if (!controller.isAuthorizationFlow) {
+      void OpenID4VP.sendErrorToVerifier(
+        OVP_ERROR_MESSAGES.DECLINED,
+        OVP_ERROR_CODE.DECLINED,
+      );
+    }
+
     controller.generateAndStoreLogMessage('USER_DECLINED_CONSENT');
     if (controller.isOVPViaDeepLink) {
       controller.GO_TO_HOME();
@@ -217,6 +232,10 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
   ]);
 
   if (controller.showLoadingScreen) {
+    if (controller.isAuthorizationFlow) {
+      return <LoaderSkeleton testID={'presentation-authorization'} />;
+    }
+
     return (
       <Loader
         title={t('loaders.loading')}
@@ -232,8 +251,9 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
 
   const getPrimaryButtonEvent = () => {
     if (controller.showConfirmationPopup && controller.isOVPViaDeepLink) {
-      return () => {
-        OpenID4VP.sendErrorToVerifier(
+      return async () => {
+        // Send error to verifier is initiated and its response is not listened to here.
+        void OpenID4VP.sendErrorToVerifier(
           OVP_ERROR_MESSAGES.DECLINED,
           OVP_ERROR_CODE.DECLINED,
         );
@@ -268,7 +288,10 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
 
   const noOfCardsSelected = controller.areAllVCsChecked
     ? Object.values(controller.vcsMatchingAuthRequest).length
-    : Object.keys(controller.selectedVCKeys).length;
+    : Object.values(controller.inputDescriptorIdToSelectedVcKeys).reduce(
+        (vcCount, arr) => vcCount + arr.length,
+        0,
+      );
 
   const cardsSelectedText =
     noOfCardsSelected === 1
@@ -279,16 +302,79 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
     noOfCardsSelected ===
     Object.values(controller.vcsMatchingAuthRequest).flatMap(vc => vc).length;
 
+  const shareActions = () => {
+    if (controller.isAuthorizationFlow) {
+      return (
+        <Button
+          type="gradient"
+          styles={{marginTop: 12}}
+          title={t('consentShare')}
+          testID={'consent-share-button'}
+          disabled={Object.keys(controller.getSelectedVCs()).length === 0}
+          onPress={() =>
+            controller.checkIfAnyVCHasImage(controller.getSelectedVCs())
+              ? controller.VERIFY_AND_ACCEPT_REQUEST(selectedDisclosuresByVc)
+              : controller.ACCEPT_REQUEST(selectedDisclosuresByVc)
+          }
+        />
+      );
+    }
+
+    return (
+      <Fragment>
+        {!controller.checkIfAllVCsHasImage(
+          controller.vcsMatchingAuthRequest,
+        ) && (
+          <Button
+            type="gradient"
+            styles={{marginTop: 12}}
+            testID={'accept-request-button'}
+            title={t('SendVcScreen:acceptRequest')}
+            disabled={
+              Object.keys(controller.getSelectedVCs()).length === 0 ||
+              controller.checkIfAnyVCHasImage(controller.getSelectedVCs())
+            }
+            onPress={() => controller.ACCEPT_REQUEST(selectedDisclosuresByVc)}
+          />
+        )}
+        {/*If one of the selected vc has image, it needs to sent only after biometric authentication (Share with Selfie)*/}
+        {controller.checkIfAnyVCHasImage(controller.vcsMatchingAuthRequest) && (
+          <Button
+            type="gradient"
+            testID={'accept-request-and-verify-button'}
+            title={t('SendVcScreen:acceptRequestAndVerify')}
+            styles={{marginTop: 12}}
+            disabled={
+              Object.keys(controller.getSelectedVCs()).length === 0 ||
+              !controller.checkIfAnyVCHasImage(controller.getSelectedVCs())
+            }
+            onPress={() =>
+              controller.VERIFY_AND_ACCEPT_REQUEST(selectedDisclosuresByVc)
+            }
+          />
+        )}
+      </Fragment>
+    );
+  };
   return (
     <React.Fragment>
-      {<TrustModal isVisible={controller.showTrustConsentModal}
-        logo={controller.verifierLogoInTrustModal} name={controller.verifierNameInTrustModal ?? t('ScanScreen:unknownVerifier')}
-        onConfirm={controller.VERIFIER_TRUST_CONSENT_GIVEN}
-        onCancel={controller.CANCEL} flowType='verifier'></TrustModal>}
+      {
+        <TrustModalVerifier
+          isVisible={controller.showTrustConsentModal}
+          logo={controller.verifierLogoInTrustModal}
+          name={
+            controller.verifierNameInTrustModal ??
+            t('ScanScreen:unknownVerifier')
+          }
+          onConfirm={controller.VERIFIER_TRUST_CONSENT_GIVEN}
+          onCancel={controller.CANCEL}
+          flowType={'verifier'}
+        />
+      }
       {Object.keys(vcsMatchingAuthRequest).length > 0 && (
         <>
           {controller.purpose !== '' && (
-            <View style={{ backgroundColor: Theme.Colors.whiteBackgroundColor }}>
+            <View style={{backgroundColor: Theme.Colors.whiteBackgroundColor}}>
               <Column
                 padding="14 12 14 12"
                 margin="20 20 20 20"
@@ -296,7 +382,9 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
                 <Text
                   color={Theme.Colors.TimeoutHintText}
                   style={Theme.VPSharingStyles.purposeText}>
-                  {controller.purpose}
+                  {controller.isAuthorizationFlow
+                    ? t('authorizationPurpose')
+                    : controller.purpose}
                 </Text>
               </Column>
             </View>
@@ -324,7 +412,7 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
               <Text
                 style={{
                   color: Theme.Colors.Icon,
-                  fontFamily: 'Inter_600SemiBold',
+                  fontFamily: 'Montserrat_600SemiBold',
                 }}
                 onPress={
                   areAllVcsChecked
@@ -339,7 +427,7 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
                 ([inputDescriptorId, vcs]) =>
                   vcs.map(vcData => (
                     <VcItemContainer
-                      key={getVcKey(vcData)}
+                      key={`${getVcKey(vcData)}-${inputDescriptorId}`}
                       vcMetadata={vcData.vcMetadata}
                       margin="0 2 8 2"
                       onPress={controller.SELECT_VC_ITEM(
@@ -349,14 +437,17 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
                       selectable
                       selected={
                         controller.areAllVCsChecked ||
-                        Object.keys(controller.selectedVCKeys).includes(
-                          getVcKey(vcData),
-                        )
+                        (Object.keys(
+                          controller.inputDescriptorIdToSelectedVcKeys,
+                        ).includes(inputDescriptorId) &&
+                          controller.inputDescriptorIdToSelectedVcKeys[
+                            inputDescriptorId
+                          ].includes(getVcKey(vcData)))
                       }
                       flow={VCItemContainerFlowType.VP_SHARE}
                       isPinned={vcData.vcMetadata.isPinned}
-                      onDisclosuresChange={(disclosures) => {
-                        handleDisclosureChange(getVcKey(vcData), disclosures)
+                      onDisclosuresChange={disclosures => {
+                        handleDisclosureChange(getVcKey(vcData), disclosures);
                       }}
                     />
                   )),
@@ -365,45 +456,19 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
             <Column
               style={[
                 Theme.SendVcScreenStyles.shareOptionButtonsContainer,
-                { position: 'relative' },
+                {position: 'relative'},
               ]}
               backgroundColor={Theme.Colors.whiteBackgroundColor}>
-              {!controller.checkIfAllVCsHasImage(
-                controller.vcsMatchingAuthRequest,
-              ) && (
-                  <Button
-                    type="gradient"
-                    styles={{ marginTop: 12 }}
-                    title={t('SendVcScreen:acceptRequest')}
-                    disabled={
-                      Object.keys(controller.getSelectedVCs()).length === 0 ||
-                      controller.checkIfAnyVCHasImage(controller.getSelectedVCs())
-                    }
-                    onPress={() => controller.ACCEPT_REQUEST(selectedDisclosuresByVc)}
-                  />
-                )}
-              {/*If one of the selected vc has image, it needs to sent only after biometric authentication (Share with Selfie)*/}
-              {controller.checkIfAnyVCHasImage(
-                controller.vcsMatchingAuthRequest,
-              ) && (
-                  <Button
-                    type="gradient"
-                    title={t('SendVcScreen:acceptRequestAndVerify')}
-                    styles={{ marginTop: 12 }}
-                    disabled={
-                      Object.keys(controller.getSelectedVCs()).length === 0 ||
-                      !controller.checkIfAnyVCHasImage(
-                        controller.getSelectedVCs(),
-                      )
-                    }
-                    onPress={()=>controller.VERIFY_AND_ACCEPT_REQUEST(selectedDisclosuresByVc)}
-                  />
-                )}
+              {shareActions()}
 
               <Button
                 type="clear"
                 loading={controller.isCancelling}
-                title={t('SendVcScreen:reject')}
+                title={
+                  controller.isAuthorizationFlow
+                    ? t('common:cancel')
+                    : t('SendVcScreen:reject')
+                }
                 onPress={handleRejectButtonEvent}
               />
             </Column>
@@ -453,8 +518,8 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
           />
         </>
       )}
-      {errorModal.show && (
-        <Error
+      {errorModal.show && !controller.isAuthorizationFlow && (
+        <ErrorView
           isModal
           alignActionsOnEnd
           showClose={false}
@@ -469,8 +534,8 @@ export const SendVPScreen: React.FC<ScanLayoutProps> = props => {
           textButtonTestID={'home'}
           textButtonText={getTextButtonText()}
           textButtonEvent={handleTextButtonEvent}
-          customImageStyles={{ paddingBottom: 0, marginBottom: -6 }}
-          customStyles={{ marginTop: '30%' }}
+          customImageStyles={{paddingBottom: 0, marginBottom: -6}}
+          customStyles={{marginTop: '30%'}}
           exitAppWithTimer={controller.isOVPViaDeepLink}
           testID={'vpShareError'}
         />

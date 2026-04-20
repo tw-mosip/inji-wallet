@@ -13,6 +13,9 @@ import HomeScreenLogo from '../../../assets/Inji_Home_Logo.svg';
 import InjiLogoSmall from '../../../assets/InjiLogo.svg';
 import i18next from '../../../i18n';
 
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+
 const Colors = {
   Black: '#231F20',
   Zambezi: '#5F5F5F',
@@ -52,7 +55,7 @@ const Colors = {
   GradientColorsLight: ['#F3E2FF', '#F3E2FF'],
   DisabledColors: ['#C7C7C7', '#C7C7C7'],
   captureIconBorder: '#F59B4B',
-  Purple: '#70308C',
+  Primary: '#70308C',
   LightPurple: '#F3E2FF',
   TimeoutHintBoxColor: '#FBF5FF',
   TimeoutHintBoxBorder: '#F3E2FF',
@@ -70,6 +73,7 @@ const Colors = {
   Mercury: '#E6E6E6',
   Yellow: '#E8A94F',
   selectIDTextGradient: ['#F5F5F5', '#FFFFFF'],
+  mildGray: '#BDBDBD',
 };
 
 export type ElevationLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -78,19 +82,19 @@ export const PurpleTheme = {
   Colors: {
     ProfileIconColor: Colors.DarkGray,
     DetailedViewBackground: Colors.Gray97,
-    TabItemText: Colors.Purple,
+    TabItemText: Colors.Primary,
     Details: Colors.Black,
     DetailsLabel: Colors.Gray40,
     LoadingDetailsLabel: Colors.Gray40,
-    AddIdBtnBg: Colors.Purple,
-    AddIdBtnTxt: Colors.Purple,
+    AddIdBtnBg: Colors.Primary,
+    AddIdBtnTxt: Colors.Primary,
     DownloadIdBtnTxt: Colors.White,
-    Loading: Colors.Purple,
-    Cursor: Colors.Purple,
-    noUinText: Colors.Purple,
-    IconBg: Colors.Purple,
+    Loading: Colors.Primary,
+    Cursor: Colors.Primary,
+    noUinText: Colors.Primary,
+    IconBg: Colors.Primary,
     popUp: Colors.Green,
-    Icon: Colors.Purple,
+    Icon: Colors.Primary,
     GrayIcon: Colors.Gray50,
     helpText: Colors.Gray44,
     borderBottomColor: Colors.Grey6,
@@ -98,7 +102,7 @@ export const PurpleTheme = {
     lightGreyBackgroundColor: Colors.LightGrey,
     errorGrayText: Colors.mediumDarkGrey,
     aboutVersion: Colors.Gray40,
-    switchHead: Colors.Purple,
+    switchHead: Colors.Primary,
     switchTrackTrue: Colors.LightPurple,
     switchTrackFalse: Colors.Grey,
     overlayBackgroundColor: Colors.White,
@@ -115,7 +119,7 @@ export const PurpleTheme = {
     whiteText: Colors.White,
     flipCameraIcon: Colors.Black,
     RetrieveIdLabel: Colors.ShadeOfGrey,
-    inputSelection: Colors.Purple,
+    inputSelection: Colors.Primary,
     checkCircleIcon: Colors.White,
     OnboardingCircleIcon: Colors.White,
     OnboardingCloseIcon: Colors.White,
@@ -150,9 +154,12 @@ export const PurpleTheme = {
     warningLogoBgColor: Colors.warningLogoBg,
     tooltipIcon: Colors.tooltip,
     toolTipPointerColor: Colors.toolTipPointer,
-    urlLink: Colors.Purple,
+    urlLink: Colors.Primary,
     warningText: Colors.Red,
     PendingIcon: Colors.Yellow,
+    unCheckText: Colors.Orange,
+    secondaryText: Colors.Orange,
+    disabled: Colors.mildGray,
   },
   Styles: StyleSheet.create({
     title: {
@@ -171,12 +178,12 @@ export const PurpleTheme = {
     fieldItemTitle: {
       backgroundColor: Colors.Transparent,
       fontSize: 11,
-      fontFamily: 'Inter_400Regular',
+      fontFamily: 'Montserrat_400Regular',
     },
     fieldItemValue: {
       backgroundColor: Colors.Transparent,
       fontSize: 12,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       marginTop: 3,
     },
     loadingSubtitle: {
@@ -185,7 +192,7 @@ export const PurpleTheme = {
     },
     verificationStatus: {
       fontSize: 12,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
     },
     statusLabel: {
       color: Colors.Gray30,
@@ -326,14 +333,14 @@ export const PurpleTheme = {
       borderRadius: 15,
       margin: 5,
       borderWidth: 3,
-      borderColor: Colors.Purple,
+      borderColor: Colors.Primary,
       overflow: 'hidden',
     },
     selectedVc: {
       borderRadius: 10,
       margin: 5,
       borderWidth: 2,
-      borderColor: Colors.Purple,
+      borderColor: Colors.Primary,
     },
     labelPartContainer: {
       marginLeft: 16,
@@ -433,6 +440,7 @@ export const PurpleTheme = {
       resizeMode: 'contain',
       aspectRatio: 1,
       height: 35,
+      marginRight: 10,
     },
     vcDetailsLogo: {
       height: 65,
@@ -568,7 +576,7 @@ export const PurpleTheme = {
       borderWidth: 0,
     },
     tabIndicator: {
-      backgroundColor: Colors.Purple,
+      backgroundColor: Colors.Primary,
     },
     tabContainer: {
       backgroundColor: Colors.Transparent,
@@ -580,7 +588,7 @@ export const PurpleTheme = {
     detailsText: {
       fontWeight: 'bold',
       fontSize: 15,
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
     },
     idInputContainer: {
       width: Dimensions.get('window').width * 0.86,
@@ -593,13 +601,13 @@ export const PurpleTheme = {
       height: isIOS() ? 100 : 'auto',
     },
     picker: {
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       fontSize: 18,
     },
     idInputBottom: {
       position: 'relative',
       bottom: 18,
-      borderBottomColor: Colors.Purple,
+      borderBottomColor: Colors.Primary,
       borderBottomWidth: 1,
       minWidth: 210,
     },
@@ -614,7 +622,7 @@ export const PurpleTheme = {
       marginVertical: 6,
     },
     placeholder: {
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
     },
     hrLine: {
       borderBottomColor: Colors.Gray44,
@@ -656,7 +664,7 @@ export const PurpleTheme = {
       borderRadius: 200,
       height: 70,
       width: 70,
-      backgroundColor: Colors.Purple,
+      backgroundColor: Colors.Primary,
       justifyContent: 'center',
       position: 'absolute',
     },
@@ -678,10 +686,10 @@ export const PurpleTheme = {
     },
     introSliderHeader: {
       marginTop: isIOS()
-          ? Constants.statusBarHeight + 40
-          : StatusBar.currentHeight + 40,
+        ? Constants.statusBarHeight + 25
+        : (StatusBar.currentHeight ?? 0) + 25,
       width: '100%',
-      marginBottom: 50,
+      marginBottom: 20,
     },
     introSliderButton: {
       borderRadius: 10,
@@ -699,14 +707,14 @@ export const PurpleTheme = {
       paddingHorizontal: 24,
     },
     newLabel: {
-      backgroundColor: Colors.Purple,
+      backgroundColor: Colors.Primary,
       paddingHorizontal: 5,
       paddingVertical: 4,
       maxHeight: 20,
       marginTop: 10,
       borderRadius: 4,
       fontSize: 10,
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
       lineHeight: 12,
     },
     scanLayoutHeaderContainer: {
@@ -717,7 +725,7 @@ export const PurpleTheme = {
     },
     scanLayoutHeaderTitle: {
       fontSize: 26,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       paddingTop: isIOS() ? 10 : 20,
       paddingBottom: 10,
     },
@@ -734,18 +742,18 @@ export const PurpleTheme = {
     },
     sendVPHeaderTitle: {
       fontSize: 18,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
     },
     sendVPHeaderSubTitle: {
       fontSize: 13,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       color: Colors.LightPurple,
       maxWidth: '80%',
       overflow: 'hidden',
     },
     HistoryHeaderTitleStyle: {
       fontSize: 26,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       marginTop: isIOS() ? 5 : 15,
     },
     tabBarIconCopilot: {
@@ -777,48 +785,60 @@ export const PurpleTheme = {
       flex: 1,
       justifyContent: 'space-around',
     },
-    horizontalSeparator:{
+    horizontalSeparator: {
       height: 1,
       backgroundColor: '#DADADA',
       marginBottom: 12,
     },
-    disclosureTitle:{
-      fontFamily: 'Inter_700Bold',
+    disclosureTitle: {
+      fontFamily: 'Montserrat_700Bold',
       fontSize: 15,
       color: Colors.Black,
     },
-    disclosureSubtitle:{
+    disclosureSubtitle: {
       fontSize: 13,
       color: '#747474',
       marginTop: 4,
     },
-    disclosureSelectButton:{
+    disclosureSelectButton: {
       fontSize: 14,
-      fontFamily: 'Inter_700Bold',
-    }
+      fontFamily: 'Montserrat_700Bold',
+    },
   }),
   BannerStyles: StyleSheet.create({
+    bannerStackContainer: {
+      position: 'absolute',
+      width: '100%',
+      alignItems: 'center',
+      zIndex: 100,
+    },
+    wrapper: {
+      width: '100%',
+      alignSelf: 'center',
+    },
     container: {
-      alignItems: 'flex-start',
+      alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: '#DB2E2E',
       width: '100%',
+      height: 70,
       position: 'relative',
       paddingHorizontal: 18,
       paddingVertical: 12,
       marginVertical: 1,
       columnGap: 7,
-    },
-    text: {
-      textAlignVertical: 'center',
-      fontSize: 12,
-      lineHeight: 15,
-      padding: 1,
-      fontFamily: 'Inter_600SemiBold',
+      borderRadius: 10,
     },
     topBanner: {
       marginTop: 10,
       marginBottom: 10,
+    },
+    text: {
+      textAlignVertical: 'center',
+      fontSize: 14,
+      lineHeight: 15,
+      padding: 1,
+      fontFamily: 'Montserrat_600SemiBold',
     },
     dismiss: {paddingLeft: 9},
     inProgress: {
@@ -854,7 +874,7 @@ export const PurpleTheme = {
       borderTopLeftRadius: 21,
       borderTopRightRadius: 21,
       justifyContent: 'space-between',
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
       paddingBottom: 10,
       paddingRight: 15,
       paddingLeft: 130,
@@ -890,7 +910,7 @@ export const PurpleTheme = {
       color: Colors.Black,
       flex: 1,
       fontSize: 33,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       height: 40,
       lineHeight: 28,
       margin: 8,
@@ -898,10 +918,10 @@ export const PurpleTheme = {
     },
     onEnteringPin: {
       borderBottomWidth: 3,
-      borderColor: Colors.Purple,
+      borderColor: Colors.Primary,
       color: Colors.Black,
       flex: 1,
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
       fontSize: 29,
       height: 40,
       margin: 8,
@@ -911,33 +931,33 @@ export const PurpleTheme = {
   TextStyles: StyleSheet.create({
     header: {
       color: Colors.Black,
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
       fontSize: 18,
       lineHeight: 19,
       paddingTop: 5,
     },
     subHeader: {
       color: Colors.mediumLightGrayText,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       lineHeight: 19,
       fontSize: 13,
       paddingTop: 4,
     },
     semiBoldHeader: {
       color: Colors.Black,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       fontSize: 18,
       lineHeight: 21,
       paddingTop: 4,
     },
     retrieveIdLabel: {
       color: Colors.ShadeOfGrey,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       lineHeight: 18,
     },
     helpHeader: {
       color: Colors.Black,
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
       fontSize: 18,
       lineHeight: 19,
       paddingTop: 5,
@@ -946,11 +966,11 @@ export const PurpleTheme = {
     helpDetails: {
       margin: 5,
       color: Colors.Gray44,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
     },
     urlLinkText: {
-      color: Colors.Purple,
-      fontFamily: 'Inter_600SemiBold',
+      color: Colors.Primary,
+      fontFamily: 'Montserrat_600SemiBold',
     },
     aboutDetails: {
       color: Colors.Black,
@@ -963,7 +983,7 @@ export const PurpleTheme = {
       top: 65,
       left: 5,
       color: Colors.Red,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       fontSize: 12,
       minWidth: 200,
     },
@@ -973,23 +993,27 @@ export const PurpleTheme = {
       lineHeight: 18,
     },
     regular: {
-      fontFamily: 'Inter_400Regular',
+      fontFamily: 'Montserrat_400Regular',
       fontSize: 14,
     },
     regularGrey: {
-      fontFamily: 'Inter_400Regular',
+      fontFamily: 'Montserrat_400Regular',
       fontSize: 15,
       lineHeight: 19,
       color: Colors.ShadeOfGrey,
     },
     semibold: {
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       fontSize: 15,
     },
     bold: {
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
       fontSize: 15,
       justifyContent: 'center',
+    },
+    extraLight: {
+      fontFamily: 'Montserrat_200ExtraLight',
+      fontWeight: '200',
     },
     small: {
       fontSize: 13,
@@ -998,6 +1022,12 @@ export const PurpleTheme = {
     mediumSmall: {
       fontSize: 15,
       lineHeight: 18,
+    },
+    mediumExtraSmall: {
+      fontSize: 14,
+    },
+    medium: {
+      fontSize: 16,
     },
     extraSmall: {
       fontSize: 12,
@@ -1039,7 +1069,7 @@ export const PurpleTheme = {
   }),
   ToastItemStyles: StyleSheet.create({
     toastContainer: {
-      backgroundColor: Colors.Purple,
+      backgroundColor: Colors.Primary,
       position: 'absolute',
       alignSelf: 'center',
       top: 80,
@@ -1069,7 +1099,7 @@ export const PurpleTheme = {
     searchBarContainer: {
       alignItems: 'center',
       borderBottomWidth: 1,
-      borderBottomColor: Colors.Purple,
+      borderBottomColor: Colors.Primary,
     },
     vcSearchBarContainer: {
       alignItems: 'center',
@@ -1104,14 +1134,14 @@ export const PurpleTheme = {
       flex: 1,
     },
     solid: {
-      backgroundColor: Colors.Purple,
+      backgroundColor: Colors.Primary,
     },
     clear: {
       backgroundColor: Colors.Transparent,
     },
     outline: {
       backgroundColor: Colors.Transparent,
-      borderColor: Colors.Purple,
+      borderColor: Colors.Primary,
     },
     disabledOutlineButton: {
       backgroundColor: Colors.Transparent,
@@ -1126,7 +1156,7 @@ export const PurpleTheme = {
       backgroundColor: Colors.Grey,
     },
     addId: {
-      backgroundColor: Colors.Purple,
+      backgroundColor: Colors.Primary,
     },
     gradient: {
       borderRadius: 9,
@@ -1147,7 +1177,7 @@ export const PurpleTheme = {
     },
     radius: {
       borderRadius: 10,
-      backgroundColor: Colors.Purple,
+      backgroundColor: Colors.Primary,
     },
   }),
   OIDCAuthStyles: StyleSheet.create({
@@ -1174,7 +1204,7 @@ export const PurpleTheme = {
       backgroundColor: Colors.White,
       borderWidth: 0,
       marginTop: -15,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       padding: 0,
     },
     timeoutHintContainer: {
@@ -1194,10 +1224,10 @@ export const PurpleTheme = {
       margin: 16,
       padding: 8,
       borderWidth: 2,
-      borderColor: Colors.Purple,
+      borderColor: Colors.Primary,
       borderRadius: 30,
     },
-    sharedSuccessfullyVerifierInfo:{
+    sharedSuccessfullyVerifierInfo: {
       alignSelf: 'center',
       backgroundColor: '#F5F5F5',
       borderRadius: 16,
@@ -1211,7 +1241,7 @@ export const PurpleTheme = {
       height: 40,
       borderRadius: 8,
       marginRight: 12,
-    }
+    },
   }),
   AppMetaDataStyles: StyleSheet.create({
     buttonContainer: {
@@ -1277,7 +1307,7 @@ export const PurpleTheme = {
   }),
   BackupAndRestoreStyles: StyleSheet.create({
     backupProgressText: {
-      fontFamily: 'Inter_400Regular',
+      fontFamily: 'Montserrat_400Regular',
       fontSize: 14,
       color: Colors.Gray44,
     },
@@ -1291,7 +1321,7 @@ export const PurpleTheme = {
       textAlign: 'center',
       lineHeight: 22,
       fontSize: 17,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       marginHorizontal: 30,
     },
     cloudInfo: {
@@ -1304,7 +1334,7 @@ export const PurpleTheme = {
       paddingHorizontal: 10,
       textAlign: 'center',
       paddingTop: 15,
-      fontFamily: 'Inter_500Medium',
+      fontFamily: 'Montserrat_500Medium',
       fontSize: 14,
       letterSpacing: 0,
       lineHeight: 17,
@@ -1322,7 +1352,7 @@ export const PurpleTheme = {
     headerText: {
       justifyContent: 'center',
       paddingLeft: 12,
-      fontFamily: 'Inter_500Medium',
+      fontFamily: 'Montserrat_500Medium',
       fontWeight: '600',
       fontSize: 14,
       letterSpacing: 0,
@@ -1372,9 +1402,18 @@ export const PurpleTheme = {
       position: 'absolute',
       bottom: 0,
     },
+    new: {
+      height: 20,
+      width: 'auto',
+      backgroundColor: '#FF5300',
+      alignItems: 'center',
+      marginLeft: 10,
+      borderRadius: 5,
+      paddingHorizontal: 5,
+    },
     kebabHeaderStyle: {
       justifyContent: 'space-between',
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
     },
   }),
   MessageOverlayStyles: StyleSheet.create({
@@ -1463,7 +1502,7 @@ export const PurpleTheme = {
       padding: 20,
     },
     slider: {
-      backgroundColor: Colors.Purple,
+      backgroundColor: Colors.Primary,
       minHeight: 300,
       width: '100%',
       margin: 0,
@@ -1473,7 +1512,7 @@ export const PurpleTheme = {
     sliderTitle: {
       color: Colors.White,
       marginBottom: 20,
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
     },
     text: {
       color: Colors.White,
@@ -1497,8 +1536,8 @@ export const PurpleTheme = {
       padding: 20,
       borderTopLeftRadius: 30,
       borderTopRightRadius: 30,
-      marginTop: -185,
-      paddingBottom: 100,
+      marginTop: -Math.round(SCREEN_HEIGHT * 0.27),
+      paddingBottom: 120,
     },
   }),
   claimsContainer: StyleSheet.create({
@@ -1509,6 +1548,7 @@ export const PurpleTheme = {
   IssuersScreenStyles: StyleSheet.create({
     issuerListOuterContainer: {
       padding: 10,
+      paddingHorizontal: 20,
       flex: 1,
       backgroundColor: Colors.White,
     },
@@ -1555,7 +1595,7 @@ export const PurpleTheme = {
       marginHorizontal: 9,
     },
     issuerHeading: {
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       fontSize: 14,
       paddingHorizontal: 3,
       marginBottom: 2,
@@ -1566,6 +1606,79 @@ export const PurpleTheme = {
       lineHeight: 14,
       color: Colors.ShadeOfGrey,
       paddingTop: 1.4,
+    },
+  }),
+  ProcessingModalStyles: StyleSheet.create({
+    modalBg: {
+      backgroundColor: '#F5F5F5',
+    },
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      backgroundColor: '#F5F5F5',
+    },
+    cardWrapper: {
+      flex: 1,
+      top: 160,
+      alignItems: 'center',
+      width: '100%',
+      marginTop: 0,
+      marginBottom: 80,
+    },
+    card: {
+      width: Math.min(Dimensions.get('window').width * 0.8, 340),
+      backgroundColor: 'white',
+      borderRadius: 20,
+      alignItems: 'center',
+      paddingVertical: Dimensions.get('window').height * 0.03,
+      marginHorizontal: 40,
+      shadowColor: '#000',
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 1,
+    },
+    logo: {
+      width: Math.min(Dimensions.get('window').width * 0.8, 340) * 0.7,
+      height: Math.min(Dimensions.get('window').width * 0.8, 340) * 0.55,
+      marginBottom: -5,
+    },
+    title: {
+      marginTop: 0,
+      marginBottom: 6,
+      textAlign: 'center',
+    },
+    subTitle: {
+      color: '#888',
+      marginBottom: Dimensions.get('window').height * 0.025,
+      textAlign: 'center',
+    },
+    progressContainer: {
+      width: '100%',
+      marginTop: 7,
+      marginBottom: 0,
+      paddingHorizontal:
+        Math.min(Dimensions.get('window').width * 0.8, 340) * 0.15,
+    },
+    progressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    progressIcon: {
+      marginRight: 8,
+    },
+    progressText: {
+      flex: 1,
+      color: '#B0B0B0',
+      fontWeight: '400',
+    },
+    progressCheck: {
+      marginLeft: 8,
+    },
+    actionWrapper: {
+      flex: 1,
+      position: 'absolute',
+      bottom: 62,
     },
   }),
   SendVcScreenStyles: StyleSheet.create({
@@ -1579,7 +1692,7 @@ export const PurpleTheme = {
     image: {marginTop: -60, paddingBottom: 26},
     title: {
       color: Colors.Black,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       fontSize: 18,
       lineHeight: 21,
       paddingTop: 4,
@@ -1588,7 +1701,7 @@ export const PurpleTheme = {
     },
     message: {
       textAlign: 'center',
-      fontFamily: 'Inter_400Regular',
+      fontFamily: 'Montserrat_400Regular',
       fontSize: 14,
       lineHeight: 20,
       marginTop: 6,
@@ -1598,7 +1711,7 @@ export const PurpleTheme = {
     },
     additionalMessage: {
       color: Colors.Black,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       fontSize: 18,
       lineHeight: 21,
       paddingTop: 4,
@@ -1647,7 +1760,7 @@ export const PurpleTheme = {
     },
     heading: {
       color: 'black',
-      fontFamily: 'Inter_700Bold',
+      fontFamily: 'Montserrat_700Bold',
       fontSize: 18,
       lineHeight: 19,
       padding: 10,
@@ -1695,7 +1808,7 @@ export const PurpleTheme = {
     biometricIntroNotch: {
       height: 13,
       width: 100,
-      marginLeft: 80,
+      alignSelf: 'center',
       marginBottom: 20,
       borderBottomLeftRadius: 13,
       borderBottomRightRadius: 10,
@@ -1704,17 +1817,16 @@ export const PurpleTheme = {
     introScreenNotch: {
       height: 13,
       width: 100,
-      marginLeft: 100,
+      alignSelf: 'center',
       borderBottomLeftRadius: 13,
       borderBottomRightRadius: 10,
       backgroundColor: 'black',
     },
     biometricIntroOuterColumn: {
       borderRadius: 30,
+      width: 350,
+      flex: 1,
       maxHeight: 600,
-      maxWidth: 350,
-      minHeight: 600,
-      minWidth: 350,
       borderColor: Colors.Black,
       borderWidth: 12,
       overflow: 'hidden',
@@ -1723,8 +1835,9 @@ export const PurpleTheme = {
       borderRadius: 30,
       borderWidth: 12,
       borderColor: Colors.Black,
+      flex: 1,
       maxHeight: 600,
-      maxWidth: 350,
+      width: 350,
       alignSelf: 'center',
       overflow: 'hidden',
       backgroundColor: Colors.White,
@@ -1751,6 +1864,7 @@ export const PurpleTheme = {
     },
     trustedDigitalWalletIntroOuterColumn: {
       flex: 1,
+      maxHeight: 600,
       width: 350,
       borderRadius: 20,
       borderColor: 'black',
@@ -1758,7 +1872,8 @@ export const PurpleTheme = {
       borderWidth: 12,
     },
     backupRestoreIntroOuterView: {
-      height: 600,
+      flex: 1,
+      maxHeight: 600,
       width: 350,
       alignSelf: 'center',
       overflow: 'hidden',
@@ -1779,6 +1894,9 @@ export const PurpleTheme = {
       borderColor: 'black',
       overflow: 'hidden',
       borderWidth: 12,
+      width: 350,
+      flex: 1,
+      maxHeight: 600,
     },
   }),
   VPSharingStyles: StyleSheet.create({
@@ -1791,16 +1909,16 @@ export const PurpleTheme = {
     purposeText: {
       fontSize: 13,
       position: 'relative',
-      fontFamily: 'Inter_500Medium',
+      fontFamily: 'Montserrat_500Medium',
     },
     cardsSelectedText: {
-      fontFamily: 'Inter_500Medium',
+      fontFamily: 'Montserrat_500Medium',
       color: '#000000',
       fontSize: 14,
     },
     selectIDText: {
       position: 'relative',
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       fontSize: 16,
     },
   }),
@@ -1820,11 +1938,11 @@ export const PurpleTheme = {
       justifyContent: 'space-between',
     },
     bannerTitle: {
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
     },
     bannerGuide: {
       opacity: 0.8,
-      fontFamily: 'Inter_400Regular',
+      fontFamily: 'Montserrat_400Regular',
     },
     bannerEnablePermissionContainer: {
       marginTop: 15,
@@ -1832,7 +1950,7 @@ export const PurpleTheme = {
     bannerEnablePermission: {
       borderBottomWidth: 1.5,
       borderBottomColor: Colors.White,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
     },
     scannerContainer: {
       borderRadius: 24,
@@ -1886,21 +2004,25 @@ export const PurpleTheme = {
     },
     holdPhoneSteadyText: {
       color: Colors.Black,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       fontSize: 15,
     },
     cameraFlipIcon: {
       height: 50,
       width: 50,
     },
-    iconText: {fontFamily: 'Inter_600SemiBold', fontSize: 12, marginTop: 6},
+    iconText: {
+      fontFamily: 'Montserrat_600SemiBold',
+      fontSize: 12,
+      marginTop: 6,
+    },
   }),
   BottomTabBarStyle: StyleSheet.create({
     headerRightContainerStyle: {paddingEnd: 13},
     headerLeftContainerStyle: {paddingEnd: 13},
     tabBarLabelStyle: {
       fontSize: 12,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
     },
     tabBarStyle: {
       display: 'flex',
@@ -1947,6 +2069,20 @@ export const PurpleTheme = {
       paddingTop: 3,
       maxWidth: 250,
     },
+    footerContainer: {
+      alignItems: 'center',
+      marginTop: 12,
+    },
+
+    poweredByRow: {
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    logoStyle: {
+      width: 40,
+      height: 40,
+      marginRight: 5,
+    },
     tuvaliVerisonStyle: {
       paddingTop: 3,
       paddingBottom: 12,
@@ -1958,6 +2094,12 @@ export const PurpleTheme = {
       height: 1,
     },
     poweredByTextStyle: {
+      fontSize: 16,
+      paddingTop: 15,
+      maxWidth: 250,
+    },
+    infoTextStyle: {
+      fontSize: 13,
       paddingTop: 15,
       maxWidth: 250,
     },
@@ -2030,6 +2172,138 @@ export const PurpleTheme = {
     },
   }),
   TrustIssuerScreenStyle: StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: 20,
+      paddingBottom: 16,
+      backgroundColor: '#F7F7F7',
+    },
+    coverCard: {
+      backgroundColor: '#FFFFFF',
+      borderRadius: 20,
+      marginBottom: 27,
+    },
+    header: {
+      alignItems: 'center',
+    },
+    trustIcon: {
+      width: 0.07 * SCREEN_HEIGHT,
+      height: 0.07 * SCREEN_HEIGHT,
+      marginBottom: 0.016 * SCREEN_HEIGHT,
+      resizeMode: 'contain',
+      marginTop: 0.08 * SCREEN_HEIGHT,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: '#111827',
+      fontFamily: 'Montserrat_700Bold',
+      marginBottom: 0.012 * SCREEN_HEIGHT,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: '#6B7280',
+      textAlign: 'center',
+      lineHeight: 20,
+      fontFamily: 'Montserrat_500Medium',
+      marginHorizontal: 0.11 * SCREEN_WIDTH,
+      marginBottom: 0.057 * SCREEN_HEIGHT,
+    },
+    card: {
+      backgroundColor: '#EDF6FB',
+      borderRadius: 20,
+      marginBottom: 16,
+      marginHorizontal: 18,
+      alignItems: 'center',
+      height: SCREEN_HEIGHT * 0.4,
+      minHeight: 300,
+    },
+    successCard: {
+      backgroundColor: '#EDF6FB',
+      height: 107,
+      borderRadius: 20,
+      marginBottom: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 0.037 * SCREEN_HEIGHT,
+      marginHorizontal: 15,
+    },
+    issuerLogo: {
+      width: 40,
+      height: 40,
+      resizeMode: 'contain',
+      borderRadius: 8,
+      marginRight: 12,
+      backgroundColor: '#FFFFFF',
+    },
+    issuerName: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: '#111827',
+    },
+    cardDescription: {
+      fontSize: 14,
+      color: '#5D5D5D',
+      lineHeight: 20,
+      fontFamily: 'Montserrat_500Medium',
+      marginTop: 0.031 * SCREEN_HEIGHT,
+      textAlign: 'center',
+      marginHorizontal: 0.1 * SCREEN_WIDTH,
+      marginBottom: 0.031 * SCREEN_HEIGHT,
+    },
+    infoItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      paddingHorizontal: 0.05 * SCREEN_WIDTH,
+    },
+    bullet: {
+      fontSize: 16,
+      color: '#374151',
+      marginRight: 8,
+      marginTop: 1,
+    },
+    infoText: {
+      flex: 1,
+      fontSize: 14,
+      color: '#5D5D5D',
+      lineHeight: 20,
+      fontFamily: 'Montserrat_400Regular',
+      textAlign: 'left',
+    },
+    actions: {
+      gap: 12,
+      paddingBottom: 8,
+    },
+    successContainer: {
+      alignItems: 'center',
+      paddingHorizontal: 24,
+    },
+    successIcon: {
+      width: 108,
+      height: 108,
+      marginBottom: 36,
+    },
+    successTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: '#111827',
+      marginBottom: 7,
+      textAlign: 'center',
+    },
+    successSubtitle: {
+      fontSize: 14,
+      color: '#6B7280',
+      textAlign: 'center',
+      lineHeight: 20,
+      marginBottom: 28,
+    },
+  }),
+  TrustVerifierScreenStyle: StyleSheet.create({
     modalOverlay: {
       flex: 1,
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -2041,7 +2315,7 @@ export const PurpleTheme = {
       backgroundColor: '#fff',
       borderRadius: 20,
       width: '100%',
-      height: 470,
+      height: SCREEN_HEIGHT * 0.55,
       padding: 20,
       alignItems: 'center',
     },
@@ -2059,6 +2333,7 @@ export const PurpleTheme = {
       marginTop: 8,
       fontWeight: 'bold',
       fontSize: 16,
+      textAlign: 'center',
     },
     description: {
       fontSize: 14,
@@ -2117,7 +2392,7 @@ export const PurpleTheme = {
     },
   }),
   DisclosureOverlayStyles: StyleSheet.create({
-    overlay:{
+    overlay: {
       padding: 0,
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
@@ -2126,7 +2401,7 @@ export const PurpleTheme = {
       bottom: 0,
       backgroundColor: '#fff',
     },
-    outerView:{
+    outerView: {
       padding: 16,
       borderBottomWidth: 1,
       borderBottomColor: Colors.LightGrey,
@@ -2134,14 +2409,14 @@ export const PurpleTheme = {
       alignItems: 'center',
       justifyContent: 'space-between',
     },
-    listView:{
+    listView: {
       marginHorizontal: 16,
       marginVertical: 6,
       padding: 12,
       borderRadius: 10,
       borderWidth: 1,
     },
-    noteView:{
+    noteView: {
       marginHorizontal: 16,
       marginBottom: 30,
       padding: 12,
@@ -2155,7 +2430,7 @@ export const PurpleTheme = {
     titleText: {
       fontSize: 17,
       textAlign: 'left',
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       paddingTop: 20,
     },
     titleDescription: {
@@ -2166,23 +2441,23 @@ export const PurpleTheme = {
     },
     noteTitleText: {
       fontSize: 14,
-      fontFamily: 'Inter_600SemiBold',
+      fontFamily: 'Montserrat_600SemiBold',
       color: '#973C00',
       marginBottom: 5,
     },
-    noteDescriptionText:{
+    noteDescriptionText: {
       fontSize: 13,
       color: '#973C00',
-      fontFamily: 'Inter_400Regular',
+      fontFamily: 'Montserrat_400Regular',
       lineHeight: 18,
       textAlign: 'left',
-      marginLeft: -25
-    }
+      marginLeft: -25,
+    },
   }),
   DisclosureInfo: StyleSheet.create({
-    view:{
+    view: {
       marginTop: -16,
-      marginBottom:16,
+      marginBottom: 16,
       marginHorizontal: 10,
       padding: 12,
       backgroundColor: '#EFF6FF',
@@ -2190,12 +2465,12 @@ export const PurpleTheme = {
       borderWidth: 1,
       borderColor: '#BEDBFF',
     },
-    text:{
+    text: {
       fontSize: 14,
-      fontFamily: 'Inter_400Regular',
+      fontFamily: 'Montserrat_400Regular',
       color: 'black',
       flex: 1,
-    }
+    },
   }),
 
   ICON_SMALL_SIZE: 16,
@@ -2237,7 +2512,7 @@ export const PurpleTheme = {
     }
 
     const [top, end, bottom, start] =
-        typeof values === 'string' ? values.split(' ').map(Number) : values;
+      typeof values === 'string' ? values.split(' ').map(Number) : values;
 
     return {
       [`${type}Top`]: top,
@@ -2250,6 +2525,69 @@ export const PurpleTheme = {
     start: {x: 0.5, y: 0.5},
     end: {x: 0.5, y: 1},
   },
+  StatusInfoModalStyles: StyleSheet.create({
+    overlay: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 0,
+      margin: 0,
+      width: Dimensions.get('screen').width,
+    },
+    container: {
+      paddingVertical: 20,
+      paddingHorizontal: 24,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    headerTitle: {
+      fontSize: 18,
+      lineHeight: 26,
+      color: Colors.Black,
+      flex: 1,
+      marginRight: 12,
+    },
+    closeButton: {
+      padding: 4,
+      flexShrink: 0,
+    },
+    contentContainer: {
+      marginTop: 10,
+    },
+    statusItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      paddingVertical: 12,
+    },
+    iconContainer: {
+      marginRight: 12,
+      marginTop: 2,
+    },
+    statusTextContainer: {
+      flex: 1,
+    },
+    statusTitle: {
+      fontSize: 14,
+      color: Colors.Black,
+      marginBottom: 4,
+    },
+    statusDescription: {
+      fontSize: 12,
+      color: Colors.Gray40,
+      lineHeight: 18,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: Colors.Grey5,
+    },
+  }),
 };
 
 function generateBoxShadowStyle() {

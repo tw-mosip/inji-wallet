@@ -1,8 +1,8 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
-import {Pressable} from 'react-native';
+import {useEffect, useRef, useState} from 'react';
+import {Pressable, View} from 'react-native';
 import {ActorRefFrom} from 'xstate';
-import {ErrorMessageOverlay} from '../../MessageOverlay';
+import {ErrorMessageOverlay, MessageOverlay} from '../../MessageOverlay';
 import {Theme} from '../../ui/styleUtils';
 import {VCMetadata} from '../../../shared/VCMetadata';
 import {format} from 'date-fns';
@@ -28,15 +28,17 @@ export const VCCardView: React.FC<VCItemProps> = ({
   isInitialLaunch = false,
   isTopCard = false,
   onDisclosuresChange,
+  onMeasured,
 }) => {
   const controller = useVcItemController(vcMetadata);
   const {t} = useTranslation();
+  const cardRef = useRef<View>(null);
 
   const service = controller.VCItemService;
   const verifiableCredentialData = controller.verifiableCredentialData;
   const generatedOn = -controller.generatedOn;
 
-  let formattedDate =
+  const formattedDate =
     generatedOn && format(new Date(generatedOn), 'MM/dd/yyyy');
 
   useEffect(() => {
@@ -46,6 +48,20 @@ export const VCCardView: React.FC<VCItemProps> = ({
   const [fields, setFields] = useState([]);
   const [wellknown, setWellknown] = useState(null);
   const [vc, setVc] = useState(null);
+
+  useEffect(() => {
+    if (onMeasured && cardRef.current) {
+      const handle = requestAnimationFrame(() => {
+        cardRef.current?.measureInWindow((x, y, width, height) => {
+          if (width > 0 && height > 0) {
+            onMeasured({x, y, width, height});
+          }
+        });
+      });
+
+      return () => cancelAnimationFrame(handle);
+    }
+  }, [onMeasured]);
 
   useEffect(() => {
     async function loadVc() {
@@ -61,10 +77,11 @@ export const VCCardView: React.FC<VCItemProps> = ({
   }, [isDownloading, controller.credential]);
 
   useEffect(() => {
-    if (!verifiableCredentialData || !verifiableCredentialData.vcMetadata) return;
+    if (!verifiableCredentialData || !verifiableCredentialData.vcMetadata)
+      return;
     const {
       credentialConfigurationId,
-      vcMetadata: { format },
+      vcMetadata: {format},
     } = verifiableCredentialData;
 
     if (vcMetadata.issuerHost) {
@@ -79,6 +96,10 @@ export const VCCardView: React.FC<VCItemProps> = ({
           if (response && response.matchingCredentialIssuerMetadata) {
             setWellknown(response.matchingCredentialIssuerMetadata);
           }
+          controller.STORE_INCOMING_VC_WELLKNOWN_CONFIG(
+            verifiableCredentialData?.vcMetadata.issuerHost,
+            response.wellknownResponse,
+          );
           setFields(response.fields);
         })
         .catch(error => {
@@ -120,14 +141,21 @@ export const VCCardView: React.FC<VCItemProps> = ({
     <Copilot
       description={t('copilot:cardMessage')}
       order={6}
-      title={t('copilot:cardTitle')}
-      children={CardViewContent()}
-    />
+      title={t('copilot:cardTitle')}>
+      {CardViewContent()}
+    </Copilot>
   );
 
   return (
-    <React.Fragment>
+    <>
+      <MessageOverlay
+        progress={true}
+        title={t('In Progress')}
+        isVisible={controller.isReverifyingVc}
+      />
+
       <Pressable
+        ref={cardRef}
         accessible={false}
         onPress={() => onPress(service)}
         style={
@@ -145,7 +173,7 @@ export const VCCardView: React.FC<VCItemProps> = ({
         onDismiss={controller.DISMISS}
         translationPath={'VcDetails'}
       />
-    </React.Fragment>
+    </>
   );
 };
 
@@ -162,4 +190,10 @@ export interface VCItemProps {
   isInitialLaunch?: boolean;
   isTopCard?: boolean;
   onDisclosuresChange?: (paths: string[]) => void;
+  onMeasured?: (rect: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) => void;
 }

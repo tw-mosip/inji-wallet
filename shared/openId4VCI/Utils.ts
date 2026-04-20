@@ -46,15 +46,12 @@ export const Issuers = {
 export function getVcVerificationDetails(
   statusType,
   vcMetadata: VCMetadata,
-  verifiableCredential,
-  wellknown: Object,
 ): vcVerificationBannerDetails {
-  const credentialType = getCredentialTypeFromWellKnown(
-    wellknown,
-    getVerifiableCredential(verifiableCredential).credentialConfigurationId,
-  );
+  const credentialType = vcMetadata.credentialType;
   return {
     statusType: statusType,
+    isRevoked: vcMetadata.isRevoked,
+    isExpired: vcMetadata.isExpired,
     vcType: credentialType,
   };
 }
@@ -71,27 +68,26 @@ export const updateCredentialInformation = async (
   context: any,
   credential: VerifiableCredential,
 ): Promise<CredentialWrapper> => {
-  let processedCredential;
-  if (context.selectedCredentialType.format === VCFormat.mso_mdoc) {
-    processedCredential = await VCProcessor.processForRendering(
-      credential,
-      context.selectedCredentialType.format,
-    );
-  }
-  if( context.selectedCredentialType.format === VCFormat.vc_sd_jwt || context.selectedCredentialType.format === VCFormat.dc_sd_jwt) {
-    processedCredential = await VCProcessor.processForRendering(
-      credential,
-      context.selectedCredentialType.format,
-    )
-  }
   let verifiableCredential;
   try {
+    let processedCredential;
+    if (
+      context.selectedCredentialType.format === VCFormat.mso_mdoc ||
+      context.selectedCredentialType.format === VCFormat.vc_sd_jwt ||
+      context.selectedCredentialType.format === VCFormat.dc_sd_jwt ||
+      context.selectedCredentialType.format === VCFormat.jwt_vc_json
+    ) {
+      processedCredential = await VCProcessor.processForRendering(
+        credential,
+        context.selectedCredentialType.format,
+      );
+    }
     verifiableCredential = {
       ...credential,
       credentialConfigurationId: context.selectedCredentialType.id,
-      issuerLogo: getDisplayObjectForCurrentLanguage(
-        context.selectedIssuer.display,
-      )?.logo,
+      issuerLogo:
+        getDisplayObjectForCurrentLanguage(context.selectedIssuer.display)
+          ?.logo ?? '',
       processedCredential,
     };
   } catch (e) {
@@ -113,9 +109,12 @@ export const updateCredentialInformation = async (
 };
 
 export const getDisplayObjectForCurrentLanguage = (
-  display: [displayType],
+  display: displayType[],
 ): displayType => {
   const currentLanguage = i18next.language;
+  if (!display || display.length === 0) {
+    return {} as displayType;
+  }
   const languageKey = Object.keys(display[0]).includes('language')
     ? 'language'
     : 'locale';
@@ -152,7 +151,19 @@ export const getCredentialIssuersWellKnownConfig = async (
         wellknownResponse,
         credentialConfigurationId,
       );
-      if (
+      // OpenID4VCI Final 1.0: credential_metadata.claims is a flat array of
+      // claim description objects (Appendix B.2). Array order defines display
+      // order (Appendix B.3), superseding any legacy `order` field.
+      const normalizedClaims = matchingWellknownDetails.claims;
+      if (Array.isArray(normalizedClaims)) {
+        const extracted = normalizedClaims
+          .map(c => serializeClaimPath(c?.path, format))
+          .filter((p): p is string => !!p);
+        if (extracted.length > 0) {
+          fields = extracted;
+          wellknownFieldsFlag = true;
+        }
+      } else if (
         matchingWellknownDetails.order != null &&
         matchingWellknownDetails.order.length > 0
       ) {
@@ -175,16 +186,29 @@ export const getCredentialIssuersWellKnownConfig = async (
             fields = ldpFields;
             wellknownFieldsFlag = true;
           }
-        }
-        else if( format === VCFormat.vc_sd_jwt || format === VCFormat.dc_sd_jwt) {
-          const sdJwtFields = flattenClaimPaths(matchingWellknownDetails.claims);
+        } else if (
+          format === VCFormat.vc_sd_jwt ||
+          format === VCFormat.dc_sd_jwt
+        ) {
+          const sdJwtFields = flattenClaimPaths(
+            matchingWellknownDetails.claims,
+          );
 
           if (sdJwtFields.length > 0) {
             fields = sdJwtFields;
-            wellknownFieldsFlag = true
+            wellknownFieldsFlag = true;
           }
-        }
-        else {
+        } else if (format === VCFormat.jwt_vc_json) {
+          const jwtVcJsonFields = Object.keys(
+            matchingWellknownDetails.credential_definition?.credentialSubject ||
+              {},
+          );
+
+          if (jwtVcJsonFields.length > 0) {
+            fields = jwtVcJsonFields;
+            wellknownFieldsFlag = true;
+          }
+        } else {
           console.error(`Unsupported credential format - ${format} found`);
           throw new UnsupportedVcFormat(format);
         }
@@ -209,6 +233,50 @@ export const getCredentialIssuersWellKnownConfig = async (
       wellknownFieldsFlag || matchingWellknownDetails?.order?.length > 0,
   };
 };
+// OpenID4VCI Final 1.0 moved per-credential `display` and `claims` into a
+// nested `credential_metadata` object. Lift them up so consumers can keep
+// reading `display`/`claims` directly. Legacy issuers (pre-Final-1.0) that
+// still put these at the top level continue to work via the `??` fallback.
+function normalizeCredentialMetadata(entry: any): any {
+  if (!entry || !entry.credential_metadata) return entry;
+  const cm = entry.credential_metadata;
+  return {
+    ...entry,
+    display: cm.display ?? entry.display,
+    claims: cm.claims ?? entry.claims,
+  };
+}
+
+// Serializes an Appendix C claims path pointer into the internal field key
+// convention used elsewhere in this codebase.
+//  - string segments → object keys
+//  - non-negative integer segments → preserved as digit strings; walkers
+//    resolve them via bracket access (works for both arrays and numeric
+//    map keys).
+//  - null segments (wildcard "all array elements") → dropped. Walkers
+//    auto-iterate remaining path across array values, so the pointer still
+//    resolves correctly.
+export function serializeClaimPath(
+  path: unknown,
+  format: string,
+): string | null {
+  if (!Array.isArray(path) || path.length === 0) return null;
+  const segs: string[] = [];
+  for (const p of path) {
+    if (typeof p === 'string') segs.push(p);
+    else if (typeof p === 'number' && Number.isInteger(p) && p >= 0)
+      segs.push(String(p));
+    // null (wildcard) is skipped — see comment above.
+  }
+  if (segs.length === 0) return null;
+  if (format === VCFormat.mso_mdoc) return segs.join('~');
+  if (format === VCFormat.ldp_vc || format === VCFormat.jwt_vc_json) {
+    const stripped = segs[0] === 'credentialSubject' ? segs.slice(1) : segs;
+    return stripped.length ? stripped.join('.') : null;
+  }
+  return segs.join('.');
+}
+
 const flattenClaimPaths = (
   claims: Record<string, any>,
   prefix = '',
@@ -231,7 +299,6 @@ const flattenClaimPaths = (
   });
 };
 
-
 export const getDetailedViewFields = async (
   issuerCacheKey: string,
   credentialConfigurationId: string,
@@ -249,7 +316,7 @@ export const getDetailedViewFields = async (
 
   let updatedFieldsList = response.fields.concat(DETAIL_VIEW_ADD_ON_FIELDS);
 
-  updatedFieldsList = removeBottomSectionFields(updatedFieldsList,format);
+  updatedFieldsList = removeBottomSectionFields(updatedFieldsList, format);
   return {
     matchingCredentialIssuerMetadata: response.matchingCredentialIssuerMetadata,
     fields: updatedFieldsList,
@@ -304,7 +371,183 @@ export enum ErrorMessage {
   CREDENTIAL_TYPE_DOWNLOAD_FAILURE = 'credentialTypeListDownloadFailure',
   AUTHORIZATION_GRANT_TYPE_NOT_SUPPORTED = 'authorizationGrantTypeNotSupportedByWallet',
   NETWORK_REQUEST_FAILED = 'networkRequestFailed',
+  KEY_MANAGEMENT_ERROR = 'unknown_error',
+  WALLET_GENERIC_ERROR = 'unknown_error',
+  STORAGE_ERROR = "storage_error",
+  PARSING_ERROR = "parsing_error",
 }
+
+export enum VCIServerErrorCode {
+  INVALID_REQUEST = "invalid_request",
+  UNAUTHORIZED_CLIENT = "unauthorized_client",
+  ACCESS_DENIED = "access_denied",
+  UNSUPPORTED_RESPONSE_TYPE = "unsupported_response_type",
+  INVALID_SCOPE = "invalid_scope",
+
+  SERVER_ERROR = "server_error",
+  TEMPORARILY_UNAVAILABLE = "temporarily_unavailable",
+
+  INVALID_CLIENT = "invalid_client",
+  INVALID_GRANT = "invalid_grant",
+  UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type",
+
+  AUTHORIZATION_PENDING = "authorization_pending",
+  SLOW_DOWN = "slow_down",
+
+  INVALID_CREDENTIAL_REQUEST = "invalid_credential_request",
+  UNSUPPORTED_CREDENTIAL_TYPE = "unsupported_credential_type",
+  UNSUPPORTED_CREDENTIAL_FORMAT = "unsupported_credential_format",
+
+  INVALID_PROOF = "invalid_proof",
+  INVALID_ENCRYPTION_PARAMETERS = "invalid_encryption_parameters",
+
+  INVALID_TOKEN = "invalid_token",
+  INSUFFICIENT_SCOPE = "insufficient_scope",
+
+  INVALID_CREDENTIAL_OFFER = "invalid_credential_offer",
+  CREDENTIAL_OFFER_FETCH_FAILED = "credential_offer_fetch_failed",
+  UNSUPPORTED_GRANT = "unsupported_grant",
+
+  BIOMETRIC_CANCELLED = "biometric_cancelled",
+  USER_CANCELLED = "user_cancelled",
+
+  NETWORK_ERROR = "network_error",
+  TIMEOUT_ERROR = "timeout_error",
+
+  VERIFICATION_FAILED = "verification_failed", 
+
+  UNKNOWN_ERROR = "unknown_error",
+}
+
+export const retryableErrors = new Set([
+  VCIServerErrorCode.SERVER_ERROR,
+  VCIServerErrorCode.INVALID_GRANT,
+  VCIServerErrorCode.SLOW_DOWN,
+  VCIServerErrorCode.INVALID_PROOF,
+  VCIServerErrorCode.INVALID_ENCRYPTION_PARAMETERS,
+  VCIServerErrorCode.CREDENTIAL_OFFER_FETCH_FAILED,
+  VCIServerErrorCode.NETWORK_ERROR,
+  VCIServerErrorCode.TIMEOUT_ERROR,
+  ErrorMessage.PARSING_ERROR,
+  ErrorMessage.STORAGE_ERROR,
+  VCIServerErrorCode.UNKNOWN_ERROR,
+  VCIServerErrorCode.ACCESS_DENIED,
+  VCIServerErrorCode.UNSUPPORTED_GRANT_TYPE,
+  ErrorMessage.KEY_MANAGEMENT_ERROR,
+  ErrorMessage.WALLET_GENERIC_ERROR,
+  VCIServerErrorCode.INVALID_CREDENTIAL_OFFER,
+  ErrorMessage.NO_INTERNET
+])
+
+export const goBackErrors = new Set([
+  VCIServerErrorCode.UNAUTHORIZED_CLIENT,
+  VCIServerErrorCode.UNSUPPORTED_RESPONSE_TYPE,
+  VCIServerErrorCode.INVALID_SCOPE,
+  VCIServerErrorCode.UNSUPPORTED_CREDENTIAL_TYPE,
+  VCIServerErrorCode.UNSUPPORTED_CREDENTIAL_FORMAT,
+  VCIServerErrorCode.INSUFFICIENT_SCOPE,
+  VCIServerErrorCode.UNSUPPORTED_GRANT
+])
+
+export const goHomeErrors = new Set([
+  VCIServerErrorCode.INVALID_REQUEST,
+  VCIServerErrorCode.INVALID_CLIENT,
+  VCIServerErrorCode.TEMPORARILY_UNAVAILABLE,
+  VCIServerErrorCode.INVALID_CREDENTIAL_REQUEST
+])
+
+export const ErrorLogMessages: Record<VCIServerErrorCode, string> = {
+
+  [VCIServerErrorCode.INVALID_REQUEST]:
+    "Invalid request sent to authorization server.",
+
+  [VCIServerErrorCode.UNAUTHORIZED_CLIENT]:
+    "Client is not authorized to perform this request.",
+
+  [VCIServerErrorCode.ACCESS_DENIED]:
+    "Authorization request was denied by the user or server.",
+
+  [VCIServerErrorCode.UNSUPPORTED_RESPONSE_TYPE]:
+    "Authorization server does not support the requested response type.",
+
+  [VCIServerErrorCode.INVALID_SCOPE]:
+    "Requested scope is invalid or unsupported.",
+
+  [VCIServerErrorCode.SERVER_ERROR]:
+    "Authorization server encountered an internal error.",
+
+  [VCIServerErrorCode.TEMPORARILY_UNAVAILABLE]:
+    "Authorization server is temporarily unavailable.",
+
+  [VCIServerErrorCode.INVALID_CLIENT]:
+    "Client authentication with the authorization server failed.",
+
+  [VCIServerErrorCode.INVALID_GRANT]:
+    "Provided authorization grant is invalid or expired.",
+
+  [VCIServerErrorCode.UNSUPPORTED_GRANT_TYPE]:
+    "Authorization server does not support the requested grant type.",
+
+  [VCIServerErrorCode.AUTHORIZATION_PENDING]:
+    "Authorization still pending; polling should continue.",
+
+  [VCIServerErrorCode.SLOW_DOWN]:
+    "Authorization server requested slower polling.",
+
+  [VCIServerErrorCode.INVALID_CREDENTIAL_REQUEST]:
+    "Credential request is invalid or malformed.",
+
+  [VCIServerErrorCode.UNSUPPORTED_CREDENTIAL_TYPE]:
+    "Issuer does not support the requested credential type.",
+
+  [VCIServerErrorCode.UNSUPPORTED_CREDENTIAL_FORMAT]:
+    "Issuer does not support the requested credential format.",
+
+  [VCIServerErrorCode.INVALID_PROOF]:
+    "Provided proof is invalid or failed verification.",
+
+  [VCIServerErrorCode.INVALID_ENCRYPTION_PARAMETERS]:
+    "Invalid encryption parameters were provided.",
+
+  [VCIServerErrorCode.INVALID_TOKEN]:
+    "Access token is invalid or expired.",
+
+  [VCIServerErrorCode.INSUFFICIENT_SCOPE]:
+    "Access token does not contain the required scope.",
+
+  [VCIServerErrorCode.INVALID_CREDENTIAL_OFFER]:
+    "Credential offer received is invalid.",
+
+  [VCIServerErrorCode.CREDENTIAL_OFFER_FETCH_FAILED]:
+    "Failed to fetch credential offer from issuer.",
+
+  [VCIServerErrorCode.UNSUPPORTED_GRANT]:
+    "Issuer does not support this credential issuance grant.",
+
+  [VCIServerErrorCode.BIOMETRIC_CANCELLED]:
+    "User cancelled biometric authentication.",
+
+  [VCIServerErrorCode.USER_CANCELLED]:
+    "User cancelled the operation.",
+
+  [VCIServerErrorCode.NETWORK_ERROR]:
+    "Network request failed while communicating with issuer.",
+
+  [VCIServerErrorCode.TIMEOUT_ERROR]:
+    "Network request timed out.",
+
+  [VCIServerErrorCode.PARSING_ERROR]:
+    "Failed to parse response from issuer.",
+
+  [VCIServerErrorCode.VERIFICATION_FAILED]:
+    "Credential verification failed.",
+
+  [VCIServerErrorCode.STORAGE_ERROR]:
+    "Failed to store credential or metadata.",
+
+  [VCIServerErrorCode.UNKNOWN_ERROR]:
+    "Unknown error occurred during credential issuance flow.",
+};
 
 export async function constructProofJWT(
   publicKey: any,
@@ -334,7 +577,6 @@ export async function constructProofJWT(
       ? {kid: `did:jwk:${base64url(JSON.stringify(jwk))}#0`}
       : {jwk}),
   };
-
   const jwtPayload = {
     ...(client_id ? {iss: client_id} : {}),
     nonce,
@@ -453,7 +695,9 @@ export function getMatchingCredentialIssuerMetadata(
 ): any {
   for (const credentialTypeKey in wellknown.credential_configurations_supported) {
     if (credentialTypeKey === credentialConfigurationId) {
-      return wellknown.credential_configurations_supported[credentialTypeKey];
+      return normalizeCredentialMetadata(
+        wellknown.credential_configurations_supported[credentialTypeKey],
+      );
     }
   }
   console.error(
@@ -487,4 +731,18 @@ function resolveEd25519Alg(proofSigningAlgosSupported: string[]) {
   )
     ? KEY_TYPE_TO_JWT_ALG[KeyTypes.ED25519]
     : ED25519_PROOF_SIGNING_ALGO;
+}
+
+export function formattedDate(time: number | string): React.ReactNode {
+  const date = new Date(time);
+  const day = date.getDate();
+  const month = date.toLocaleString('default', {month: 'long'});
+  const year = date.getFullYear();
+  const formattedHours = (date.getHours() % 12 || 12)
+    .toString()
+    .padStart(2, '0');
+  const formattedMinutes = date.getMinutes().toString().padStart(2, '0');
+  const period = date.getHours() >= 12 ? 'PM' : 'AM';
+
+  return `${day} ${month} ${year}, ${formattedHours}:${formattedMinutes} ${period}`;
 }

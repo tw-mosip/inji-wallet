@@ -13,10 +13,13 @@ import {
 } from '../shared/telemetry/TelemetryUtils';
 import {TelemetryConstants} from '../shared/telemetry/TelemetryConstants';
 import {SvgImage} from '../components/ui/svg';
+import {useBiometricType} from '../shared/hooks/useBiometricType';
 
 export const AuthScreen: React.FC<RootRouteProps> = props => {
   const {t} = useTranslation('AuthScreen');
   const controller = useAuthScreen(props);
+  const {biometricType, isBiometricsLoading, translationSuffix} =
+    useBiometricType();
 
   const handleUsePasscodeButtonPress = () => {
     sendStartEvent(
@@ -29,7 +32,7 @@ export const AuthScreen: React.FC<RootRouteProps> = props => {
         'Use Passcode Button',
       ),
     );
-    controller.usePasscode();
+    controller.navigateToPasscode();
   };
   return (
     <Column
@@ -43,11 +46,11 @@ export const AuthScreen: React.FC<RootRouteProps> = props => {
         title={controller.alertMsg}
       />
       <Column crossAlign="center">
-        {SvgImage.fingerprintIcon(66)}
+        {!isBiometricsLoading &&
+          SvgImage.adaptiveBiometricIcon(biometricType, 66)}
         <Column margin="30 0 0 0">
           <Text
             testID="selectAppUnlockMethod"
-            style={{paddingTop: 3}}
             align="center"
             style={Theme.TextStyles.header}>
             {t('header')}
@@ -76,7 +79,9 @@ export const AuthScreen: React.FC<RootRouteProps> = props => {
       <Column>
         <Button
           testID="useBiometrics"
-          title={t('useBiometrics')}
+          title={t(`use${translationSuffix}` as any, {
+            defaultValue: t('useBiometrics'),
+          })}
           type="gradient"
           margin="0 0 8 0"
           disabled={!controller.isBiometricsAvailable}

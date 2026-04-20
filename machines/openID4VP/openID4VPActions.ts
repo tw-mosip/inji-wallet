@@ -9,7 +9,7 @@ import {VC} from '../VerifiableCredential/VCMetaMachine/vc';
 import {StoreEvents} from '../store';
 import {JSONPath} from 'jsonpath-plus';
 
-import {VCShareFlowType} from '../../shared/Utils';
+import {parseJSON, VCShareFlowType} from '../../shared/Utils';
 import {ActivityLogEvents} from '../activityLog';
 import {VPShareActivityLog} from '../../components/VPShareActivityLogEvent';
 import OpenID4VP from '../../shared/openID4VP/OpenID4VP';
@@ -25,6 +25,10 @@ import {
 export const openID4VPActions = (model: any) => {
   let result;
   return {
+    setPresentationRequest: model.assign({
+      presentationRequest: (_, event) => event.presentationRequest,
+    }),
+
     setAuthenticationResponse: model.assign({
       authenticationResponse: (_, event) => event.data,
     }),
@@ -49,11 +53,36 @@ export const openID4VPActions = (model: any) => {
         const pd = response['presentation_definition'];
         return pd.purpose ?? '';
       },
+
+      hasNoMatchingVCs: () => {
+        return (
+          !result.matchingVCs ||
+          Object.keys(result.matchingVCs).length === 0 ||
+          Object.values(result.matchingVCs).every(
+            value => Array.isArray(value) && value.length === 0,
+          )
+        );
+      },
+    }),
+
+    setAuthenticationResponseForPresentationAuthFlow: model.assign({
+      authenticationResponse: (context, _) => context.presentationRequest,
     }),
 
     setSelectedVCs: model.assign({
       selectedVCs: (_, event) => event.selectedVCs,
       selectedDisclosuresByVc: (_, event) => event.selectedDisclosuresByVc,
+    }),
+
+    setUnsignedVPToken: model.assign({
+      unsignedVPToken: (_, event) => {
+        try {
+          return parseJSON(event.data);
+        } catch (error) {
+          console.error('Error parsing unsignedVPToken:', error);
+          return null;
+        }
+      },
     }),
 
     compareAndStoreSelectedVC: model.assign({
@@ -155,14 +184,17 @@ export const openID4VPActions = (model: any) => {
 
     setAuthenticationError: model.assign({
       error: (_, event) => {
-        console.error('Error:', event.data.message, event.data.code);
+        console.error(
+          'Error occurred during the authenticateVerifier call :',
+          event.data.userInfo,
+        );
         return event.data.code;
       },
     }),
 
     setTrustedVerifiersApiCallError: model.assign({
       error: (_, event) => {
-        console.error('Error:', event.data.message);
+        console.error('Error while fetching trusted verifiers:', event.data);
         return 'api error - ' + event.data.message;
       },
     }),
@@ -173,6 +205,12 @@ export const openID4VPActions = (model: any) => {
 
     dismissTrustModal: assign({
       showTrustConsentModal: () => false,
+    }),
+
+    setSignVPError: model.assign({
+      error: (_, event) => {
+        return 'sign vp-' + event.data.message + '-' + event.data.code;
+      },
     }),
 
     setSendVPShareError: model.assign({
@@ -225,13 +263,6 @@ export const openID4VPActions = (model: any) => {
       },
       {to: (context: any) => context.serviceRefs.activityLog},
     ),
-
-    shareDeclineStatus: () => {
-      OpenID4VP.sendErrorToVerifier(
-        OVP_ERROR_MESSAGES.DECLINED,
-        OVP_ERROR_CODE.DECLINED,
-      );
-    },
 
     setIsFaceVerificationRetryAttempt: model.assign({
       isFaceVerificationRetryAttempt: () => true,
@@ -296,7 +327,7 @@ function getVcsMatchingAuthRequest(context, event) {
         requestedClaimsByVerifier,
       );
 
-      let shouldInclude = false;
+      let shouldInclude: boolean;
       if (inputDescriptor.constraints.fields && format) {
         shouldInclude = isMatchingConstraints && areMatchingFormatAndProofType;
       } else {
@@ -317,7 +348,8 @@ function getVcsMatchingAuthRequest(context, event) {
   }
 
   if (Object.keys(matchingVCs).length === 0) {
-    OpenID4VP.sendErrorToVerifier(
+    // Error is only sent when there are no VCs matching the request
+    void OpenID4VP.sendErrorToVerifier(
       OVP_ERROR_MESSAGES.NO_MATCHING_VCS,
       OVP_ERROR_CODE.NO_MATCHING_VCS,
     );
@@ -378,7 +410,8 @@ function areVCFormatAndProofTypeMatchingRequest(
       const alg = extractAlgFromSdJwt(sdJwt);
 
       return Object.entries(requestFormat).some(
-        ([type, value]) => type === vcFormatType && value["sd-jwt_alg_values"]?.includes(alg),
+        ([type, value]) =>
+          type === vcFormatType && value['sd-jwt_alg_values']?.includes(alg),
       );
     } catch (e) {
       console.error('Error processing SD-JWT alg match:', e);
@@ -459,7 +492,8 @@ function fetchCredentialBasedOnFormat(vc: any) {
       );
       break;
     }
-    case VCFormat.vc_sd_jwt || VCFormat.dc_sd_jwt: {
+    case VCFormat.vc_sd_jwt:
+    case VCFormat.dc_sd_jwt: {
       credential =
         vc.verifiableCredential.processedCredential.fullResolvedPayload;
       break;
