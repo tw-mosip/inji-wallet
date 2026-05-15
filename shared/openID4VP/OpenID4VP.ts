@@ -142,8 +142,31 @@ class OpenID4VP {
         JSON.stringify(result, null, 2),
       );
 
+      const matchingVCs: Record<string, VC[]> = {};
+      if (result.queryMatches) {
+        Object.entries(result.queryMatches).forEach(
+          ([credentialQueryId, queryMatch]: [string, any]) => {
+            if (
+              queryMatch.matchingCredentials &&
+              queryMatch.matchingCredentials.length > 0
+            ) {
+              const matchedVCs = queryMatch.matchingCredentials
+                .map((mc: {credentialId: string}) =>
+                  availableWalletCredentials.find(
+                    vc => vc.vcMetadata.id === mc.credentialId,
+                  ),
+                )
+                .filter(Boolean);
+              if (matchedVCs.length > 0) {
+                matchingVCs[credentialQueryId] = matchedVCs;
+              }
+            }
+          },
+        );
+      }
+
       return {
-        matchingVCs: {mvrc: availableWalletCredentials},
+        matchingVCs,
         requestedClaims: '',
         purpose: '',
       };
@@ -184,7 +207,7 @@ class OpenID4VP {
     signatureAlgorithm: string,
   ) {
     const openID4VP = await OpenID4VP.getInstance();
-
+    console.log('vpRequest: ', vpRequest);
     const isPresentationExchangeFlow = vpRequest.hasOwnProperty(
       'presentation_definition',
     );
@@ -194,26 +217,26 @@ class OpenID4VP {
         selectedDisclosuresByVc,
       );
 
-      let holder = holderId;
-      let signatureAlgorithmForCredential = signatureAlgorithm;
+      const holder = holderId;
+      const signatureAlgorithmForCredential = signatureAlgorithm;
 
-      for (const [_, vcsArray] of Object.entries(updatedSelectedVCs)) {
-        if (vcsArray['ldp_vc']) {
-          // extract the holderId from the very first entry
-          const firstLdpVc = vcsArray['ldp_vc'][0];
-          holder = firstLdpVc['credentialSubject']['id'];
-          signatureAlgorithmForCredential = this.getSignatureSuite(holder);
-          if (signatureAlgorithmForCredential === 'Ed25519Signature2020') {
-            // convert holder from did:jwk to did:key format for Ed25519 keys
-            holder = 'did:web:KiruthikaJeyashankar.github.io:did#key-0';
-            console.log(
-              'Holder uses Ed25519 key, converted holder id to did:key format: ',
-              holder,
-            );
-          }
-          break;
-        }
-      }
+      // for (const [_, vcsArray] of Object.entries(updatedSelectedVCs)) {
+      //   if (vcsArray['ldp_vc']) {
+      //     // extract the holderId from the very first entry
+      //     const firstLdpVc = vcsArray['ldp_vc'][0];
+      //     holder = firstLdpVc['credentialSubject']['id'];
+      //     signatureAlgorithmForCredential = this.getSignatureSuite(holder);
+      //     // if (signatureAlgorithmForCredential === 'Ed25519Signature2020') {
+      //     //   // convert holder from did:jwk to did:key format for Ed25519 keys
+      //     //   holder = 'did:web:KiruthikaJeyashankar.github.io:did#key-0';
+      //     //   console.log(
+      //     //     'Holder uses Ed25519 key, converted holder id to did:key format: ',
+      //     //     holder,
+      //     //   );
+      //     // }
+      //     break;
+      //   }
+      // }
 
       console.log(
         'The holder id for signing the VP token is determined to be: ',
@@ -229,6 +252,7 @@ class OpenID4VP {
           holder,
           signatureAlgorithmForCredential,
         );
+      console.log('unSignedVpTokens: ', unSignedVpTokens);
       return parseJSON(unSignedVpTokens);
     } else {
       // DCQL Query flow

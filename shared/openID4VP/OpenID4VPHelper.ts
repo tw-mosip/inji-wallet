@@ -1,5 +1,9 @@
 import {
-  createSignature, createSignatureECK1, createSignatureECR1, createSignatureED, createSignatureRSA,
+  createSignature,
+  createSignatureECK1,
+  createSignatureECR1,
+  createSignatureED,
+  createSignatureRSA,
   encodeB64,
   fetchKeyPair,
 } from '../cryptoutil/cryptoUtil';
@@ -11,10 +15,7 @@ import {isIOS, JWT_ALG_TO_KEY_TYPE} from '../constants';
 import {getMdocAuthenticationAlorithm} from '../../components/VC/common/VCUtils';
 import {KeyTypes, SignatureAlgorithms} from '../cryptoutil/KeyTypes';
 import {signatureSuite} from '../../machines/openID4VP/openID4VPServices';
-import {
-  UnsignedVPToken,
-  VPTokenSigningResult,
-} from './openid4vp.types';
+import {UnsignedVPToken, VPTokenSigningResult} from './openid4vp.types';
 
 export async function constructDetachedJWT(
   privateKey: any,
@@ -171,6 +172,7 @@ export const signDataForVpPreparation = async (
           keyType,
         );
         if (signature) {
+          console.log('Signature: ', signature);
           uuidToSignature[uuid] = signature;
         } else {
           throw new Error(`Failed to create signature for UUID: ${uuid}`);
@@ -180,6 +182,7 @@ export const signDataForVpPreparation = async (
       vpTokenSigningResultMap[formatType] = uuidToSignature;
     }
   }
+  console.log('vpTokenSigningResultMap: ', vpTokenSigningResultMap);
   return vpTokenSigningResultMap;
 };
 
@@ -206,25 +209,26 @@ export const signDataForVpPreparationV2 = async (
     } else {
       const key = await fetchKeyPair(keyType);
       keyTypeToKeys[keyType] = key;
-      return key
+      return key;
     }
-  }
+  };
 
   const result: Promise<VPTokenSigningResult>[] = unSignedVpTokens.map(
     async unsignedVPToken => {
+      console.log('unsignedVPToken: ', unsignedVPToken);
       let signature: string | undefined = '';
       const formatType = unsignedVPToken.format;
       const payload: string = unsignedVPToken.dataToSign;
       const signatureAlgorithm: string = unsignedVPToken.signatureAlgorithm;
-      console.log("Signing VP Token with format: ", formatType);
-      console.log("Signature Algorithm: ", signatureAlgorithm);
+      console.log('Signing VP Token with format: ', formatType);
+      console.log('Signature Algorithm: ', signatureAlgorithm);
 
       const keyType =
         JWT_ALG_TO_KEY_TYPE[
           signatureAlgorithm as keyof typeof JWT_ALG_TO_KEY_TYPE
-          ];
+        ];
       const key = await getKeyInfo(keyType);
-      console.log("Key Info = ", JSON.stringify(key, null, 2))
+      console.log('Key Info = ', JSON.stringify(key, null, 2));
       signature = await signData(
         key.privateKey,
         payload, // Payload is in base64 url encoded form - decode it before signing
@@ -238,29 +242,22 @@ export const signDataForVpPreparationV2 = async (
   return vpTokenSigningResults as Array<VPTokenSigningResult>;
 };
 
-
 async function signData(
   privateKey: string,
   base64EncodedPayload: string,
   keyType: string,
 ) {
-  const payloadBytes = base64ToByteArray(base64EncodedPayload);
-  // const payloadBytes = base64UrlToUint8Array(base64EncodedPayload);
-  console.log("Signing data with key type: ", keyType);
-  console.log("payloadBytes: ", payloadBytes);
-  // const hexString = Array.from(payloadBytes)
-  //   .map(b => b.toString(16).padStart(2, '0'))
-  //   .join(' ');
-  // console.log("payloadBytes in hex: ", hexString);
+  console.log('Signing data with key type: ', keyType);
 
   switch (keyType) {
-    case SignatureAlgorithms.RS256: // Life Insurance credential
-      return createSignatureRSA(privateKey, payloadBytes);
-    case SignatureAlgorithms.ES256: // Insurance credential
-      return createSignatureECR1(privateKey, payloadBytes);
-    case SignatureAlgorithms.ES256K: // Mock VC DM 1.1
-      return createSignatureECK1(privateKey, payloadBytes);
+    case SignatureAlgorithms.RS256:
+      return createSignatureRSA(privateKey, base64EncodedPayload);
+    case SignatureAlgorithms.ES256:
+      return createSignatureECR1(privateKey, base64EncodedPayload);
+    case SignatureAlgorithms.ES256K:
+      return createSignatureECK1(privateKey, base64EncodedPayload);
     case SignatureAlgorithms.EdDSA: {
+      const payloadBytes = base64ToByteArray(base64EncodedPayload);
       return createSignatureED(privateKey, payloadBytes);
     }
     default:

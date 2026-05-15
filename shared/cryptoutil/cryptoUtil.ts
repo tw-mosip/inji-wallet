@@ -1,7 +1,13 @@
 import 'react-native-get-random-values';
 import {RSA} from 'react-native-rsa-native';
 import forge from 'node-forge';
-import {BIOMETRIC_CANCELLED, DEBUG_MODE_ENABLED, isAndroid, isIOS, SUPPORTED_KEY_TYPES,} from '../constants';
+import {
+  BIOMETRIC_CANCELLED,
+  DEBUG_MODE_ENABLED,
+  isAndroid,
+  isIOS,
+  SUPPORTED_KEY_TYPES,
+} from '../constants';
 import {NativeModules} from 'react-native';
 import {BiometricCancellationError} from '../error/BiometricCancellationError';
 import {EncryptedOutput} from './encryptedOutput';
@@ -250,7 +256,7 @@ export async function createSignatureECK1(privateKey, payload) {
 
   const signatureBytes = await secp.signAsync(msgHash, privKeyBytes, {
     lowS: false,
-    extraEntropy: true
+    extraEntropy: true,
   });
   const compactSignatureBytes: Uint8Array = signatureBytes.toCompactRawBytes();
 
