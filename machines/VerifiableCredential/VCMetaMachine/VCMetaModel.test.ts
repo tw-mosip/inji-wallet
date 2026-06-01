@@ -215,5 +215,9 @@ describe('VCMetaModel', () => {
       expect(context.verificationErrorMessage).not.toBeNull();
       expect(context.verificationErrorMessage).toBe('');
     });
+
+    it('should have isCredentialOfferDroppedDueToBusyState as false', () => {
+      expect(initialContext.isCredentialOfferDroppedDueToBusyState).toBe(false);
+    });
   });
 });

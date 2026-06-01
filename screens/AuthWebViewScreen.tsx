@@ -14,6 +14,8 @@ import VciClient from '../shared/vciClient/VciClient';
 import {Theme} from '../components/ui/styleUtils';
 import {useTranslation} from 'react-i18next';
 import {isAndroid} from '../shared/constants';
+import {VCIServerErrorCode} from '../shared/openId4VCI/Utils';
+import {DeeplinkBanner} from '../components/DeeplinkBanner';
 
 const AuthWebViewScreen: React.FC<any> = ({route, navigation}) => {
   const {authorizationURL, clientId, redirectUri, controller} = route.params;
@@ -94,13 +96,31 @@ const AuthWebViewScreen: React.FC<any> = ({route, navigation}) => {
 
   const handleNavigationRequest = (request: any) => {
     const {url} = request;
+
     if (url.startsWith(redirectUri)) {
       try {
         const uri = new URL(url);
+
         const code = uri.searchParams.get('code');
+        const error = uri.searchParams.get('error');
+        const errorDescription = uri.searchParams.get('error_description');
+
+        if (error) {
+          controller.CANCEL({
+            serverErrorCode: error,
+            serverErrorDescription: errorDescription,
+          });
+
+          navigation.goBack();
+          return false;
+        }
 
         if (!code) {
-          controller.CANCEL();
+          controller.CANCEL({
+            serverErrorCode: VCIServerErrorCode.INVALID_REQUEST,
+            serverErrorDescription: 'Authorization server did not return code',
+          });
+
           navigation.goBack();
           return false;
         }
@@ -109,8 +129,11 @@ const AuthWebViewScreen: React.FC<any> = ({route, navigation}) => {
         navigation.goBack();
         return false;
       } catch (err: any) {
-        console.error('Error parsing redirect URL:', err);
-        controller.CANCEL();
+        controller.CANCEL({
+          serverErrorCode: 'redirect_parse_error',
+          serverErrorDescription: err?.message,
+        });
+
         navigation.goBack();
         return false;
       }
@@ -136,6 +159,7 @@ const AuthWebViewScreen: React.FC<any> = ({route, navigation}) => {
   return (
     <View style={{flex: 1}}>
       <Header />
+      <DeeplinkBanner absolute />
       {shouldRenderWebView && !showWebView && (
         <WebView style={{width: 0, height: 0}} source={{uri: 'about:blank'}} />
       )}

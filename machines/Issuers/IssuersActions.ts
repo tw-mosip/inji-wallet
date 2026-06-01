@@ -2,14 +2,12 @@ import {
   ErrorMessage,
   getDisplayObjectForCurrentLanguage,
   Issuers_Key_Ref,
-  OIDCErrors,
   selectCredentialRequestKey,
+  VCIServerErrorCode,
 } from '../../shared/openId4VCI/Utils';
 import {
   EXPIRED_VC_ERROR_CODE,
   MY_VCS_STORE_KEY,
-  NO_INTERNET,
-  REQUEST_TIMEOUT,
   isIOS,
   AuthorizationType,
   OVP_ERROR_CODE,
@@ -35,7 +33,9 @@ import {issuerType} from './IssuersMachine';
 import {RevocationStatus} from '../../shared/vcVerifier/VcVerifier';
 import {logState} from '../../shared/commonUtil';
 import {createOpenID4VPMachine} from '../openID4VP/openID4VPMachine';
-import VciClient from '../../shared/vciClient/VciClient';
+import VciClient, {
+  VciClientErrorResponse,
+} from '../../shared/vciClient/VciClient';
 
 const {RNSecureKeystoreModule} = NativeModules;
 
@@ -110,32 +110,43 @@ export const IssuersActions = (model: any) => {
       },
     }),
 
+    setIsInternetAvailable: model.assign({
+      isInternetAvailable: (_: any, event: any) => event.isInternetAvailable,
+    }),
+
+    setParsingError: model.assign({
+      errorMessage: () => ErrorMessage.PARSING_ERROR,
+    }),
+
+    setStorageError: model.assign({
+      errorMessage: () => ErrorMessage.STORAGE_ERROR,
+    }),
     setError: model.assign({
-      errorMessage: (_: any, event: any) => {
-        console.error(`Error occurred while ${event} -> `, event.data.message);
-        const error = event.data.message;
-        if (error.includes(NO_INTERNET)) {
+      errorMessage: (context: any, event: any) => {
+        const error = (event.data ?? event) as VciClientErrorResponse;
+        console.error(`Error occurred while ${event} -> `, error);
+        if (error.serverErrorCode)
+          return error.serverErrorCode as VCIServerErrorCode;
+        if (!context.isInternetAvailable) {
           return ErrorMessage.NO_INTERNET;
-        }
-        if (isNetworkError(error)) {
-          return ErrorMessage.NETWORK_REQUEST_FAILED;
-        }
-        if (error.includes(REQUEST_TIMEOUT)) {
-          return ErrorMessage.REQUEST_TIMEDOUT;
-        }
-        if (
-          error.includes(
-            OIDCErrors.AUTHORIZATION_ENDPOINT_DISCOVERY
-              .GRANT_TYPE_NOT_SUPPORTED,
-          )
-        ) {
-          return ErrorMessage.AUTHORIZATION_GRANT_TYPE_NOT_SUPPORTED;
-        }
-        return ErrorMessage.GENERIC;
+        } else if (error.sourceErrorCode === 'VCI-008') {
+          return VCIServerErrorCode.INVALID_CREDENTIAL_OFFER;
+        } else if (error.sourceErrorCode === 'VCI-007') {
+          return VCIServerErrorCode.TIMEOUT_ERROR;
+        } else if (error.code) return VCIServerErrorCode.SERVER_ERROR;
+        else return VCIServerErrorCode.UNKNOWN_ERROR;
       },
     }),
     resetError: model.assign({
       errorMessage: '',
+    }),
+
+    setKeyManagementError: model.assign({
+      errorMessage: (_: any, event: any) => ErrorMessage.KEY_MANAGEMENT_ERROR,
+    }),
+
+    setGenericError: model.assign({
+      errorMessage: (_: any, event: any) => ErrorMessage.WALLET_GENERIC_ERROR,
     }),
 
     loadKeyPair: assign({
@@ -421,6 +432,23 @@ export const IssuersActions = (model: any) => {
       },
     }),
 
+    setIsCredentialOfferViaDeepLink: model.assign({
+      isCredentialOfferViaDeepLink: (_: any, _event: any) => true,
+    }),
+
+    resetIsCredentialOfferViaDeepLink: model.assign({
+      isCredentialOfferViaDeepLink: (_: any, _event: any) => false,
+    }),
+
+    notifyIgnoredDeepLinkOffer: send(
+      (_: any) => ({
+        type: 'CREDENTIAL_OFFER_DROPPED_DUE_TO_BUSY_STATE',
+      }),
+      {
+        to: (context: any) => context.serviceRefs.vcMeta,
+      },
+    ),
+
     resetRequestConsentToTrustIssuer: model.assign({
       isConsentRequested: (_: any, event: any) => {
         return false;
@@ -550,11 +578,6 @@ export const IssuersActions = (model: any) => {
         presentationRequest: event.presentationRequest,
         flowType: VCShareFlowType.OPENID4VP_AUTHORIZATION,
       });
-    },
-
-    sendSignedVP: (context, event) => {
-      const vpTokenSigningResult = event.signedVPToken.data;
-      VciClient.getInstance().sendSignedVP(vpTokenSigningResult);
     },
 
     sendVPConsentReject: () => {

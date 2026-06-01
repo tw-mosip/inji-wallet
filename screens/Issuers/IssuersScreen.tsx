@@ -27,6 +27,7 @@ import {MessageOverlay} from '../../components/MessageOverlay';
 import {SearchBar} from '../../components/ui/SearchBar';
 import {SvgImage} from '../../components/ui/svg';
 import {Icon} from 'react-native-elements';
+import {DeeplinkBanner} from '../../components/DeeplinkBanner';
 import {BannerNotificationContainer} from '../../components/BannerNotificationContainer';
 import {CredentialTypeSelectionScreen} from './CredentialTypeSelectionScreen';
 import {QrScanner} from '../../components/QrScanner';
@@ -43,6 +44,8 @@ import {
   ProgressIndicator,
 } from '../../components/ui/processingScreen/ProcessingModal';
 import {ErrorView} from '../../components/ui/Error';
+import {goBackErrors, goHomeErrors} from '../../shared/openId4VCI/Utils';
+import {VCIServerErrorCode} from '../../shared/openId4VCI/Utils';
 
 export const IssuersScreen: React.FC<
   HomeRouteProps | RootRouteProps
@@ -185,11 +188,9 @@ export const IssuersScreen: React.FC<
   };
 
   const getImage = () => {
-    if (isGenericError()) {
-      return SvgImage.SomethingWentWrong();
-    }
-    if (isBackendError()) return SvgImage.ErrorOccurred();
-    return SvgImage.NoInternetConnection();
+    if (controller.errorMessageType == ErrorMessage.NO_INTERNET)
+      return SvgImage.NoInternetConnection();
+    return SvgImage.ErrorOccurred();
   };
 
   const filterIssuers = (searchText: string) => {
@@ -349,55 +350,64 @@ export const IssuersScreen: React.FC<
     );
   }
   if (showFullScreenError) {
+    const isDeepLinkOfferError = controller.isCredentialOfferViaDeepLink;
+    const errorPrimaryButtonText = isDeepLinkOfferError
+      ? 'goHome'
+      : goBackErrors.has(controller.errorMessageType as VCIServerErrorCode)
+      ? 'goBack'
+      : goHomeErrors.has(controller.errorMessageType as VCIServerErrorCode)
+      ? 'goHome'
+      : 'tryAgain';
+    const errorPrimaryAction = isDeepLinkOfferError
+      ? controller.GO_HOME_FROM_OFFER_ERROR
+      : controller.TRY_AGAIN;
+    const errorGoBack = isDeepLinkOfferError
+      ? controller.GO_HOME_FROM_OFFER_ERROR
+      : goBack;
     return (
       <ErrorView
         testID={`${controller.errorMessageType}Error`}
+        customImageStyles={{
+          marginTop:
+            controller.errorMessageType == ErrorMessage.NO_INTERNET ? 20 : 0,
+        }}
         isVisible={controller.errorMessageType !== ''}
         title={t(`errors.${controller.errorMessageType}.title`)}
         message={t(`errors.${controller.errorMessageType}.message`)}
-        goBack={goBack}
+        goBack={errorGoBack}
         tryAgain={controller.TRY_AGAIN}
         image={getImage()}
         showClose
-        primaryButtonTestID="tryAgain"
-        primaryButtonText={
-          controller.errorMessageType != ErrorMessage.TECHNICAL_DIFFICULTIES &&
-          controller.errorMessageType !=
-            ErrorMessage.AUTHORIZATION_GRANT_TYPE_NOT_SUPPORTED
-            ? 'tryAgain'
-            : undefined
-        }
-        primaryButtonEvent={controller.TRY_AGAIN}
-        onDismiss={goBack}
+        alignActionsOnEnd
+        primaryButtonTestID={isDeepLinkOfferError ? 'goHome' : 'tryAgain'}
+        primaryButtonText={errorPrimaryButtonText}
+        primaryButtonEvent={errorPrimaryAction}
+        onDismiss={errorGoBack}
       />
     );
   }
 
   if (controller.loadingReason) {
-    return (
-      <Fragment>
-        {controller.isPresentationAuthorization ? (
-          <SendVPScreen
-            navigation={props.navigation}
-            route={{
-              ...props.route,
-              params: {
-                ...props.route.params,
-                ovpService: controller.ovpMachine,
-              },
-            }}
-          />
-        ) : (
-          <Loader
-            title={
-              controller.loadingReason === 'preparingRequest'
-                ? t('loaders.preparingRequest')
-                : t('loaders.loading')
-            }
-            subTitle={t(`loaders.subTitle.${controller.loadingReason}`)}
-          />
-        )}
-      </Fragment>
+    return controller.isPresentationAuthorization ? (
+      <SendVPScreen
+        navigation={props.navigation}
+        route={{
+          ...props.route,
+          params: {
+            ...props.route.params,
+            ovpService: controller.ovpMachine,
+          },
+        }}
+      />
+    ) : (
+      <Loader
+        title={
+          controller.loadingReason === 'preparingRequest'
+            ? t('loaders.preparingRequest')
+            : t('loaders.loading')
+        }
+        subTitle={t(`loaders.subTitle.${controller.loadingReason}`)}
+      />
     );
   }
 
@@ -427,8 +437,9 @@ export const IssuersScreen: React.FC<
 
   return (
     <React.Fragment>
+      <DeeplinkBanner />
       <BannerNotificationContainer />
-      {controller.issuers.length > 0 && (
+      {
         <Column style={Theme.IssuersScreenStyles.issuerListOuterContainer}>
           <Row
             style={
@@ -503,7 +514,7 @@ export const IssuersScreen: React.FC<
             )}
           </Column>
         </Column>
-      )}
+      }
     </React.Fragment>
   );
 };

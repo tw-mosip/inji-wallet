@@ -27,6 +27,7 @@ import {
   selectIsAuthorizationSuccess,
   selectSelectedCredentialType,
   selectTrustedIssuerConsentStatus,
+  selectIsCredentialOfferViaDeepLink,
 } from '../../machines/Issuers/IssuersSelectors';
 import {ActorRefFrom} from 'xstate';
 import {BOTTOM_TAB_ROUTES} from '../../routes/routesConstants';
@@ -37,6 +38,7 @@ import {
   IssuersMachine,
 } from '../../machines/Issuers/IssuersMachine';
 import {CredentialTypes} from '../../machines/VerifiableCredential/VCMetaMachine/vc';
+import {goHomeErrors} from '../../shared/openId4VCI/Utils';
 
 export function useIssuerScreenController({route, navigation}) {
   const service = route.params.service;
@@ -88,12 +90,30 @@ export function useIssuerScreenController({route, navigation}) {
       selectVerificationErrorMessage,
     ),
     isError: useSelector(service, selectIsError),
+    isCredentialOfferViaDeepLink: useSelector(
+      service,
+      selectIsCredentialOfferViaDeepLink,
+    ),
 
-    CANCEL: () => service.send(IssuerScreenTabEvents.CANCEL()),
+    CANCEL: ({serverErrorCode = '', serverErrorDescription = ''} = {}) =>
+      service.send(
+        IssuerScreenTabEvents.CANCEL({serverErrorCode, serverErrorDescription}),
+      ),
     SELECTED_ISSUER: id =>
       service.send(IssuerScreenTabEvents.SELECTED_ISSUER(id)),
-    TRY_AGAIN: () => service.send(IssuerScreenTabEvents.TRY_AGAIN()),
+    TRY_AGAIN: () => {
+      const state = service.getSnapshot();
+      if (goHomeErrors.has(state.context.errorMessage)) {
+        navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
+        return;
+      }
+      service.send(IssuerScreenTabEvents.TRY_AGAIN());
+    },
     RESET_ERROR: () => service.send(IssuerScreenTabEvents.RESET_ERROR()),
+    GO_HOME_FROM_OFFER_ERROR: () => {
+      service.send(IssuerScreenTabEvents.RESET_ERROR());
+      navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});
+    },
     DOWNLOAD_ID: () => {
       service.send(IssuerScreenTabEvents.DOWNLOAD_ID());
       navigation.navigate(BOTTOM_TAB_ROUTES.home, {screen: 'HomeScreen'});

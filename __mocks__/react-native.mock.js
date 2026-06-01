@@ -23,6 +23,13 @@ jest.mock('react-native', () => {
         decryptData: input => (input ? String(input) : 'mockedString'),
         deviceSupportsHardware: () => true,
       },
+      InjiVciClient: {
+        addListener: jest.fn(),
+        removeListeners: jest.fn(),
+      },
+      WalletModule: {
+        handleDataEvents: jest.fn(),
+      },
     },
   });
 

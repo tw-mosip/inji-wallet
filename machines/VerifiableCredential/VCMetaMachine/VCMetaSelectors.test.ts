@@ -17,6 +17,9 @@ import {
   selectVerificationErrorMessage,
   selectIsDownloadingFailed,
   selectIsDownloadingSuccess,
+  selectIsCredentialOfferDroppedDueToBusyState,
+  selectIsReverificationSuccess,
+  selectIsReverificationFailure,
 } from './VCMetaSelectors';
 import {VCMetadata} from '../../../shared/VCMetadata';
 
@@ -486,6 +489,28 @@ describe('VCMetaSelectors', () => {
     });
   });
 
+  describe('selectIsCredentialOfferDroppedDueToBusyState', () => {
+    it('should return true when credential offer dropped due to busy', () => {
+      const state: any = {
+        context: {
+          isCredentialOfferDroppedDueToBusyState: true,
+        },
+      };
+      const result = selectIsCredentialOfferDroppedDueToBusyState(state);
+      expect(result).toBe(true);
+    });
+
+    it('should return false when not busy', () => {
+      const state: any = {
+        context: {
+          isCredentialOfferDroppedDueToBusyState: false,
+        },
+      };
+      const result = selectIsCredentialOfferDroppedDueToBusyState(state);
+      expect(result).toBe(false);
+    });
+  });
+
   describe('selectIsDownloadingSuccess', () => {
     it('should return DownloadingCredentialsSuccess status', () => {
       const state: any = {
@@ -505,6 +530,38 @@ describe('VCMetaSelectors', () => {
       };
       const result = selectIsDownloadingSuccess(state);
       expect(result).toBe(false);
+    });
+  });
+
+  describe('selectIsReverificationSuccess', () => {
+    it('should return true when reverificationSuccess is true', () => {
+      const state: any = {
+        context: {reverificationSuccess: true},
+      };
+      expect(selectIsReverificationSuccess(state)).toBe(true);
+    });
+
+    it('should return false when reverificationSuccess is false', () => {
+      const state: any = {
+        context: {reverificationSuccess: false},
+      };
+      expect(selectIsReverificationSuccess(state)).toBe(false);
+    });
+  });
+
+  describe('selectIsReverificationFailure', () => {
+    it('should return true when reverificationFailed is true', () => {
+      const state: any = {
+        context: {reverificationFailed: true},
+      };
+      expect(selectIsReverificationFailure(state)).toBe(true);
+    });
+
+    it('should return false when reverificationFailed is false', () => {
+      const state: any = {
+        context: {reverificationFailed: false},
+      };
+      expect(selectIsReverificationFailure(state)).toBe(false);
     });
   });
 });

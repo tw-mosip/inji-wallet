@@ -2,26 +2,11 @@ import {IssuersModel} from './IssuersModel';
 import {AuthorizationType} from '../../shared/constants';
 
 describe('IssuersModel', () => {
-  describe('Model structure', () => {
-    it('should be defined', () => {
-      expect(IssuersModel).toBeDefined();
-    });
-
-    it('should have initialContext', () => {
-      expect(IssuersModel.initialContext).toBeDefined();
-    });
-
-    it('should have events', () => {
-      expect(IssuersModel.events).toBeDefined();
-    });
-  });
-
   describe('Initial Context', () => {
     const initialContext = IssuersModel.initialContext;
 
     it('should have issuers as empty array', () => {
       expect(initialContext.issuers).toEqual([]);
-      expect(Array.isArray(initialContext.issuers)).toBe(true);
     });
 
     it('should have selectedIssuerId as empty string', () => {
@@ -62,7 +47,6 @@ describe('IssuersModel', () => {
 
     it('should have supportedCredentialTypes as empty array', () => {
       expect(initialContext.supportedCredentialTypes).toEqual([]);
-      expect(Array.isArray(initialContext.supportedCredentialTypes)).toBe(true);
     });
 
     it('should have credentialWrapper as empty object', () => {
@@ -95,7 +79,6 @@ describe('IssuersModel', () => {
 
     it('should have wellknownKeyTypes as empty array', () => {
       expect(initialContext.wellknownKeyTypes).toEqual([]);
-      expect(Array.isArray(initialContext.wellknownKeyTypes)).toBe(true);
     });
 
     it('should have authEndpointToOpen as false', () => {
@@ -170,9 +153,9 @@ describe('IssuersModel', () => {
       expect(initialContext.authorizationSuccess).toBe(false);
     });
 
-    it('should have all 39 required properties', () => {
+    it('should have all 41 required properties', () => {
       const properties = Object.keys(initialContext);
-      expect(properties).toHaveLength(39);
+      expect(properties).toHaveLength(41);
     });
   });
 
